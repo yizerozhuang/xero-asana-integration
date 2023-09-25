@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <a href="{{ url_for('get_all_project') }}">Project</a><br>
+        <form action="/select_project" method="post">
+            <select name="project_id">
+                {% for i in data %}
+                    <option value={{i["gid"]}}>{{i["name"]}}</option>
+                {% endfor %}
+            </select>
+            <button class="button execute" name="submit" value="submit">Submit</button>
+        </form>
+</body>
+</html>
