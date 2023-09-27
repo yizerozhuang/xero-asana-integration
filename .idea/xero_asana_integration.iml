@@ -5,7 +5,7 @@
   </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="xero" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="xero-asana-intergration" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
@@ -16,7 +16,7 @@
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
     <option name="TEMPLATE_FOLDERS">
       <list>
-        <option value="$MODULE_DIR$/../xero_asana_integration/xero-python-oauth2-starter/templates" />
+        <option value="$USER_HOME$/xero_asana_integration/xero-python-oauth2-starter/templates" />
       </list>
     </option>
   </component>

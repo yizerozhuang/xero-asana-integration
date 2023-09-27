@@ -89,7 +89,7 @@ def get_task():
         fee_proposal["B"+str(136+i)]=note
         fee_proposal["F"+str(136+i)]=gross
 
-    path = "./Resource/xlsx/"+"Mechanical Fee Proposal for "+task["name"][7:]+".xlsx"
+    path = "./resource/xlsx/"+"Mechanical Fee Proposal for "+task["name"][7:]+".xlsx"
     wb.save(path)
     return send_file(path, as_attachment=True)
 
