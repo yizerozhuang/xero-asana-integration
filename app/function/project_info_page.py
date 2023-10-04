@@ -25,7 +25,7 @@ class ProjectInfoPage(tk.Frame):
         self.project_info_frame()
         self.client_frame()
         self.main_contact_frame()
-        self.building_features_frame()
+        self.Drawings_frame()
         self.drawing_number_frame()
 
     def project_info_frame(self):
@@ -147,20 +147,20 @@ class ProjectInfoPage(tk.Frame):
         contact_frame = tk.LabelFrame(self.main_context_frame, text="Main Contact", font=self.app.font)
         contact_frame.grid(row=3, column=0, padx=20)
         
-        self.app.data["Main Contact"] = dict()
+        self.app.data["Main_Contact"] = dict()
         tk.Label(contact_frame, width=30, text="Main Contact Full Name", font=self.app.font).grid(row=0, column=0, padx=(10, 0))
 
-        self.app.data["Main Contact"]["Main Contact Full Name"]= tk.StringVar(name="Main Contact Full Name")
-        tk.Entry(contact_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Main Contact"]["Main Contact Full Name"]).grid(row=0, column=1, columnspan=3, padx=(0, 10))
+        self.app.data["Main_Contact"]["Main Contact Full Name"]= tk.StringVar(name="Main Contact Full Name")
+        tk.Entry(contact_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Main_Contact"]["Main Contact Full Name"]).grid(row=0, column=1, columnspan=3, padx=(0, 10))
 
         tk.Label(contact_frame, text="Main Contact Contact Type", font=self.app.font).grid(row=1, column=0)
 
         contact_type = ["Architect", "Builder", "Certifier", "Contractor", "Developer", "Engineer", "Government", "RDM",
                         "Strata", "Supplier", "Owner/Tenant", "Others"]
 
-        self.app.data["Main Contact"]["Main Contact Contact Type"] = tk.StringVar(name="Main Contact Contact Type", value="Architect")
+        self.app.data["Main_Contact"]["Main Contact Contact Type"] = tk.StringVar(name="Main Contact Contact Type", value="Architect")
         for i, p_type in enumerate(contact_type):
-            button = tk.Radiobutton(contact_frame, text=p_type, variable=self.app.data["Main Contact"]["Main Contact Contact Type"],
+            button = tk.Radiobutton(contact_frame, text=p_type, variable=self.app.data["Main_Contact"]["Main Contact Contact Type"],
                                                                value=p_type, font=self.app.font)
             if i < 3:
                 button.grid(row=1, column=i + 1, sticky="W")
@@ -175,11 +175,11 @@ class ProjectInfoPage(tk.Frame):
                         "Main Contact Number", "Main Contact Email"]
         for i, info in enumerate(contact_info):
             tk.Label(contact_frame,width=30, text=info, font=self.app.font).grid(row=i+5, column=0)
-            self.app.data["Main Contact"][info] = tk.StringVar(name=info)
-            tk.Entry(contact_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Main Contact"][info]).grid(row=i+5, column=1, columnspan=3)
+            self.app.data["Main_Contact"][info] = tk.StringVar(name=info)
+            tk.Entry(contact_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Main_Contact"][info]).grid(row=i+5, column=1, columnspan=3)
 
 
-    def building_features_frame(self):
+    def Drawings_frame(self):
 
         build_feature_frame = tk.LabelFrame(self.main_context_frame, text="Building Features", font=self.app.font)
         build_feature_frame.grid(row=4, column=0)
@@ -189,7 +189,7 @@ class ProjectInfoPage(tk.Frame):
         tk.Label(build_feature_frame, text="Area/m^2", font=self.app.font).grid(row=0, column=2)
 
         n_building = 5
-        self.app.data["Building Feature"] = {
+        self.app.data["Drawing"] = {
             "Levels": [],
             "Space/room Description": [],
             "Area/m^2": [],
@@ -198,7 +198,7 @@ class ProjectInfoPage(tk.Frame):
 
         def area_update(*args):
             sum = 0
-            for area in self.app.data["Building Feature"]["Area/m^2"]:
+            for area in self.app.data["Drawing"]["Area/m^2"]:
                 if area.get() == "":
                     continue
                 try:
@@ -206,25 +206,25 @@ class ProjectInfoPage(tk.Frame):
                 except:
                     sum = "Error"
                     total_area_label.config(text=str(sum), bg="red")
-                    self.app.data["Building Feature"]["Total"] = sum
+                    self.app.data["Drawing"]["Total"] = sum
                     return
             total_area_label.config(text=str(sum), bg=self.cget("bg"))
-            self.app.data["Building Feature"]["Total"] = sum
+            self.app.data["Drawing"]["Total"] = sum
 
         tk.Label(build_feature_frame, text="Total", font=self.app.font).grid(row=n_building + 1, column=0)
         total_area_label = tk.Label(build_feature_frame, text="0", font=self.app.font)
         total_area_label.grid(row=n_building + 1, column=2)
 
         for i in range(n_building):
-            self.app.data["Building Feature"]["Levels"].append(tk.StringVar(name=f"Levels {str(i)}"))
-            self.app.data["Building Feature"]["Space/room Description"].append(tk.StringVar(name=f"Space/room Description {str(i)} "))
-            self.app.data["Building Feature"]["Area/m^2"].append(tk.StringVar(name=f"Area/m^2 {str(i)} "))
+            self.app.data["Drawing"]["Levels"].append(tk.StringVar(name=f"Levels {str(i)}"))
+            self.app.data["Drawing"]["Space/room Description"].append(tk.StringVar(name=f"Space/room Description {str(i)} "))
+            self.app.data["Drawing"]["Area/m^2"].append(tk.StringVar(name=f"Area/m^2 {str(i)} "))
 
-            tk.Entry(build_feature_frame, width=34, font=self.app.font, fg="blue", textvariable=self.app.data["Building Feature"]["Levels"][i]).grid(row=i + 1, column=0, padx=(10, 0))
-            tk.Entry(build_feature_frame, width=50, font=self.app.font, fg="blue", textvariable=self.app.data["Building Feature"]["Space/room Description"][i]).grid(row=i + 1, column=1)
-            tk.Entry(build_feature_frame, width=20, font=self.app.font, fg="blue", textvariable=self.app.data["Building Feature"]["Area/m^2"][i]).grid(row=i + 1, column=2, padx=(0, 10))
+            tk.Entry(build_feature_frame, width=34, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Levels"][i]).grid(row=i + 1, column=0, padx=(10, 0))
+            tk.Entry(build_feature_frame, width=50, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Space/room Description"][i]).grid(row=i + 1, column=1)
+            tk.Entry(build_feature_frame, width=20, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Area/m^2"][i]).grid(row=i + 1, column=2, padx=(0, 10))
 
-            self.app.data["Building Feature"]["Area/m^2"][i].trace("w", area_update)
+            self.app.data["Drawing"]["Area/m^2"][i].trace("w", area_update)
 
 
     def drawing_number_frame(self):
@@ -238,31 +238,31 @@ class ProjectInfoPage(tk.Frame):
         n_drawing = 5
         drawing_dic = dict()
 
-        self.app.data["Building Feature"] = {
+        self.app.data["Drawing"] = {
             "Drawing Number": [],
             "Drawing Name": [],
             "Revision": []
         }
 
         for i in range(n_drawing):
-            self.app.data["Building Feature"]["Drawing Number"].append(tk.StringVar(name=f"Drawing Number {str(i)}"))
-            self.app.data["Building Feature"]["Drawing Name"].append(tk.StringVar(name=f"Drawing Name {str(i)}"))
-            self.app.data["Building Feature"]["Revision"].append(tk.StringVar(name=f"Drawing Revision {str(i)}"))
+            self.app.data["Drawing"]["Drawing Number"].append(tk.StringVar(name=f"Drawing Number {str(i)}"))
+            self.app.data["Drawing"]["Drawing Name"].append(tk.StringVar(name=f"Drawing Name {str(i)}"))
+            self.app.data["Drawing"]["Revision"].append(tk.StringVar(name=f"Drawing Revision {str(i)}"))
 
 
-            tk.Entry(drawing_number_frame, width=34, font=self.app.font, fg="blue", textvariable=self.app.data["Building Feature"]["Drawing Number"][i]).grid(row=i + 1, column=0, padx=(10, 0))
-            tk.Entry(drawing_number_frame, width=50, font=self.app.font, fg="blue", textvariable=self.app.data["Building Feature"]["Drawing Name"][i]).grid(row=i + 1, column=1)
-            tk.Entry(drawing_number_frame, width=20, font=self.app.font, fg="blue", textvariable=self.app.data["Building Feature"]["Revision"][i]).grid(row=i + 1, column=2, padx=(0, 10))
+            tk.Entry(drawing_number_frame, width=34, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Drawing Number"][i]).grid(row=i + 1, column=0, padx=(10, 0))
+            tk.Entry(drawing_number_frame, width=50, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Drawing Name"][i]).grid(row=i + 1, column=1)
+            tk.Entry(drawing_number_frame, width=20, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Revision"][i]).grid(row=i + 1, column=2, padx=(0, 10))
 
-        self.app.data["Building Feature"]["Drawing Number"][0].set("M-000")
-        self.app.data["Building Feature"]["Drawing Name"][0].set("Cover Sheet")
-        self.app.data["Building Feature"]["Revision"][0].set("A")
-        self.app.data["Building Feature"]["Drawing Number"][1].set("M-001")
-        self.app.data["Building Feature"]["Drawing Name"][1].set("Tenancy Level Layout")
-        self.app.data["Building Feature"]["Revision"][1].set("A")
-        self.app.data["Building Feature"]["Drawing Number"][2].set("M-002")
-        self.app.data["Building Feature"]["Drawing Name"][2].set("Roof Layout")
-        self.app.data["Building Feature"]["Revision"][2].set("A")
+        self.app.data["Drawing"]["Drawing Number"][0].set("M-000")
+        self.app.data["Drawing"]["Drawing Name"][0].set("Cover Sheet")
+        self.app.data["Drawing"]["Revision"][0].set("A")
+        self.app.data["Drawing"]["Drawing Number"][1].set("M-001")
+        self.app.data["Drawing"]["Drawing Name"][1].set("Tenancy Level Layout")
+        self.app.data["Drawing"]["Revision"][1].set("A")
+        self.app.data["Drawing"]["Drawing Number"][2].set("M-002")
+        self.app.data["Drawing"]["Drawing Name"][2].set("Roof Layout")
+        self.app.data["Drawing"]["Revision"][2].set("A")
 
     def _on_mousewheel(self, event):
         self.main_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
