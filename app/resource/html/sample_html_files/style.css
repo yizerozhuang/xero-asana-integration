@@ -1015,3 +1015,8 @@ x\:* {behavior:url(#default#VML);}
 .new-page{
     page-break-before: always;
 }
+@page{
+	@bottom-right {
+		content: "Page " counter(pageNumber);
+	}
+}

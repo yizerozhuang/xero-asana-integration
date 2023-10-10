@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import date
 
-
 class FeeProposalPage(tk.Frame):
     def __init__(self, parent, app):
         tk.Frame.__init__(self, parent)
@@ -12,16 +11,17 @@ class FeeProposalPage(tk.Frame):
         self.main_frame.pack(fill=tk.BOTH, expand=1, side=tk.LEFT)
 
         self.main_canvas = tk.Canvas(self.main_frame)
-        self.main_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.main_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1, anchor="nw")
 
         self.scrollbar = ttk.Scrollbar(self.main_frame, orient=tk.VERTICAL, command=self.main_canvas.yview)
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=1)
 
         self.main_canvas.config(yscrollcommand=self.scrollbar.set)
         self.main_canvas.bind("<Configure>", lambda e:self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all")))
-        self.main_canvas.bind("<MouseWheel>", self._on_mousewheel)
+        self.app.bind("<MouseWheel>", self._on_mousewheel, add="+")
         self.main_context_frame = tk.LabelFrame(self.main_canvas, text="Main Context")
         self.main_canvas.create_window((0, 0), window=self.main_context_frame, anchor="center")
+        self.main_context_frame.bind("<Configure>", self.reset_scrollregion)
         self.reference_frame()
         self.time_frame()
         self.scope_frame()
@@ -54,6 +54,7 @@ class FeeProposalPage(tk.Frame):
             tk.Label(time_frame, text="-").grid(row=i, column=2)
             tk.Entry(time_frame, width=20, font=self.app.font, fg="blue", textvariable=self.app.data["Fee Proposal Page"]["Time"][stage+" Duration"][1]).grid(row=i, column=3)
             tk.Label(time_frame, text=" business day", font=self.app.font).grid(row=i, column=4)
+
     def scope_frame(self):
         self.scope_frame = tk.LabelFrame(self.main_context_frame, text="Scope of Work", font=self.app.font)
         self.scope_frame.pack(fill=tk.BOTH, expand=1, padx=20)
@@ -82,32 +83,29 @@ class FeeProposalPage(tk.Frame):
         #
         # ttk.Combobox(self.append_frame, width=20, textvariable=self.append_extra, values=extra_type, state="readonly").grid(row=0, column=1)
 
-
-
-
     def fee_frame(self):
         self.fee_frame = tk.LabelFrame(self.main_context_frame, text="Fee Proposal Details", font=self.app.font)
         self.fee_frame.pack(fill=tk.BOTH, expand=1, padx=20)
 
 
-        tk.Label(self.fee_frame, text="Services", font=self.app.font).grid(row=0, column=0)
-        tk.Label(self.fee_frame, text="Total ex.GST", font=self.app.font).grid(row=0, column=1)
-        tk.Label(self.fee_frame, text="Total in.GST", font=self.app.font).grid(row=0, column=2)
+        tk.Label(self.fee_frame, text="Services", font=self.app.font).grid(row=0, column=1)
+        tk.Label(self.fee_frame, text="ex.GST", font=self.app.font).grid(row=0, column=2)
+        tk.Label(self.fee_frame, text="in.GST", font=self.app.font).grid(row=0, column=3)
 
         self.app.data["Fee Proposal Page"]["Details"] = dict()
         self.fee_dic = dict()
         self.bool_var_list = []
+        self.fee_frame_number = 1
 
-        tk.Label(self.fee_frame, text="Total", font=self.app.font).grid(row=999, column=0)
+        tk.Label(self.fee_frame, text="Total", font=self.app.font).grid(row=999, column=1)
         self.total_ex_gst_label = tk.Label(self.fee_frame, text="0", font=self.app.font)
-        self.total_ex_gst_label.grid(row=999, column=1)
+        self.total_ex_gst_label.grid(row=999, column=2)
         self.total_in_gst_label = tk.Label(self.fee_frame, text="0", font=self.app.font)
-        self.total_in_gst_label.grid(row=999, column=2)
+        self.total_in_gst_label.grid(row=999, column=3)
 
     def update_scope_frame(self, var):
         if var.get() == True:
             if self.scope_frames.get(var._name) == None:
-                #scope part
                 self.scope_frames[var._name] = dict()
                 self.scope_frames[var._name]["main"] = tk.LabelFrame(self.scope_frame, text=var._name, font=self.app.font)
 
@@ -139,80 +137,132 @@ class FeeProposalPage(tk.Frame):
                         context_button_list[j].grid(row=j, column=0)
                         context_entry_list.append(tk.Entry(self.scope_frames[var._name][extra], width=100, textvariable=self.app.data["Fee Proposal Page"]["Scope of Work"][var._name][extra][j][1], font=self.app.font, bg=color_list[j%2]))
                         context_entry_list[j].grid(row=j, column=1)
-
                 self.append_context[var._name] = dict()
-                #garbige collection,
-                self.append_context[var._name]["Extend"]=(tk.StringVar(), tk.BooleanVar())
+                # garbage collection
+                self.append_context[var._name]["Extend"] = (tk.StringVar(), tk.BooleanVar())
                 append_frame = tk.Frame(self.scope_frames[var._name]["Extend"])
                 append_frame.grid(row=999, column=0, columnspan=2)
-                tk.Entry(append_frame, width=95, textvariable=self.append_context[var._name]["Extend"][0]).grid(row=0, column=0)
-                tk.Checkbutton(append_frame, variable=self.append_context[var._name]["Extend"][1], text="Add to Database").grid(row=0,column=1)
-                tk.Button(append_frame, text="Submit", command=lambda:self.append_value(var._name, "Extend")).grid(row=0, column=2)
-
-                self.append_context[var._name]["Exclusion"]=(tk.StringVar(), tk.BooleanVar())
+                tk.Entry(append_frame, width=95, textvariable=self.append_context[var._name]["Extend"][0]).grid(row=0,
+                                                                                                                column=0)
+                tk.Checkbutton(append_frame, variable=self.append_context[var._name]["Extend"][1],
+                               text="Add to Database").grid(row=0, column=1)
+                tk.Button(append_frame, text="Submit", command=lambda: self.append_value(var._name, "Extend")).grid(
+                    row=0,
+                    column=2)
+                self.append_context[var._name]["Exclusion"] = (tk.StringVar(), tk.BooleanVar())
                 append_frame = tk.Frame(self.scope_frames[var._name]["Exclusion"])
                 append_frame.grid(row=999, column=0, columnspan=2)
-                tk.Entry(append_frame, width=95, textvariable=self.append_context[var._name]["Exclusion"][0]).grid(row=0, column=0)
-                tk.Checkbutton(append_frame, variable=self.append_context[var._name]["Exclusion"][1], text="Add to Database").grid(row=0,column=1)
-                tk.Button(append_frame, text="Submit", command=lambda:self.append_value(var._name, "Exclusion")).grid(row=0, column=2)
+                tk.Entry(append_frame, width=95, textvariable=self.append_context[var._name]["Exclusion"][0]).grid(
+                    row=0,
+                    column=0)
+                tk.Checkbutton(append_frame, variable=self.append_context[var._name]["Exclusion"][1],
+                               text="Add to Database").grid(row=0, column=1)
+                tk.Button(append_frame, text="Submit", command=lambda: self.append_value(var._name, "Exclusion")).grid(
+                    row=0, column=2)
 
-                self.append_context[var._name]["Deliverables"]=(tk.StringVar(), tk.BooleanVar())
+                self.append_context[var._name]["Deliverables"] = (tk.StringVar(), tk.BooleanVar())
                 append_frame = tk.Frame(self.scope_frames[var._name]["Deliverables"])
                 append_frame.grid(row=999, column=0, columnspan=2)
-                tk.Entry(append_frame, width=95, textvariable=self.append_context[var._name]["Deliverables"][0]).grid(row=0, column=0)
-                tk.Checkbutton(append_frame, variable=self.append_context[var._name]["Deliverables"][1], text="Add to Database").grid(row=0,column=1)
-                tk.Button(append_frame, text="Submit", command=lambda:self.append_value(var._name, "Deliverables")).grid(row=0, column=2)
-                # fee part
-
-                self.app.data["Fee Proposal Page"]["Details"][var._name] = (tk.BooleanVar(value=True), tk.StringVar(name=var._name+" Fee"))
-                self.fee_dic["Service " + var._name] = tk.Label(self.fee_frame, text=var._name+" design and documentation", width=60, font=self.app.font)
-                self.fee_dic["Total ex.GST " + var._name] = tk.Entry(self.fee_frame, textvariable=self.app.data["Fee Proposal Page"]["Details"][var._name][1], width=20, font=self.app.font, fg="blue")
-                self.fee_dic["Total in.GST " + var._name] = tk.Label(self.fee_frame, text=0, width=20, font=self.app.font)
-
-                def in_gst_update(*args):
-                    num = 0
-                    try:
-                        num+=int(float(self.app.data["Fee Proposal Page"]["Details"][var._name][1].get() if self.app.data["Fee Proposal Page"]["Details"][var._name][1].get()!="" else 0)*1.1)
-                    except:
-                        num = "Error"
-                        self.fee_dic["Total in.GST " + var._name].config(text=str(num), bg="red")
-                        return
-                    self.fee_dic["Total in.GST " + var._name].config(text=str(num), bg=self.cget("bg"))
-
-                def sum_update(*args):
-                    sum = 0
-                    in_sum = 0
-                    for key, value in self.app.data["Fee Proposal Page"]["Details"].items():
-                        try:
-                            sum += float(self.app.data["Fee Proposal Page"]["Details"][key][1].get() if self.app.data["Fee Proposal Page"]["Details"][key][1].get()!="" else 0)
-                            in_sum += int(float(self.app.data["Fee Proposal Page"]["Details"][key][1].get() if self.app.data["Fee Proposal Page"]["Details"][key][1].get() != "" else 0) * 1.1)
-                        except:
-                            sum = "Error"
-                            in_sum = "Error"
-                            self.total_ex_gst_label.config(text=str(sum), bg="red")
-                            self.total_in_gst_label.config(text=str(in_sum), bg="red")
-                            return
-                        self.total_ex_gst_label.config(text=str(sum), bg=self.cget("bg"))
-                        self.total_in_gst_label.config(text=str(in_sum), bg=self.cget("bg"))
-
-                self.app.data["Fee Proposal Page"]["Details"][var._name][1].trace("w", in_gst_update)
-                self.app.data["Fee Proposal Page"]["Details"][var._name][1].trace("w", sum_update)
-
-            self.app.data["Fee Proposal Page"]["Details"][var._name][0].set(True)
+                tk.Entry(append_frame, width=95, textvariable=self.append_context[var._name]["Deliverables"][0]).grid(
+                    row=0,
+                    column=0)
+                tk.Checkbutton(append_frame, variable=self.append_context[var._name]["Deliverables"][1],
+                               text="Add to Database").grid(row=0, column=1)
+                tk.Button(append_frame, text="Submit",
+                          command=lambda: self.append_value(var._name, "Deliverables")).grid(
+                    row=0, column=2)
             self.scope_frames[var._name]["main"].grid(row=self.current_frame_number, column=0)
-
-            self.fee_dic["Service " + var._name].grid(row=self.current_frame_number+1, column=0)
-            self.fee_dic["Total ex.GST " + var._name].grid(row=self.current_frame_number+1, column=1)
-            self.fee_dic["Total in.GST " + var._name].grid(row=self.current_frame_number+1, column=2)
             self.current_frame_number += 1
         else:
             self.scope_frames[var._name]["main"].grid_forget()
-            self.fee_dic["Service " + var._name].grid_forget()
-            self.app.data["Fee Proposal Page"]["Details"][var._name][1].set("")
-            self.app.data["Fee Proposal Page"]["Details"][var._name][0].set(False)
             self.app.data["Fee Proposal Page"]["Scope of Work"][var._name]["on"] = False
-            self.fee_dic["Total ex.GST " + var._name].grid_forget()
-            self.fee_dic["Total in.GST " + var._name].grid_forget()
+
+
+
+    def update_fee(self, var):
+        if var.get() == True:
+            if not var._name in self.app.data["Fee Proposal Page"]["Details"]:
+                self.app.data["Fee Proposal Page"]["Details"][var._name] = {
+                    "on":tk.BooleanVar(name=var._name+" on", value=True),
+                    "Expanded":tk.BooleanVar(name=var._name + " Expand", value=False),
+                    "Fee":tk.StringVar(name=var._name + " Fee"),
+                    "Context":[(tk.StringVar(), tk.StringVar()) for _ in range(3)]
+                }
+
+                
+                self.fee_dic[var._name] ={
+                    "Expand":tk.Checkbutton(self.fee_frame,
+                                            text="Expand",
+                                            variable=self.app.data["Fee Proposal Page"]["Details"][var._name]["Expanded"],
+                                            font=self.app.font),
+                    "Service":tk.Label(self.fee_frame,
+                                       text=var._name + " design and documentation",
+                                       width=50,
+                                       font=self.app.font),
+                    "ex.GST":tk.Entry(self.fee_frame,
+                                      textvariable=self.app.data["Fee Proposal Page"]["Details"][var._name]["Fee"],
+                                      width=20,
+                                      font=self.app.font,
+                                      fg="blue"),
+                    "in.GST":tk.Label(self.fee_frame, text=0, width=20, font=self.app.font),
+                    "Position":0,
+                    "expand frame":{
+                        "Service": [tk.Entry(self.fee_frame, width=50, textvariable=self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][i][0]) for i in range(3)],
+                        "Fee": [tk.Entry(self.fee_frame, width=20, textvariable=self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][i][1]) for i in range(3)],
+                        "in.GST":[tk.Label(self.fee_frame, width=20, text="0", font=self.app.font) for _ in range(3)],
+                        "Total":tk.Label(self.fee_frame, width=50,text=var._name + " Total", font=self.app.font)
+                    }
+                }
+
+                self.app.data["Fee Proposal Page"]["Details"][var._name]["Expanded"].trace("w", lambda a,b,c:self.expand(var._name))
+                for i in range(3):
+                    sum_fun = lambda a, b, c: self.app._sum_update([item[1] for item in self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"]],
+                                                                   self.app.data["Fee Proposal Page"]["Details"][var._name]["Fee"])
+
+                    self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][i][1].trace("w",sum_fun)
+                    # self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][i][0].trace("w",lambda a,b,c: self.enable_input(var._name, i))
+
+                #garbage collection value
+                ist_fun_0 = lambda a, b, c: self.app._ist_update(
+                    self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][0][1],
+                    self.fee_dic[var._name]["expand frame"]["in.GST"][0])
+                self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][0][1].trace("w", ist_fun_0)
+                ist_fun_1 = lambda a, b, c: self.app._ist_update(
+                    self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][1][1],
+                    self.fee_dic[var._name]["expand frame"]["in.GST"][1])
+                self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][1][1].trace("w", ist_fun_1)
+                ist_fun_2 = lambda a, b, c: self.app._ist_update(
+                    self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][2][1],
+                    self.fee_dic[var._name]["expand frame"]["in.GST"][2])
+                self.app.data["Fee Proposal Page"]["Details"][var._name]["Context"][2][1].trace("w", ist_fun_2)
+
+
+                self.app.data["Fee Proposal Page"]["Details"][var._name]["Fee"].trace("w", lambda a,b,c:self.app._ist_update(self.app.data["Fee Proposal Page"]["Details"][var._name]["Fee"], self.fee_dic[var._name]["in.GST"]))
+                self.app.data["Fee Proposal Page"]["Details"][var._name]["Fee"].trace("w", lambda a,b,c:self.app._sum_update([value["Fee"] for value in self.app.data["Fee Proposal Page"]["Details"].values()], self.total_ex_gst_label))
+                self.app.data["Fee Proposal Page"]["Details"][var._name]["Fee"].trace("w", lambda a,b,c: self.app._in_sum_update(
+                    [value["Fee"] for value in self.app.data["Fee Proposal Page"]["Details"].values()], self.total_in_gst_label))
+                # sample
+
+
+            self.app.data["Fee Proposal Page"]["Details"][var._name]["on"].set(True)
+            self.fee_dic[var._name]["Position"]=str(self.fee_frame_number)
+
+            self.fee_dic[var._name]["Expand"].grid(row=self.fee_dic[var._name]["Position"], column=0)
+            self.fee_dic[var._name]["Service"].grid(row=self.fee_dic[var._name]["Position"], column=1)
+            self.fee_dic[var._name]["ex.GST"].grid(row=self.fee_dic[var._name]["Position"], column=2)
+            self.fee_dic[var._name]["in.GST"].grid(row=self.fee_dic[var._name]["Position"], column=3)
+            self.fee_frame_number += 5
+        else:
+            self.app.data["Fee Proposal Page"]["Details"][var._name]["Fee"].set("")
+            if self.app.data["Fee Proposal Page"]["Details"][var._name]["Expanded"].get():
+                self.app.data["Fee Proposal Page"]["Details"][var._name]["Expanded"].set(False)
+            self.fee_dic[var._name]["Expand"].grid_forget()
+            self.fee_dic[var._name]["Service"].grid_forget()
+            self.fee_dic[var._name]["ex.GST"].grid_forget()
+            self.fee_dic[var._name]["in.GST"].grid_forget()
+
+
+
 
 
     def _on_mousewheel(self, event):
@@ -248,3 +298,37 @@ class FeeProposalPage(tk.Frame):
         self.append_context[service][extra][0].set("")
         self.append_context[service][extra][1].set(False)
 
+    def reset_scrollregion(self, event):
+        self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
+
+
+    def expand(self, service):
+        if self.app.data["Fee Proposal Page"]["Details"][service]["Expanded"].get():
+            for i in range(3):
+                self.fee_dic[service]["expand frame"]["Service"][i].grid(row=int(self.fee_dic[service]["Position"]) + i + 1, column=1)
+                self.fee_dic[service]["expand frame"]["Fee"][i].grid(row=int(self.fee_dic[service]["Position"]) + i + 1, column=2)
+                self.fee_dic[service]["expand frame"]["in.GST"][i].grid(row=int(self.fee_dic[service]["Position"]) + i + 1, column=3)
+            self.app.data["Fee Proposal Page"]["Details"][service]["Fee"].set("")
+            self.fee_dic[service]["expand frame"]["Total"].grid(row=int(self.fee_dic[service]["Position"]) + 4, column=1, pady=(0,20))
+            self.fee_dic[service]["ex.GST"].grid(row=int(self.fee_dic[service]["Position"]) + 4, column=2, pady=(0,20))
+            self.fee_dic[service]["ex.GST"].config(state="readonly")
+            self.fee_dic[service]["in.GST"].grid(row=int(self.fee_dic[service]["Position"]) + 4, column=3, pady=(0,20))
+        else:
+            for i in range(3):
+                self.app.data["Fee Proposal Page"]["Details"][service]["Context"][i][0].set("")
+                self.app.data["Fee Proposal Page"]["Details"][service]["Context"][i][1].set("")
+                self.fee_dic[service]["expand frame"]["Service"][i].grid_forget()
+                self.fee_dic[service]["expand frame"]["Fee"][i].grid_forget()
+                self.fee_dic[service]["expand frame"]["in.GST"][i].grid_forget()
+            self.app.data["Fee Proposal Page"]["Details"][service]["Fee"].set("")
+            self.fee_dic[service]["expand frame"]["Total"].grid_forget()
+            self.fee_dic[service]["ex.GST"].grid(row=int(self.fee_dic[service]["Position"]), column=2,pady=0)
+            self.fee_dic[service]["ex.GST"].config(state=tk.NORMAL)
+            self.fee_dic[service]["in.GST"].grid(row=int(self.fee_dic[service]["Position"]), column=3,pady=0)
+        self.app.invoice_page.expand(service)
+
+    def enable_input(self, server, i):
+        if len(self.app.data["Fee Proposal Page"]["Details"][server]["Context"][i][0].get())==0:
+            self.fee_dic[server]["expand frame"]["Fee"][i].config(state="readonly")
+        else:
+            self.fee_dic[server]["expand frame"]["Fee"][i].config(state="")
