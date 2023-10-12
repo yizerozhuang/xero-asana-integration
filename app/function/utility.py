@@ -88,7 +88,7 @@ def email(data, *args):
     newmail.To = data["Client"]["Contact Email"].get()
     newmail.CC = "felix@pcen.com.au"
     newmail.Body=f"""
-    {data["Client"]["Client Full Name"]}
+    {data["Client"]["Client Full Name"].get()}
 
     I hope this email finds you well. Please find the attached fee proposal to this email.
 
