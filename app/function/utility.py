@@ -1,4 +1,6 @@
 import asana
+import win32com.client
+import os
 
 configuration = asana.Configuration()
 configuration.access_token = '1/1205463377927189:4825d7e7924a9dd8dd44a9c826e45455'
@@ -74,3 +76,36 @@ def update_asana(data, *args):
     )
     task_api_instance.update_task(task_gid=task_id, body=body)
     print(api_respond)
+
+def excel_print_pdf(date, *args):
+    pass
+
+def email(data, *args):
+    ol = win32com.client.Dispatch("Outlook.Application")
+    olmailitem =0x0
+    newmail = ol.CreateItem(olmailitem)
+    newmail.Subject = "Fee Proposal - " + data["Project Information"]["Project Name"].get()
+    newmail.To = data["Client"]["Contact Email"].get()
+    newmail.CC = "felix@pcen.com.au"
+    newmail.Body=f"""
+    {data["Client"]["Client Full Name"]}
+
+    I hope this email finds you well. Please find the attached fee proposal to this email.
+
+    If you have any questions or need more information regarding the proposal, please don't hesitate to reach out. Felix and I are happy to provide you with whatever information you need.
+
+    I look forward to hearing from you soon.
+
+    Cheers,
+
+    Iza
+    Administrative Assistant
+    Premium Consulting Engineers Pty Ltd
+
+    E : admin@pcen.com.au
+    A : Suite 802, 299 Sussex Street, Sydney, NSW 2000
+    W: www.pcen.com.au
+    """
+    newmail.Attachments.Add(os.getcwd()+"\output.pdf")
+    newmail.Display()
+

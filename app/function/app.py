@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 import pdfkit
-import aspose.words as aw
 from function.utility import *
 from function.project_info_page import ProjectInfoPage
 from function.fee_proposal_page import FeeProposalPage
@@ -23,7 +22,7 @@ class App(tk.Tk):
         self.data = {}
         # self.attributes("-fullscreen", True)
         # the main frame
-        self.main_frame = tk.Frame(self, width=600)
+        self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=1)
         self.conn = psycopg2.connect(
             host="127.0.0.1",
@@ -59,6 +58,9 @@ class App(tk.Tk):
                                  font=self.font)
         print_button.grid(row=0, column=2)
 
+        email_button = tk.Button(utility_frame, text="Email", command=lambda: email(self.data), bg="brown", fg="white", font=self.font)
+        email_button.grid(row=0, column=3)
+
     def change_page_frame(self):
         # change page
         change_page_frame = tk.LabelFrame(self.main_frame, text="Change Page")
@@ -93,6 +95,8 @@ class App(tk.Tk):
         self.fee_proposal_page.update_scope_frame(var)
         self.fee_proposal_page.update_fee(var)
         self.invoice_page.update_fee(var)
+        self.invoice_page.update_bill(var)
+        self.invoice_page.update_profit(var)
 
     def rename_new_folder(self):
         if self.data["Project Information"]["Project Name"].get()=="":
@@ -263,35 +267,50 @@ class App(tk.Tk):
             label.config(text=str(int(sum)), bg=self.cget("bg"))
         elif type(label) == tk.StringVar:
             label.set(str(int(sum)))
-    def _in_sum_update(self, area_list, label):
-        sum = 0
-        for area in area_list:
-            if area is None or area.get() == "":
-                continue
-            try:
-                sum += int(float(area.get())*1.1)
-            except ValueError:
-                sum = "Error"
-                # if type(label) == tk.Label:
-                label.config(text=str(sum), bg="red")
-                # elif type(label) ==tk.StringVar:
-                #     label.set(str(sum))
-                return
-        # if type(label) == tk.Label:
-        label.config(text=str(sum), bg=self.cget("bg"))
-        # elif type(label) == tk.StringVar:
-        #     label.set(str(sum))
     def _ist_update(self, string_variable, label):
-        if len(string_variable.get()) == 0:
-            label.config(text="0", bg=self.cget("bg"))
-            return
-        try:
-            num = int(float(string_variable.get())*1.1)
-        except ValueError:
-            label.config(text="Error", bg="red")
-            return
-        label.config(text=str(num), bg=self.cget("bg"))
+        if type(label)==tk.Label:
+            if len(string_variable.get()) == 0:
+                label.config(text="0", bg=self.cget("bg"))
+                return
+            try:
+                num = int(float(string_variable.get())*1.1)
+            except ValueError:
+                label.config(text="Error", bg="red")
+                return
+            label.config(text=str(num), bg=self.cget("bg"))
+        elif type(label)==tk.StringVar:
+            if len(string_variable.get())==0:
+                label.set("")
+                return
+            try:
+                num = int(float(string_variable.get()) * 1.1)
+            except ValueError:
+                label.set("Error")
+                return
+            label.set(str(num))
 
+    def update_invoice_sum(self, details, invoice_list):
+        new_value=[0]*6
+        for service in details.values():
+            if not service["on"].get():
+                continue
+            if service["Expanded"].get():
+                for i in range(3):
+                    if service["Context"][i]["Invoice"].get() != "None":
+                        index = int(service["Context"][i]["Invoice"].get()[3]) - 1
+                        try:
+                            new_value[index] += int(float(service["Context"][i]["Fee"].get()))
+                        except ValueError:
+                            continue
+            else:
+                if service["Invoice"].get() != "None":
+                    index = int(service["Invoice"].get()[3]) - 1
+                    try:
+                        new_value[index] += int(float(service["Fee"].get()))
+                    except ValueError:
+                        continue
+        for j in range(6):
+            invoice_list[j].set(str(new_value[j]))
 
 
 

@@ -16,7 +16,7 @@ class ProjectInfoPage(tk.Frame):
         self.main_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1, anchor="nw")
 
         self.scrollbar = ttk.Scrollbar(self.main_frame, orient=tk.VERTICAL, command=self.main_canvas.yview)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=1)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.main_canvas.config(yscrollcommand=self.scrollbar.set)
         self.main_canvas.bind("<Configure>", lambda e:self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all")))
@@ -200,7 +200,7 @@ class ProjectInfoPage(tk.Frame):
 
 
         tk.Label(build_feature_frame, text="Feature/Notes",width=30, font=self.app.font).grid(row=n_building + 1, column=0)
-        tk.Entry(build_feature_frame, width=72, font=self.app.font, textvariable=self.app.data["Building Features"]["Feature/Notes"]).grid(row=n_building+1, column=1, columnspan=2)
+        tk.Entry(build_feature_frame, width=72, font=self.app.font, fg="blue", textvariable=self.app.data["Building Features"]["Feature/Notes"]).grid(row=n_building+1, column=1, columnspan=2)
         tk.Label(build_feature_frame, text="Total", font=self.app.font).grid(row=n_building + 2, column=0)
         self.total_area_label = tk.Label(build_feature_frame, textvariable=self.app.data["Building Features"]["Total Area"],font=self.app.font)
         self.total_area_label.grid(row=n_building + 2, column=2)
