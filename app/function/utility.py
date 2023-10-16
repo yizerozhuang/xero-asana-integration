@@ -6,8 +6,6 @@ import os
 import requests
 import urllib
 import webbrowser
-from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.options import Options
 
 #asana part
 asana_configuration = asana.Configuration()
@@ -28,7 +26,7 @@ from xero_python.accounting import AccountingApi, ContactPerson, Contact, Contac
 from xero_python.api_client import ApiClient, serialize
 from xero_python.api_client.configuration import Configuration
 from xero_python.api_client.oauth2 import OAuth2Token
-from flask import Flask
+from flask import Flask, request
 from xero_python.exceptions import AccountingBadRequestException
 from xero_python.identity import IdentityApi
 from xero_python.utils import getvalue
@@ -37,11 +35,12 @@ import json
 import http.server
 import socketserver
 import _thread
+import time
 from typing import Tuple
 from http import HTTPStatus
 
 client_id = "7BC59213098143A68B6ED1DD08EE16BA"
-redirect_url = "http://localhost:5000/get_response"
+redirect_url = "http://localhost:6789/get_response"
 code_verifier, code_challenge = pkce.generate_pkce_pair()
 xero_api_client = ApiClient(
     Configuration(
@@ -239,16 +238,21 @@ def update_xero(data, invoice_number):
     # }
     # response = requests.get(url, headers=headers)
     # html = response.text
-    def thread_task(threadName):
-        start_flask()
-    _thread.start_new_thread(thread_task, ("flask",))
+    query_string = [None]
+    def thread_task(result):
+        start_flask(result)
+    _thread.start_new_thread(thread_task, (query_string,))
     webbrowser.open_new_tab(url)
-
+    while True:
+        time.sleep(1)
+        if not query_string[0] is None:
+            break
+    code = str(query_string[0]).split("&")[0].split("=")[1]
+    print("done")
     # chrome_options = Options()
     # chrome_options.add_argument("--headless")
     # with Chrome(options=chrome_options) as browser:
     #     browser.get(url)
-    print()
     # with urllib.request.urlopen(url) as responce:
     #     print(responce)
     # print()
@@ -278,21 +282,33 @@ def update_xero(data, invoice_number):
     #     "code.html", title="Invoices", code=code, sub_title=sub_title
     # )
 
-class Handler(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, request:bytes, client_address, server):
-        super().__init__(request, client_address, server)
-    @property
-    def api_response(self):
-        return json.dumps({"message":"Hello World"}).encode()
-    def do_GET(self) -> None:
-        if self.path == "/get_response":
-            self.send_response(HTTPStatus.OK)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(bytes(self.api_response))
+# http request version
+# class Handler(http.server.SimpleHTTPRequestHandler):
+#     def __init__(self, request:bytes, client_address, server):
+#         super().__init__(request, client_address, server)
+#     @property
+#     def api_response(self):
+#         return json.dumps({"message":"Hello World"}).encode()
+#     def do_GET(self) -> None:
+#         if self.path == "/get_response":
+#             self.send_response(HTTPStatus.OK)
+#             self.send_header("Content-Type", "application/json")
+#             self.end_headers()
+#             self.wfile.write(bytes(self.api_response))
+#
+# def start_flask():
+#     PORT = 6789
+#     my_server = socketserver.TCPServer(("localhost", PORT), Handler)
+#     print("my_server start")
+#     my_server.serve_forever()
 
-def start_flask():
-    PORT = 5000
-    my_server = socketserver.TCPServer(("localhost", PORT), Handler)
-    print("my_server start")
-    my_server.serve_forever()
+#flask version
+def start_flask(result):
+    PORT = 6789
+    app = Flask(__name__)
+    @app.route("/get_response", methods=["GET"])
+    def get_response():
+        result[0] = request.query_string
+        return "The Authorization is successful, you can close this tab and return to the app"
+    app.run(port=PORT)
+
