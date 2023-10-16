@@ -54,12 +54,17 @@ class App(tk.Tk):
         update_asana_button = tk.Button(utility_frame, text="Update Asana", command=lambda: update_asana(self.data), bg="brown", fg="white", font=self.font)
         update_asana_button.grid(row=0, column=1)
 
-        print_button = tk.Button(utility_frame, text="Print", bg="brown", command=self._print_pdf, fg="white",
+        # print_button = tk.Button(utility_frame, text="Print", bg="brown", command=self._print_pdf, fg="white",
+        #                          font=self.font)
+        print_button = tk.Button(utility_frame, text="Print", bg="brown", command=lambda: excel_print_pdf(self.data), fg="white",
                                  font=self.font)
         print_button.grid(row=0, column=2)
 
         email_button = tk.Button(utility_frame, text="Email", command=lambda: email(self.data), bg="brown", fg="white", font=self.font)
         email_button.grid(row=0, column=3)
+
+        # xero_button = tk.Button(utility_frame, text="Update xero", command=lambda:update_xero(self.data), bg="brown", fg="white", font=self.font)
+        # xero_button.grid(row=0, column=4)
 
     def change_page_frame(self):
         # change page

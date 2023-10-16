@@ -1,8 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
+from function.utility import *
+from openpyxl import load_workbook
+import os
 class InvoicePage(tk.Frame):
     def __init__(self, parent, app):
         tk.Frame.__init__(self, parent)
+        self.update_invoice_number = None
         self.parent = parent
         self.app = app
         self.main_frame = tk.Frame(self, bg="blue")
@@ -35,6 +39,13 @@ class InvoicePage(tk.Frame):
         tk.Label(self.invoice_frame, width=35, text="Items", font=self.app.font).grid(row=0, column=0)
         tk.Label(self.invoice_frame, width=10, text="ex.GST", font=self.app.font).grid(row=0, column=1)
         tk.Label(self.invoice_frame, width=10, text="in.GST", font=self.app.font).grid(row=1, column=1)
+        #for demonstration purpose
+        tk.Button(self.invoice_frame,width=10, text="Generate Invoice", command= self.generate_invoice_number, bg="brown", fg="white",
+                  font=self.app.font).grid(row=1, column=2)
+        tk.Button(self.invoice_frame, width=10, text="Update Xero", command=lambda: update_xero(self.app.data, self.update_invoice_number), bg="brown",
+                  fg="white",
+                  font=self.app.font).grid(row=1, column=3)
+        #
         for i in range(6):
             tk.Label(self.invoice_frame, width=10, text="INV"+str(i+1), font=self.app.font).grid(row=0, column=i+2, sticky="ew")
         self.invoice_frame.grid(row=0, column=0)
@@ -42,8 +53,10 @@ class InvoicePage(tk.Frame):
         self.invoice_number_frame = tk.LabelFrame(self.fee_frame)
         tk.Label(self.invoice_number_frame, width=10, text="", font=self.app.font).grid(row=0, column=1)
         tk.Label(self.invoice_number_frame, width=35, text="Invoice Number", font=self.app.font).grid(row=0, column=0)
+        self.invoice_number_entry = []
         for i in range(6):
-            tk.Entry(self.invoice_number_frame, width=11, font=self.app.font, fg="blue").grid(row=0, column=i + 2, padx=(0,5), sticky="ew")
+            self.invoice_number_entry.append(tk.Entry(self.invoice_number_frame, width=11, font=self.app.font, fg="blue"))
+            self.invoice_number_entry[i].grid(row=0, column=i + 2, padx=(0,5), sticky="ew")
         self.invoice_number_frame.grid(row=1, column=0, sticky="ew")
 
         self.fee_dic = dict()
@@ -600,4 +613,16 @@ class InvoicePage(tk.Frame):
     def reset_scrollregion(self, event):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
 
+
+    def generate_invoice_number(self):
+        wb = load_workbook(os.getcwd()+"\\PCE INV.xlsx")
+        cur_number = max([int(num) for num in wb.sheetnames if num.isdigit()])+1
+        self.invoice_number_entry[0].delete(0, tk.END)
+        self.invoice_number_entry[0].insert(0,str(cur_number))
+        self.invoice_number_entry[0].config(state=tk.DISABLED)
+        self.update_invoice_number = str(cur_number)
+        # sheet = wb.create_sheet(str(cur_number+1), -1)
+        # sheet = wb.copy_worksheet(wb[str(cur_number)])
+        # sheet = wb[str(cur_number)]
+        # print(sheet.title)
 
