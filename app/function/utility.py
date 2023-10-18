@@ -1,11 +1,7 @@
 import asana
 from win32com import client as win32client
-from xero_python import *
 import shutil
 import os
-import requests
-import urllib
-import webbrowser
 
 #asana part
 asana_configuration = asana.Configuration()
@@ -18,39 +14,279 @@ custom_fields_api_instance = asana.CustomFieldsApi(asana_api_client)
 template_api_instance = asana.TaskTemplatesApi(asana_api_client)
 workspace_gid = '1205045058713243'
 #xero part
+import datetime
 from functools import wraps
-from io import BytesIO
-from logging.config import dictConfig
 
-from xero_python.accounting import AccountingApi, ContactPerson, Contact, Contacts
-from xero_python.api_client import ApiClient, serialize
+from flask import Flask, url_for, session, redirect, json, request
+from flask_oauthlib.contrib.client import OAuth, OAuth2Application
+from flask_session import Session
+from xero_python.accounting import AccountingApi, Account, AccountType, Contact, LineItem, Invoice, Invoices
+from xero_python.api_client import ApiClient
 from xero_python.api_client.configuration import Configuration
 from xero_python.api_client.oauth2 import OAuth2Token
-from flask import Flask, request
 from xero_python.exceptions import AccountingBadRequestException
 from xero_python.identity import IdentityApi
 from xero_python.utils import getvalue
-import pkce
-import json
-import http.server
-import socketserver
-import _thread
-import time
-from typing import Tuple
-from http import HTTPStatus
 
-client_id = "7BC59213098143A68B6ED1DD08EE16BA"
-redirect_url = "http://localhost:6789/get_response"
-code_verifier, code_challenge = pkce.generate_pkce_pair()
-xero_api_client = ApiClient(
+import _thread
+import webbrowser
+from datetime import datetime
+
+
+# configure main flask application
+app = Flask(__name__)
+app.config.from_object("default_settings")
+app.config.from_pyfile("config.py", silent=True)
+
+if app.config["ENV"] != "production":
+    # allow oauth2 loop to run over http (used for local testing only)
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+# configure persistent session cache
+Session(app)
+
+# configure flask-oauthlib application
+oauth = OAuth(app)
+xero = oauth.remote_app(
+    name="xero",
+    version="2",
+    client_id=app.config["CLIENT_ID"],
+    client_secret=app.config["CLIENT_SECRET"],
+    endpoint_url="https://api.xero.com/",
+    authorization_url="https://login.xero.com/identity/connect/authorize",
+    access_token_url="https://identity.xero.com/connect/token",
+    refresh_token_url="https://identity.xero.com/connect/token",
+    scope="offline_access openid profile email accounting.transactions "
+    "accounting.transactions.read accounting.reports.read "
+    "accounting.journals.read accounting.settings accounting.settings.read "
+    "accounting.contacts accounting.contacts.read accounting.attachments "
+    "accounting.attachments.read assets projects "
+    "files "
+    "payroll.employees payroll.payruns payroll.payslip payroll.timesheets payroll.settings",
+    # "paymentservices "
+    # "finance.bankstatementsplus.read finance.cashvalidation.read finance.statements.read finance.accountingactivity.read",
+)  # type: OAuth2Application
+
+
+# configure xero-python sdk client
+api_client = ApiClient(
     Configuration(
-        debug=False,
+        debug=app.config["DEBUG"],
         oauth2_token=OAuth2Token(
-            client_id=client_id
+            client_id=app.config["CLIENT_ID"], client_secret=app.config["CLIENT_SECRET"]
         ),
     ),
     pool_threads=1,
 )
+
+def login_xero():
+    def thread_task():
+        start_flask()
+    _thread.start_new_thread(thread_task,())
+    webbrowser.open_new_tab("http://localhost:1234/login")
+
+def start_flask():
+    app.run(host='localhost', port=1234)
+@app.route("/login")
+def login():
+    redirect_url = url_for("oauth_callback", _external=True)
+    session["state"] = app.config["STATE"]
+    response = xero.authorize(callback_uri=redirect_url, state=session["state"])
+    return response
+
+@app.route("/callback")
+def oauth_callback():
+    if request.args.get("state") != session["state"]:
+        return "Error, state doesn't match, no token for you."
+    try:
+        response = xero.authorized_response()
+    except Exception as e:
+        print(e)
+        raise
+    if response is None or response.get("access_token") is None:
+        return "Access denied: response=%s" % response
+    store_xero_oauth2_token(response)
+    return "You are Successfully login, you can go back to the app right now"
+token_list = {}
+@xero.tokengetter
+@api_client.oauth2_token_getter
+def obtain_xero_oauth2_token():
+    return token_list.get("token")
+
+@xero.tokensaver
+@api_client.oauth2_token_saver
+def store_xero_oauth2_token(token):
+    token_list["token"] = token
+
+def xero_token_required(function):
+    @wraps(function)
+    def decorator(*args, **kwargs):
+        xero_token = obtain_xero_oauth2_token()
+        if not xero_token:
+            return redirect(url_for("login", _external=True))
+
+        return function(*args, **kwargs)
+
+    return decorator
+def get_code_snippet(endpoint,action):
+    s = open("C:\\Users\\yeezh\\xero-python-oauth2-app\\app.py").read()
+    startstr = "["+ endpoint +":"+ action +"]"
+    endstr = "#[/"+ endpoint +":"+ action +"]"
+    start = s.find(startstr) + len(startstr)
+    end = s.find(endstr)
+    substring = s[start:end]
+    return substring
+def get_xero_tenant_id():
+    token = obtain_xero_oauth2_token()
+    if not token:
+        return None
+
+    identity_api = IdentityApi(api_client)
+    for connection in identity_api.get_connections():
+        if connection.tenant_type == "ORGANISATION":
+            return connection.tenant_id
+@xero_token_required
+def update_xero(data, invoice):
+    xero_tenant_id = get_xero_tenant_id()
+    accounting_api = AccountingApi(api_client)
+    # try:
+    # we need a contact
+    contacts = accounting_api.get_contacts(
+        xero_tenant_id
+    )
+    contacts_list = remove_none(contacts.to_dict())["contacts"]
+    def contact_name_contact_id(api_list):
+        res = dict()
+        for item in api_list:
+            res[item["name"]] = item["contact_id"]
+        return res
+    # need to handle if it's not in the client
+    contacts_name_map = contact_name_contact_id(contacts_list)
+    if len(data["Client"]["Client Company"].get()) == 0:
+        contacts_key = data["Client"]["Client Full Name"].get()
+    elif len(data["Client"]["Client Full Name"].get()) == 0:
+        contacts_key = data["Client"]["Client Company"].get()
+    else:
+        contacts_key = data["Client"]["Client Company"].get()+", "+data["Client"]["Client Full Name"].get()
+    contact_id = contacts_name_map[contacts_key] if contacts_key in contacts_name_map.keys() else create_contact(contacts_key)
+    contact = Contact(contact_id)
+
+    # we need an account of type BANK
+    where = "Type==\"BANK\""
+    try:
+        accounts = accounting_api.get_accounts(
+            xero_tenant_id, where
+        )
+        account_id = getvalue(accounts, "accounts.0.account_id", "")
+        account = Account(account_id=account_id)
+    except AccountingBadRequestException as exception:
+        pass
+    #only first one
+    line_item_list = []
+    for key, service in data["Fee Proposal Page"]["Details"].items():
+        if not service["on"].get():
+            continue
+        if service["Expanded"].get():
+            for i in range(3):
+                if service["Context"][i]["Invoice"].get() == "INV1":
+                    try:
+                        line_item_list.append(
+                            LineItem(
+                                description=service["Context"][i]["Service"].get(),
+                                quantity=1,
+                                unit_amount=int(service["Context"][i]["Fee"].get()),
+                                account_code="200"
+                            )
+                        )
+                    except ValueError:
+                        continue
+        else:
+            if service["Invoice"].get() == "INV1":
+                try:
+                    line_item_list.append(
+                        LineItem(
+                            description=key,
+                            quantity=1,
+                            unit_amount=int(service["Fee"].get()),
+                            account_code="200"
+                        )
+                    )
+                except ValueError:
+                    continue
+    # we need multiple invoices
+
+    invoice_1 = Invoice(
+        type="ACCREC",
+        contact=contact,
+        date=datetime.today(),
+        due_date=datetime.today(),
+        line_items=line_item_list,
+        invoice_number=invoice[0]["Invoice Number"].get(),
+        reference=data["Project Information"]["Project Name"].get(),
+        status="DRAFT"
+    )
+    invoices = Invoices(invoices=[invoice_1])
+
+    try:
+        created_invoices = accounting_api.create_invoices(
+            xero_tenant_id, invoices
+        )
+        invoice_1_id = getvalue(created_invoices, "invoices.0.invoice_id", "")
+    except AccountingBadRequestException as exception:
+        pass
+
+    #[BATCHPAYMENTS:CREATE]
+    # xero_tenant_id = get_xero_tenant_id()
+    # accounting_api = AccountingApi(api_client)
+    #
+    # invoice_1 = Invoice(invoice_id=invoice_1_id)
+    # invoice_2 = Invoice(invoice_id=invoice_2_id)
+    #
+    # payment_1 = Payment(
+    #     reference="something 1",
+    #     invoice=invoice_1,
+    #     amount=3.50
+    # )
+    # payment_2 = Payment(
+    #     reference="something 2",
+    #     invoice=invoice_2,
+    #     amount=7.25
+    # )
+    #
+    # batch_payment = BatchPayment(
+    #     date=dateutil.parser.parse("2020-12-24"),
+    #     reference="Something",
+    #     account=account,
+    #     payments=[payment_1, payment_2]
+    # )
+    #
+    # batch_payments = BatchPayments(batch_payments=[batch_payment])
+    #
+    # try:
+    #     created_batch_payments = accounting_api.create_batch_payment(
+    #         xero_tenant_id, batch_payments
+    #     )
+    # except AccountingBadRequestException as exception:
+    #     output = "Error: " + exception.reason
+    #     json = jsonify(exception.error_data)
+    # else:
+    #     output = "Batch payment created with id {} .".format(
+    #         getvalue(created_batch_payments, "batch_payments.0.batch_payment_id", "")
+    #     )
+    #     json = serialize_model(created_batch_payments)
+
+@xero_token_required
+def create_contact(name):
+    xero_tenant_id = get_xero_tenant_id()
+    accounting_api = AccountingApi(api_client)
+
+    account = Account(
+        name=name,
+        type=AccountType.EXPENSE
+    )
+    api_response = accounting_api.create_account(xero_tenant_id, account)
+    print(api_response)
+    return api_response.to_dict()["accounts"][0]["account_id"]
 
 def remove_none(obj):
     if isinstance(obj, list):
@@ -116,9 +352,6 @@ def update_asana(data, *args):
     )
     task_api_instance.update_task(task_gid=task_id, body=body)
     print(api_respond)
-
-
-
 
 def excel_print_pdf(data, *args):
     if _use_page_2(data):
@@ -228,27 +461,94 @@ def email(data, *args):
     newmail.Attachments.Add(os.getcwd() + "\\output.pdf")
     newmail.Display()
 
+def read_response(response):
+    response_content = response.content.decode("utf8")
+    response_json = json.loads(response_content)
+    return response_json
 
-def update_xero(data, invoice_number):
-    url = f"http://login.xero.com/identity/connect/authorize?response_type=code&client_id={client_id}&redirect_uri={redirect_url}&scope=openid profile email accounting.transactions&state=123&code_challenge={code_challenge}&code_challenge_method=S256"
-    url = url.replace(" ", "%20")
-    # headers = {
-    #     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36',
-    #     'Content-Type': 'text/html',
-    # }
-    # response = requests.get(url, headers=headers)
-    # html = response.text
-    query_string = [None]
-    def thread_task(result):
-        start_flask(result)
-    _thread.start_new_thread(thread_task, (query_string,))
-    webbrowser.open_new_tab(url)
-    while True:
-        time.sleep(1)
-        if not query_string[0] is None:
-            break
-    code = str(query_string[0]).split("&")[0].split("=")[1]
-    print("done")
+
+# def update_xero(data, invoice_number):
+#     if not token_make:
+#         url = f"http://login.xero.com/identity/connect/authorize?response_type=code&client_id={client_id}&redirect_uri={redirect_url}&scope=openid profile email accounting.transactions&state=123&code_challenge={code_challenge}&code_challenge_method=S256"
+#         url = url.replace(" ", "%20")
+#         query_string = [None]
+#         def thread_task(result):
+#             start_flask(result)
+#         _thread.start_new_thread(thread_task, (query_string,))
+#         webbrowser.open_new_tab(url)
+#         while True:
+#             time.sleep(1)
+#             if not query_string[0] is None:
+#                 break
+#         code = str(query_string[0]).split("&")[0].split("=")[1]
+#         exchange_url =  "https://identity.xero.com/connect/token"
+#         response = requests.post(exchange_url,
+#                                  headers={
+#                                      "Content-Type":"application/x-www-form-urlencoded"
+#                                  },
+#                                  data={
+#                                      "grant_type":"authorization_code",
+#                                      "client_id":client_id,
+#                                      "code":code,
+#                                      "redirect_uri":redirect_url,
+#                                      "code_verifier":code_verifier
+#                                  })
+#         access_token = read_response(response)["access_token"]
+#         xero_api_client.oauth2_token_saver(access_token)
+#         tenant_response = requests.get("https://api.xero.com/connections",
+#                                 headers = {
+#                                     "Authorization":"Bearer "+ access_token,
+#                                     "Content-Type":"application/json"
+#                                 })
+#         #need to change to choose the oorganisation
+#         tenantId = read_response(tenant_response)[0]["tenantId"]
+#         xero_api_client.set_oauth2_token(access_token)
+#         api_instance = AccountingApi(xero_api_client)
+#         xero_tenant_id = tenantId
+#         date_value = date_parser.parse('2020-10-10T00:00:00Z')
+#         due_date_value = date_parser.parse('2020-10-28T00:00:00Z')
+#
+#         contact = Contact(
+#             contact_id="00000000-0000-0000-0000-000000000000")
+#
+#         line_item_tracking = LineItemTracking(
+#             tracking_category_id="00000000-0000-0000-0000-000000000000",
+#             tracking_option_id="00000000-0000-0000-0000-000000000000")
+#
+#         line_item_trackings = []
+#         line_item_trackings.append(line_item_tracking)
+#
+#         line_item = LineItem(
+#             description="Foobar",
+#             quantity=1.0,
+#             unit_amount=20.0,
+#             account_code="000",
+#             tracking=line_item_trackings)
+#
+#         line_items = []
+#         line_items.append(line_item)
+#
+#         invoice = Invoice(
+#             type="ACCREC",
+#             contact=contact,
+#             date=date_value,
+#             due_date=due_date_value,
+#             line_items=line_items,
+#             reference="Website Design",
+#             status="DRAFT")
+#
+#         invoices = Invoices(
+#             invoices=[invoice])
+#
+#         try:
+#             api_response = api_instance.create_invoices(xero_tenant_id, invoices)
+#             print(api_response)
+#         except AccountingBadRequestException as e:
+#             print("Exception when calling AccountingApi->createInvoices: %s\n" % e)
+
+
+    #
+
     # chrome_options = Options()
     # chrome_options.add_argument("--headless")
     # with Chrome(options=chrome_options) as browser:
@@ -303,12 +603,13 @@ def update_xero(data, invoice_number):
 #     my_server.serve_forever()
 
 #flask version
-def start_flask(result):
-    PORT = 6789
-    app = Flask(__name__)
-    @app.route("/get_response", methods=["GET"])
-    def get_response():
-        result[0] = request.query_string
-        return "The Authorization is successful, you can close this tab and return to the app"
-    app.run(port=PORT)
+# def start_flask(result):
+#     PORT = 6789
+#     app = Flask(__name__)
+#     @app.route("/get_response", methods=["GET"])
+#     def get_response():
+#         result[0] = request.query_string
+#         return "The Authorization is successful, you can close this tab and return to the app"
+#     app.run(port=PORT)
+
 

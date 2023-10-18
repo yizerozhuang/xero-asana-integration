@@ -185,6 +185,7 @@ class FeeProposalPage(tk.Frame):
         if var.get() == True:
             if not var._name in self.app.data["Fee Proposal Page"]["Details"]:
                 self.app.data["Fee Proposal Page"]["Details"][var._name] = {
+                    "Service": tk.StringVar(value=var._name),
                     "on":tk.BooleanVar(name=var._name+" on", value=True),
                     "Expanded":tk.BooleanVar(name=var._name + " Expand", value=False),
                     "Fee":tk.StringVar(name=var._name + " Fee"),

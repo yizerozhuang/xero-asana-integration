@@ -315,7 +315,7 @@ class App(tk.Tk):
                     except ValueError:
                         continue
         for j in range(6):
-            invoice_list[j].set(str(new_value[j]))
+            invoice_list[j]["Fee"].set(str(new_value[j]))
 
 
 

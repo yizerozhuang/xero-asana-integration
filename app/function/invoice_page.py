@@ -42,9 +42,10 @@ class InvoicePage(tk.Frame):
         #for demonstration purpose
         tk.Button(self.invoice_frame,width=10, text="Generate Invoice", command= self.generate_invoice_number, bg="brown", fg="white",
                   font=self.app.font).grid(row=1, column=2)
-        tk.Button(self.invoice_frame, width=10, text="Update Xero", command=lambda: update_xero(self.app.data, self.update_invoice_number), bg="brown",
+        tk.Button(self.invoice_frame, width=10, text="Login Xero", command= lambda: login_xero(), bg="brown",
                   fg="white",
                   font=self.app.font).grid(row=1, column=3)
+
         #
         for i in range(6):
             tk.Label(self.invoice_frame, width=10, text="INV"+str(i+1), font=self.app.font).grid(row=0, column=i+2, sticky="ew")
@@ -53,11 +54,7 @@ class InvoicePage(tk.Frame):
         self.invoice_number_frame = tk.LabelFrame(self.fee_frame)
         tk.Label(self.invoice_number_frame, width=10, text="", font=self.app.font).grid(row=0, column=1)
         tk.Label(self.invoice_number_frame, width=35, text="Invoice Number", font=self.app.font).grid(row=0, column=0)
-        self.invoice_number_entry = []
-        for i in range(6):
-            self.invoice_number_entry.append(tk.Entry(self.invoice_number_frame, width=11, font=self.app.font, fg="blue"))
-            self.invoice_number_entry[i].grid(row=0, column=i + 2, padx=(0,5), sticky="ew")
-        self.invoice_number_frame.grid(row=1, column=0, sticky="ew")
+
 
         self.fee_dic = dict()
         self.fee_frame_number = 2
@@ -68,26 +65,40 @@ class InvoicePage(tk.Frame):
         self.total_ex_gst_label.grid(row=0, column=1)
         self.total_in_gst_label = tk.Label(self.total_frame, width=10, textvariable=self.app.data["Fee Proposal Page"]["in.GST"], font=self.app.font)
         self.total_in_gst_label.grid(row=1, column=1)
-        self.invoice_list = [tk.StringVar(name="Invoice "+str(i+1), value="0") for i in range(6)]
+        self.invoice_list = [
+            {
+                "Invoice Number":tk.StringVar(name="Invoice Number"+str(i+1)),
+                "Fee":tk.StringVar(name="Invoice amount"+str(i+1), value="0")
+            } for i in range(6)
+        ]
+        self.invoice_number_entry = []
+        for i in range(6):
+            self.invoice_number_entry.append(
+                tk.Entry(self.invoice_number_frame, textvariable=self.invoice_list[i]["Invoice Number"],width=11, font=self.app.font, fg="blue"))
+            self.invoice_number_entry[i].grid(row=0, column=i + 2, padx=(0, 5), sticky="ew")
+        self.invoice_number_frame.grid(row=1, column=0, sticky="ew")
+
         self.inGST_invoice_list = [tk.StringVar(name="ingst Invoice "+str(i+1), value="0") for i in range(6)]
         for j in range(6):
-            tk.Label(self.total_frame, width=10, textvariable=self.invoice_list[j], font=self.app.font).grid(row=0, column=2+j)
+            tk.Label(self.total_frame, width=10, textvariable=self.invoice_list[j]["Fee"], font=self.app.font).grid(row=0, column=2+j)
             tk.Label(self.total_frame, width=10, textvariable=self.inGST_invoice_list[j], font=self.app.font).grid(row=1, column=2+j)
         self.total_frame.grid(row=999, column=0, sticky="ew")
         #garbage collection
-        self.invoice_list[0].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[0],
+        self.invoice_list[0]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[0]["Fee"],
                                                                              self.inGST_invoice_list[0]))
-        self.invoice_list[1].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[1],
+        self.invoice_list[1]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[1]["Fee"],
                                                                              self.inGST_invoice_list[1]))
-        self.invoice_list[2].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[2],
+        self.invoice_list[2]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[2]["Fee"],
                                                                              self.inGST_invoice_list[2]))
-        self.invoice_list[3].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[3],
+        self.invoice_list[3]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[3]["Fee"],
                                                                              self.inGST_invoice_list[3]))
-        self.invoice_list[4].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[4],
+        self.invoice_list[4]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[4]["Fee"],
                                                                              self.inGST_invoice_list[4]))
-        self.invoice_list[5].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[5],
+        self.invoice_list[5]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.invoice_list[5]["Fee"],
                                                                              self.inGST_invoice_list[5]))
-
+        tk.Button(self.invoice_frame, width=10, text="Update Xero", command=lambda: update_xero(self.app.data, self.invoice_list), bg="brown",
+                  fg="white",
+                  font=self.app.font).grid(row=1, column=4)
     def bill_main_frame(self):
         self.bill_frame = tk.LabelFrame(self.main_context_frame, text="Bill Details", font=self.app.font)
         self.bill_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
@@ -124,25 +135,29 @@ class InvoicePage(tk.Frame):
                                            textvariable=self.bill_fee_isgst_total,
                                            font=self.app.font)
         self.total_in_gst_label.grid(row=1, column=1)
-        self.bill_list = [tk.StringVar(name="Bill " + str(i + 1), value="0") for i in range(6)]
+        self.bill_list = [
+            {
+                "Bill Number":tk.StringVar(name="Bill Number"+str(i+1)),
+                "Fee":tk.StringVar(name="Bill " + str(i + 1), value="0")
+            } for i in range(6)]
         self.inGST_bill_list = [tk.StringVar(name="ingst Bill " + str(i + 1), value="0") for i in range(6)]
         for j in range(6):
-            tk.Label(self.total_frame, width=10, textvariable=self.bill_list[j], font=self.app.font).grid(row=0,
+            tk.Label(self.total_frame, width=10, textvariable=self.bill_list[j]["Fee"], font=self.app.font).grid(row=0,
                                                                                                              column=2 + j)
             tk.Label(self.total_frame, width=10, textvariable=self.inGST_bill_list[j], font=self.app.font).grid(
                 row=1, column=2 + j)
         self.total_frame.grid(row=999, column=0, sticky="ew")
-        self.bill_list[0].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[0],
+        self.bill_list[0]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[0]["Fee"],
                                                                              self.inGST_bill_list[0]))
-        self.bill_list[1].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[1],
+        self.bill_list[1]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[1]["Fee"],
                                                                              self.inGST_bill_list[1]))
-        self.bill_list[2].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[2],
+        self.bill_list[2]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[2]["Fee"],
                                                                              self.inGST_bill_list[2]))
-        self.bill_list[3].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[3],
+        self.bill_list[3]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[3]["Fee"],
                                                                              self.inGST_bill_list[3]))
-        self.bill_list[4].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[4],
+        self.bill_list[4]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[4]["Fee"],
                                                                              self.inGST_bill_list[4]))
-        self.bill_list[5].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[5],
+        self.bill_list[5]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(self.bill_list[5]["Fee"],
                                                                              self.inGST_bill_list[5]))
     def profit_main_frame(self):
         self.profit_frame = tk.LabelFrame(self.main_context_frame, text="Profit Details", font=self.app.font)
@@ -617,8 +632,7 @@ class InvoicePage(tk.Frame):
     def generate_invoice_number(self):
         wb = load_workbook(os.getcwd()+"\\PCE INV.xlsx")
         cur_number = max([int(num) for num in wb.sheetnames if num.isdigit()])+1
-        self.invoice_number_entry[0].delete(0, tk.END)
-        self.invoice_number_entry[0].insert(0,str(cur_number))
+        self.invoice_list[0]["Invoice Number"].set(str(cur_number))
         self.invoice_number_entry[0].config(state=tk.DISABLED)
         self.update_invoice_number = str(cur_number)
         # sheet = wb.create_sheet(str(cur_number+1), -1)
