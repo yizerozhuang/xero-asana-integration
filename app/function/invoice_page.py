@@ -27,26 +27,25 @@ class InvoicePage(tk.Frame):
         self.items_frame = {}
         self.bills_frame = {}
 
-        self.invoice_main_frame()
-        self.bill_main_frame()
-        self.profit_main_frame()
+        self.invoice_part()
+        # self.bill_main_frame()
+        # self.profit_main_frame()
 
-    def invoice_main_frame(self):
-        self.fee_frame = tk.LabelFrame(self.main_context_frame, text="Invoice Details", font=self.app.font)
-        self.fee_frame.pack(side=tk.LEFT,fill=tk.BOTH, expand=1)
+    def invoice_part(self):
+        self.invoic_frame = tk.LabelFrame(self.main_context_frame, text="Invoice Details", font=self.app.font)
+        self.fee_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
         self.invoice_frame = tk.LabelFrame(self.fee_frame)
         tk.Label(self.invoice_frame, width=35, text="Items", font=self.app.font).grid(row=0, column=0)
         tk.Label(self.invoice_frame, width=10, text="ex.GST", font=self.app.font).grid(row=0, column=1)
         tk.Label(self.invoice_frame, width=10, text="in.GST", font=self.app.font).grid(row=1, column=1)
         #for demonstration purpose
-        tk.Button(self.invoice_frame,width=10, text="Generate Invoice", command= self.generate_invoice_number, bg="brown", fg="white",
-                  font=self.app.font).grid(row=1, column=2)
-        tk.Button(self.invoice_frame, width=10, text="Login Xero", command= lambda: login_xero(), bg="brown",
-                  fg="white",
-                  font=self.app.font).grid(row=1, column=3)
+        # tk.Button(self.invoice_frame,width=10, text="Generate Invoice", command= self.generate_invoice_number, bg="brown", fg="white",
+        #           font=self.app.font).grid(row=1, column=2)
+        # tk.Button(self.invoice_frame, width=10, text="Login Xero", command= lambda: login_xero(), bg="brown",
+        #           fg="white",
+        #           font=self.app.font).grid(row=1, column=3)
 
-        #
         for i in range(6):
             tk.Label(self.invoice_frame, width=10, text="INV"+str(i+1), font=self.app.font).grid(row=0, column=i+2, sticky="ew")
         self.invoice_frame.grid(row=0, column=0)
@@ -629,14 +628,14 @@ class InvoicePage(tk.Frame):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
 
 
-    def generate_invoice_number(self):
-        wb = load_workbook(os.getcwd()+"\\PCE INV.xlsx")
-        cur_number = max([int(num) for num in wb.sheetnames if num.isdigit()])+1
-        self.invoice_list[0]["Invoice Number"].set(str(cur_number))
-        self.invoice_number_entry[0].config(state=tk.DISABLED)
-        self.update_invoice_number = str(cur_number)
-        # sheet = wb.create_sheet(str(cur_number+1), -1)
-        # sheet = wb.copy_worksheet(wb[str(cur_number)])
-        # sheet = wb[str(cur_number)]
-        # print(sheet.title)
+    # def generate_invoice_number(self):
+    #     wb = load_workbook(os.getcwd()+"\\PCE INV.xlsx")
+    #     cur_number = max([int(num) for num in wb.sheetnames if num.isdigit()])+1
+    #     self.invoice_list[0]["Invoice Number"].set(str(cur_number))
+    #     self.invoice_number_entry[0].config(state=tk.DISABLED)
+    #     self.update_invoice_number = str(cur_number)
+    #     # sheet = wb.create_sheet(str(cur_number+1), -1)
+    #     # sheet = wb.copy_worksheet(wb[str(cur_number)])
+    #     # sheet = wb[str(cur_number)]
+    #     # print(sheet.title)
 

@@ -9,51 +9,52 @@ class ProjectInfoPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.parent = parent
         self.app = app
+        self.app.data["Project Info"] = dict()
+        self.data = app.data
+
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=1)
-
         self.main_canvas = tk.Canvas(self.main_frame)
         self.main_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1, anchor="nw")
-
         self.scrollbar = ttk.Scrollbar(self.main_frame, orient=tk.VERTICAL, command=self.main_canvas.yview)
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
         self.main_canvas.config(yscrollcommand=self.scrollbar.set)
         self.main_canvas.bind("<Configure>", lambda e:self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all")))
         self.app.bind("<MouseWheel>", self._on_mousewheel, add="+")
         self.main_context_frame = tk.LabelFrame(self.main_canvas, text="Main Context")
         self.main_canvas.create_window((0, 0), window=self.main_context_frame, anchor="center")
 
-        self.project_info_frame()
-        self.client_frame()
-        self.main_contact_frame()
-        self.building_features_frame()
-        self.drawing_number_frame()
+        self.project_part()
+        self.client_part()
+        self.main_contact_part()
+        self.building_features_part()
+        self.drawing_number_part()
 
-    def project_info_frame(self):
+    def project_part(self):
         # User_information frame
-        user_info_frame = tk.LabelFrame(self.main_context_frame, text="Project Information", font=self.app.font)
-        user_info_frame.grid(row=1, column=0, padx=20)
+        project=dict()
+        self.data["Project Info"]["Project"] = project
 
-        user_info = ["Project Name", "Quotation Number", "Project Number"]
+        project_frame = tk.LabelFrame(self.main_context_frame, text="Project Information", font=self.app.font)
+        project_frame.grid(row=1, column=0, padx=20)
 
-        self.app.data["Project Information"] = dict()
+        project_info = ["Project Name", "Quotation Number", "Project Number"]
 
-        for i, info in enumerate(user_info):
-            tk.Label(user_info_frame,  width=30, text=info, font=self.app.font).grid(row=i, column=0, padx=(10, 0))
-            self.app.data["Project Information"][info] = tk.StringVar(name=info)
-            tk.Entry(user_info_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Project Information"][info]).grid(row=i, column=1, columnspan=3, padx=(0, 10))
+        for i, info in enumerate(project_info):
+            tk.Label(project_frame,  width=30, text=info, font=self.app.font).grid(row=i, column=0, padx=(10, 0))
+            project[info] = tk.StringVar()
+            tk.Entry(project_frame, width=70, font=self.app.font, fg="blue", textvariable=project[info]).grid(row=i, column=1, columnspan=3, padx=(0, 10))
 
-        self.app.data["Project Information"]["Project Name"].trace("w",self._update_quotation_number)
+        project["Project Name"].trace("w",self._update_quotation_number)
 
-        tk.Label(user_info_frame, text="Project Type", font=self.app.font).grid(row=3, column=0)
+        tk.Label(project_frame, text="Project Type", font=self.app.font).grid(row=3, column=0)
         project_types = ["Restaurant", "Office", "Commercial", "Group house", "Apartment", "Mixed-use complex",
                          "School", "Others"]
 
-        self.app.data["Project Information"]["Project Type"] = tk.StringVar(name="Project Type", value="Restaurant")
+        project["Project Type"] = tk.StringVar(value="Restaurant")
 
-        for i, p_type in enumerate(project_types):
-            button = tk.Radiobutton(user_info_frame, text=p_type, variable=self.app.data["Project Information"]["Project Type"],value=p_type, font=self.app.font)
+        for i, types in enumerate(project_types):
+            button = tk.Radiobutton(project_frame, text=types, variable=project["Project Type"], value=types, font=self.app.font)
             if i < 3:
                 button.grid(row=3, column=i + 1, sticky="W")
             elif i < 6:
@@ -61,15 +62,20 @@ class ProjectInfoPage(tk.Frame):
             else:
                 button.grid(row=5, column=i - 5, sticky="W")
 
-        service_type = ["Hydraulic Service", "Electrical Service", "Fire Service", "Kitchen Ventilation", "Mechanical Service", "CFD Service", "Mech Review",
+        service_types = ["Hydraulic Service", "Electrical Service", "Fire Service", "Kitchen Ventilation", "Mechanical Service", "CFD Service", "Mech Review",
                         "Installation", "Miscellaneous"]
 
-        tk.Label(user_info_frame, width=30, text="Service Type", font=self.app.font).grid(row=6, column=0)
+        tk.Label(project_frame, width=30, text="Service Type", font=self.app.font).grid(row=6, column=0)
 
-        self.app.data["Project Information"]["Service Type"] = []
-        for i, service in enumerate(service_type):
-            self.app.data["Project Information"]["Service Type"].append(tk.BooleanVar(name=service))
-            button = tk.Checkbutton(user_info_frame, text=service, variable=self.app.data["Project Information"]["Service Type"][i], font=self.app.font)
+        project["Service Type"] = []
+        for i, service in enumerate(service_types):
+            project["Service Type"].append(
+                {
+                    "Service":tk.StringVar(value=service),
+                    "Include":tk.BooleanVar()
+                }
+            )
+            button = tk.Checkbutton(project_frame, text=service, variable=project["Service Type"][i]["Include"], font=self.app.font)
             if i < 3:
                 button.grid(row=6, column=i + 1, sticky="W")
             elif i < 6:
@@ -77,56 +83,36 @@ class ProjectInfoPage(tk.Frame):
             else:
                 button.grid(row=8, column=i - 5, sticky="W")
 
-        self.app.data["Project Information"]["Service Type"][0].trace("w", lambda a, b, c: self.app.update_service_type(
-            self.app.data["Project Information"]["Service Type"][0]))
-        self.app.data["Project Information"]["Service Type"][1].trace("w", lambda a, b, c: self.app.update_service_type(
-            self.app.data["Project Information"]["Service Type"][1]))
-        self.app.data["Project Information"]["Service Type"][2].trace("w", lambda a, b, c: self.app.update_service_type(
-            self.app.data["Project Information"]["Service Type"][2]))
-        self.app.data["Project Information"]["Service Type"][4].trace("w", lambda a, b, c: self.app.update_service_type(
-            self.app.data["Project Information"]["Service Type"][4]))
+        project["Service Type"][0]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"][0]))
+        project["Service Type"][1]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"][1]))
+        project["Service Type"][2]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"][2]))
+        project["Service Type"][4]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"][4]))
 
-        # #error for loop does not work here for some reason
-        #
-        # service_list[0].trace("w", lambda a, b, c: self.app.update_scope(service_list[0]))
-        # service_list[1].trace("w", lambda a, b, c: self.app.update_scope(service_list[1]))
-        # service_list[2].trace("w", lambda a, b, c: self.app.update_scope(service_list[2]))
-        # # service_list[3].trace("w", lambda a, b, c:self.app.update_scope(service_list[3]))
-        # service_list[4].trace("w", lambda a, b, c: self.app.update_scope(service_list[4]))
-        # # service_list[5].trace("w", lambda a, b, c: self.app.master.update_scope(service_list[5]))
-        # # service_list[6].trace("w", lambda a, b, c: self.app.master.update_scope(service_list[6]))
-        # # service_list[7].trace("w", lambda a, b, c: self.app.master.update_scope(service_list[6]))
-        # # service_list[8].trace("w", lambda a, b, c: self.app.master.update_scope(service_list[6]))
-        #
-        # # for i in range(6):
-        # #     service_list[i].trace("w", lambda a, b, c: self.parent.master.update_scope(service_list[i]))
-        # # i = 0
-        # # while i <len(service_list):
-        # #     service_list[i].trace("w", lambda a, b, c: self.parent.master.update_scope(service_list[i]))
-        # # for s in service_list:
-        # #     s.trace("w", lambda a, b, c:self.parent.master.update_scope(s))
-        # # [s.trace("w", lambda a, b, c:self.parent.master.update_scope(s)) for s in service_list]
-
-
-    def client_frame(self):
+        tk.Label(project_frame, width=30, text="Shop Name", font=self.app.font).grid(row=9, column=0, padx=(10, 0), pady=(0, 10))
+        project["Shop Name"] = tk.StringVar()
+        tk.Entry(project_frame, width=70, font=self.app.font, fg="blue", textvariable=project["Shop Name"]).grid(row=9,
+                                                                                                          column=1,
+                                                                                                          columnspan=3,
+                                                                                                          padx=(0, 10),pady=(0,10))
+    def client_part(self):
+        client = dict()
+        self.data["Project Info"]["Client"] = client
 
         #client frame
         client_frame = tk.LabelFrame(self.main_context_frame, text="Client", font=self.app.font)
         client_frame.grid(row=2, column=0)
-        self.app.data["Client"] = dict()
 
         tk.Label(client_frame, width=30, text="Client Full Name", font=self.app.font).grid(row=0, column=0, padx=(10, 0))
-        self.app.data["Client"]["Client Full Name"] = tk.StringVar(name="Client Full Name")
-        tk.Entry(client_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Client"]["Client Full Name"]).grid(row=0, column=1, columnspan=3, padx=(0,10))
-        # self.app.data["Client"]["Client Full Name"].trace("w", self.app.update_client)
+        client["Client Full Name"] = tk.StringVar()
+        tk.Entry(client_frame, width=70, font=self.app.font, fg="blue", textvariable=client["Client Full Name"]).grid(row=0, column=1, columnspan=3, padx=(0,10))
 
         tk.Label(client_frame, width=30, text="Client Contact Type", font=self.app.font).grid(row=1, column=0)
 
         contact_type = ["Architect", "Builder", "Certifier", "Contractor", "Developer", "Engineer", "Government", "RDM", "Strata", "Supplier", "Owner/Tenant", "Others"]
 
-        self.app.data["Client"]["Client Contact Type"] = tk.StringVar(value="Architect", name="Client Contact Type")
-        for i, p_type in enumerate(contact_type):
-            button = tk.Radiobutton(client_frame, text=p_type, variable=self.app.data["Client"]["Client Contact Type"], value=p_type, font=self.app.font)
+        client["Client Contact Type"] = tk.StringVar(value="Architect")
+        for i, types in enumerate(contact_type):
+            button = tk.Radiobutton(client_frame, text=types, variable=client["Client Contact Type"], value=types, font=self.app.font)
             if i < 3:
                 button.grid(row=1, column=i + 1, sticky="W")
             elif i < 6:
@@ -137,32 +123,31 @@ class ProjectInfoPage(tk.Frame):
                 button.grid(row=4, column=i - 8, sticky="W")
         client_info = ["Client Company", "Client Address", "Client ABN", "Contact Number",
                        "Contact Email"]
-
         for i, info in enumerate(client_info):
             tk.Label(client_frame, width=30, text=info, font=self.app.font).grid(row=i+5, column=0)
-            self.app.data["Client"][info] = tk.StringVar(name=info)
-            tk.Entry(client_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Client"][info]).grid(row=i+5, column=1, columnspan=3)
-
-    
-    def main_contact_frame(self):
+            client[info] = tk.StringVar()
+            tk.Entry(client_frame, width=70, font=self.app.font, fg="blue", textvariable=client[info]).grid(row=i+5, column=1, columnspan=3)
+    def main_contact_part(self):
+        main_contact = dict()
+        self.data["Project Info"]["Main Contact"] = main_contact
+        
         contact_frame = tk.LabelFrame(self.main_context_frame, text="Main Contact", font=self.app.font)
         contact_frame.grid(row=3, column=0, padx=20)
         
-        self.app.data["Main Contact"] = dict()
         tk.Label(contact_frame, width=30, text="Main Contact Full Name", font=self.app.font).grid(row=0, column=0, padx=(10, 0))
 
-        self.app.data["Main Contact"]["Main Contact Full Name"]= tk.StringVar(name="Main Contact Full Name")
-        tk.Entry(contact_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Main Contact"]["Main Contact Full Name"]).grid(row=0, column=1, columnspan=3, padx=(0, 10))
+        main_contact["Main Contact Full Name"] = tk.StringVar()
+        tk.Entry(contact_frame, width=70, font=self.app.font, fg="blue", textvariable=main_contact["Main Contact Full Name"]).grid(row=0, column=1, columnspan=3, padx=(0, 10))
 
         tk.Label(contact_frame, text="Main Contact Contact Type", font=self.app.font).grid(row=1, column=0)
 
         contact_type = ["Architect", "Builder", "Certifier", "Contractor", "Developer", "Engineer", "Government", "RDM",
                         "Strata", "Supplier", "Owner/Tenant", "Others"]
 
-        self.app.data["Main Contact"]["Main Contact Contact Type"] = tk.StringVar(name="Main Contact Contact Type", value="Architect")
-        for i, p_type in enumerate(contact_type):
-            button = tk.Radiobutton(contact_frame, text=p_type, variable=self.app.data["Main Contact"]["Main Contact Contact Type"],
-                                                               value=p_type, font=self.app.font)
+        main_contact["Main Contact Contact Type"] = tk.StringVar(value="Architect")
+        for i, types in enumerate(contact_type):
+            button = tk.Radiobutton(contact_frame, text=types, variable=main_contact["Main Contact Contact Type"],
+                                                               value=types, font=self.app.font)
             if i < 3:
                 button.grid(row=1, column=i + 1, sticky="W")
             elif i < 6:
@@ -176,11 +161,23 @@ class ProjectInfoPage(tk.Frame):
                         "Main Contact Number", "Main Contact Email"]
         for i, info in enumerate(contact_info):
             tk.Label(contact_frame,width=30, text=info, font=self.app.font).grid(row=i+5, column=0)
-            self.app.data["Main Contact"][info] = tk.StringVar(name=info)
-            tk.Entry(contact_frame, width=70, font=self.app.font, fg="blue", textvariable=self.app.data["Main Contact"][info]).grid(row=i+5, column=1, columnspan=3)
+            main_contact[info] = tk.StringVar(name=info)
+            tk.Entry(contact_frame, width=70, font=self.app.font, fg="blue", textvariable=main_contact[info]).grid(row=i+5, column=1, columnspan=3)
+    def building_features_part(self):
+        n_building = self.app.configuration["n_building"]
+        building_features = {
+            "Details": [
+                {
+                    "Levels": tk.StringVar(),
+                    "Space/room Description": tk.StringVar(),
+                    "Area/m^2": tk.StringVar()
+                } for _ in range(n_building)
+            ],
+            "Feature/Notes": tk.StringVar(),
+            "Total Area": tk.StringVar(value="0")
+        }
+        self.data["Project Info"]["Building Features"] = building_features
 
-
-    def building_features_frame(self):
 
         build_feature_frame = tk.LabelFrame(self.main_context_frame, text="Building Features", font=self.app.font)
         build_feature_frame.grid(row=4, column=0)
@@ -189,37 +186,31 @@ class ProjectInfoPage(tk.Frame):
         tk.Label(build_feature_frame, text="Space/room Description", font=self.app.font).grid(row=0, column=1)
         tk.Label(build_feature_frame, text="Area/m^2", font=self.app.font).grid(row=0, column=2)
 
-        n_building = 5
-        self.app.data["Building Features"] = {
-            "Levels": [],
-            "Space/room Description": [],
-            "Area/m^2": [],
-            "Feature/Notes":tk.StringVar(name="Feature/Notes"),
-            "Total Area":tk.StringVar(name="Total area", value="0")
-        }
-
 
         tk.Label(build_feature_frame, text="Feature/Notes",width=30, font=self.app.font).grid(row=n_building + 1, column=0)
-        tk.Entry(build_feature_frame, width=72, font=self.app.font, fg="blue", textvariable=self.app.data["Building Features"]["Feature/Notes"]).grid(row=n_building+1, column=1, columnspan=2)
+        tk.Entry(build_feature_frame, width=72, font=self.app.font, fg="blue", textvariable=building_features["Feature/Notes"]).grid(row=n_building+1, column=1, columnspan=2)
         tk.Label(build_feature_frame, text="Total", font=self.app.font).grid(row=n_building + 2, column=0)
-        self.total_area_label = tk.Label(build_feature_frame, textvariable=self.app.data["Building Features"]["Total Area"],font=self.app.font)
-        self.total_area_label.grid(row=n_building + 2, column=2)
+        tk.Label(build_feature_frame, textvariable=building_features["Total Area"],font=self.app.font).grid(row=n_building + 2, column=2)
 
 
 
         for i in range(n_building):
-            self.app.data["Building Features"]["Levels"].append(tk.StringVar(name=f"Levels {str(i)}"))
-            self.app.data["Building Features"]["Space/room Description"].append(tk.StringVar(name=f"Space/room Description {str(i)} "))
-            self.app.data["Building Features"]["Area/m^2"].append(tk.StringVar(name=f"Area/m^2 {str(i)} "))
+            tk.Entry(build_feature_frame, width=34, font=self.app.font, fg="blue", textvariable=building_features["Details"][i]["Levels"]).grid(row=i + 1, column=0, padx=(10, 0))
+            tk.Entry(build_feature_frame, width=50, font=self.app.font, fg="blue", textvariable=building_features["Details"][i]["Space/room Description"]).grid(row=i + 1, column=1)
+            tk.Entry(build_feature_frame, width=20, font=self.app.font, fg="blue", textvariable=building_features["Details"][i]["Area/m^2"]).grid(row=i + 1, column=2, padx=(0, 10))
 
-            tk.Entry(build_feature_frame, width=34, font=self.app.font, fg="blue", textvariable=self.app.data["Building Features"]["Levels"][i]).grid(row=i + 1, column=0, padx=(10, 0))
-            tk.Entry(build_feature_frame, width=50, font=self.app.font, fg="blue", textvariable=self.app.data["Building Features"]["Space/room Description"][i]).grid(row=i + 1, column=1)
-            tk.Entry(build_feature_frame, width=20, font=self.app.font, fg="blue", textvariable=self.app.data["Building Features"]["Area/m^2"][i]).grid(row=i + 1, column=2, padx=(0, 10))
+            building_features["Details"][i]["Area/m^2"].trace("w", self._update_area)
+    def drawing_number_part(self):
+        n_drawing = self.app.configuration["n_drawing"]
+        drawing = [
+            {
+                "Drawing Number": tk.StringVar(),
+                "Drawing Name": tk.StringVar(),
+                "Revision": tk.StringVar()
+            } for _ in range(n_drawing)
+        ]
+        self.app.data["Drawing"] = drawing
 
-            self.app.data["Building Features"]["Area/m^2"][i].trace("w", lambda a, b, c:self.app._sum_update(self.app.data["Building Features"]["Area/m^2"],  self.app.data["Building Features"]["Total Area"]))
-
-
-    def drawing_number_frame(self):
         drawing_number_frame = tk.LabelFrame(self.main_context_frame, text="Drawing Number", font=self.app.font)
         drawing_number_frame.grid(row=5, column=0, padx=20)
 
@@ -227,44 +218,43 @@ class ProjectInfoPage(tk.Frame):
         tk.Label(drawing_number_frame, text="Drawing Name", font=self.app.font).grid(row=0, column=1)
         tk.Label(drawing_number_frame, text="Revision", font=self.app.font).grid(row=0, column=2)
 
-        n_drawing = 5
-        drawing_dic = dict()
-
-        self.app.data["Drawing"] = {
-            "Drawing Number": [],
-            "Drawing Name": [],
-            "Revision": []
-        }
-
         for i in range(n_drawing):
-            self.app.data["Drawing"]["Drawing Number"].append(tk.StringVar(name=f"Drawing Number {str(i)}"))
-            self.app.data["Drawing"]["Drawing Name"].append(tk.StringVar(name=f"Drawing Name {str(i)}"))
-            self.app.data["Drawing"]["Revision"].append(tk.StringVar(name=f"Drawing Revision {str(i)}"))
+            tk.Entry(drawing_number_frame, width=34, font=self.app.font, fg="blue", textvariable=drawing[i]["Drawing Number"]).grid(row=i + 1, column=0, padx=(10, 0))
+            tk.Entry(drawing_number_frame, width=50, font=self.app.font, fg="blue", textvariable=drawing[i]["Drawing Name"]).grid(row=i + 1, column=1)
+            tk.Entry(drawing_number_frame, width=20, font=self.app.font, fg="blue", textvariable=drawing[i]["Revision"]).grid(row=i + 1, column=2, padx=(0, 10))
 
-
-            tk.Entry(drawing_number_frame, width=34, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Drawing Number"][i]).grid(row=i + 1, column=0, padx=(10, 0))
-            tk.Entry(drawing_number_frame, width=50, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Drawing Name"][i]).grid(row=i + 1, column=1)
-            tk.Entry(drawing_number_frame, width=20, font=self.app.font, fg="blue", textvariable=self.app.data["Drawing"]["Revision"][i]).grid(row=i + 1, column=2, padx=(0, 10))
-
-        self.app.data["Drawing"]["Drawing Number"][0].set("M-000")
-        self.app.data["Drawing"]["Drawing Name"][0].set("Cover Sheet")
-        self.app.data["Drawing"]["Revision"][0].set("A")
-        self.app.data["Drawing"]["Drawing Number"][1].set("M-001")
-        self.app.data["Drawing"]["Drawing Name"][1].set("Tenancy Level Layout")
-        self.app.data["Drawing"]["Revision"][1].set("A")
-        self.app.data["Drawing"]["Drawing Number"][2].set("M-002")
-        self.app.data["Drawing"]["Drawing Name"][2].set("Roof Layout")
-        self.app.data["Drawing"]["Revision"][2].set("A")
-
+        drawing[0]["Drawing Number"].set("M-000")
+        drawing[0]["Drawing Name"].set("Cover Sheet")
+        drawing[0]["Revision"].set("A")
+        drawing[1]["Drawing Number"].set("M-001")
+        drawing[1]["Drawing Name"].set("Tenancy Level Layout")
+        drawing[1]["Revision"].set("A")
+        drawing[2]["Drawing Number"].set("M-002")
+        drawing[2]["Drawing Name"].set("Roof Layout")
+        drawing[2]["Revision"].set("A")
     def _update_quotation_number(self, *args):
-        if self.app.data["Project Information"]["Quotation Number"].get() != "":
+        if self.data["Project Info"]["Project"]["Quotation Number"].get() != "":
             return
         current_quotation = [dir for dir in os.listdir(".") if dir.startswith(date.today().strftime("%y%m000")[1:])][-1]
         quotation_letter = current_quotation[6:8][0]+chr(ord(current_quotation[6:8][1])+1) if current_quotation[6:8][1] != "Z" else chr(ord(current_quotation[6:8][0])+1)+"A"
-        self.app.data["Project Information"]["Quotation Number"].set(current_quotation[:6]+quotation_letter)
-
-
-
+        self.data["Project Info"]["Project"]["Quotation Number"].set(current_quotation[:6]+quotation_letter)
+    def _update_area(self, *args):
+        area_sum = 0
+        for drawing in self.data["Project Info"]["Building Features"]["Details"]:
+            if len(drawing["Area/m^2"].get())==0:
+                continue
+            try:
+                area_sum+=float(drawing["Area/m^2"].get())
+            except ValueError:
+                self.data["Project Info"]["Building Features"]["Total Area"].set("Error")
+                return
+        self.data["Project Info"]["Building Features"]["Total Area"].set(str(round(area_sum, 2)))
+    def _update_service(self, var,*args):
+        self.app.fee_proposal_page.update_scope(var)
+        self.app.fee_proposal_page.update_fee(var)
+        # self.app.invoice_page.update_fee(var)
+        # self.app.invoice_page.update_bill(var)
+        # self.app.invoice_page.update_profit(var)
     def _on_mousewheel(self, event):
         self.main_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
