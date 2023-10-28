@@ -37,32 +37,32 @@ class FileSelectDialog(simpledialog.Dialog):
     def cancel(self):
         self.destroy()
 
-class ConfirmDialog(simpledialog.Dialog):
-    def __init__(self, master, title=None):
-        super().__init__(master, title)
-        self.exit=False
-
-    def body(self, master):
-        tk.Label(self, text="Do you want to save the change before exist this program").pack()
-
-    def buttonbox(self):
-        self.ok_button = tk.Button(self, text="Ok", width=20, command=self.ok_pressed)
-        self.ok_button.pack(side=tk.LEFT)
-        self.no_button = tk.Button(self, text="NO", width=20, command=self.no_pressed)
-        self.no_button.pack(side=tk.RIGHT)
-        self.bind("<Return>", lambda event:self.ok_pressed())
-        self.bind("<Escape>", lambda event:self.no_pressed())
-
-    def ok_pressed(self):
-        # data_json = convert_to_json(self.master.data)
-        # if not os.path.exists(os.getcwd()+"\\database\\"+data_json["Project Info"]["Project"]["Quotation Number"]):
-        #     os.mkdir(os.getcwd()+"\\database\\"+data_json["Project Info"]["Project"]["Quotation Number"])
-        # with open(os.getcwd()+"\\database\\"+data_json["Project Info"]["Project"]["Quotation Number"]+"\\data.json", "w") as f:
-        #     json_object = json.dumps(data_json, indent=4)
-        #     f.write(json_object)
-        self.master.destroy()
-    def no_pressed(self):
-        self.master.destroy()
+# class ConfirmDialog(simpledialog.Dialog):
+#     def __init__(self, master, title=None):
+#         super().__init__(master, title)
+#         self.exit=False
+#
+#     def body(self, master):
+#         tk.Label(self, text="Do you want to save the change before exist this program").pack()
+#
+#     def buttonbox(self):
+#         self.ok_button = tk.Button(self, text="Ok", width=20, command=self.ok_pressed)
+#         self.ok_button.pack(side=tk.LEFT)
+#         self.no_button = tk.Button(self, text="NO", width=20, command=self.no_pressed)
+#         self.no_button.pack(side=tk.RIGHT)
+#         self.bind("<Return>", lambda event:self.ok_pressed())
+#         self.bind("<Escape>", lambda event:self.no_pressed())
+#
+#     def ok_pressed(self):
+#         # data_json = convert_to_json(self.master.data)
+#         # if not os.path.exists(os.getcwd()+"\\database\\"+data_json["Project Info"]["Project"]["Quotation Number"]):
+#         #     os.mkdir(os.getcwd()+"\\database\\"+data_json["Project Info"]["Project"]["Quotation Number"])
+#         # with open(os.getcwd()+"\\database\\"+data_json["Project Info"]["Project"]["Quotation Number"]+"\\data.json", "w") as f:
+#         #     json_object = json.dumps(data_json, indent=4)
+#         #     f.write(json_object)
+#         self.master.destroy()
+#     def no_pressed(self):
+#         self.master.destroy()
 
 # class KillProcessDialog(simpledialog.Dialog):
 #     def __init__(self, master, title=None):

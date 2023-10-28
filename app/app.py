@@ -1,17 +1,12 @@
 import tkinter as tk
-from tkinter import messagebox
 
 from project_info_page import ProjectInfoPage
 from fee_proposal_page import FeeProposalPage
 from invoice_and_bill import InvoicePage
-from utility import rename_new_folder, excel_print_pdf, email, convert_to_json, convert_to_data
+from utility import rename_new_folder, excel_print_pdf, email, save
 from asana_function import update_asana
-from custom_dialog import ConfirmDialog
 
-import psycopg2
 from PIL import Image, ImageTk
-import os
-import json
 
 class App(tk.Tk):
     def __init__(self, CONFIUGRATION, *args, **kwargs):
@@ -27,14 +22,6 @@ class App(tk.Tk):
         # the main frame
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=1)
-
-        self.conn = psycopg2.connect(
-            host="127.0.0.1",
-            database="postgres",
-            user="postgres",
-            password="Zero0929"
-        )
-        self.cur = self.conn.cursor()
 
         self.utility_frame()
         self.change_page_frame()
@@ -59,7 +46,7 @@ class App(tk.Tk):
                                  font=self.conf["font"])
         print_button.grid(row=0, column=1)
 
-        email_button = tk.Button(utility_frame, text="Email to Client", command=lambda: email(self.data), bg="brown",
+        email_button = tk.Button(utility_frame, text="Email to Client", command=lambda: email(self), bg="brown",
                                  fg="white", font=self.conf["font"])
         email_button.grid(row=0, column=2)
 
@@ -142,41 +129,10 @@ class App(tk.Tk):
                 return
         total.set(str(round(sum, 2)))
 
-    def save(self):
-        data_json = convert_to_json(self.data)
-        msg_box = True
-        if not self.data["State"]["Folder Renamed"].get():
-            messagebox.showerror("Error", "You should rename the folder before you save it to the database")
-            return
-        elif not os.path.exists(
-                os.getcwd() + "\\database\\" + data_json["Project Info"]["Project"]["Quotation Number"]):
-            os.mkdir(os.getcwd() + "\\database\\" + data_json["Project Info"]["Project"]["Quotation Number"])
-        elif os.path.exists(os.getcwd() + "\\database\\" + data_json["Project Info"]["Project"][
-            "Quotation Number"] + "\\data.json"):
-            msg_box = messagebox.askyesno("Overwrite", "Existing Data found, do you want to overwrite")
-        if msg_box:
-            with open(os.getcwd() + "\\database\\" + data_json["Project Info"]["Project"][
-                "Quotation Number"] + "\\data.json", "w") as f:
-                json_object = json.dumps(data_json, indent=4)
-                f.write(json_object)
-            messagebox.showinfo("Saved", "It is saved into database")
-
-    def load(self):
-        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
-            messagebox.showerror("Error", "Please enter a Quotation Number before you load")
-            return
-        elif not os.path.exists(
-                os.getcwd() + "\\database\\" + self.data["Project Info"]["Project"]["Quotation Number"].get()):
-            messagebox.showerror("Error", "The quotation number doesn't exist")
-            return
-        f = open(os.getcwd() + "\\database\\" + self.data["Project Info"]["Project"][
-            "Quotation Number"].get() + "\\data.json")
-        data_json = json.load(f)
-        convert_to_data(data_json, self.data)
-
     def confirm(self):
         if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
             self.destroy()
         else:
-            ConfirmDialog(self)
+            save(self)
+            self.destroy()
 

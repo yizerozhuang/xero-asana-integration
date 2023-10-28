@@ -1,0 +1,93 @@
+{
+    "Mechanical Service": {
+        "Extend": [
+            "Map out existing mechanical components",
+            "Air conditioning design to the tenancy area as required",
+            "Grilles coordination with RCP",
+            "Natural ventilation design",
+            "Other ventilation as required to AS 1668.2",
+            "1 off site visit"
+        ],
+        "Exclusion": [
+            "Assessment of compliance with environmental noise regulations",
+            "Preparation of Performance Solutions",
+            "Odour management report, please liaise with us cost of the report from us"
+        ],
+        "Deliverables": [
+            "Full set of mechanical drawings in PDF format",
+            "Mechanical design certificate",
+            "Equipment selection"
+        ]
+    },
+    "Electrical Service": {
+        "Extend": [
+            "Maximum demand calculation as per AS3000",
+            "Electrical single line diagram",
+            "Main switchboard and mains",
+            "Distribution boards and submains(if required)",
+            "General power distribution and Comms",
+            "Electrical and lighting systems",
+            "Power supply to mechanical, fire and hydraulic services including full services coordination",
+            "Internal lighting",
+            "General indoor/external lighting and lighting control",
+            "Exit signages and Emergency egress lighting as per AS2293-2005"
+        ],
+        "Exclusion": [
+            "ASP Level 3 design",
+            "Liaison with Supply Authority/Level 3 ASP for power supply to site",
+            "NBN pathway design and submission",
+            "UPS, Stand-by and emergency generator systems",
+            "Landscape and council metered public lighting",
+            "Solar PV system",
+            "Home Automation Systems"
+        ],
+        "Deliverables": [
+            "Full set of Electrical drawings in PDF format",
+            "Electrical design certificate",
+            "Coordination with related services"
+        ]
+    },
+    "Hydraulic Service": {
+        "Extend": [
+            "Sanitary waste and drainage services",
+            "Trade waste service",
+            "Hot and cold water supply and distribution services",
+            "Natural gas supply and distribution services",
+            "Fire Hydrant and Hose Reel supply and distribution services",
+            "Mechanical plant condensate waste",
+            "1 off site visit"
+        ],
+        "Exclusion": [
+            "Authority fees and charges such as Section 73, Section 188 etc",
+            "Site underground service survey service",
+            "Fire protection services (including fire sprinkler system, fire alarm system or any dry fire systems)",
+            "Civil and stormwater services",
+            "Landscape irrigation o water features associated plant and distribution systems"
+        ],
+        "Deliverables": [
+            "Full set of hydraulic drawings in PDF format",
+            "Hydraulic design certificate",
+            "Coordination with related services"
+        ]
+    },
+    "Fire Service": {
+        "Extend": [
+            "The emergency lights, exit and directional signage",
+            "Automatic Detection and warning System",
+            "Portable Fire Extinguisher System",
+            "Sprinkler system",
+            "Liaise with relevant authorities and consultants",
+            "1 off site visit"
+        ],
+        "Exclusion": [
+            "BCA DTS requirement compliance",
+            "Any applicable fire engineering report by C10 Fire Engineer",
+            "Section 74B certificate based on base building fire safety measures"
+        ],
+        "Deliverables": [
+            "Full set of Fire Protection Service drawings in PDF format",
+            "Fire Protection Service design certificate",
+            "Coordination with related services"
+        ]
+    }
+}

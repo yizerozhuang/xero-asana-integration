@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from datetime import date
-import gc
+import os
+import json
 
 class FeeProposalPage(tk.Frame):
     def __init__(self, parent, app):
@@ -71,7 +72,6 @@ class FeeProposalPage(tk.Frame):
         self.scope_frame = tk.LabelFrame(self.main_context_frame, text="Scope of Work", font=self.conf["font"])
         self.scope_frame.pack(fill=tk.BOTH, expand=1, padx=20)
         self.scope_frames = {}
-        self.app.conn.autocommit = True
         self.append_context = dict()
     def fee_part(self):
         fee = {
@@ -103,6 +103,8 @@ class FeeProposalPage(tk.Frame):
         scope = self.data["Fee Proposal"]["Scope"]
         service = var["Service"].get()
         include = var["Include"].get()
+        scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
+        scope_data = json.load(open(scope_dir))
         if include:
             self.scope_frames[service] = tk.LabelFrame(self.scope_frame, text=service, font=self.conf["font"])
             self.scope_frames[service].pack()
@@ -113,28 +115,27 @@ class FeeProposalPage(tk.Frame):
             for i, extra in enumerate(extra_list):
                 extra_frame = tk.LabelFrame(self.scope_frames[service], text=extra, font=self.conf["font"])
                 extra_frame.pack()
-                self.app.cur.execute(
-                    f"""
-                        SELECT *
-                        FROM service_scope
-                        WHERE service_type='{service}'
-                        AND extra ='{extra}'
-                    """
-                )
-                items = self.app.cur.fetchall()
+                # self.app.cur.execute(
+                #     f"""
+                #         SELECT *
+                #         FROM service_scope
+                #         WHERE service_type='{service}'
+                #         AND extra ='{extra}'
+                #     """
+                # )
+                # items = self.app.cur.fetchall()
+                items = scope_data[service][extra]
                 color_list = ["white", "azure"]
                 scope[service][extra] = []
-
                 for j, context in enumerate(items):
                     scope[service][extra].append(
                         {
                             "Include":tk.BooleanVar(value=True),
-                            "Item":tk.StringVar(value=context[2])
+                            "Item":tk.StringVar(value=context)
                         }
                     )
                     tk.Checkbutton(extra_frame, variable=scope[service][extra][j]["Include"]).grid(row=j, column=0)
                     tk.Entry(extra_frame, width=100, textvariable=scope[service][extra][j]["Item"], font=self.conf["font"], bg=color_list[j%2]).grid(row=j, column=1)
-                # garbage collection
 
                 self.append_context[service][extra] = {
                     "Item":tk.StringVar(),
@@ -168,7 +169,7 @@ class FeeProposalPage(tk.Frame):
                         "Fee":tk.StringVar(),
                         "in.GST":tk.StringVar(),
                         "Invoice": tk.StringVar(value="None")
-                    } for _ in range(self.app.configuration["n_items"])
+                    } for _ in range(self.conf["n_items"])
                 ]
             }
 
@@ -209,7 +210,7 @@ class FeeProposalPage(tk.Frame):
                                                width=17,
                                                textvariable=details[service]["Content"][i]["in.GST"],
                                                font=self.conf["font"])
-                        } for i in range(self.app.configuration["n_items"])
+                        } for i in range(self.conf["n_items"])
                     ],
                     "Service":tk.Label(self.fee_frames[service], width=36, text=service + " Total", font=self.conf["font"]),
                     "Fee": tk.Label(self.fee_frames[service],
@@ -235,7 +236,7 @@ class FeeProposalPage(tk.Frame):
             details[service]["in.GST"].trace("w", lambda a, b, c: self.app._sum_update(
                 [value["in.GST"] for value in details.values()], self.data["Fee Proposal"]["Fee Details"]["in.GST"]))
 
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 func = lambda i: lambda a, b, c: self.app._ist_update(details[service]["Content"][i]["Fee"],
                                                                   details[service]["Content"][i]["in.GST"])
                 details[service]["Content"][i]["Fee"].trace("w", func(i))
@@ -251,10 +252,11 @@ class FeeProposalPage(tk.Frame):
 
 
     def _append_value(self, service, extra):
+        scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
         scope = self.app.data["Fee Proposal"]["Scope"]
         item = self.append_context[service][extra]["Item"].get()
         if item == "":
-            tk.messagebox.showwarning(title="Error", message="You cant need to enter some context")
+            messagebox.showwarning(title="Error", message="You cant need to enter some context")
             return
         scope[service][extra].append(
             {
@@ -276,12 +278,17 @@ class FeeProposalPage(tk.Frame):
                        variable=scope[service][extra][-1]["Include"]).grid(row=len(scope[service][extra]), column=0)
 
         if self.append_context[service][extra]["Add"].get():
-            self.app.cur.execute(f"""
-                INSERT INTO service_scope(service_type, extra, context)
-                VALUES 
-                ('{service}','{extra}','{item}')
-                """)
-            self.app.conn.commit()
+            scope_data = json.load(open(scope_dir))
+            scope_data[service][extra].append(item)
+            with open(scope_dir, "w") as f:
+                json_object = json.dumps(scope_data, indent=4)
+                f.write(json_object)
+            # self.app.cur.execute(f"""
+            #     INSERT INTO service_scope(service_type, extra, context)
+            #     VALUES
+            #     ('{service}','{extra}','{item}')
+            #     """)
+            # self.app.conn.commit()
         self.append_context[service][extra]["Item"].set("")
         self.append_context[service][extra]["Add"].set(False)
     def reset_scrollregion(self, event):
@@ -289,23 +296,23 @@ class FeeProposalPage(tk.Frame):
     def _expand(self, service):
         details = self.data["Fee Proposal"]["Fee Details"]["Details"]
         if details[service]["Expand"].get():
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 self.fee_dic[service]["Content"]["Details"][i]["Service"].grid(row=i+1, column=1)
                 self.fee_dic[service]["Content"]["Details"][i]["Fee"].grid(row=i+1, column=2)
                 self.fee_dic[service]["Content"]["Details"][i]["in.GST"].grid(row=i+1, column=3)
 
             details[service]["Fee"].set("")
 
-            self.fee_dic[service]["Content"]["Service"].grid(row=self.app.configuration["n_items"] + 1,
+            self.fee_dic[service]["Content"]["Service"].grid(row=self.conf["n_items"] + 1,
                                                              column=1)
-            self.fee_dic[service]["Content"]["Fee"].grid(row=self.app.configuration["n_items"] + 1,
+            self.fee_dic[service]["Content"]["Fee"].grid(row=self.conf["n_items"] + 1,
                                                          column=2)
-            self.fee_dic[service]["Content"]["in.GST"].grid(row=self.app.configuration["n_items"] + 1,
+            self.fee_dic[service]["Content"]["in.GST"].grid(row=self.conf["n_items"] + 1,
                                                             column=3)
             self.fee_dic[service]["Fee"].grid_forget()
             self.fee_dic[service]["in.GST"].grid_forget()
         else:
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 details[service]["Content"][i]["Service"].set("")
                 details[service]["Content"][i]["Fee"].set("")
                 self.fee_dic[service]["Content"]["Details"][i]["Service"].grid_forget()

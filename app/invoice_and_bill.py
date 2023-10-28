@@ -197,7 +197,7 @@ class InvoicePage(tk.Frame):
                                                        width=8,
                                                        variable=self.app.data["Fee Proposal"]["Fee Details"]["Details"][service]["Content"][i]["Invoice"],
                                                        value="INV" + str(j + 1)) for j in range(6)]
-                        } for i in range(self.app.configuration["n_items"])
+                        } for i in range(self.conf["n_items"])
                     ],
                     "Service": tk.Label(self.invoice_frames[service], width=35, text=service + " Total",
                                         font=self.conf["font"]),
@@ -222,7 +222,7 @@ class InvoicePage(tk.Frame):
 
             details[service]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
             details[service]["Invoice"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 details[service]["Content"][i]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
                 details[service]["Content"][i]["Invoice"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
         else:
@@ -249,7 +249,7 @@ class InvoicePage(tk.Frame):
                         "Fee":tk.StringVar(),
                         "in.GST":tk.StringVar(),
                         "Invoice": tk.StringVar(value="None")
-                    } for _ in range(self.app.configuration["n_items"])
+                    } for _ in range(self.conf["n_items"])
                 ]
             }
             self.bill_dic[service] = {
@@ -289,7 +289,7 @@ class InvoicePage(tk.Frame):
                                                        width=8,
                                                        variable=bill_fee[service]["Content"][i]["Invoice"],
                                                        value="INV" + str(j + 1)) for j in range(6)]
-                        } for i in range(self.app.configuration["n_items"])
+                        } for i in range(self.conf["n_items"])
                     ],
                     "Service": tk.Label(self.bill_frames[service], width=35, text=service + " Total",
                                         font=self.conf["font"]),
@@ -314,7 +314,7 @@ class InvoicePage(tk.Frame):
 
             bill_fee[service]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(bill_fee, bill_details))
             bill_fee[service]["Invoice"].trace("w", lambda a, b, c: self.update_invoice_sum(bill_fee, bill_details))
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 bill_fee[service]["Content"][i]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(bill_fee, bill_details))
                 bill_fee[service]["Content"][i]["Invoice"].trace("w", lambda a, b, c: self.update_invoice_sum(bill_fee, bill_details))
             # #trace function start
@@ -463,22 +463,22 @@ class InvoicePage(tk.Frame):
     def _expand_invoice(self, service):
         details = self.data["Fee Proposal"]["Fee Details"]["Details"]
         if details[service]["Expand"].get():
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 self.invoice_dic[service]["Content"]["Details"][i]["Service"].grid(row=2*i+2, column=0)
                 self.invoice_dic[service]["Content"]["Details"][i]["Fee"].grid(row=2*i+2, column=1)
                 self.invoice_dic[service]["Content"]["Details"][i]["in.GST"].grid(row=2*i+3, column=1)
                 for j in range(6):
                     self.invoice_dic[service]["Content"]["Details"][i]["Invoice"][j].grid(row=2*i+2, column=2+j, rowspan=2, padx=(2, 0))
-            self.invoice_dic[service]["Content"]["Service"].grid(row=2*(self.app.configuration["n_items"]+1)+1, column=0)
-            self.invoice_dic[service]["Content"]["Fee"].grid(row=2*(self.app.configuration["n_items"]+1)+1, column=1)
-            self.invoice_dic[service]["Content"]["in.GST"].grid(row=2*(self.app.configuration["n_items"]+1)+2, column=1)
+            self.invoice_dic[service]["Content"]["Service"].grid(row=2*(self.conf["n_items"]+1)+1, column=0)
+            self.invoice_dic[service]["Content"]["Fee"].grid(row=2*(self.conf["n_items"]+1)+1, column=1)
+            self.invoice_dic[service]["Content"]["in.GST"].grid(row=2*(self.conf["n_items"]+1)+2, column=1)
 
             self.invoice_dic[service]["Fee"].grid_forget()
             self.invoice_dic[service]["in.GST"].grid_forget()
             for i in range(6):
                 self.invoice_dic[service]["Invoice"][i].grid_forget()
         else:
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 self.invoice_dic[service]["Content"]["Details"][i]["Service"].grid_forget()
                 self.invoice_dic[service]["Content"]["Details"][i]["Fee"].grid_forget()
                 self.invoice_dic[service]["Content"]["Details"][i]["in.GST"].grid_forget()
@@ -501,15 +501,15 @@ class InvoicePage(tk.Frame):
         bill_fee = self.data["Invoice Page"]["Bill Details"]
         if details[service]["Expand"].get():
             bill_fee[service]["Expand"].set(True)
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 self.bill_dic[service]["Content"]["Details"][i]["Service"].grid(row=2*i+2, column=0, pady=(2, 0))
                 self.bill_dic[service]["Content"]["Details"][i]["Fee"].grid(row=2*i+2, column=1)
                 self.bill_dic[service]["Content"]["Details"][i]["in.GST"].grid(row=2*i+3, column=1)
                 for j in range(6):
                     self.bill_dic[service]["Content"]["Details"][i]["Invoice"][j].grid(row=2*i+2, column=2+j, rowspan=2, padx=(2, 0))
-            self.bill_dic[service]["Content"]["Service"].grid(row=2*(self.app.configuration["n_items"]+1)+1, column=0)
-            self.bill_dic[service]["Content"]["Fee"].grid(row=2*(self.app.configuration["n_items"]+1)+1, column=1)
-            self.bill_dic[service]["Content"]["in.GST"].grid(row=2*(self.app.configuration["n_items"]+1)+2, column=1)
+            self.bill_dic[service]["Content"]["Service"].grid(row=2*(self.conf["n_items"]+1)+1, column=0)
+            self.bill_dic[service]["Content"]["Fee"].grid(row=2*(self.conf["n_items"]+1)+1, column=1)
+            self.bill_dic[service]["Content"]["in.GST"].grid(row=2*(self.conf["n_items"]+1)+2, column=1)
 
             self.bill_dic[service]["Service"].config(state=tk.DISABLED)
             self.bill_dic[service]["Fee"].grid_forget()
@@ -518,7 +518,7 @@ class InvoicePage(tk.Frame):
                 self.bill_dic[service]["Invoice"][i].grid_forget()
         else:
             bill_fee[service]["Expand"].set(False)
-            for i in range(self.app.configuration["n_items"]):
+            for i in range(self.conf["n_items"]):
                 self.bill_dic[service]["Content"]["Details"][i]["Service"].grid_forget()
                 self.bill_dic[service]["Content"]["Details"][i]["Fee"].grid_forget()
                 self.bill_dic[service]["Content"]["Details"][i]["in.GST"].grid_forget()
@@ -606,7 +606,7 @@ class InvoicePage(tk.Frame):
         }
         for service in details.values():
             if service["Expand"].get():
-                for i in range(self.app.configuration["n_items"]):
+                for i in range(self.conf["n_items"]):
                     if service["Content"][i]["Invoice"].get() != "None":
                         index = service["Content"][i]["Invoice"].get()
                         try:
