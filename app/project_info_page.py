@@ -1,9 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import os
-from datetime import date
 
 from utility import load
+
+import os
+from datetime import date
+import webbrowser
 
 
 class ProjectInfoPage(tk.Frame):
@@ -50,6 +52,10 @@ class ProjectInfoPage(tk.Frame):
             column=1,
             columnspan=3,
             padx=(0, 10))
+        # self.project_list = ttk.Combobox(project_frame,font=self.conf["font"], width=85, textvariable=project["Project Name"])
+        # self.project_list.grid(row=0, column=1, columnspan=3, padx=(0, 10))
+        # project["Project Name"].trace("w", self._search_projects)
+
         tk.Label(project_frame, width=30, text="Quotation Number", font=self.conf["font"]).grid(row=1, column=0,
                                                                                                 padx=(10, 0))
         project["Quotation Number"] = tk.StringVar()
@@ -59,16 +65,19 @@ class ProjectInfoPage(tk.Frame):
                                                                 columnspan=2,
                                                                 padx=(0, 10))
         save_load_frame = tk.Frame(project_frame)
-        save_load_frame.grid(row=1, column=3)
+        save_load_frame.grid(row=1, column=3, rowspan=2)
 
-        tk.Button(save_load_frame, width=8, text="Load", command=self.load_data, bg="brown", fg="white",
+        tk.Button(save_load_frame, width=8, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
+        tk.Button(save_load_frame, width=10, height=2, text="Open Folder", command=self.open_folder, bg="brown",
+                  fg="white",
+                  font=self.conf["font"]).grid(row=0, column=1)
 
         tk.Label(project_frame, width=30, text="Project Number", font=self.conf["font"]).grid(row=2, column=0,
                                                                                               padx=(10, 0))
         project["Project Number"] = tk.StringVar()
-        tk.Entry(project_frame, width=70, font=self.conf["font"], fg="blue",
-                 textvariable=project["Project Number"]).grid(row=2, column=1, columnspan=3, padx=(0, 10))
+        tk.Entry(project_frame, width=46, font=self.conf["font"], fg="blue",
+                 textvariable=project["Project Number"]).grid(row=2, column=1, columnspan=2, padx=(0, 10))
 
         project["Project Name"].trace("w", self._update_quotation_number)
 
@@ -293,6 +302,19 @@ class ProjectInfoPage(tk.Frame):
             messagebox.showerror("Error", f"The quotation {quotation_number} number doesn't exist")
         else:
             load(self)
+
+    def open_folder(self):
+        quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
+        folder_name = self.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+                      self.data["Project Info"]["Project"]["Project Name"].get()
+        folder_path = os.path.join(self.conf["working_dir"], folder_name)
+        if len(quotation_number) == 0:
+            messagebox.showerror("Error", "Please enter a Quotation Number before you load")
+        elif not os.path.exists(folder_path):
+            messagebox.showerror("Error", f"Python cannot find the folder {folder_path}")
+        else:
+            webbrowser.open(folder_path)
+
     def _update_quotation_number(self, *args):
         if self.data["Project Info"]["Project"]["Quotation Number"].get() != "":
             return
@@ -306,6 +328,9 @@ class ProjectInfoPage(tk.Frame):
                 current_quotation[6:8][1] != "Z" else chr(ord(current_quotation[6:8][0]) + 1) + "A"
             current_quotation = current_quotation[:6] + quotation_letter
         self.data["Project Info"]["Project"]["Quotation Number"].set(current_quotation)
+
+    def _search_projects(self):
+        os.listdir(self.conf["working_dir"])
 
     def _update_area(self, *args):
         area_sum = 0

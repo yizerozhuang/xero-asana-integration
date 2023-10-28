@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter import messagebox
 
 from custom_dialog import FileSelectDialog
@@ -13,15 +14,8 @@ def save(app):
     data = app.data
     data_json = convert_to_json(data)
     database_dir = os.path.join(app.conf["database_dir"], data_json["Project Info"]["Project"]["Quotation Number"])
-    # write = True
-    # if not data["State"]["Folder Renamed"].get():
-    #     messagebox.showerror("Error", "You should rename the folder before you save it to the database")
-    #     return
     if not os.path.exists(database_dir):
         os.mkdir(database_dir)
-    # else:
-    #     write = messagebox.askyesno("Overwrite", "Existing Data found, do you want to overwrite")
-    # if write:
     with open(os.path.join(database_dir, "data.json"), "w") as f:
         json_object = json.dumps(data_json, indent=4)
         f.write(json_object)
@@ -46,7 +40,16 @@ def convert_to_json(obj):
 
 def convert_to_data(json, data):
     if isinstance(json, list):
-        [convert_to_data(json[i], data[i]) for i in range(len(json))]
+        try:
+            [convert_to_data(json[i], data[i]) for i in range(len(json))]
+        except IndexError:
+            data.append(
+                {
+                    "Include": tk.BooleanVar(value=True),
+                    "Item": tk.StringVar()
+                }
+            )
+            convert_to_data(json[len(data)-1], data[-1])
     elif isinstance(json, dict):
         [convert_to_data(json[k], data[k]) for k in json.keys()]
     else:
