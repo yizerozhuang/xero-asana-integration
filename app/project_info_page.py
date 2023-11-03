@@ -1,10 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from utility import load
+from utility import load, get_quotation_number, save, reset, config_state, config_log
 
 import os
-from datetime import date
 import webbrowser
 
 
@@ -30,11 +29,21 @@ class ProjectInfoPage(tk.Frame):
         self.main_context_frame = tk.LabelFrame(self.main_canvas, text="Main Context")
         self.main_canvas.create_window((0, 0), window=self.main_context_frame, anchor="center")
 
+        self.main_log_frame = tk.LabelFrame(self.main_canvas, text="Log")
+        self.main_canvas.create_window((800, -600), window=self.main_log_frame, anchor="nw")
+
+        self.log_part()
         self.project_part()
         self.client_part()
         self.main_contact_part()
         self.building_features_part()
         self.drawing_number_part()
+        self.finish_part()
+
+    def log_part(self):
+        log_frame = tk.Frame(self.main_log_frame)
+        log_frame.pack()
+        tk.Label(log_frame, textvariable=self.app.log_text, font=self.conf["font"], justify=tk.LEFT).pack(anchor="w")
 
     def project_part(self):
         # User_information frame
@@ -42,7 +51,7 @@ class ProjectInfoPage(tk.Frame):
         self.data["Project Info"]["Project"] = project
 
         project_frame = tk.LabelFrame(self.main_context_frame, text="Project Information", font=self.conf["font"])
-        project_frame.grid(row=1, column=0, padx=20)
+        project_frame.pack(padx=20)
 
         tk.Label(project_frame, width=30, text="Project Name", font=self.conf["font"]).grid(row=0, column=0,
                                                                                             padx=(10, 0))
@@ -59,7 +68,7 @@ class ProjectInfoPage(tk.Frame):
         tk.Label(project_frame, width=30, text="Quotation Number", font=self.conf["font"]).grid(row=1, column=0,
                                                                                                 padx=(10, 0))
         project["Quotation Number"] = tk.StringVar()
-        tk.Entry(project_frame, width=46, font=self.conf["font"], fg="blue",
+        tk.Entry(project_frame, width=34, font=self.conf["font"], fg="blue",
                  textvariable=project["Quotation Number"]).grid(row=1,
                                                                 column=1,
                                                                 columnspan=2,
@@ -67,21 +76,33 @@ class ProjectInfoPage(tk.Frame):
         save_load_frame = tk.Frame(project_frame)
         save_load_frame.grid(row=1, column=3, rowspan=2)
 
-        tk.Button(save_load_frame, width=8, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
+        tk.Button(save_load_frame, width=10, height=2, text="Reset", command=lambda: reset(self.app), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
+        tk.Button(save_load_frame, width=8, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=0, column=1)
         tk.Button(save_load_frame, width=10, height=2, text="Open Folder", command=self.open_folder, bg="brown",
                   fg="white",
-                  font=self.conf["font"]).grid(row=0, column=1)
+                  font=self.conf["font"]).grid(row=0, column=2)
+
 
         tk.Label(project_frame, width=30, text="Project Number", font=self.conf["font"]).grid(row=2, column=0,
                                                                                               padx=(10, 0))
         project["Project Number"] = tk.StringVar()
-        tk.Entry(project_frame, width=46, font=self.conf["font"], fg="blue",
+        tk.Entry(project_frame, width=34, font=self.conf["font"], fg="blue",
                  textvariable=project["Project Number"]).grid(row=2, column=1, columnspan=2, padx=(0, 10))
 
         project["Project Name"].trace("w", self._update_quotation_number)
 
-        tk.Label(project_frame, text="Project Type", font=self.conf["font"]).grid(row=3, column=0)
+        tk.Label(project_frame, width=30, text="Shop Name", font=self.conf["font"]).grid(row=3, column=0, padx=(10, 0),
+                                                                                         pady=(0, 10))
+        project["Shop Name"] = tk.StringVar()
+        tk.Entry(project_frame, width=70, font=self.conf["font"], fg="blue", textvariable=project["Shop Name"]).grid(
+            row=3,
+            column=1,
+            columnspan=3,
+            padx=(0, 10), pady=(0, 10))
+
+        tk.Label(project_frame, text="Project Type", font=self.conf["font"]).grid(row=4, column=0)
         project_types = ["Restaurant", "Office", "Commercial", "Group house", "Apartment", "Mixed-use complex",
                          "School", "Others"]
 
@@ -91,17 +112,17 @@ class ProjectInfoPage(tk.Frame):
             button = tk.Radiobutton(project_frame, text=types, variable=project["Project Type"], value=types,
                                     font=self.conf["font"])
             if i < 3:
-                button.grid(row=3, column=i + 1, sticky="W")
+                button.grid(row=4, column=i + 1, sticky="W")
             elif i < 6:
-                button.grid(row=4, column=i - 2, sticky="W")
+                button.grid(row=5, column=i - 2, sticky="W")
             else:
-                button.grid(row=5, column=i - 5, sticky="W")
+                button.grid(row=6, column=i - 5, sticky="W")
 
         service_types = ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service",
                          "Kitchen Ventilation", "Mech Review",
                          "Installation", "Miscellaneous"]
 
-        tk.Label(project_frame, width=30, text="Service Type", font=self.conf["font"]).grid(row=6, column=0)
+        tk.Label(project_frame, width=30, text="Service Type", font=self.conf["font"]).grid(row=7, column=0)
 
         project["Service Type"] = []
         for i, service in enumerate(service_types):
@@ -114,11 +135,11 @@ class ProjectInfoPage(tk.Frame):
             button = tk.Checkbutton(project_frame, text=service, variable=project["Service Type"][i]["Include"],
                                     font=self.conf["font"])
             if i < 3:
-                button.grid(row=6, column=i + 1, sticky="W")
+                button.grid(row=7, column=i + 1, sticky="W")
             elif i < 6:
-                button.grid(row=7, column=i - 2, sticky="W")
+                button.grid(row=8, column=i - 2, sticky="W")
             else:
-                button.grid(row=8, column=i - 5, sticky="W")
+                button.grid(row=9, column=i - 5, sticky="W")
 
         project["Service Type"][0]["Include"].trace("w",
                                                     lambda a, b, c: self._update_service(project["Service Type"][0]))
@@ -129,14 +150,6 @@ class ProjectInfoPage(tk.Frame):
         project["Service Type"][4]["Include"].trace("w",
                                                     lambda a, b, c: self._update_service(project["Service Type"][4]))
 
-        tk.Label(project_frame, width=30, text="Shop Name", font=self.conf["font"]).grid(row=9, column=0, padx=(10, 0),
-                                                                                         pady=(0, 10))
-        project["Shop Name"] = tk.StringVar()
-        tk.Entry(project_frame, width=70, font=self.conf["font"], fg="blue", textvariable=project["Shop Name"]).grid(
-            row=9,
-            column=1,
-            columnspan=3,
-            padx=(0, 10), pady=(0, 10))
 
     def client_part(self):
         client = dict()
@@ -144,7 +157,7 @@ class ProjectInfoPage(tk.Frame):
 
         # client frame
         client_frame = tk.LabelFrame(self.main_context_frame, text="Client", font=self.conf["font"])
-        client_frame.grid(row=2, column=0)
+        client_frame.pack(padx=20)
 
         tk.Label(client_frame, width=30, text="Client Full Name", font=self.conf["font"]).grid(row=0, column=0,
                                                                                                padx=(10, 0))
@@ -182,7 +195,7 @@ class ProjectInfoPage(tk.Frame):
         self.data["Project Info"]["Main Contact"] = main_contact
 
         contact_frame = tk.LabelFrame(self.main_context_frame, text="Main Contact", font=self.conf["font"])
-        contact_frame.grid(row=3, column=0, padx=20)
+        contact_frame.pack(padx=20)
 
         tk.Label(contact_frame, width=30, text="Main Contact Full Name", font=self.conf["font"]).grid(row=0, column=0,
                                                                                                       padx=(10, 0))
@@ -233,7 +246,7 @@ class ProjectInfoPage(tk.Frame):
         self.data["Project Info"]["Building Features"] = building_features
 
         build_feature_frame = tk.LabelFrame(self.main_context_frame, text="Building Features", font=self.conf["font"])
-        build_feature_frame.grid(row=4, column=0)
+        build_feature_frame.pack(padx=20)
 
         tk.Label(build_feature_frame, text="Levels", font=self.conf["font"]).grid(row=0, column=0)
         tk.Label(build_feature_frame, text="Space/room Description", font=self.conf["font"]).grid(row=0, column=1)
@@ -269,7 +282,7 @@ class ProjectInfoPage(tk.Frame):
         self.app.data["Project Info"]["Drawing"] = drawing
 
         drawing_number_frame = tk.LabelFrame(self.main_context_frame, text="Drawing Number", font=self.conf["font"])
-        drawing_number_frame.grid(row=5, column=0, padx=20)
+        drawing_number_frame.pack(padx=20)
 
         tk.Label(drawing_number_frame, text="Drawing Number", font=self.conf["font"]).grid(row=0, column=0)
         tk.Label(drawing_number_frame, text="Drawing Name", font=self.conf["font"]).grid(row=0, column=1)
@@ -293,6 +306,15 @@ class ProjectInfoPage(tk.Frame):
         drawing[2]["Drawing Name"].set("Roof Layout")
         drawing[2]["Revision"].set("A")
 
+    def finish_part(self):
+        finish_frame = tk.LabelFrame(self.main_context_frame)
+        finish_frame.pack(padx=20, side=tk.RIGHT)
+
+        tk.Button(finish_frame, text="Quote Unsuccessful", command=self.quote_unsuccessful,
+                  bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
+        tk.Button(finish_frame, text="Finish Set Up", command=self.finish_set_up,
+                  bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
+
     def load_data(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
         database_dir = os.path.join(self.conf["database_dir"], quotation_number)
@@ -301,7 +323,7 @@ class ProjectInfoPage(tk.Frame):
         elif not os.path.exists(database_dir):
             messagebox.showerror("Error", f"The quotation {quotation_number} number doesn't exist")
         else:
-            load(self)
+            load(self.app)
 
     def open_folder(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
@@ -315,19 +337,28 @@ class ProjectInfoPage(tk.Frame):
         else:
             webbrowser.open(folder_path)
 
+    def finish_set_up(self):
+        self.data["State"]["Generate Proposal"].set(True)
+        save(self.app)
+        config_state(self.app)
+        config_log(self.app)
+        self.app.log.log_finish_set_up(self.app)
+        messagebox.showinfo("Set Up", f"Project {self.data['Project Info']['Project']['Quotation Number'].get()} set up successful")
+
+
+    def quote_unsuccessful(self):
+        quote = messagebox.askyesno("Warming", "Are you sure you want to put this project in Quote Unsuccessful")
+        if quote:
+            self.data["State"]["Quote Unsuccessful"].set(True)
+            save(self.app)
+            config_state(self.app)
+            self.app.log.log_unsuccessful(self.app)
+            config_log(self)
+
     def _update_quotation_number(self, *args):
         if self.data["Project Info"]["Project"]["Quotation Number"].get() != "":
             return
-        current_quotation_list = [dir for dir in os.listdir("..") if
-                                  dir.startswith(date.today().strftime("%y%m000")[1:])]
-        if len(current_quotation_list) == 0:
-            current_quotation = date.today().strftime("%y%m000")[1:] + "AA"
-        else:
-            current_quotation = current_quotation_list[-1]
-            quotation_letter = current_quotation[6:8][0] + chr(ord(current_quotation[6:8][1]) + 1) if \
-                current_quotation[6:8][1] != "Z" else chr(ord(current_quotation[6:8][0]) + 1) + "A"
-            current_quotation = current_quotation[:6] + quotation_letter
-        self.data["Project Info"]["Project"]["Quotation Number"].set(current_quotation)
+        self.data["Project Info"]["Project"]["Quotation Number"].set(get_quotation_number())
 
     def _search_projects(self):
         os.listdir(self.conf["working_dir"])
@@ -347,7 +378,7 @@ class ProjectInfoPage(tk.Frame):
     def _update_service(self, var, *args):
         self.app.fee_proposal_page.update_scope(var)
         self.app.fee_proposal_page.update_fee(var)
-        self.app.invoice_page.update_fee(var)
+        self.app.financial_panel_page.update_fee(var)
         # self.app.invoice_page.update_bill(var)
         # self.app.invoice_page.update_profit(var)
 

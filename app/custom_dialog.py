@@ -1,12 +1,10 @@
 import tkinter as tk
 from tkinter import simpledialog, ttk, messagebox
 
-# from utility import convert_to_json
+# from main import CONFIGURATION
 
 import os
 import shutil
-import json
-
 
 class FileSelectDialog(simpledialog.Dialog):
     def __init__(self, app, dir_list, title=None):
@@ -36,6 +34,8 @@ class FileSelectDialog(simpledialog.Dialog):
         messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {self.rename_dir.get()} to {folder_path}")
     def cancel(self):
         self.destroy()
+#
+# class message_box(tk.messagebox)
 
 # class ConfirmDialog(simpledialog.Dialog):
 #     def __init__(self, master, title=None):

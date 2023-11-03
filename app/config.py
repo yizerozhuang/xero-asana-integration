@@ -1,3 +1,15 @@
-CLIENT_ID = "876EFEC2F1AC4729812A3B39152A2DD3"
-CLIENT_SECRET = "jtohs0Oqcoezje-bjYn8n9KaTa9hCm2taATzBIbS3RpaXmOl"
-STATE = "12345"
+import os
+from pathlib import Path
+
+
+CONFIGURATION = {
+    "font": ("Calibri", 11),
+    "tax rates": 1.1,
+    "n_building": 5,
+    "n_drawing": 5,
+    "n_items": 3,
+    "n_invoice": 6,
+    "working_dir": str(Path(os.getcwd()).parent)
+}
+CONFIGURATION["database_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "database")
+CONFIGURATION["resource_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "resource")

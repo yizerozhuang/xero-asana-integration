@@ -1,4 +1,3 @@
-import tkinter as tk
 from tkinter import messagebox
 
 from custom_dialog import FileSelectDialog
@@ -8,7 +7,19 @@ import shutil
 import os
 import webbrowser
 import json
+from datetime import date, datetime
+import psutil
 
+
+def reset(app):
+    database_dir = os.path.join(app.conf["database_dir"], app.data["Project Info"]["Project"]["Quotation Number"].get())
+    if os.path.exists(database_dir) and len(app.data["Project Info"]["Project"]["Quotation Number"].get())!=0:
+        save(app)
+    database_dir = os.path.join(app.conf["database_dir"], "data_template.json")
+    template_json = json.load(open(database_dir))
+    template_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
+    convert_to_data(template_json, app.data)
+    app.log_text.set("")
 
 def save(app):
     data = app.data
@@ -19,7 +30,8 @@ def save(app):
     with open(os.path.join(database_dir, "data.json"), "w") as f:
         json_object = json.dumps(data_json, indent=4)
         f.write(json_object)
-    # messagebox.showinfo("Saved", "It is saved into database")
+    # current_folder_name = [folder for folder in os.listdir(app.conf["working_dir"]) if folder.startswith(data["Project Info"]["Project"]["Quotation Number"])][0]
+    # print(current_folder_name)
 
 
 def load(app):
@@ -27,6 +39,7 @@ def load(app):
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get().upper())
     data_json = json.load(open(os.path.join(database_dir, "data.json")))
     convert_to_data(data_json, data)
+    config_log(app)
 
 
 def convert_to_json(obj):
@@ -40,22 +53,94 @@ def convert_to_json(obj):
 
 def convert_to_data(json, data):
     if isinstance(json, list):
-        try:
-            [convert_to_data(json[i], data[i]) for i in range(len(json))]
-        except IndexError:
-            data.append(
-                {
-                    "Include": tk.BooleanVar(value=True),
-                    "Item": tk.StringVar()
-                }
-            )
-            convert_to_data(json[len(data)-1], data[-1])
+        # try:
+        [convert_to_data(json[i], data[i]) for i in range(len(data))]
+        # except IndexError:
+        #     data.append(
+        #         {
+        #             "Include": tk.BooleanVar(value=True),
+        #             "Item": tk.StringVar()
+        #         }
+        #     )
+        #     convert_to_data(json[len(data)-1], data[-1])
     elif isinstance(json, dict):
         [convert_to_data(json[k], data[k]) for k in json.keys()]
     else:
         if data.get() != json:
             data.set(json)
 
+# def read_log(app):
+#     database_dir = os.path.join(app.conf["database_dir"], app["Project Info"]["Project"]["Quotation Number"], "log")
+#     data =
+
+def config_state(app):
+    database_dir = app.conf["database_dir"]
+    res = {
+        "Set Up": [],
+        "Generate Proposal": [],
+        "Email to Client": [],
+        "Fee Accepted": []
+    }
+    current_project = [folder for folder in os.listdir(database_dir) if not folder.endswith(".json")]
+    for quotation in current_project:
+        data = json.load(open(os.path.join(database_dir, quotation, "data.json")))
+        _classify_state(data, res)
+    app.state_dict["Set Up"].config(value=res["Set Up"])
+    app.state_dict["Generate Proposal"].config(value=res["Generate Proposal"])
+    app.state_dict["Email to Client"].config(value=res["Email to Client"])
+    res["Fee Accepted"].sort(key=lambda x: int(x.split("-")[1]))
+    app.state_dict["Fee Accepted"].config(value=res["Fee Accepted"])
+
+def _classify_state(data, res):
+    if data["State"]["Done"] or data["State"]["Quote Unsuccessful"]:
+        return
+    elif data["State"]["Fee Accepted"]:
+        _classify_fee(res, data)
+    elif data["State"]["Email to Client"]:
+        res["Email to Client"].append(data["Project Info"]["Project"]["Quotation Number"])
+    elif data["State"]["Generate Proposal"]:
+        res["Generate Proposal"].append(data["Project Info"]["Project"]["Quotation Number"])
+    elif data["State"]["Set Up"]:
+        res["Set Up"].append(data["Project Info"]["Project"]["Quotation Number"]+"-"+data["Project Info"]["Project"]["Project Name"])
+
+def _classify_fee(res, data):
+    append_list = [data["Project Info"]["Project"]["Quotation Number"],
+                   str((datetime.today() - datetime.strptime(data["Email"]["Fee Proposal"], "%Y-%m-%d")).days)]
+    if len(data["Email"]["First Chase"]) != 0:
+        append_list.append(
+            str((datetime.today() - datetime.strptime(data["Email"]["First Chase"], "%Y-%m-%d")).days)
+        )
+    if len(data["Email"]["Second Chase"]) != 0:
+        append_list.append(
+            str((datetime.today() - datetime.strptime(data["Email"]["Second Chase"], "%Y-%m-%d")).days)
+        )
+    if len(data["Email"]["Third Chase"]) != 0:
+        append_list.append(
+            str((datetime.today() - datetime.strptime(data["Email"]["Third Chase"], "%Y-%m-%d")).days)
+        )
+    res["Fee Accepted"].append("-".join(append_list))
+    # elif len(data["Email"]["Second Chase"]) == 0:
+    #     data_json["Email"]["Second Chase"] = datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d")
+    # elif len(data["Email"]["Third Chase"]) == 0:
+    #     data_json["Email"]["Third Chase"] = datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d")
+
+def config_log(app):
+    database_dir = app.conf["database_dir"]
+    log_file = os.path.join(database_dir, app.data["Project Info"]["Project"]["Quotation Number"].get(), "data.log")
+    log = open(log_file).readlines()
+    log.reverse()
+    app.log_text.set("".join(log))
+def get_quotation_number():
+    current_quotation_list = [dir for dir in os.listdir("..") if
+                              dir.startswith(date.today().strftime("%y%m000")[1:])]
+    if len(current_quotation_list) == 0:
+        current_quotation = date.today().strftime("%y%m000")[1:] + "AA"
+    else:
+        current_quotation = current_quotation_list[-1]
+        quotation_letter = current_quotation[6:8][0] + chr(ord(current_quotation[6:8][1]) + 1) if \
+            current_quotation[6:8][1] != "Z" else chr(ord(current_quotation[6:8][0]) + 1) + "A"
+        current_quotation = current_quotation[:6] + quotation_letter
+    return current_quotation
 
 def remove_none(obj):
     if isinstance(obj, list):
@@ -68,8 +153,8 @@ def remove_none(obj):
 
 def rename_new_folder(app):
     data = app.data
-    folder_name = app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                  app.data["Project Info"]["Project"]["Project Name"].get()
+    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+                  data["Project Info"]["Project"]["Project Name"].get()
     folder_path = os.path.join(app.conf["working_dir"], folder_name)
     dir_list = os.listdir(app.conf["working_dir"])
     rename_list = [dir for dir in dir_list if dir.startswith("New folder")]
@@ -87,13 +172,13 @@ def rename_new_folder(app):
         if len(rename_list) == 1:
             mode = 0o666
             os.mkdir(folder_path, mode)
-            shutil.move(os.path.join(app.conf["working_dir"], rename_list[0]), folder_path + "\\External")
+            shutil.move(os.path.join(app.conf["working_dir"], rename_list[0]), os.path.join(folder_path, "External"))
             os.mkdir(os.path.join(folder_path, "Photos"), mode)
             os.mkdir(os.path.join(folder_path, "Plot"), mode)
             os.mkdir(os.path.join(folder_path, "SS"), mode)
             shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Preliminary Calculation v2.5.xlsx"),
                             os.path.join(folder_path, "Preliminary Calculation v2.5.xlsx"))
-            app.data["State"]["Folder Renamed"].set(True)
+            app.data["State"]["Set Up"].set(True)
             messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {rename_list[0]} to {folder_name}")
         else:
             FileSelectDialog(app, rename_list, "Multiple new folders found, please select one")
@@ -101,7 +186,28 @@ def rename_new_folder(app):
         messagebox.showerror("Error", f"Cannot create a file when that file already exists:{folder_name}")
         return
     save(app)
+    config_state(app)
+    app.log.log_rename_folder(app)
+    config_log(app)
 
+
+def create_new_folder(folder_name, conf):
+    folder_path = os.path.join(conf["working_dir"], folder_name)
+    os.mkdir(folder_path)
+    os.mkdir(os.path.join(folder_path, "External"))
+    os.mkdir(os.path.join(folder_path, "Photos"))
+    os.mkdir(os.path.join(folder_path, "Plot"))
+    os.mkdir(os.path.join(folder_path, "SS"))
+    shutil.copyfile(os.path.join(conf["resource_dir"], "xlsx", "Preliminary Calculation v2.5.xlsx"),
+                    os.path.join(folder_path, "Preliminary Calculation v2.5.xlsx"))
+
+
+def _check_fee(app):
+    data = app.data
+    for service_fee in data["Invoices"]["Details"].values():
+        if len(service_fee["Fee"].get())==0:
+            return False
+    return True
 
 def excel_print_pdf(app, *args):
     data = app.data
@@ -115,14 +221,17 @@ def excel_print_pdf(app, *args):
     services = [key for key in data["Fee Proposal"]["Scope"].keys()]
     page = len(services) // 2 + 1
 
-    if not data["State"]["Folder Renamed"].get():
-        messagebox.showerror("Error", "Please rename a folder first")
+    if not data["State"]["Generate Proposal"].get():
+        messagebox.showerror("Error", "Please finish Set Up first")
         return
     elif not os.path.exists(folder_path):
         messagebox.showerror("Error", "Can't find the folder, please rename first")
         return
     elif len(services) == 0:
         messagebox.showerror("Error", "Please at least select 1 service")
+        return
+    elif not _check_fee(app):
+        messagebox.showerror("Error", "Please go to fee proposal page to complete fee first")
         return
     elif not page in [1, 2, 3]:
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
@@ -148,6 +257,9 @@ def excel_print_pdf(app, *args):
     excel.DisplayAlerts = False
     excel.EnableEvents = False
     try:
+        # for proc in psutil.process_iter():
+        #     if proc.name() == "excel.exe" or proc.name() == "EXCEL.EXE":
+        #         proc.kill()
         shutil.copyfile(os.path.join(resource_dir, "xlsx", f"fee_proposal_template_{page}.xlsx"),
                         os.path.join(folder_path, "fee proposal.xlsx"))
         work_book = excel.Workbooks.Open(os.path.join(folder_path, "fee proposal.xlsx"))
@@ -201,16 +313,16 @@ def excel_print_pdf(app, *args):
             work_sheets.Cells(cur_row + i, 1).Value = "•"
             work_sheets.Cells(cur_row + i, 2).Value = project
         cur_row += 34
-        for i, service in enumerate(data['Fee Proposal']['Fee Details']["Details"].values()):
+        for i, service in enumerate(data["Invoices"]["Details"].values()):
             work_sheets.Cells(cur_row + i, 2).Value = service["Service"].get() + " design and documentation"
             work_sheets.Cells(cur_row + i, 6).Value = service["Fee"].get()
             work_sheets.Cells(cur_row + i, 7).Value = service["in.GST"].get()
         if page == 3:
-            work_sheets.Cells(cur_row + 4, 6).Value = data['Fee Proposal']['Fee Details']["Fee"].get()
-            work_sheets.Cells(cur_row + 4, 7).Value = data['Fee Proposal']['Fee Details']["in.GST"].get()
+            work_sheets.Cells(cur_row + 4, 6).Value = data["Invoices"]["Fee"].get()
+            work_sheets.Cells(cur_row + 4, 7).Value = data["Invoices"]["in.GST"].get()
         else:
-            work_sheets.Cells(cur_row + 3, 6).Value = data['Fee Proposal']['Fee Details']["Fee"].get()
-            work_sheets.Cells(cur_row + 3, 7).Value = data['Fee Proposal']['Fee Details']["in.GST"].get()
+            work_sheets.Cells(cur_row + 3, 6).Value = data["Invoices"]["Fee"].get()
+            work_sheets.Cells(cur_row + 3, 7).Value = data["Invoices"]["in.GST"].get()
         cur_row += 17
         work_sheets.Cells(cur_row, 2).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
         work_sheets.ExportAsFixedFormat(0, os.path.join(folder_path, "Plot", pdf_name))
@@ -228,9 +340,16 @@ def excel_print_pdf(app, *args):
         messagebox.showerror("Error", "Please close the preview or file before you use it")
     except FileNotFoundError:
         messagebox.showerror("Error", "Please Contact Administer, the app cant find the file")
+    except Exception as e:
+        messagebox.showerror("Error", "Please Contact Administer, some error occurs")
+        print(e)
     else:
-        app.data["State"]["Fee Proposal Issued"].set(True)
+        app.data["State"]["Email to Client"].set(True)
         webbrowser.open(os.path.join(folder_path, "Plot", pdf_name))
+        save(app)
+        config_state(app)
+        app.log.log_fee_proposal(app)
+        config_log(app)
     finally:
         excel.ScreenUpdating = True
         excel.DisplayAlerts = True
@@ -243,7 +362,7 @@ def email(app, *args):
     folder_path = os.path.join(app.conf["working_dir"], folder_name)
     pdf_name = f'Mechanical Fee Proposal revision {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
 
-    if not data["State"]["Fee Proposal Issued"].get():
+    if not data["State"]["Email to Client"].get():
         messagebox.showerror("Error", "Please Generate a pdf first")
         return
     elif not os.path.exists(os.path.join(folder_path, "Plot", pdf_name)):
@@ -253,13 +372,13 @@ def email(app, *args):
     ol = win32client.Dispatch("Outlook.Application")
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
-    newmail.Subject = "Mechanical Fee Proposal - " + data["Project Info"]["Project"]["Project Name"].get() + " revision " + data["Fee Proposal"]["Reference"]["Revision"].get()
+    newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-Mechanical Fee Proposal - {data["Project Info"]["Project"]["Project Name"].get()} revision {data["Fee Proposal"]["Reference"]["Revision"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au"
+    newmail.CC = "felix@pcen.com.au; bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
     message = f"""
-    Dear {data["Project Info"]["Client"]["Client Full Name"].get()},<br>
+    Dear {data["Project Info"]["Main Contact"]["Main Contact Full Name"].get()},<br>
 
     I hope this email finds you well. Please find the attached fee proposal to this email.<br>
 
@@ -272,4 +391,34 @@ def email(app, *args):
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
     newmail.Attachments.Add(os.path.join(folder_path, "Plot", pdf_name))
     newmail.Display()
-    data["State"]["Email to Client"].set(True)
+    save(app)
+    config_state(app)
+
+def chase(app, *args):
+    data = app.data
+
+    if not data["State"]["Fee Accepted"].get():
+        messagebox.showerror("Error", "Please Sent the fee proposal to client first")
+        return
+
+    ol = win32client.Dispatch("Outlook.Application")
+    olmailitem = 0x0
+    newmail = ol.CreateItem(olmailitem)
+    newmail.Subject = f'Re: {data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
+    newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
+    newmail.CC = "felix@pcen.com.au; bridge@pcen.com.au"
+    newmail.GetInspector()
+    index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
+    message = f"""
+    Hi {data["Project Info"]["Main Contact"]["Main Contact Full Name"].get()},<br>
+    I wanted to circle back regarding the fee proposal we sent on {data["Email"]["Fee Proposal"].get()}. Do you have any questions or concerns? We're looking forward to working with you and hearing your feedback. <br>
+
+    Thank you for considering our proposal, and we anticipate your response soon.<br>
+
+    Cheers ,<br>
+    """
+    newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
+    newmail.Display()
+    save(app)
+    config_state(app)
+

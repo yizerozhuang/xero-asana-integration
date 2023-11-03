@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from tkinterdnd2 import DND_FILES
 
-from TkinterDnD2 import DND_FILES
+from utility import save, config_log, config_state
 
 import os
 import shutil
@@ -33,7 +34,7 @@ class FeeAcceptedPage(tk.Frame):
     def main_part(self):
         self.data["Log Files"] = {
             "Type": tk.StringVar(value="None"),
-            "External Files":tk.StringVar()
+            "External Files": tk.StringVar()
         }
         self.data["Log Files"]["External Files"].trace("w", self.update_list_box)
         drop_file_frame = tk.Frame(self.main_context_frame)
@@ -71,23 +72,43 @@ class FeeAcceptedPage(tk.Frame):
         self.drop_file_listbox.insert(0, self.data["Log Files"]["External Files"].get().split("/")[-1])
     def upload_files(self):
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
-
-        rewrite = True
-        if not self.data["State"]["Email to Client"].get():
+        if not self.data["State"]["Fee Accepted"].get():
             messagebox.showerror("Error", "You cant update the fee acceptance before you email to client")
             return
-        elif len(self.data["Log Files"]["External Files"].get()) == 0:
-            messagebox.showerror("Error", "Please upload a file before uploading")
+        elif self.data["Log Files"]["Type"].get() == "None":
+            messagebox.showerror("Error", "Please select a type first")
             return
-        elif os.path.exists(os.path.join(database_dir, "Fee accepted Files")):
-            rewrite = messagebox.askyesno("Overwrite", "Previous Fee Accepted found, do you want to overwrite")
 
-        if rewrite:
-            if os.path.exists(os.path.join(database_dir, "Fee accepted Files")):
-                shutil.rmtree(os.path.join(database_dir, "Fee accepted Files"))
-            os.mkdir(os.path.join(database_dir, "Fee accepted Files"))
-            shutil.copy(self.data["Log Files"]["External Files"].get(), os.path.join(database_dir, "Fee accepted Files"))
 
+
+        if self.data["Log Files"]["Type"].get() == "Oral":
+            yes = messagebox.askyesno("Warning", "Are you sure Client give the oral approve and move this project into design state?")
+            if yes:
+                self.data["State"]["Done"].set(True)
+                save(self.app)
+                self.app.log.log_fee_accept_file(self.app)
+                config_log(self.app)
+                config_state(self.app)
+
+        else:
+            rewrite = True
+            if len(self.data["Log Files"]["External Files"].get()) == 0:
+                messagebox.showerror("Error", "Please upload a file before uploading")
+                return
+            elif os.path.exists(os.path.join(database_dir, "Fee accepted Files")):
+                rewrite = messagebox.askyesno("Overwrite", "Previous Fee Accepted found, do you want to overwrite")
+
+            if rewrite:
+                if os.path.exists(os.path.join(database_dir, "Fee accepted Files")):
+                    shutil.rmtree(os.path.join(database_dir, "Fee accepted Files"))
+                os.mkdir(os.path.join(database_dir, "Fee accepted Files"))
+                shutil.copy(self.data["Log Files"]["External Files"].get(), os.path.join(database_dir, "Fee accepted Files"))
+                messagebox.showinfo("Update", "Successfully log the file into database")
+                self.data["State"]["Done"].set(True)
+                save(self.app)
+                self.app.log.log_fee_accept_file(self.app)
+                config_log(self.app)
+                config_state(self.app)
 
     def _on_mousewheel(self, event):
         self.main_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")

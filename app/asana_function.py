@@ -1,6 +1,6 @@
 import asana
 from tkinter import messagebox
-from utility import remove_none
+from utility import remove_none, config_log
 
 asana_configuration = asana.Configuration()
 asana_configuration.access_token = '1/1205463377927189:4825d7e7924a9dd8dd44a9c826e45455'
@@ -22,7 +22,8 @@ def name_id_map(api_list):
         res[item["name"]] = item["gid"]
     return res
 
-def update_asana(data, *args):
+def update_asana(app, *args):
+    data = app.data
     if not data["State"]["Email to Client"].get():
         messagebox.showerror("Error", "Please sent to client first")
         return
@@ -77,4 +78,5 @@ def update_asana(data, *args):
     )
     task_api_instance.update_task(task_gid=task_id, body=body)
     messagebox.showinfo("Success", "Update/Create Asana Success")
-    data["State"]["Update Asana"].set(True)
+    app.log.log_update_asana(app)
+    config_log(app)

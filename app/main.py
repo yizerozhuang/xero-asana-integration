@@ -1,20 +1,14 @@
 from app import App
-import os
-from pathlib import Path
+from login import Login
 
+from config import CONFIGURATION
 
-CONFIGURATION = {
-    "font": ("Calibri", 11),
-    "tax rates": 1.1,
-    "n_building": 5,
-    "n_drawing": 5,
-    "n_items": 3,
-    "n_invoice": 6,
-    "working_dir": str(Path(os.getcwd()).parent)
-}
-CONFIGURATION["database_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "database")
-CONFIGURATION["resource_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "resource")
 
 if __name__ == '__main__':
-    app = App(CONFIGURATION)
-    app.mainloop()
+    user = [""]
+    login = [False]
+    login_app = Login(CONFIGURATION, user, login)
+    login_app.mainloop()
+    if login[0]:
+        app = App(CONFIGURATION, user[0])
+        app.mainloop()
