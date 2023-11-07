@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from tkinterdnd2 import DND_FILES
 
 from utility import save, config_log, config_state
+from asana_function import update_asana
 
 import os
 import shutil
@@ -42,8 +43,8 @@ class FeeAcceptedPage(tk.Frame):
 
         select_type_frame = tk.Frame(self.main_context_frame)
         select_type_frame.pack(side=tk.LEFT)
-        tk.Radiobutton(select_type_frame, variable=self.data["Log Files"]["Type"], value="Oral",
-                       text="Oral").grid(row=0, column=0, columnspan=2, sticky="W")
+        tk.Radiobutton(select_type_frame, variable=self.data["Log Files"]["Type"], value="Verbal",
+                       text="Verbal").grid(row=0, column=0, columnspan=2, sticky="W")
         tk.Radiobutton(select_type_frame, variable=self.data["Log Files"]["Type"], value="Email",
                        text="Email").grid(row=1, column=0, columnspan=2, sticky="W")
         tk.Radiobutton(select_type_frame, variable=self.data["Log Files"]["Type"], value="PDF",
@@ -81,8 +82,8 @@ class FeeAcceptedPage(tk.Frame):
 
 
 
-        if self.data["Log Files"]["Type"].get() == "Oral":
-            yes = messagebox.askyesno("Warning", "Are you sure Client give the oral approve and move this project into design state?")
+        if self.data["Log Files"]["Type"].get() == "Verbal":
+            yes = messagebox.askyesno("Warning", "Are you sure Client give the verbal approve and move this project into design state?")
             if yes:
                 self.data["State"]["Done"].set(True)
                 save(self.app)
@@ -103,7 +104,8 @@ class FeeAcceptedPage(tk.Frame):
                     shutil.rmtree(os.path.join(database_dir, "Fee accepted Files"))
                 os.mkdir(os.path.join(database_dir, "Fee accepted Files"))
                 shutil.copy(self.data["Log Files"]["External Files"].get(), os.path.join(database_dir, "Fee accepted Files"))
-                messagebox.showinfo("Update", "Successfully log the file into database")
+                update_asana(self.app)
+                messagebox.showinfo("Update", "Successfully log the file into database and update asana")
                 self.data["State"]["Done"].set(True)
                 save(self.app)
                 self.app.log.log_fee_accept_file(self.app)

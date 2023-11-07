@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from utility import load, get_quotation_number, save, reset, config_state, config_log
+from utility import load, get_quotation_number, save, reset, finish_setup, delete_project, config_state, config_log
 
 import os
 import webbrowser
@@ -310,10 +310,32 @@ class ProjectInfoPage(tk.Frame):
         finish_frame = tk.LabelFrame(self.main_context_frame)
         finish_frame.pack(padx=20, side=tk.RIGHT)
 
-        tk.Button(finish_frame, text="Quote Unsuccessful", command=self.quote_unsuccessful,
+        tk.Button(finish_frame, text="Delete Project", command=self._delete_project,
                   bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
-        tk.Button(finish_frame, text="Finish Set Up", command=self.finish_set_up,
+
+        self.quote_text = tk.StringVar(value="Quote Unsuccessful")
+        tk.Button(finish_frame, textvariable=self.quote_text, command=self.quote_unsuccessful,
                   bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
+
+        self.data["State"]["Quote Unsuccessful"].trace("w", self._update_quote_button_text)
+
+        tk.Button(finish_frame, text="Finish Set Up", command=self._finish_setup,
+                  bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
+
+    def _update_quote_button_text(self, *args):
+        if self.data["State"]["Quote Unsuccessful"].get():
+            self.quote_text.set("Restore")
+        else:
+            self.quote_text.set("Quote Unsuccessful")
+
+    def _delete_project(self):
+        if len(self.data["Project Info"]["Project"]["Quotation Number"].get())==0:
+            messagebox.showerror("Error", "You cant delete an empty project")
+            return
+        delete = messagebox.askretrycancel('Warming', "Are you sure you want to delete the Project? only the admin can restore after you delete the project")
+        if delete:
+            delete_project(self.app)
+            messagebox.showinfo("Deleted", f"Project {self.data['Project Info']['Project']['Quotation Number'].get()} deleted")
 
     def load_data(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
@@ -337,31 +359,38 @@ class ProjectInfoPage(tk.Frame):
         else:
             webbrowser.open(folder_path)
 
-    def finish_set_up(self):
-        self.data["State"]["Generate Proposal"].set(True)
-        save(self.app)
-        config_state(self.app)
-        config_log(self.app)
-        self.app.log.log_finish_set_up(self.app)
-        messagebox.showinfo("Set Up", f"Project {self.data['Project Info']['Project']['Quotation Number'].get()} set up successful")
+    def _finish_setup(self):
+        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
+            messagebox.showerror("Error", "Please Create an quotation Number first")
+            return
 
+        finish_setup(self.app)
 
     def quote_unsuccessful(self):
-        quote = messagebox.askyesno("Warming", "Are you sure you want to put this project in Quote Unsuccessful")
-        if quote:
-            self.data["State"]["Quote Unsuccessful"].set(True)
-            save(self.app)
-            config_state(self.app)
-            self.app.log.log_unsuccessful(self.app)
-            config_log(self)
+        if self.data["State"]["Quote Unsuccessful"].get():
+            restore = messagebox.askyesno("Warming", "Are you sure you want to restore this project")
+            if restore:
+                self.data["State"]["Quote Unsuccessful"].set(False)
+                save(self.app)
+                config_state(self.app)
+                self.app.log.log_restore(self.app)
+                config_log(self.app)
+        else:
+            quote = messagebox.askyesno("Warming", "Are you sure you want to put this project in Quote Unsuccessful")
+            if quote:
+                self.data["State"]["Quote Unsuccessful"].set(True)
+                save(self.app)
+                config_state(self.app)
+                self.app.log.log_unsuccessful(self.app)
+                config_log(self.app)
 
     def _update_quotation_number(self, *args):
         if self.data["Project Info"]["Project"]["Quotation Number"].get() != "":
             return
         self.data["Project Info"]["Project"]["Quotation Number"].set(get_quotation_number())
 
-    def _search_projects(self):
-        os.listdir(self.conf["working_dir"])
+    # def _search_projects(self):
+    #     os.listdir(self.conf["working_dir"])
 
     def _update_area(self, *args):
         area_sum = 0
@@ -378,7 +407,7 @@ class ProjectInfoPage(tk.Frame):
     def _update_service(self, var, *args):
         self.app.fee_proposal_page.update_scope(var)
         self.app.fee_proposal_page.update_fee(var)
-        self.app.financial_panel_page.update_fee(var)
+        self.app.financial_panel_page.update_invoice(var)
         # self.app.invoice_page.update_bill(var)
         # self.app.invoice_page.update_profit(var)
 

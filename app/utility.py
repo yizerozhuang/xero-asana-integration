@@ -8,18 +8,20 @@ import os
 import webbrowser
 import json
 from datetime import date, datetime
+import subprocess
 import psutil
 
 
 def reset(app):
     database_dir = os.path.join(app.conf["database_dir"], app.data["Project Info"]["Project"]["Quotation Number"].get())
-    if os.path.exists(database_dir) and len(app.data["Project Info"]["Project"]["Quotation Number"].get())!=0:
+    if os.path.exists(database_dir) and len(app.data["Project Info"]["Project"]["Quotation Number"].get()) != 0:
         save(app)
     database_dir = os.path.join(app.conf["database_dir"], "data_template.json")
     template_json = json.load(open(database_dir))
     template_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
     convert_to_data(template_json, app.data)
     app.log_text.set("")
+
 
 def save(app):
     data = app.data
@@ -36,7 +38,8 @@ def save(app):
 
 def load(app):
     data = app.data
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get().upper())
+    database_dir = os.path.join(app.conf["database_dir"],
+                                data["Project Info"]["Project"]["Quotation Number"].get().upper())
     data_json = json.load(open(os.path.join(database_dir, "data.json")))
     convert_to_data(data_json, data)
     config_log(app)
@@ -69,9 +72,29 @@ def convert_to_data(json, data):
         if data.get() != json:
             data.set(json)
 
-# def read_log(app):
-#     database_dir = os.path.join(app.conf["database_dir"], app["Project Info"]["Project"]["Quotation Number"], "log")
-#     data =
+
+def finish_setup(app):
+    data = app.data
+    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"][
+        "Project Name"].get()
+    working_dir = os.path.join(app.conf["working_dir"], folder_name)
+
+    if not os.path.exists(working_dir):
+        create_folder = messagebox.askyesno("Folder not found",
+                                            f"Can not find the folder {folder_name}, do you want to create the folder")
+        if create_folder:
+            create_new_folder(folder_name, app.conf)
+        else:
+            return
+    data["State"]["Set Up"].set(True)
+    data["State"]["Generate Proposal"].set(True)
+    save(app)
+    app.log.log_finish_set_up(app)
+    config_state(app)
+    config_log(app)
+    messagebox.showinfo("Set Up",
+                        f"Project {data['Project Info']['Project']['Quotation Number'].get()} set up successful")
+
 
 def config_state(app):
     database_dir = app.conf["database_dir"]
@@ -91,6 +114,7 @@ def config_state(app):
     res["Fee Accepted"].sort(key=lambda x: int(x.split("-")[1]))
     app.state_dict["Fee Accepted"].config(value=res["Fee Accepted"])
 
+
 def _classify_state(data, res):
     if data["State"]["Done"] or data["State"]["Quote Unsuccessful"]:
         return
@@ -101,11 +125,12 @@ def _classify_state(data, res):
     elif data["State"]["Generate Proposal"]:
         res["Generate Proposal"].append(data["Project Info"]["Project"]["Quotation Number"])
     elif data["State"]["Set Up"]:
-        res["Set Up"].append(data["Project Info"]["Project"]["Quotation Number"]+"-"+data["Project Info"]["Project"]["Project Name"])
+        res["Set Up"].append(
+            data["Project Info"]["Project"]["Quotation Number"] + "-" + data["Project Info"]["Project"]["Project Name"])
+
 
 def _classify_fee(res, data):
-    append_list = [data["Project Info"]["Project"]["Quotation Number"],
-                   str((datetime.today() - datetime.strptime(data["Email"]["Fee Proposal"], "%Y-%m-%d")).days)]
+    append_list = [str((datetime.today() - datetime.strptime(data["Email"]["Fee Proposal"], "%Y-%m-%d")).days)]
     if len(data["Email"]["First Chase"]) != 0:
         append_list.append(
             str((datetime.today() - datetime.strptime(data["Email"]["First Chase"], "%Y-%m-%d")).days)
@@ -118,11 +143,33 @@ def _classify_fee(res, data):
         append_list.append(
             str((datetime.today() - datetime.strptime(data["Email"]["Third Chase"], "%Y-%m-%d")).days)
         )
+    append_list.append(data["Project Info"]["Project"]["Quotation Number"])
+    append_list.reverse()
     res["Fee Accepted"].append("-".join(append_list))
     # elif len(data["Email"]["Second Chase"]) == 0:
     #     data_json["Email"]["Second Chase"] = datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d")
     # elif len(data["Email"]["Third Chase"]) == 0:
     #     data_json["Email"]["Third Chase"] = datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d")
+
+
+def delete_project(app):
+    data = app.data
+    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"][
+        "Project Name"].get()
+    working_dir = os.path.join(app.conf["working_dir"], folder_name)
+    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    recycle_folder = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + datetime.now().strftime(
+        "%y%m%d%H%M%S")
+    recycle_bin_dir = os.path.join(app.conf["recycle_bin_dir"], recycle_folder)
+
+    os.mkdir(recycle_bin_dir)
+    if os.path.exists(database_dir):
+        app.log.log_delete(app)
+        shutil.move(database_dir, recycle_bin_dir)
+    if os.path.exists(working_dir):
+        shutil.move(working_dir, recycle_bin_dir)
+    reset(app)
+
 
 def config_log(app):
     database_dir = app.conf["database_dir"]
@@ -130,6 +177,8 @@ def config_log(app):
     log = open(log_file).readlines()
     log.reverse()
     app.log_text.set("".join(log))
+
+
 def get_quotation_number():
     current_quotation_list = [dir for dir in os.listdir("..") if
                               dir.startswith(date.today().strftime("%y%m000")[1:])]
@@ -141,6 +190,7 @@ def get_quotation_number():
             current_quotation[6:8][1] != "Z" else chr(ord(current_quotation[6:8][0]) + 1) + "A"
         current_quotation = current_quotation[:6] + quotation_letter
     return current_quotation
+
 
 def remove_none(obj):
     if isinstance(obj, list):
@@ -205,9 +255,10 @@ def create_new_folder(folder_name, conf):
 def _check_fee(app):
     data = app.data
     for service_fee in data["Invoices"]["Details"].values():
-        if len(service_fee["Fee"].get())==0:
+        if len(service_fee["Fee"].get()) == 0:
             return False
     return True
+
 
 def excel_print_pdf(app, *args):
     data = app.data
@@ -235,7 +286,8 @@ def excel_print_pdf(app, *args):
         return
     elif not page in [1, 2, 3]:
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
-    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if str(file).startswith("Mechanical Fee Proposal")]
+    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
+                str(file).startswith("Mechanical Fee Proposal")]
     if len(pdf_list) != 0:
         current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"][
@@ -252,17 +304,15 @@ def excel_print_pdf(app, *args):
             messagebox.showerror("Error", "There is no other existing fee proposal found, can only have revision 1")
             return
 
+
+    shutil.copy(os.path.join(resource_dir, "xlsx", f"fee_proposal_template_{page}.xlsx"),
+                os.path.join(database_dir, "fee proposal.xlsx"))
     excel = win32client.Dispatch("Excel.Application")
     excel.ScreenUpdating = False
     excel.DisplayAlerts = False
     excel.EnableEvents = False
+    work_book = excel.Workbooks.Open(os.path.join(database_dir, "fee proposal.xlsx"))
     try:
-        # for proc in psutil.process_iter():
-        #     if proc.name() == "excel.exe" or proc.name() == "EXCEL.EXE":
-        #         proc.kill()
-        shutil.copyfile(os.path.join(resource_dir, "xlsx", f"fee_proposal_template_{page}.xlsx"),
-                        os.path.join(folder_path, "fee proposal.xlsx"))
-        work_book = excel.Workbooks.Open(os.path.join(folder_path, "fee proposal.xlsx"))
         work_sheets = work_book.Worksheets[0]
         work_sheets.Cells(1, 2).Value = data["Project Info"]["Client"]["Client Full Name"].get()
         work_sheets.Cells(5, 2).Value = data["Project Info"]["Client"]["Client Full Name"].get()
@@ -300,14 +350,6 @@ def excel_print_pdf(app, *args):
                 cur_index += 1
         cur_row = 102 + (page - 1) * 46
         project_type = data["Project Info"]["Project"]["Project Type"].get()
-        # app.cur.execute(
-        #     f"""
-        #         SELECT *
-        #         FROM past_project
-        #         WHERE project_type='{project_type}'
-        #     """
-        # )
-        # past_project = app.cur.fetchall()
         past_projects = json.load(open(past_projects_dir, encoding="utf-8"))[project_type]
         for i, project in enumerate(past_projects):
             work_sheets.Cells(cur_row + i, 1).Value = "•"
@@ -325,60 +367,167 @@ def excel_print_pdf(app, *args):
             work_sheets.Cells(cur_row + 3, 7).Value = data["Invoices"]["in.GST"].get()
         cur_row += 17
         work_sheets.Cells(cur_row, 2).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
-        work_sheets.ExportAsFixedFormat(0, os.path.join(folder_path, "Plot", pdf_name))
+        work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, pdf_name))
         work_book.Close(True)
-        shutil.copyfile(
-            os.path.join(folder_path, "Plot", pdf_name),
-            os.path.join(database_dir, pdf_name)
-        )
-        shutil.copyfile(
-            os.path.join(folder_path, "fee proposal.xlsx"),
-            os.path.join(database_dir, "fee proposal.xlsx")
-        )
-        os.remove(os.path.join(folder_path, "fee proposal.xlsx"))
+        # shutil.copyfile(
+        #     os.path.join(folder_path, "Plot", pdf_name),
+        #     os.path.join(database_dir, pdf_name)
+        # )
+        # shutil.copyfile(
+        #     os.path.join(folder_path, "fee proposal.xlsx"),
+        #     os.path.join(database_dir, "fee proposal.xlsx")
+        # )
+        # os.remove(os.path.join(folder_path, "fee proposal.xlsx"))
     except PermissionError:
         messagebox.showerror("Error", "Please close the preview or file before you use it")
     except FileNotFoundError:
         messagebox.showerror("Error", "Please Contact Administer, the app cant find the file")
     except Exception as e:
-        messagebox.showerror("Error", "Please Contact Administer, some error occurs")
+        messagebox.showerror("Error", "Please Close the pdf before you generate a new one")
         print(e)
     else:
         app.data["State"]["Email to Client"].set(True)
-        webbrowser.open(os.path.join(folder_path, "Plot", pdf_name))
+        webbrowser.open(os.path.join(database_dir, pdf_name))
         save(app)
         config_state(app)
         app.log.log_fee_proposal(app)
         config_log(app)
-    finally:
+    try:
         excel.ScreenUpdating = True
         excel.DisplayAlerts = True
         excel.EnableEvents = True
+        work_book.Close(True)
+    except:
+        pass
+
+def excel_print_invoice(app, inv):
+    inv = f"INV{str(inv+1)}"
+    data = app.data
+    excel_name = inv + ".xlsx"
+    invoice_name = inv + ".pdf"
+    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    resource_dir = app.conf["resource_dir"]
+    # if not data["State"]["Done"].get():
+    #     messagebox.showerror("Error", "Please Submit a fee acceptance yet")
+    #     return
+    # invoice_list = [file for file in os.listdir(os.path.join(database_dir)) if
+    #             str(file).startswith("Mechanical Fee Proposal")]
+    # if len(pdf_list) != 0:
+    #     current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
+    #     if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"][
+    #         "Revision"].get() == str(int(current_revision) + 1):
+    #         msg = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
+    #         if not msg:
+    #             return
+    #     else:
+    #         messagebox.showerror("Error",
+    #                              f'Current revision is {current_revision}, you can not use revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
+    #         return
+    # else:
+    #     if not data["Fee Proposal"]["Reference"]["Revision"].get() == "1":
+    #         messagebox.showerror("Error", "There is no other existing fee proposal found, can only have revision 1")
+    #         return
+    shutil.copy(os.path.join(resource_dir, "xlsx", f"invoice_template.xlsx"),
+                os.path.join(database_dir, excel_name))
+    excel = win32client.Dispatch("Excel.Application")
+    excel.ScreenUpdating = False
+    excel.DisplayAlerts = False
+    excel.EnableEvents = False
+    work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
+    try:
+        work_sheets = work_book.Worksheets[0]
+        work_sheets.Cells(4, 1).Value = data["Project Info"]["Client"]["Client Full Name"].get()
+        work_sheets.Cells(6, 1).Value = data["Project Info"]["Client"]["Client Company"].get()
+        work_sheets.Cells(7, 1).Value = data["Project Info"]["Client"]["Client Address"].get()
+        work_sheets.Cells(4, 10).Value = datetime.today().strftime("%d-%b-%Y")
+        work_sheets.Cells(5, 10).Value = data["Financial Panel"]["Invoice Details"][inv]["Number"].get()
+        work_sheets.Cells(12, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
+        cur_row = 14
+        total_fee = 0
+        total_inGST = 0
+        for service in data["Invoices"]["Details"].values():
+            if service["Expand"].get():
+                work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
+                work_sheets.Cells(cur_row + 1, 2).Value = "Payment Instalments"
+                work_sheets.Cells(cur_row + 1, 7).Value = "Amount"
+                work_sheets.Cells(cur_row + 1, 8).Value = "This pay"
+                cur_row += 2
+                for item in service["Content"]:
+                    if len(item["Service"].get()) != 0:
+                        work_sheets.Cells(cur_row, 1).Value = item["Service"].get()
+                        work_sheets.Cells(cur_row, 7).Value = item["Fee"].get()
+                        if item["Number"].get() == inv:
+                            work_sheets.Cells(cur_row, 8).Value = item["Fee"].get()
+                            work_sheets.Cells(cur_row, 9).Value = item["Fee"].get()
+                            work_sheets.Cells(cur_row, 10).Value = item["in.GST"].get()
+                            total_fee += float(item["Fee"].get())
+                            total_inGST += float(item["in.GST"].get())
+                        cur_row += 1
+            else:
+                work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
+                work_sheets.Cells(cur_row+1, 2).Value = "Payment Instalments"
+                work_sheets.Cells(cur_row + 1, 7).Value = "Amount"
+                work_sheets.Cells(cur_row + 1, 8).Value = "This pay"
+                work_sheets.Cells(cur_row+2, 1).Value = "The Full amount for design and documentation"
+                work_sheets.Cells(cur_row+2, 7).Value = service["Fee"].get()
+                if service["Number"].get() == inv:
+                    work_sheets.Cells(cur_row+2, 8).Value = service["Fee"].get()
+                    work_sheets.Cells(cur_row+2, 9).Value = service["Fee"].get()
+                    work_sheets.Cells(cur_row+2, 10).Value = service["in.GST"].get()
+                    total_fee += float(service["Fee"].get())
+                    total_inGST += float(service["in.GST"].get())
+                cur_row+=3
+            cur_row+=1
+        work_sheets.Cells(33, 9).Value = str(total_fee)
+        work_sheets.Cells(33, 10).Value = str(total_inGST)
+        work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, invoice_name))
+        work_book.Close(True)
+    except PermissionError:
+        messagebox.showerror("Error", "Please close the preview or file before you use it")
+    except Exception as e:
+        messagebox.showerror("Error", "Please Close the pdf before you generate a new one")
+        print(e)
+    else:
+        webbrowser.open(os.path.join(database_dir, invoice_name))
+        save(app)
+        config_state(app)
+        config_log(app)
+    try:
+        excel.ScreenUpdating = True
+        excel.DisplayAlerts = True
+        excel.EnableEvents = True
+        work_book.Close(True)
+    except:
+        pass
+
 
 def email(app, *args):
     data = app.data
-    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                  data["Project Info"]["Project"]["Project Name"].get()
-    folder_path = os.path.join(app.conf["working_dir"], folder_name)
+    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     pdf_name = f'Mechanical Fee Proposal revision {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
 
     if not data["State"]["Email to Client"].get():
         messagebox.showerror("Error", "Please Generate a pdf first")
         return
-    elif not os.path.exists(os.path.join(folder_path, "Plot", pdf_name)):
-        messagebox.showerror("Error", f'Python cant found fee proposal for {data["Project Info"]["Project"]["Quotation Number"].get()} revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
+    elif not os.path.exists(os.path.join(database_dir, pdf_name)):
+        messagebox.showerror("Error",
+                             f'Python cant found fee proposal for {data["Project Info"]["Project"]["Quotation Number"].get()} revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
         return
 
+    if not "OUTLOOK.EXE" in (p.name() for p in psutil.process_iter()):
+        os.startfile("outlook")
     ol = win32client.Dispatch("Outlook.Application")
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
-    newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-Mechanical Fee Proposal - {data["Project Info"]["Project"]["Project Name"].get()} revision {data["Fee Proposal"]["Reference"]["Revision"].get()}'
+    newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-Mechanical Fee Proposal - {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au; bridge@pcen.com.au"
+    newmail.CC = "felix@pcen.com.au"
+    newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
+    first_name = data["Project Info"]["Main Contact"]["Main Contact Full Name"].get().split(" ")[0]
     message = f"""
-    Dear {data["Project Info"]["Main Contact"]["Main Contact Full Name"].get()},<br>
+    Dear {first_name},<br>
 
     I hope this email finds you well. Please find the attached fee proposal to this email.<br>
 
@@ -389,28 +538,32 @@ def email(app, *args):
     Cheers,<br>
     """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
-    newmail.Attachments.Add(os.path.join(folder_path, "Plot", pdf_name))
+    newmail.Attachments.Add(os.path.join(database_dir, pdf_name))
     newmail.Display()
     save(app)
     config_state(app)
 
+
 def chase(app, *args):
     data = app.data
-
     if not data["State"]["Fee Accepted"].get():
         messagebox.showerror("Error", "Please Sent the fee proposal to client first")
         return
 
+    if not "OUTLOOK.EXE" in (p.name() for p in psutil.process_iter()):
+        os.startfile("outlook")
     ol = win32client.Dispatch("Outlook.Application")
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'Re: {data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au; bridge@pcen.com.au"
+    newmail.CC = "felix@pcen.com.au"
+    newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
+    first_name = data["Project Info"]["Main Contact"]["Main Contact Full Name"].get().split(" ")[0]
     message = f"""
-    Hi {data["Project Info"]["Main Contact"]["Main Contact Full Name"].get()},<br>
+    Hi {first_name},<br>
     I wanted to circle back regarding the fee proposal we sent on {data["Email"]["Fee Proposal"].get()}. Do you have any questions or concerns? We're looking forward to working with you and hearing your feedback. <br>
 
     Thank you for considering our proposal, and we anticipate your response soon.<br>
@@ -422,3 +575,42 @@ def chase(app, *args):
     save(app)
     config_state(app)
 
+def email_invoice(app, inv):
+    inv = f"INV{str(inv+1)}"
+    data = app.data
+    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    pdf_name = inv+".pdf"
+
+    # if not data["State"]["Fee Accepted"].get():
+    #     messagebox.showerror("Error", "Please Sent the fee proposal to client first")
+    #     return
+
+    if not "OUTLOOK.EXE" in (p.name() for p in psutil.process_iter()):
+        os.startfile("outlook")
+    ol = win32client.Dispatch("Outlook.Application")
+    olmailitem = 0x0
+    newmail = ol.CreateItem(olmailitem)
+    newmail.Subject = f'Invoice {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
+    newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
+    newmail.CC = "felix@pcen.com.au"
+    newmail.BCC = "bridge@pcen.com.au"
+    newmail.GetInspector()
+    index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
+    first_name = data["Project Info"]["Client"]["Client Full Name"].get().split(" ")[0]
+    message = f"""
+    Hi {first_name},<br>
+    I hope this email finds you well and energized for the week ahead.<br>
+
+    Please find the attached invoice for client payment. We appreciate your prompt attention to this matter.<br>
+
+    If you have any questions or concerns regarding the invoice, please do not hesitate to contact Felix and me. We are happy to discuss further.<br>
+
+    Thank you for your time and consideration.<br>
+    
+    Cheers ,<br>
+    """
+    newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
+    newmail.Display()
+    newmail.Attachments.Add(os.path.join(database_dir, pdf_name))
+    save(app)
+    config_state(app)

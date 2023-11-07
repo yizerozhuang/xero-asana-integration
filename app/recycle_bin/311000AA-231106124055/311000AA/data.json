@@ -1,0 +1,376 @@
+{
+    "State": {
+        "Set Up": true,
+        "Generate Proposal": true,
+        "Email to Client": false,
+        "Fee Accepted": false,
+        "Done": false,
+        "Quote Unsuccessful": false
+    },
+    "Email": {
+        "Fee Proposal": "",
+        "First Chase": "",
+        "Second Chase": "",
+        "Third Chase": ""
+    },
+    "Project Info": {
+        "Project": {
+            "Project Name": "test_delete",
+            "Quotation Number": "311000AA",
+            "Project Number": "",
+            "Shop Name": "",
+            "Project Type": "Restaurant",
+            "Service Type": [
+                {
+                    "Service": "Mechanical Service",
+                    "Include": true
+                },
+                {
+                    "Service": "CFD Service",
+                    "Include": true
+                },
+                {
+                    "Service": "Electrical Service",
+                    "Include": false
+                },
+                {
+                    "Service": "Hydraulic Service",
+                    "Include": false
+                },
+                {
+                    "Service": "Fire Service",
+                    "Include": true
+                },
+                {
+                    "Service": "Kitchen Ventilation",
+                    "Include": false
+                },
+                {
+                    "Service": "Mech Review",
+                    "Include": false
+                },
+                {
+                    "Service": "Installation",
+                    "Include": false
+                },
+                {
+                    "Service": "Miscellaneous",
+                    "Include": false
+                }
+            ]
+        },
+        "Client": {
+            "Client Full Name": "",
+            "Client Contact Type": "Architect",
+            "Client Company": "",
+            "Client Address": "",
+            "Client ABN": "",
+            "Contact Number": "",
+            "Contact Email": ""
+        },
+        "Main Contact": {
+            "Main Contact Full Name": "",
+            "Main Contact Contact Type": "Architect",
+            "Main Contact Company": "",
+            "Main Contact Address": "",
+            "Main Contact ABN": "",
+            "Main Contact Number": "",
+            "Main Contact Email": ""
+        },
+        "Building Features": {
+            "Details": [
+                {
+                    "Levels": "",
+                    "Space/room Description": "",
+                    "Area/m^2": ""
+                },
+                {
+                    "Levels": "",
+                    "Space/room Description": "",
+                    "Area/m^2": ""
+                },
+                {
+                    "Levels": "",
+                    "Space/room Description": "",
+                    "Area/m^2": ""
+                },
+                {
+                    "Levels": "",
+                    "Space/room Description": "",
+                    "Area/m^2": ""
+                },
+                {
+                    "Levels": "",
+                    "Space/room Description": "",
+                    "Area/m^2": ""
+                }
+            ],
+            "Feature/Notes": "",
+            "Total Area": "0"
+        },
+        "Drawing": [
+            {
+                "Drawing Number": "M-000",
+                "Drawing Name": "Cover Sheet",
+                "Revision": "A"
+            },
+            {
+                "Drawing Number": "M-001",
+                "Drawing Name": "Tenancy Level Layout",
+                "Revision": "A"
+            },
+            {
+                "Drawing Number": "M-002",
+                "Drawing Name": "Roof Layout",
+                "Revision": "A"
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
+            }
+        ]
+    },
+    "Fee Proposal": {
+        "Reference": {
+            "Date": "06-Nov-2023",
+            "Revision": "1"
+        },
+        "Time": {
+            "Fee Proposal": {
+                "Start": "1",
+                "End": "2"
+            },
+            "Pre-design": {
+                "Start": "1",
+                "End": "2"
+            },
+            "Documentation": {
+                "Start": "1",
+                "End": "2"
+            }
+        },
+        "Scope": {
+            "Mechanical Service": {
+                "Extend": [
+                    {
+                        "Include": true,
+                        "Item": "Map out existing mechanical components"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Air conditioning design to the tenancy area as required"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Grilles coordination with RCP"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Natural ventilation design"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Other ventilation as required to AS 1668.2"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "1 off site visit"
+                    }
+                ],
+                "Exclusion": [
+                    {
+                        "Include": true,
+                        "Item": "Assessment of compliance with environmental noise regulations"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Preparation of Performance Solutions"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Odour management report, please liaise with us cost of the report from us"
+                    }
+                ],
+                "Deliverables": [
+                    {
+                        "Include": true,
+                        "Item": "Full set of mechanical drawings in PDF format"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Mechanical design certificate"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Equipment selection"
+                    }
+                ]
+            },
+            "Fire Service": {
+                "Extend": [
+                    {
+                        "Include": true,
+                        "Item": "The emergency lights, exit and directional signage"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Automatic Detection and warning System"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Portable Fire Extinguisher System"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Sprinkler system"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Liaise with relevant authorities and consultants"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "1 off site visit"
+                    }
+                ],
+                "Exclusion": [
+                    {
+                        "Include": true,
+                        "Item": "BCA DTS requirement compliance"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Any applicable fire engineering report by C10 Fire Engineer"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Section 74B certificate based on base building fire safety measures"
+                    }
+                ],
+                "Deliverables": [
+                    {
+                        "Include": true,
+                        "Item": "Full set of Fire Protection Service drawings in PDF format"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Fire Protection Service design certificate"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Coordination with related services"
+                    }
+                ]
+            }
+        }
+    },
+    "Invoices": {
+        "Details": {
+            "Mechanical Service": {
+                "Service": "Mechanical Service",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Fire Service": {
+                "Service": "Fire Service",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            }
+        },
+        "Fee": "",
+        "in.GST": ""
+    },
+    "Bills": {
+        "Details": {},
+        "Fee": "",
+        "in.GST": ""
+    },
+    "Log Files": {
+        "Type": "None",
+        "External Files": ""
+    },
+    "Financial Panel": {
+        "Invoice Details": {
+            "INV1": {
+                "Number": "",
+                "Fee": "",
+                "in.GST": ""
+            },
+            "INV2": {
+                "Number": "",
+                "Fee": "",
+                "in.GST": ""
+            },
+            "INV3": {
+                "Number": "",
+                "Fee": "",
+                "in.GST": ""
+            },
+            "INV4": {
+                "Number": "",
+                "Fee": "",
+                "in.GST": ""
+            },
+            "INV5": {
+                "Number": "",
+                "Fee": "",
+                "in.GST": ""
+            },
+            "INV6": {
+                "Number": "",
+                "Fee": "",
+                "in.GST": ""
+            }
+        }
+    }
+}

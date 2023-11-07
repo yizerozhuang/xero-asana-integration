@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
+from utility import excel_print_invoice, email_invoice
 
 import os
 
@@ -31,7 +32,8 @@ class FinancialPanelPage(tk.Frame):
         self.data["Financial Panel"] = dict()
 
         self.invoice_part()
-        # self.bill_part()
+        self.invoice_function_part()
+        self.bill_part()
         # self.profit_main_frame()
 
     def invoice_part(self):
@@ -48,7 +50,7 @@ class FinancialPanelPage(tk.Frame):
         self.invoice_dic["Number"] = dict()
 
         self.invoice_frame = tk.LabelFrame(self.main_context_frame, text="Invoice Details", font=self.conf["font"])
-        self.invoice_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        self.invoice_frame.grid(row=0, column=0)
 
 
 
@@ -62,7 +64,7 @@ class FinancialPanelPage(tk.Frame):
         tk.Label(invoice_number_frame, width=10, text="", font=self.conf["font"]).grid(row=0, column=1)
         tk.Label(invoice_number_frame, width=35, text="Invoice Number", font=self.conf["font"]).grid(row=0, column=0)
 
-        tk.Button(title_frame, width=10, text="Gen Invoice", command=self.generate_invoice_number, bg="brown", fg="white",
+        tk.Button(title_frame, width=10, text="Gen", command=self.generate_invoice_number, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=1, column=2)
 
         for i in range(6):
@@ -85,78 +87,7 @@ class FinancialPanelPage(tk.Frame):
             tk.Label(total_frame, width=10, textvariable=invoice[f"INV{str(i+1)}"]["Fee"], font=self.conf["font"]).grid(row=0, column=2+i)
             tk.Label(total_frame, width=10, textvariable=invoice[f"INV{str(i+1)}"]["in.GST"], font=self.conf["font"]).grid(row=1, column=2+i)
             invoice[f"INV{str(i+1)}"]["Fee"].trace("w", ist_fuc(i))
-
-
-    def bill_part(self):
-        bill_details = dict()
-        self.data["Financial Panel"]["Bill Details"] = bill_details
-        bill_fee = dict()
-        self.data["Financial Panel"]["Bill Fee"] = bill_fee
-        self.bill_dic = dict()
-        self.bill_dic["Number"] = dict()
-        self.bill_frames = dict()
-
-        self.bill_frame = tk.LabelFrame(self.main_context_frame, text="Bill Details", font=self.conf["font"])
-        self.bill_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
-
-        title_frame = tk.LabelFrame(self.bill_frame)
-        title_frame.pack()
-        tk.Label(title_frame, width=35, text="Bills", font=self.conf["font"]).grid(row=0, column=0)
-        tk.Label(title_frame, width=10, text="ex.GST", font=self.conf["font"]).grid(row=0, column=1)
-        tk.Label(title_frame, width=10, text="in.GST", font=self.conf["font"]).grid(row=1, column=1)
-
-        bill_number_frame = tk.LabelFrame(self.bill_frame)
-        bill_number_frame.pack()
-        tk.Label(bill_number_frame, width=10, text="", font=self.conf["font"]).grid(row=0, column=1)
-        tk.Label(bill_number_frame, width=35, text="Bill Number", font=self.conf["font"]).grid(row=0, column=0)
-        for i in range(6):
-            bill_details[f"INV{str(i + 1)}"] = {
-                "Number": tk.StringVar(),
-                "Fee": tk.StringVar(),
-                "in.GST": tk.StringVar()
-            }
-            tk.Label(title_frame, width=10, text="BILL" + str(i + 1), font=self.conf["font"]).grid(row=0, column=i + 2)
-            self.bill_dic["Number"][f"INV{str(i+1)}"] = tk.Entry(bill_number_frame, width=11, textvariable=bill_details[f"INV{str(i + 1)}"]["Number"], font=self.conf["font"], fg="blue")
-            self.bill_dic["Number"][f"INV{str(i+1)}"].grid(row=0, column=i + 2, padx=(0, 5), sticky="ew")
-
-        total_frame = tk.LabelFrame(self.bill_frame)
-        total_frame.pack(side=tk.BOTTOM)
-        bill_fee["Fee"] = tk.StringVar()
-        bill_fee["in.GST"] = tk.StringVar()
-        tk.Label(total_frame, width=35, text=" Bill Total", font=self.conf["font"]).grid(row=0, column=0)
-        tk.Label(total_frame, width=10, textvariable=bill_fee["Fee"], font=self.conf["font"]).grid(row=0, column=1)
-        tk.Label(total_frame, width=10, textvariable=bill_fee["in.GST"], font=self.conf["font"]).grid(row=1, column=1)
-        ist_fuc = lambda i: lambda a, b, c: self.app._ist_update(bill_details[f"INV{str(i+1)}"]["Fee"], bill_details[f"INV{str(i+1)}"]["in.GST"])
-        for i in range(6):
-            tk.Label(total_frame, width=10, textvariable=bill_details[f"INV{str(i+1)}"]["Fee"], font=self.conf["font"]).grid(row=0, column=2+i)
-            tk.Label(total_frame, width=10, textvariable=bill_details[f"INV{str(i+1)}"]["in.GST"], font=self.conf["font"]).grid(row=1, column=2+i)
-            bill_details[f"INV{str(i+1)}"]["Fee"].trace("w", ist_fuc(i))
-    # def profit_main_frame(self):
-    #     self.profit_frame = tk.LabelFrame(self.main_context_frame, text="Profit Details", font=self.conf["font"])
-    #     self.profit_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
-    #
-    #     self.profit_title_frame = tk.LabelFrame(self.profit_frame)
-    #     tk.Label(self.profit_title_frame, width=10, text="ex.GST", font=self.conf["font"]).grid(row=0, column=0)
-    #     tk.Label(self.profit_title_frame, width=10, text="in.GST", font=self.conf["font"]).grid(row=1, column=0)
-    #     self.profit_title_frame.grid(row=0, column=0, sticky="ew")
-    #
-    #     _ = tk.LabelFrame(self.profit_frame)
-    #     tk.Label(_, text="").grid(row=0, column=0, pady=(0, 3))
-    #     _.grid(row=1, column=0, sticky="ew")
-    #
-    #     self.profit_data_dic = dict()
-    #     self.profit_dic = dict()
-    #     self.profits_frame = dict()
-    #     self.profit_frame_number = 2
-    #
-    #     self.total_profit_frame = tk.LabelFrame(self.profit_frame)
-    #     self.total_profit_var = tk.StringVar(name="Total Profit", value = "")
-    #     self.total_in_profit_var = tk.StringVar(name="Total ingst Profit", value="")
-    #     tk.Label(self.total_profit_frame, width=10, textvariable=self.total_profit_var, font=self.conf["font"]).grid(row=0, column=0)
-    #     tk.Label(self.total_profit_frame, width=10, textvariable=self.total_in_profit_var, font=self.conf["font"]).grid(row=1, column=0)
-    #
-    #     self.total_profit_frame.grid(row=999, column=0, sticky="ew")
-    def update_fee(self, var):
+    def update_invoice(self, var):
         details = self.data["Invoices"]["Details"]
         invoice_details = self.data["Financial Panel"]["Invoice Details"]
         service = var["Service"].get()
@@ -198,7 +129,9 @@ class FinancialPanelPage(tk.Frame):
                                                font=self.conf["font"]),
                             "Invoice": [tk.Radiobutton(self.invoice_frames[service],
                                                        width=8,
-                                                       variable=self.app.data["Invoices"]["Details"][service]["Content"][i]["Number"],
+                                                       variable=
+                                                       self.app.data["Invoices"]["Details"][service]["Content"][i][
+                                                           "Number"],
                                                        value="INV" + str(j + 1)) for j in range(6)]
                         } for i in range(self.conf["n_items"])
                     ],
@@ -218,18 +151,139 @@ class FinancialPanelPage(tk.Frame):
             self.invoice_dic[service]["Fee"].grid(row=0, column=1)
             self.invoice_dic[service]["in.GST"].grid(row=1, column=1)
             for i in range(6):
-                self.invoice_dic[service]["Invoice"][i].grid(row=0, column=2+i, rowspan=2, padx=(2, 0))
+                self.invoice_dic[service]["Invoice"][i].grid(row=0, column=2 + i, rowspan=2, padx=(2, 0))
 
-
-            details[service]["Expand"].trace("w",lambda a, b, c: self._expand_invoice(service))
+            details[service]["Expand"].trace("w", lambda a, b, c: self._expand_invoice(service))
 
             details[service]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
             details[service]["Number"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
             for i in range(self.conf["n_items"]):
-                details[service]["Content"][i]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
-                details[service]["Content"][i]["Number"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
+                details[service]["Content"][i]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(details,
+                                                                                                         invoice_details))
+                details[service]["Content"][i]["Number"].trace("w", lambda a, b, c: self.update_invoice_sum(details,
+                                                                                                            invoice_details))
         else:
             self.invoice_frames[service].destroy()
+    def _expand_invoice(self, service):
+        details = self.data["Invoices"]["Details"]
+        if details[service]["Expand"].get():
+            for i in range(self.conf["n_items"]):
+                self.invoice_dic[service]["Content"]["Details"][i]["Service"].grid(row=2*i+2, column=0)
+                self.invoice_dic[service]["Content"]["Details"][i]["Fee"].grid(row=2*i+2, column=1)
+                self.invoice_dic[service]["Content"]["Details"][i]["in.GST"].grid(row=2*i+3, column=1)
+                for j in range(6):
+                    self.invoice_dic[service]["Content"]["Details"][i]["Invoice"][j].grid(row=2*i+2, column=2+j, rowspan=2, padx=(2, 0))
+            self.invoice_dic[service]["Content"]["Service"].grid(row=2*(self.conf["n_items"]+1)+1, column=0)
+            self.invoice_dic[service]["Content"]["Fee"].grid(row=2*(self.conf["n_items"]+1)+1, column=1)
+            self.invoice_dic[service]["Content"]["in.GST"].grid(row=2*(self.conf["n_items"]+1)+2, column=1)
+
+            self.invoice_dic[service]["Fee"].grid_forget()
+            self.invoice_dic[service]["in.GST"].grid_forget()
+            for i in range(6):
+                self.invoice_dic[service]["Invoice"][i].grid_forget()
+        else:
+            for i in range(self.conf["n_items"]):
+                self.invoice_dic[service]["Content"]["Details"][i]["Service"].grid_forget()
+                self.invoice_dic[service]["Content"]["Details"][i]["Fee"].grid_forget()
+                self.invoice_dic[service]["Content"]["Details"][i]["in.GST"].grid_forget()
+                for j in range(6):
+                    self.invoice_dic[service]["Content"]["Details"][i]["Invoice"][j].grid_forget()
+            self.invoice_dic[service]["Content"]["Service"].grid_forget()
+            self.invoice_dic[service]["Content"]["Fee"].grid_forget()
+            self.invoice_dic[service]["Content"]["in.GST"].grid_forget()
+
+            self.invoice_dic[service]["Fee"].grid(row=0, column=1)
+            self.invoice_dic[service]["in.GST"].grid(row=1, column=1)
+            for i in range(6):
+                self.invoice_dic[service]["Invoice"][i].grid(row=0, column=2+i, rowspan=2, padx=(2, 0))
+        details[service]["Number"].set("None")
+        for i in range(3):
+            details[service]["Content"][i]["Number"].set("None")
+    def invoice_function_part(self):
+        invoice_function_frame = tk.LabelFrame(self.main_context_frame, text="Invoice Functions", font=self.conf["font"])
+        invoice_function_frame.grid(row=1, column=0)
+        print_invoice_function = lambda i: lambda :excel_print_invoice(self.app, i)
+        email_invoice_function = lambda i: lambda :email_invoice(self.app, i)
+        for i in range(6):
+            tk.Label(invoice_function_frame, width=20, text="Invoice Number: ", font=self.conf["font"]).grid(row=i, column=0)
+            tk.Label(invoice_function_frame, width=20, textvariable=self.data["Financial Panel"]["Invoice Details"][f"INV{str(i+1)}"]["Number"], font=self.conf["font"]).grid(row=i, column=1)
+            tk.Button(invoice_function_frame, text="Preview", font=self.conf["font"], bg="brown", fg="white",
+                      command=print_invoice_function(i)).grid(row=i, column=2)
+            tk.Button(invoice_function_frame, text="Email", font=self.conf["font"], bg="brown", fg="white",
+                      command=email_invoice_function(i)).grid(row=i, column=3)
+            tk.Button(invoice_function_frame, text="Upload full amount", font=self.conf["font"], bg="brown", fg="white").grid(row=i, column=4)
+
+    def bill_part(self):
+        # bill_details = dict()
+        # self.data["Financial Panel"]["Bill Details"] = bill_details
+        # bill_fee = dict()
+        # self.data["Financial Panel"]["Bill Fee"] = bill_fee
+        # self.bill_dic = dict()
+        # self.bill_dic["Number"] = dict()
+        # self.bill_frames = dict()
+
+        self.bill_frame = tk.LabelFrame(self.main_context_frame, text="Bill Details", font=self.conf["font"])
+        self.bill_frame.grid(row=0, column=1)
+        tk.Label(self.bill_frame, text="ok").pack()
+
+
+        # title_frame = tk.LabelFrame(self.bill_frame)
+        # title_frame.pack()
+        # tk.Label(title_frame, width=35, text="Bills", font=self.conf["font"]).grid(row=0, column=0)
+        # tk.Label(title_frame, width=10, text="ex.GST", font=self.conf["font"]).grid(row=0, column=1)
+        # tk.Label(title_frame, width=10, text="in.GST", font=self.conf["font"]).grid(row=1, column=1)
+        #
+        # bill_number_frame = tk.LabelFrame(self.bill_frame)
+        # bill_number_frame.pack()
+        # tk.Label(bill_number_frame, width=10, text="", font=self.conf["font"]).grid(row=0, column=1)
+        # tk.Label(bill_number_frame, width=35, text="Bill Number", font=self.conf["font"]).grid(row=0, column=0)
+        # for i in range(6):
+        #     bill_details[f"INV{str(i + 1)}"] = {
+        #         "Number": tk.StringVar(),
+        #         "Fee": tk.StringVar(),
+        #         "in.GST": tk.StringVar()
+        #     }
+        #     tk.Label(title_frame, width=10, text="BILL" + str(i + 1), font=self.conf["font"]).grid(row=0, column=i + 2)
+        #     self.bill_dic["Number"][f"INV{str(i+1)}"] = tk.Entry(bill_number_frame, width=11, textvariable=bill_details[f"INV{str(i + 1)}"]["Number"], font=self.conf["font"], fg="blue")
+        #     self.bill_dic["Number"][f"INV{str(i+1)}"].grid(row=0, column=i + 2, padx=(0, 5), sticky="ew")
+        #
+        # total_frame = tk.LabelFrame(self.bill_frame)
+        # total_frame.pack(side=tk.BOTTOM)
+        # bill_fee["Fee"] = tk.StringVar()
+        # bill_fee["in.GST"] = tk.StringVar()
+        # tk.Label(total_frame, width=35, text=" Bill Total", font=self.conf["font"]).grid(row=0, column=0)
+        # tk.Label(total_frame, width=10, textvariable=bill_fee["Fee"], font=self.conf["font"]).grid(row=0, column=1)
+        # tk.Label(total_frame, width=10, textvariable=bill_fee["in.GST"], font=self.conf["font"]).grid(row=1, column=1)
+        # ist_fuc = lambda i: lambda a, b, c: self.app._ist_update(bill_details[f"INV{str(i+1)}"]["Fee"], bill_details[f"INV{str(i+1)}"]["in.GST"])
+        # for i in range(6):
+        #     tk.Label(total_frame, width=10, textvariable=bill_details[f"INV{str(i+1)}"]["Fee"], font=self.conf["font"]).grid(row=0, column=2+i)
+        #     tk.Label(total_frame, width=10, textvariable=bill_details[f"INV{str(i+1)}"]["in.GST"], font=self.conf["font"]).grid(row=1, column=2+i)
+        #     bill_details[f"INV{str(i+1)}"]["Fee"].trace("w", ist_fuc(i))
+    # def profit_main_frame(self):
+    #     self.profit_frame = tk.LabelFrame(self.main_context_frame, text="Profit Details", font=self.conf["font"])
+    #     self.profit_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+    #
+    #     self.profit_title_frame = tk.LabelFrame(self.profit_frame)
+    #     tk.Label(self.profit_title_frame, width=10, text="ex.GST", font=self.conf["font"]).grid(row=0, column=0)
+    #     tk.Label(self.profit_title_frame, width=10, text="in.GST", font=self.conf["font"]).grid(row=1, column=0)
+    #     self.profit_title_frame.grid(row=0, column=0, sticky="ew")
+    #
+    #     _ = tk.LabelFrame(self.profit_frame)
+    #     tk.Label(_, text="").grid(row=0, column=0, pady=(0, 3))
+    #     _.grid(row=1, column=0, sticky="ew")
+    #
+    #     self.profit_data_dic = dict()
+    #     self.profit_dic = dict()
+    #     self.profits_frame = dict()
+    #     self.profit_frame_number = 2
+    #
+    #     self.total_profit_frame = tk.LabelFrame(self.profit_frame)
+    #     self.total_profit_var = tk.StringVar(name="Total Profit", value = "")
+    #     self.total_in_profit_var = tk.StringVar(name="Total ingst Profit", value="")
+    #     tk.Label(self.total_profit_frame, width=10, textvariable=self.total_profit_var, font=self.conf["font"]).grid(row=0, column=0)
+    #     tk.Label(self.total_profit_frame, width=10, textvariable=self.total_in_profit_var, font=self.conf["font"]).grid(row=1, column=0)
+    #
+    #     self.total_profit_frame.grid(row=999, column=0, sticky="ew")
     
     def update_bill(self, var):
         return
@@ -449,41 +503,6 @@ class FinancialPanelPage(tk.Frame):
                 self.profit_data_dic[var._name]["Expanded"].set(False)
             self.profits_frame[var._name].grid_forget()
 
-    def _expand_invoice(self, service):
-        details = self.data["Invoices"]["Details"]
-        if details[service]["Expand"].get():
-            for i in range(self.conf["n_items"]):
-                self.invoice_dic[service]["Content"]["Details"][i]["Service"].grid(row=2*i+2, column=0)
-                self.invoice_dic[service]["Content"]["Details"][i]["Fee"].grid(row=2*i+2, column=1)
-                self.invoice_dic[service]["Content"]["Details"][i]["in.GST"].grid(row=2*i+3, column=1)
-                for j in range(6):
-                    self.invoice_dic[service]["Content"]["Details"][i]["Invoice"][j].grid(row=2*i+2, column=2+j, rowspan=2, padx=(2, 0))
-            self.invoice_dic[service]["Content"]["Service"].grid(row=2*(self.conf["n_items"]+1)+1, column=0)
-            self.invoice_dic[service]["Content"]["Fee"].grid(row=2*(self.conf["n_items"]+1)+1, column=1)
-            self.invoice_dic[service]["Content"]["in.GST"].grid(row=2*(self.conf["n_items"]+1)+2, column=1)
-
-            self.invoice_dic[service]["Fee"].grid_forget()
-            self.invoice_dic[service]["in.GST"].grid_forget()
-            for i in range(6):
-                self.invoice_dic[service]["Invoice"][i].grid_forget()
-        else:
-            for i in range(self.conf["n_items"]):
-                self.invoice_dic[service]["Content"]["Details"][i]["Service"].grid_forget()
-                self.invoice_dic[service]["Content"]["Details"][i]["Fee"].grid_forget()
-                self.invoice_dic[service]["Content"]["Details"][i]["in.GST"].grid_forget()
-                for j in range(6):
-                    self.invoice_dic[service]["Content"]["Details"][i]["Invoice"][j].grid_forget()
-            self.invoice_dic[service]["Content"]["Service"].grid_forget()
-            self.invoice_dic[service]["Content"]["Fee"].grid_forget()
-            self.invoice_dic[service]["Content"]["in.GST"].grid_forget()
-
-            self.invoice_dic[service]["Fee"].grid(row=0, column=1)
-            self.invoice_dic[service]["in.GST"].grid(row=1, column=1)
-            for i in range(6):
-                self.invoice_dic[service]["Invoice"][i].grid(row=0, column=2+i, rowspan=2, padx=(2, 0))
-        details[service]["Number"].set("None")
-        for i in range(3):
-            details[service]["Content"][i]["Number"].set("None")
 
     def _expand_bill(self, service):
         details = self.data["Invoices"]["Details"]

@@ -29,7 +29,10 @@ class App(tk.Tk):
         self.log_text = tk.StringVar()
         logo = Image.open(os.path.join(self.conf["resource_dir"], "jpg", "logo.jpg"))
         render = ImageTk.PhotoImage(logo)
-
+        # self.option_add('*Dialog.msg.font', 'Helvetica 24')
+        # self.master.option_add('*Dialog.msg.width', 34)
+        # self.master.option_add("*Dialog.msg.wrapLength", "6i")
+        # self.option_add('*Dialog.msg.font', self.conf[    "msg_font"])
         self.iconphoto(False, render)
         self.state("zoomed")
         self.data = {}

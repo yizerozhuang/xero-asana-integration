@@ -42,6 +42,14 @@ class AppLog:
         self.log_to_file(self.format("Quote Unsuccessful", app.user),
                          app.data["Project Info"]["Project"]["Quotation Number"].get())
 
+    def log_restore(self, app):
+        self.log_to_file(self.format("Restore Project", app.user),
+                         app.data["Project Info"]["Project"]["Quotation Number"].get())
+
+    def log_delete(self, app):
+        self.log_to_file(self.format("Delete Project", app.user),
+                         app.data["Project Info"]["Project"]["Quotation Number"].get())
+
     def log_update_asana(self, app):
         self.log_to_file(self.format("Update Asana", app.user),
                          app.data["Project Info"]["Project"]["Quotation Number"].get())
