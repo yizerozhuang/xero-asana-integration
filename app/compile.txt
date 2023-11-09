@@ -1,0 +1,1 @@
+pyinstaller --onefile --icon=.\app\resource\jpg\logo.jpg .\app\main.py

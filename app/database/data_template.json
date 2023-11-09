@@ -15,11 +15,11 @@
     },
     "Project Info": {
         "Project": {
-            "Project Name": "",
-            "Quotation Number": "",
+            "Project Name":"",
+            "Quotation Number":"",
             "Project Number": "",
-            "Project Type": "Restaurant",
             "Shop Name": "",
+            "Project Type": "Restaurant",
             "Service Type": [
                 {
                     "Service": "Mechanical Service",
@@ -167,6 +167,32 @@
         "Fee": "",
         "in.GST": ""
     },
+    "Variation": [
+        {
+            "Service": "",
+            "Fee": "",
+            "in.GST": "",
+            "Number": "None"
+        },
+        {
+            "Service": "",
+            "Fee": "",
+            "in.GST": "",
+            "Number": "None"
+        },
+        {
+            "Service": "",
+            "Fee": "",
+            "in.GST": "",
+            "Number": "None"
+        },
+        {
+            "Service": "",
+            "Fee": "",
+            "in.GST": "",
+            "Number": "None"
+        }
+    ],
     "Financial Panel": {
         "Invoice Details": {
             "INV1": {

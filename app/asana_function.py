@@ -24,9 +24,6 @@ def name_id_map(api_list):
 
 def update_asana(app, *args):
     data = app.data
-    if not data["State"]["Email to Client"].get():
-        messagebox.showerror("Error", "Please sent to client first")
-        return
     all_projects = clearn_response(project_api_instance.get_projects_for_workspace(workspace_gid))
     projects_id_map = name_id_map(all_projects)
 

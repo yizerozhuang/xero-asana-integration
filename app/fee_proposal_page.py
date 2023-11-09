@@ -96,8 +96,21 @@ class FeeProposalPage(tk.Frame):
             "Fee": tk.StringVar(),
             "in.GST": tk.StringVar()
         }
+        variation = [
+            {
+                "Service": tk.StringVar(),
+                "Fee": tk.StringVar(),
+                "in.GST": tk.StringVar(),
+                "Number": tk.StringVar(value="None")
+            } for _ in range(self.conf["n_variation"])
+        ]
+        ist_update_fuc = lambda i: lambda a,b,c: self.app._ist_update(variation[i]["Fee"], variation[i]["in.GST"])
+        for i in range(self.conf["n_variation"]):
+            variation[i]["Fee"].trace("w", ist_update_fuc(i))
+
         self.data["Invoices"] = invoices
         self.data["Bills"] = bills
+        self.data["Variation"] = variation
 
         self.fee_frames = dict()
         self.fee_dic = dict()
@@ -114,10 +127,19 @@ class FeeProposalPage(tk.Frame):
 
         bottom_frame = tk.LabelFrame(self.fee_frame)
         bottom_frame.pack(side=tk.BOTTOM)
-        tk.Label(bottom_frame, text="", width=6, font=self.conf["font"]).grid(row=0, column=0)
+        tk.Label(bottom_frame, width=6, text="", font=self.conf["font"]).grid(row=0, column=0)
         tk.Label(bottom_frame, width=50, text="Total", font=self.conf["font"]).grid(row=0, column=1)
+
         tk.Label(bottom_frame, width=20, textvariable=invoices["Fee"], font=self.conf["font"]).grid(row=0, column=2)
         tk.Label(bottom_frame, width=20, textvariable=invoices["in.GST"], font=self.conf["font"]).grid(row=0, column=3)
+
+        for i in range(self.conf["n_variation"]):
+            variation_frame = tk.LabelFrame(self.fee_frame)
+            variation_frame.pack(side=tk.BOTTOM, fill=tk.X)
+            tk.Label(variation_frame, width=10, text="", font=self.conf["font"]).grid(row=0, column=0)
+            tk.Entry(variation_frame, width=50, textvariable=variation[i]["Service"], font=self.conf["font"], fg="blue").grid(row=0, column=1)
+            tk.Entry(variation_frame, width=20, textvariable=variation[i]["Fee"], font=self.conf["font"], fg="blue").grid(row=0, column=2, padx=(40,0))
+            tk.Label(variation_frame, width=20, textvariable=variation[i]["in.GST"], font=self.conf["font"]).grid(row=0, column=3)
 
     def update_scope(self, var):
         scope = self.data["Fee Proposal"]["Scope"]
@@ -176,7 +198,6 @@ class FeeProposalPage(tk.Frame):
 
     def update_fee(self, var):
         invoices_details = self.data["Invoices"]["Details"]
-        bills_details = self.data["Bills"]["Details"]
         service = var["Service"].get()
         include = var["Include"].get()
         if include:
@@ -195,21 +216,7 @@ class FeeProposalPage(tk.Frame):
                     } for _ in range(self.conf["n_items"])
                 ]
             }
-            # bills_details[service] = {
-            #     "Service": tk.StringVar(),
-            #     "Fee": tk.StringVar(),
-            #     "in.GST": tk.StringVar(),
-            #     "Expand": tk.BooleanVar(),
-            #     "Number": tk.StringVar(value="None"),
-            #     "Content": [
-            #         {
-            #             "Service": tk.StringVar(),
-            #             "Fee": tk.StringVar(),
-            #             "in.GST": tk.StringVar(),
-            #             "Number": tk.StringVar(value="None")
-            #         } for _ in range(self.conf["n_items"])
-            #     ]
-            # }
+
 
             self.fee_frames[service] = tk.LabelFrame(self.fee_frame)
             self.fee_frames[service].pack()

@@ -80,8 +80,6 @@ class FeeAcceptedPage(tk.Frame):
             messagebox.showerror("Error", "Please select a type first")
             return
 
-
-
         if self.data["Log Files"]["Type"].get() == "Verbal":
             yes = messagebox.askyesno("Warning", "Are you sure Client give the verbal approve and move this project into design state?")
             if yes:

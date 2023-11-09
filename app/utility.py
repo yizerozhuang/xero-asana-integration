@@ -8,7 +8,6 @@ import os
 import webbrowser
 import json
 from datetime import date, datetime
-import subprocess
 import psutil
 
 
@@ -478,6 +477,20 @@ def excel_print_invoice(app, inv):
                     total_inGST += float(service["in.GST"].get())
                 cur_row+=3
             cur_row+=1
+        cur_row+=1
+        for service in data["Variation"]:
+            if len(service["Service"].get())==0:
+                continue
+            work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
+            work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
+            if service["Number"].get() == inv:
+                work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
+                work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
+                work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
+                total_fee += float(service["Fee"].get())
+                total_inGST += float(service["in.GST"].get())
+            cur_row += 2
+
         work_sheets.Cells(33, 9).Value = str(total_fee)
         work_sheets.Cells(33, 10).Value = str(total_inGST)
         work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, invoice_name))

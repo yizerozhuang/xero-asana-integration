@@ -19,8 +19,18 @@ import os
 
 # configure main flask application
 flask_app = Flask(__name__)
-flask_app.config.from_object("default_settings")
-flask_app.config.from_pyfile("xero_config.py", silent=True)
+flask_app.config["SECRET_KEY"] = os.urandom(16)
+
+# configure file based session
+flask_app.config["SESSION_TYPE"] = "filesystem"
+# SESSION_FILE_DIR = join(dirname(__file__), "../../xero-python-oauth2-starter/cache")
+
+# configure flask app for local development
+flask_app.config["ENV"] = "development"
+# flask_app.config.from_pyfile("xero_config.py", silent=True)
+
+flask_app.config["CLIENT_ID"] = "876EFEC2F1AC4729812A3B39152A2DD3"
+flask_app.config["CLIENT_SECRET"] = "jtohs0Oqcoezje-bjYn8n9KaTa9hCm2taATzBIbS3RpaXmOl"
 
 # if flask_app.config["ENV"] != "production":
 #     # allow oauth2 loop to run over http (used for local testing only)

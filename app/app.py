@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from tkinterdnd2 import TkinterDnD
+# from tkinterdnd2 import TkinterDnD
 
 from app_log import AppLog
 from project_info_page import ProjectInfoPage
@@ -19,8 +19,8 @@ import os
 
 class App(tk.Tk):
     def __init__(self, conf, user, *args, **kwargs):
-        TkinterDnD.Tk.__init__(self, *args, **kwargs)
-        # tk.Tk.__init__(self, *args, **kwargs)
+        # TkinterDnD.Tk.__init__(self, *args, **kwargs)
+        tk.Tk.__init__(self, *args, **kwargs)
 
         self.title("Premium Consulting Engineers")
         self.conf = conf
@@ -122,12 +122,12 @@ class App(tk.Tk):
         tk.Button(change_page_frame, text="Project Info",
                   command=lambda: self.show_frame(self.page_info_page), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
-        tk.Button(change_page_frame, text="Fee Proposal",
+        tk.Button(change_page_frame, text="Fee Details",
                   command=lambda: self.show_frame(self.fee_proposal_page), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(change_page_frame, text="Log Files",
-                  command=lambda: self.show_frame(self.fee_accepted_page), bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=2)
+        # tk.Button(change_page_frame, text="Log Files",
+        #           command=lambda: self.show_frame(self.fee_accepted_page), bg="brown", fg="white",
+        #           font=self.conf["font"]).grid(row=0, column=2)
         tk.Button(change_page_frame, text="Financial Panel",
                   command=lambda: self.show_frame(self.financial_panel_page), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
@@ -136,13 +136,13 @@ class App(tk.Tk):
         # main frame page
         self.page_info_page = ProjectInfoPage(self.main_frame, self)
         self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
-        self.fee_accepted_page = FeeAcceptedPage(self.main_frame, self)
+        # self.fee_accepted_page = FeeAcceptedPage(self.main_frame, self)
         self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
 
     def show_frame(self, page):
         self.page_info_page.pack_forget()
         self.fee_proposal_page.pack_forget()
-        self.fee_accepted_page.pack_forget()
+        # self.fee_accepted_page.pack_forget()
         self.financial_panel_page.pack_forget()
         page.pack(fill=tk.BOTH, expand=1)
 
@@ -173,6 +173,8 @@ class App(tk.Tk):
     def load_project(self, *args):
         if len(self.load_project_quotation.get()) == 0:
             return
+        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) !=0:
+            save(self)
         self.data["Project Info"]["Project"]["Quotation Number"].set(self.load_project_quotation.get().split("-")[0])
         load(self)
         self.load_project_quotation.set("")

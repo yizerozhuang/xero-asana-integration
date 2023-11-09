@@ -408,7 +408,7 @@ class ProjectInfoPage(tk.Frame):
         self.app.fee_proposal_page.update_scope(var)
         self.app.fee_proposal_page.update_fee(var)
         self.app.financial_panel_page.update_invoice(var)
-        # self.app.invoice_page.update_bill(var)
+        self.app.financial_panel_page.update_bill(var)
         # self.app.invoice_page.update_profit(var)
 
     def _on_mousewheel(self, event):
