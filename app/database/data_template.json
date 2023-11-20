@@ -4,7 +4,6 @@
         "Generate Proposal": false,
         "Email to Client": false,
         "Fee Accepted": false,
-        "Done": false,
         "Quote Unsuccessful": false
     },
     "Email": {
@@ -193,6 +192,11 @@
             "Number": "None"
         }
     ],
+    "Profits": {
+        "Details": {},
+        "Fee": "",
+        "in.GST": ""
+    },
     "Financial Panel": {
         "Invoice Details": {
             "INV1": {
@@ -225,6 +229,32 @@
                 "Fee": "",
                 "in.GST": ""
             }
+        }
+    },
+    "Remittances": {
+        "INV1": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV2": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV3": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV4": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV5": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV6":{
+            "Part1": "",
+            "Part2": ""
         }
     }
 }

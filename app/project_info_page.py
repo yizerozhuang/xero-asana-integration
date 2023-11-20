@@ -76,7 +76,7 @@ class ProjectInfoPage(tk.Frame):
         save_load_frame = tk.Frame(project_frame)
         save_load_frame.grid(row=1, column=3, rowspan=2)
 
-        tk.Button(save_load_frame, width=10, height=2, text="Reset", command=lambda: reset(self.app), bg="brown", fg="white",
+        tk.Button(save_load_frame, width=10, height=2, text="Clear Up", command=lambda: reset(self.app), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
         tk.Button(save_load_frame, width=8, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
@@ -319,8 +319,8 @@ class ProjectInfoPage(tk.Frame):
 
         self.data["State"]["Quote Unsuccessful"].trace("w", self._update_quote_button_text)
 
-        tk.Button(finish_frame, text="Finish Set Up", command=self._finish_setup,
-                  bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
+        # tk.Button(finish_frame, text="Finish Set Up", command=self._finish_setup,
+        #           bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
 
     def _update_quote_button_text(self, *args):
         if self.data["State"]["Quote Unsuccessful"].get():
@@ -359,12 +359,6 @@ class ProjectInfoPage(tk.Frame):
         else:
             webbrowser.open(folder_path)
 
-    def _finish_setup(self):
-        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
-            messagebox.showerror("Error", "Please Create an quotation Number first")
-            return
-
-        finish_setup(self.app)
 
     def quote_unsuccessful(self):
         if self.data["State"]["Quote Unsuccessful"].get():
@@ -409,7 +403,7 @@ class ProjectInfoPage(tk.Frame):
         self.app.fee_proposal_page.update_fee(var)
         self.app.financial_panel_page.update_invoice(var)
         self.app.financial_panel_page.update_bill(var)
-        # self.app.invoice_page.update_profit(var)
+        self.app.financial_panel_page.update_profit(var)
 
     def _on_mousewheel(self, event):
         self.main_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")

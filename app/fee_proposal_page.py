@@ -91,26 +91,7 @@ class FeeProposalPage(tk.Frame):
             "Fee": tk.StringVar(),
             "in.GST": tk.StringVar()
         }
-        bills = {
-            "Details": dict(),
-            "Fee": tk.StringVar(),
-            "in.GST": tk.StringVar()
-        }
-        variation = [
-            {
-                "Service": tk.StringVar(),
-                "Fee": tk.StringVar(),
-                "in.GST": tk.StringVar(),
-                "Number": tk.StringVar(value="None")
-            } for _ in range(self.conf["n_variation"])
-        ]
-        ist_update_fuc = lambda i: lambda a,b,c: self.app._ist_update(variation[i]["Fee"], variation[i]["in.GST"])
-        for i in range(self.conf["n_variation"]):
-            variation[i]["Fee"].trace("w", ist_update_fuc(i))
-
         self.data["Invoices"] = invoices
-        self.data["Bills"] = bills
-        self.data["Variation"] = variation
 
         self.fee_frames = dict()
         self.fee_dic = dict()
@@ -133,13 +114,44 @@ class FeeProposalPage(tk.Frame):
         tk.Label(bottom_frame, width=20, textvariable=invoices["Fee"], font=self.conf["font"]).grid(row=0, column=2)
         tk.Label(bottom_frame, width=20, textvariable=invoices["in.GST"], font=self.conf["font"]).grid(row=0, column=3)
 
+
+        self._update_variation()
+
+    def _update_variation(self):
+        variation = [
+            {
+                "Service": tk.StringVar(),
+                "Fee": tk.StringVar(),
+                "in.GST": tk.StringVar(),
+                "Number": tk.StringVar(value="None")
+            } for _ in range(self.conf["n_variation"])
+        ]
+        self.data["Variation"] = variation
+        ist_update_fuc = lambda i: lambda a,b,c: self.app._ist_update(variation[i]["Fee"], variation[i]["in.GST"])
+        for i in range(self.conf["n_variation"]):
+            variation[i]["Fee"].trace("w", ist_update_fuc(i))
+            variation[i]["Fee"].trace("w", self.update_sum)
+
         for i in range(self.conf["n_variation"]):
             variation_frame = tk.LabelFrame(self.fee_frame)
             variation_frame.pack(side=tk.BOTTOM, fill=tk.X)
             tk.Label(variation_frame, width=10, text="", font=self.conf["font"]).grid(row=0, column=0)
             tk.Entry(variation_frame, width=50, textvariable=variation[i]["Service"], font=self.conf["font"], fg="blue").grid(row=0, column=1)
-            tk.Entry(variation_frame, width=20, textvariable=variation[i]["Fee"], font=self.conf["font"], fg="blue").grid(row=0, column=2, padx=(40,0))
+            tk.Entry(variation_frame, width=20, textvariable=variation[i]["Fee"], font=self.conf["font"], fg="blue").grid(row=0, column=2, padx=(40, 0))
             tk.Label(variation_frame, width=20, textvariable=variation[i]["in.GST"], font=self.conf["font"]).grid(row=0, column=3)
+
+
+
+        # variation_var = {
+        #     "Service":tk.StringVar(value="Variation"),
+        #     "Include":tk.BooleanVar(value=True)
+        # }
+        # self.update_fee(variation_var)
+        # self.data["Invoices"]["Details"]["Variation"]["Expand"].set(True)
+        # self.fee_dic["Variation"]["Expand"].grid_forget()
+        # tk.Label(self.fee_frames["Variation"], text="", width=10).grid(row=0, column=0)
+        # self.fee_dic["Variation"]["Service"].config(text="Variation")
+        # self.fee_frames["Variation"].pack(side=tk.BOTTOM)
 
     def update_scope(self, var):
         scope = self.data["Fee Proposal"]["Scope"]
@@ -157,15 +169,6 @@ class FeeProposalPage(tk.Frame):
             for i, extra in enumerate(extra_list):
                 extra_frame = tk.LabelFrame(self.scope_frames[service], text=extra, font=self.conf["font"])
                 extra_frame.pack()
-                # self.app.cur.execute(
-                #     f"""
-                #         SELECT *
-                #         FROM service_scope
-                #         WHERE service_type='{service}'
-                #         AND extra ='{extra}'
-                #     """
-                # )
-                # items = self.app.cur.fetchall()
                 items = scope_data[service][extra]
                 color_list = ["white", "azure"]
                 scope[service][extra] = []
@@ -278,16 +281,13 @@ class FeeProposalPage(tk.Frame):
 
             invoices_details[service]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(
                 invoices_details[service]["Fee"], invoices_details[service]["in.GST"]))
-            invoices_details[service]["Fee"].trace("w", lambda a, b, c: self.app._sum_update(
-                [value["Fee"] for value in invoices_details.values()], self.data["Invoices"]["Fee"]))
-            invoices_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._sum_update(
-                [value["in.GST"] for value in invoices_details.values()], self.data["Invoices"]["in.GST"]))
+            invoices_details[service]["Fee"].trace("w", self.update_sum)
+            invoices_details[service]["in.GST"].trace("w", self.update_sum)
 
             for i in range(self.conf["n_items"]):
                 func = lambda i: lambda a, b, c: self.app._ist_update(invoices_details[service]["Content"][i]["Fee"],
                                                                       invoices_details[service]["Content"][i]["in.GST"])
                 invoices_details[service]["Content"][i]["Fee"].trace("w", func(i))
-
                 sum_fun = lambda a, b, c: self.app._sum_update(
                     [item["Fee"] for item in invoices_details[service]["Content"]],
                     invoices_details[service]["Fee"])
@@ -329,12 +329,6 @@ class FeeProposalPage(tk.Frame):
             with open(scope_dir, "w") as f:
                 json_object = json.dumps(scope_data, indent=4)
                 f.write(json_object)
-            # self.app.cur.execute(f"""
-            #     INSERT INTO service_scope(service_type, extra, context)
-            #     VALUES
-            #     ('{service}','{extra}','{item}')
-            #     """)
-            # self.app.conn.commit()
         self.append_context[service][extra]["Item"].set("")
         self.append_context[service][extra]["Add"].set(False)
 
@@ -377,3 +371,27 @@ class FeeProposalPage(tk.Frame):
 
     def _on_mousewheel(self, event):
         self.main_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+
+    def update_sum(self, *args):
+        details = self.data["Invoices"]["Details"]
+        total = self.data["Invoices"]["Fee"]
+        total_ist = self.data["Invoices"]["in.GST"]
+        variation = self.data["Variation"]
+        sum = 0
+        ist_sum = 0
+        fee_list = [value for value in details.values()] + [var for var in variation]
+        for fee in fee_list:
+            if len(fee["Fee"].get().strip())==0 or len(fee["in.GST"].get().strip())==0:
+                continue
+            else:
+                try:
+                    sum += float(fee["Fee"].get())
+                    ist_sum += float(fee["in.GST"].get())
+                except ValueError as e:
+                    total.set("Error")
+                    total_ist.set("Error")
+                    print(e)
+                    return
+        total.set(str(round(sum, 2)))
+        total_ist.set(str(round(ist_sum, 2)))

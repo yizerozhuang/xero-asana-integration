@@ -15,10 +15,10 @@
     },
     "Project Info": {
         "Project": {
-            "Project Name": "test2",
+            "Project Name": "9 The Boulevarde, Strathfield",
             "Quotation Number": "311000AB",
             "Project Number": "",
-            "Shop Name": "",
+            "Shop Name": "Gimme One",
             "Project Type": "Restaurant",
             "Service Type": [
                 {
@@ -35,7 +35,7 @@
                 },
                 {
                     "Service": "Hydraulic Service",
-                    "Include": false
+                    "Include": true
                 },
                 {
                     "Service": "Fire Service",
@@ -43,7 +43,7 @@
                 },
                 {
                     "Service": "Kitchen Ventilation",
-                    "Include": false
+                    "Include": true
                 },
                 {
                     "Service": "Mech Review",
@@ -60,29 +60,29 @@
             ]
         },
         "Client": {
-            "Client Full Name": "",
-            "Client Contact Type": "Architect",
-            "Client Company": "",
-            "Client Address": "",
-            "Client ABN": "",
-            "Contact Number": "",
-            "Contact Email": ""
+            "Client Full Name": "Gimme",
+            "Client Contact Type": "Owner/Tenant",
+            "Client Company": "1",
+            "Client Address": "2",
+            "Client ABN": "3",
+            "Contact Number": "4",
+            "Contact Email": "felix@pcen.com.au"
         },
         "Main Contact": {
-            "Main Contact Full Name": "",
+            "Main Contact Full Name": "Cessie Zhang",
             "Main Contact Contact Type": "Architect",
-            "Main Contact Company": "",
-            "Main Contact Address": "",
-            "Main Contact ABN": "",
-            "Main Contact Number": "",
-            "Main Contact Email": ""
+            "Main Contact Company": "5",
+            "Main Contact Address": "6",
+            "Main Contact ABN": "7",
+            "Main Contact Number": "8",
+            "Main Contact Email": "yee.zhuang@gmail.com"
         },
         "Building Features": {
             "Details": [
                 {
-                    "Levels": "",
+                    "Levels": "Tenancy Level",
                     "Space/room Description": "",
-                    "Area/m^2": ""
+                    "Area/m^2": "80"
                 },
                 {
                     "Levels": "",
@@ -106,7 +106,7 @@
                 }
             ],
             "Feature/Notes": "",
-            "Total Area": "0"
+            "Total Area": "80.0"
         },
         "Drawing": [
             {
@@ -138,7 +138,7 @@
     },
     "Fee Proposal": {
         "Reference": {
-            "Date": "09-Nov-2023",
+            "Date": "16-Nov-2023",
             "Revision": "1"
         },
         "Time": {
@@ -179,7 +179,7 @@
                         "Item": "Other ventilation as required to AS 1668.2"
                     },
                     {
-                        "Include": true,
+                        "Include": false,
                         "Item": "1 off site visit"
                     }
                 ],
@@ -251,7 +251,7 @@
                         "Item": "General indoor/external lighting and lighting control"
                     },
                     {
-                        "Include": true,
+                        "Include": false,
                         "Item": "Exit signages and Emergency egress lighting as per AS2293-2005"
                     }
                 ],
@@ -299,6 +299,74 @@
                         "Item": "Coordination with related services"
                     }
                 ]
+            },
+            "Hydraulic Service": {
+                "Extend": [
+                    {
+                        "Include": true,
+                        "Item": "Sanitary waste and drainage services"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Trade waste service"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Hot and cold water supply and distribution services"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Natural gas supply and distribution services"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Fire Hydrant and Hose Reel supply and distribution services"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Mechanical plant condensate waste"
+                    },
+                    {
+                        "Include": false,
+                        "Item": "1 off site visit"
+                    }
+                ],
+                "Exclusion": [
+                    {
+                        "Include": true,
+                        "Item": "Authority fees and charges such as Section 73, Section 188 etc"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Site underground service survey service"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Fire protection services (including fire sprinkler system, fire alarm system or any dry fire systems)"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Civil and stormwater services"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Landscape irrigation o water features associated plant and distribution systems"
+                    }
+                ],
+                "Deliverables": [
+                    {
+                        "Include": true,
+                        "Item": "Full set of hydraulic drawings in PDF format"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Hydraulic design certificate"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "Coordination with related services"
+                    }
+                ]
             }
         }
     },
@@ -308,6 +376,39 @@
                 "Service": "Mechanical Service",
                 "Fee": "",
                 "in.GST": "",
+                "Expand": true,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "item 1",
+                        "Fee": "100",
+                        "in.GST": "110.0",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "item 2",
+                        "Fee": "200",
+                        "in.GST": "220.0",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "item 3",
+                        "Fee": "300",
+                        "in.GST": "330.0",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Electrical Service": {
+                "Service": "Electrical Service",
+                "Fee": "500",
+                "in.GST": "550.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -337,10 +438,10 @@
                     }
                 ]
             },
-            "Electrical Service": {
-                "Service": "Electrical Service",
-                "Fee": "",
-                "in.GST": "",
+            "Hydraulic Service": {
+                "Service": "Hydraulic Service",
+                "Fee": "400",
+                "in.GST": "440.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -371,8 +472,98 @@
                 ]
             }
         },
-        "Fee": "",
-        "in.GST": ""
+        "Fee": "900.0",
+        "in.GST": "990.0"
+    },
+    "Variation": [
+        {
+            "Service": "",
+            "Fee": "",
+            "in.GST": "",
+            "Number": "None"
+        },
+        {
+            "Service": "",
+            "Fee": "",
+            "in.GST": "",
+            "Number": "None"
+        },
+        {
+            "Service": "",
+            "Fee": "",
+            "in.GST": "",
+            "Number": "None"
+        },
+        {
+            "Service": "",
+            "Fee": "",
+            "in.GST": "",
+            "Number": "None"
+        }
+    ],
+    "Log Files": {
+        "Type": "None",
+        "External Files": ""
+    },
+    "Financial Panel": {
+        "Invoice Details": {
+            "INV1": {
+                "Number": "",
+                "Fee": "0",
+                "in.GST": "0.0"
+            },
+            "INV2": {
+                "Number": "",
+                "Fee": "0",
+                "in.GST": "0.0"
+            },
+            "INV3": {
+                "Number": "",
+                "Fee": "0",
+                "in.GST": "0.0"
+            },
+            "INV4": {
+                "Number": "",
+                "Fee": "0",
+                "in.GST": "0.0"
+            },
+            "INV5": {
+                "Number": "",
+                "Fee": "0",
+                "in.GST": "0.0"
+            },
+            "INV6": {
+                "Number": "",
+                "Fee": "0",
+                "in.GST": "0.0"
+            }
+        }
+    },
+    "Remittances": {
+        "INV1": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV2": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV3": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV4": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV5": {
+            "Part1": "",
+            "Part2": ""
+        },
+        "INV6": {
+            "Part1": "",
+            "Part2": ""
+        }
     },
     "Bills": {
         "Details": {
@@ -449,69 +640,118 @@
                         "Number": ""
                     }
                 ]
+            },
+            "Hydraulic Service": {
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "Number": "",
+                "Ori": "",
+                "V1": "",
+                "V2": "",
+                "V3": "",
+                "Paid": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": ""
+                    }
+                ]
             }
         },
         "Fee": "",
         "in.GST": ""
     },
-    "Variation": [
-        {
-            "Service": "",
-            "Fee": "",
-            "in.GST": "",
-            "Number": "None"
-        },
-        {
-            "Service": "",
-            "Fee": "",
-            "in.GST": "",
-            "Number": "None"
-        },
-        {
-            "Service": "",
-            "Fee": "",
-            "in.GST": "",
-            "Number": "None"
-        },
-        {
-            "Service": "",
-            "Fee": "",
-            "in.GST": "",
-            "Number": "None"
-        }
-    ],
-    "Financial Panel": {
-        "Invoice Details": {
-            "INV1": {
-                "Number": "",
-                "Fee": "",
-                "in.GST": ""
+    "Profits": {
+        "Details": {
+            "Mechanical Service": {
+                "Fee": "0",
+                "in.GST": "0",
+                "Context": [
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    }
+                ]
             },
-            "INV2": {
-                "Number": "",
-                "Fee": "",
-                "in.GST": ""
+            "Electrical Service": {
+                "Fee": "500",
+                "in.GST": "550",
+                "Context": [
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    }
+                ]
             },
-            "INV3": {
-                "Number": "",
-                "Fee": "",
-                "in.GST": ""
-            },
-            "INV4": {
-                "Number": "",
-                "Fee": "",
-                "in.GST": ""
-            },
-            "INV5": {
-                "Number": "",
-                "Fee": "",
-                "in.GST": ""
-            },
-            "INV6": {
-                "Number": "",
-                "Fee": "",
-                "in.GST": ""
+            "Hydraulic Service": {
+                "Fee": "400",
+                "in.GST": "440",
+                "Context": [
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    },
+                    {
+                        "Fee": "",
+                        "in.GST": ""
+                    }
+                ]
             }
-        }
+        },
+        "Fee": "900.0",
+        "in.GST": "990.0"
     }
 }

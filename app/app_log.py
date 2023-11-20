@@ -58,7 +58,11 @@ class AppLog:
         self.log_to_file(self.format("log fee accept file", app.user),
                          app.data["Project Info"]["Project"]["Quotation Number"].get())
 
-    def format(self,text, user):
+    def log_generate_invoices(self, app, inv):
+        self.log_to_file(self.format(f"Generate Invoice {app.data['Financial Panel']['Invoice Details'][inv]['Number'].get()}", app.user),
+                         app.data["Project Info"]["Project"]["Quotation Number"].get())
+
+    def format(self, text, user):
         return f'{datetime.now().strftime("%Y-%m-%d, %H:%M:%S")} {user} {text}'
 
     def log_to_file(self, text, quotation):

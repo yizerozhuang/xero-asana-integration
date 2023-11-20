@@ -9,7 +9,8 @@ import webbrowser
 import json
 from datetime import date, datetime
 import psutil
-
+import subprocess
+from config import CONFIGURATION
 
 def reset(app):
     database_dir = os.path.join(app.conf["database_dir"], app.data["Project Info"]["Project"]["Quotation Number"].get())
@@ -26,6 +27,9 @@ def save(app):
     data = app.data
     data_json = convert_to_json(data)
     database_dir = os.path.join(app.conf["database_dir"], data_json["Project Info"]["Project"]["Quotation Number"])
+    # if len(data["Project Info"]["Project"]["Quotation Number"].get()) != 6 or len(data["Project Info"]["Project"]["Quotation Number"].get()) != 8:
+    #     return
+
     if not os.path.exists(database_dir):
         os.mkdir(database_dir)
     with open(os.path.join(database_dir, "data.json"), "w") as f:
@@ -86,7 +90,6 @@ def finish_setup(app):
         else:
             return
     data["State"]["Set Up"].set(True)
-    data["State"]["Generate Proposal"].set(True)
     save(app)
     app.log.log_finish_set_up(app)
     config_state(app)
@@ -115,19 +118,17 @@ def config_state(app):
 
 
 def _classify_state(data, res):
-    if data["State"]["Done"] or data["State"]["Quote Unsuccessful"]:
+    if data["State"]["Fee Accepted"] or data["State"]["Quote Unsuccessful"]:
         return
-    elif data["State"]["Fee Accepted"]:
-        _classify_fee(res, data)
     elif data["State"]["Email to Client"]:
-        res["Email to Client"].append(data["Project Info"]["Project"]["Quotation Number"])
+        _classify_fee(res, data)
     elif data["State"]["Generate Proposal"]:
-        res["Generate Proposal"].append(data["Project Info"]["Project"]["Quotation Number"])
+        res["Email to Client"].append(data["Project Info"]["Project"]["Quotation Number"])
     elif data["State"]["Set Up"]:
+        res["Generate Proposal"].append(data["Project Info"]["Project"]["Quotation Number"])
+    else:
         res["Set Up"].append(
             data["Project Info"]["Project"]["Quotation Number"] + "-" + data["Project Info"]["Project"]["Project Name"])
-
-
 def _classify_fee(res, data):
     append_list = [str((datetime.today() - datetime.strptime(data["Email"]["Fee Proposal"], "%Y-%m-%d")).days)]
     if len(data["Email"]["First Chase"]) != 0:
@@ -173,13 +174,19 @@ def delete_project(app):
 def config_log(app):
     database_dir = app.conf["database_dir"]
     log_file = os.path.join(database_dir, app.data["Project Info"]["Project"]["Quotation Number"].get(), "data.log")
-    log = open(log_file).readlines()
-    log.reverse()
+    try:
+        log = open(log_file).readlines()
+        log.reverse()
+    except FileNotFoundError:
+        log = ""
     app.log_text.set("".join(log))
 
 
 def get_quotation_number():
-    current_quotation_list = [dir for dir in os.listdir("..") if
+    working_dir = CONFIGURATION["database_dir"]
+
+
+    current_quotation_list = [dir for dir in os.listdir(working_dir) if
                               dir.startswith(date.today().strftime("%y%m000")[1:])]
     if len(current_quotation_list) == 0:
         current_quotation = date.today().strftime("%y%m000")[1:] + "AA"
@@ -200,6 +207,22 @@ def remove_none(obj):
         return obj
 
 
+def rename_project(app):
+    #determine whether to change the quotation  number or the project name
+    working_dir = app.conf["working_dir"]
+    dir_list = os.listdir(working_dir)
+    data = app.data
+
+    for folder in dir_list:
+        if folder[:5].isdigit():
+            quotation_number, project_name = folder.split("-", 1)
+            old_dir = os.path.join(working_dir, folder)
+            new_dir = os.path.join(working_dir,
+                                   f'{data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}')
+            if quotation_number == data["Project Info"]["Project"]["Quotation Number"].get() or project_name == data["Project Info"]["Project"]["Project Name"].get():
+                os.rename(old_dir, new_dir)
+                return folder
+
 def rename_new_folder(app):
     data = app.data
     folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
@@ -217,6 +240,7 @@ def rename_new_folder(app):
     elif len(rename_list) == 0:
         messagebox.showerror(title="Error", message="Please create a new folder first")
         return
+
     try:
         if len(rename_list) == 1:
             mode = 0o666
@@ -227,7 +251,6 @@ def rename_new_folder(app):
             os.mkdir(os.path.join(folder_path, "SS"), mode)
             shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Preliminary Calculation v2.5.xlsx"),
                             os.path.join(folder_path, "Preliminary Calculation v2.5.xlsx"))
-            app.data["State"]["Set Up"].set(True)
             messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {rename_list[0]} to {folder_name}")
         else:
             FileSelectDialog(app, rename_list, "Multiple new folders found, please select one")
@@ -261,27 +284,24 @@ def _check_fee(app):
 
 def excel_print_pdf(app, *args):
     data = app.data
-    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                  data["Project Info"]["Project"]["Project Name"].get()
-    folder_path = os.path.join(app.conf["working_dir"], folder_name)
-    pdf_name = f'Mechanical Fee Proposal revision {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
+    pdf_name = f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
     services = [key for key in data["Fee Proposal"]["Scope"].keys()]
     page = len(services) // 2 + 1
 
-    if not data["State"]["Generate Proposal"].get():
+    if not data["State"]["Set Up"].get():
         messagebox.showerror("Error", "Please finish Set Up first")
-        return
-    elif not os.path.exists(folder_path):
-        messagebox.showerror("Error", "Can't find the folder, please rename first")
         return
     elif len(services) == 0:
         messagebox.showerror("Error", "Please at least select 1 service")
         return
     elif not _check_fee(app):
-        messagebox.showerror("Error", "Please go to fee proposal page to complete fee first")
+        messagebox.showerror("Error", "Please go to fee proposal page to complete the fee first")
+        return
+    elif data["Invoices"]["Fee"].get() == "Error":
+        messagebox.showerror(title="Error", message="There are error in the fee proposal section, please fix the fee section before generate the fee proposal")
         return
     elif not page in [1, 2, 3]:
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
@@ -289,10 +309,11 @@ def excel_print_pdf(app, *args):
                 str(file).startswith("Mechanical Fee Proposal")]
     if len(pdf_list) != 0:
         current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
-        if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"][
-            "Revision"].get() == str(int(current_revision) + 1):
-            msg = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
-            if not msg:
+        if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"]["Revision"].get() == str(int(current_revision) + 1):
+            old_pdf_path = os.path.join(database_dir, f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {current_revision}.pdf')
+            ps = subprocess.Popen([old_pdf_path], shell=True)
+            overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
+            if not overwrite:
                 return
         else:
             messagebox.showerror("Error",
@@ -303,14 +324,22 @@ def excel_print_pdf(app, *args):
             messagebox.showerror("Error", "There is no other existing fee proposal found, can only have revision 1")
             return
 
-
-    shutil.copy(os.path.join(resource_dir, "xlsx", f"fee_proposal_template_{page}.xlsx"),
-                os.path.join(database_dir, "fee proposal.xlsx"))
-    excel = win32client.Dispatch("Excel.Application")
-    excel.ScreenUpdating = False
-    excel.DisplayAlerts = False
-    excel.EnableEvents = False
-    work_book = excel.Workbooks.Open(os.path.join(database_dir, "fee proposal.xlsx"))
+    total_fee = 0
+    total_ist = 0
+    for service in data["Invoices"]["Details"].values():
+        total_fee += float(service["Fee"].get())
+        total_ist += float(service["in.GST"].get())
+    try:
+        shutil.copy(os.path.join(resource_dir, "xlsx", f"fee_proposal_template_{page}.xlsx"),
+                    os.path.join(database_dir, "fee proposal.xlsx"))
+        excel = win32client.Dispatch("Excel.Application")
+        excel.ScreenUpdating = False
+        excel.DisplayAlerts = False
+        excel.EnableEvents = False
+        work_book = excel.Workbooks.Open(os.path.join(database_dir, "fee proposal.xlsx"))
+    except Exception as e:
+        messagebox.showerror("Error", e)
+        return
     try:
         work_sheets = work_book.Worksheets[0]
         work_sheets.Cells(1, 2).Value = data["Project Info"]["Client"]["Client Full Name"].get()
@@ -320,9 +349,7 @@ def excel_print_pdf(app, *args):
         work_sheets.Cells(2, 8).Value = data["Fee Proposal"]["Reference"]["Date"].get()
         work_sheets.Cells(3, 8).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
         work_sheets.Cells(6, 1).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
-        work_sheets.Cells(8, 1).Value = f"""Thank you for giving us the opportunity to submit this fee proposal for our 
-                                        {', '.join([value['Service'].get() for value in data['Project Info']['Project']['Service Type'] if value['Include'].get()])} 
-                                        for the above project."""
+        work_sheets.Cells(8, 1).Value = f"Thank you for giving us the opportunity to submit this fee proposal for our {', '.join([value['Service'].get() for value in data['Project Info']['Project']['Service Type'] if value['Include'].get()])} for the above project."
         work_sheets.Cells(16, 7).Value = data["Fee Proposal"]["Time"]["Fee Proposal"]["Start"].get() + "-" + \
                                          data["Fee Proposal"]["Time"]["Fee Proposal"]["End"].get()
         work_sheets.Cells(21, 7).Value = data["Fee Proposal"]["Time"]["Pre-design"]["Start"].get() + "-" + \
@@ -358,25 +385,17 @@ def excel_print_pdf(app, *args):
             work_sheets.Cells(cur_row + i, 2).Value = service["Service"].get() + " design and documentation"
             work_sheets.Cells(cur_row + i, 6).Value = service["Fee"].get()
             work_sheets.Cells(cur_row + i, 7).Value = service["in.GST"].get()
+
         if page == 3:
-            work_sheets.Cells(cur_row + 4, 6).Value = data["Invoices"]["Fee"].get()
-            work_sheets.Cells(cur_row + 4, 7).Value = data["Invoices"]["in.GST"].get()
+            work_sheets.Cells(cur_row + 4, 6).Value = str(total_fee)
+            work_sheets.Cells(cur_row + 4, 7).Value = str(total_ist)
         else:
-            work_sheets.Cells(cur_row + 3, 6).Value = data["Invoices"]["Fee"].get()
-            work_sheets.Cells(cur_row + 3, 7).Value = data["Invoices"]["in.GST"].get()
+            work_sheets.Cells(cur_row + 3, 6).Value = str(total_fee)
+            work_sheets.Cells(cur_row + 3, 7).Value = str(total_ist)
         cur_row += 17
         work_sheets.Cells(cur_row, 2).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
         work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, pdf_name))
         work_book.Close(True)
-        # shutil.copyfile(
-        #     os.path.join(folder_path, "Plot", pdf_name),
-        #     os.path.join(database_dir, pdf_name)
-        # )
-        # shutil.copyfile(
-        #     os.path.join(folder_path, "fee proposal.xlsx"),
-        #     os.path.join(database_dir, "fee proposal.xlsx")
-        # )
-        # os.remove(os.path.join(folder_path, "fee proposal.xlsx"))
     except PermissionError:
         messagebox.showerror("Error", "Please close the preview or file before you use it")
     except FileNotFoundError:
@@ -385,7 +404,7 @@ def excel_print_pdf(app, *args):
         messagebox.showerror("Error", "Please Close the pdf before you generate a new one")
         print(e)
     else:
-        app.data["State"]["Email to Client"].set(True)
+        app.data["State"]["Generate Proposal"].set(True)
         webbrowser.open(os.path.join(database_dir, pdf_name))
         save(app)
         config_state(app)
@@ -402,124 +421,117 @@ def excel_print_pdf(app, *args):
 def excel_print_invoice(app, inv):
     inv = f"INV{str(inv+1)}"
     data = app.data
-    excel_name = inv + ".xlsx"
-    invoice_name = inv + ".pdf"
+    excel_name = f'PCE INV {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}.xlsx'
+    invoice_name = f'PCE INV {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}.pdf'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
-    # if not data["State"]["Done"].get():
-    #     messagebox.showerror("Error", "Please Submit a fee acceptance yet")
-    #     return
-    # invoice_list = [file for file in os.listdir(os.path.join(database_dir)) if
-    #             str(file).startswith("Mechanical Fee Proposal")]
-    # if len(pdf_list) != 0:
-    #     current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
-    #     if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"][
-    #         "Revision"].get() == str(int(current_revision) + 1):
-    #         msg = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
-    #         if not msg:
-    #             return
-    #     else:
-    #         messagebox.showerror("Error",
-    #                              f'Current revision is {current_revision}, you can not use revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
-    #         return
-    # else:
-    #     if not data["Fee Proposal"]["Reference"]["Revision"].get() == "1":
-    #         messagebox.showerror("Error", "There is no other existing fee proposal found, can only have revision 1")
-    #         return
-    shutil.copy(os.path.join(resource_dir, "xlsx", f"invoice_template.xlsx"),
-                os.path.join(database_dir, excel_name))
-    excel = win32client.Dispatch("Excel.Application")
-    excel.ScreenUpdating = False
-    excel.DisplayAlerts = False
-    excel.EnableEvents = False
-    work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
-    try:
-        work_sheets = work_book.Worksheets[0]
-        work_sheets.Cells(4, 1).Value = data["Project Info"]["Client"]["Client Full Name"].get()
-        work_sheets.Cells(6, 1).Value = data["Project Info"]["Client"]["Client Company"].get()
-        work_sheets.Cells(7, 1).Value = data["Project Info"]["Client"]["Client Address"].get()
-        work_sheets.Cells(4, 10).Value = datetime.today().strftime("%d-%b-%Y")
-        work_sheets.Cells(5, 10).Value = data["Financial Panel"]["Invoice Details"][inv]["Number"].get()
-        work_sheets.Cells(12, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
-        cur_row = 14
-        total_fee = 0
-        total_inGST = 0
-        for service in data["Invoices"]["Details"].values():
-            if service["Expand"].get():
+
+    if len(data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0:
+        messagebox.showerror("Error", "You need to generate a invoice number before you generate the Invoice")
+        return
+
+    rewrite = True
+    if os.path.exists(os.path.join(database_dir, invoice_name)):
+        rewrite = messagebox.askyesno("Warming", f"Existing file PCE INV {invoice_name}")
+        if not rewrite:
+            return
+
+    if rewrite:
+        shutil.copy(os.path.join(resource_dir, "xlsx", f"invoice_template.xlsx"),
+                    os.path.join(database_dir, excel_name))
+        excel = win32client.Dispatch("Excel.Application")
+        excel.ScreenUpdating = False
+        excel.DisplayAlerts = False
+        excel.EnableEvents = False
+        work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
+        try:
+            work_sheets = work_book.Worksheets[0]
+            work_sheets.Cells(4, 1).Value = data["Project Info"]["Client"]["Client Full Name"].get()
+            work_sheets.Cells(6, 1).Value = data["Project Info"]["Client"]["Client Company"].get()
+            work_sheets.Cells(7, 1).Value = data["Project Info"]["Client"]["Client Address"].get()
+            work_sheets.Cells(4, 10).Value = datetime.today().strftime("%d-%b-%Y")
+            work_sheets.Cells(5, 10).Value = data["Financial Panel"]["Invoice Details"][inv]["Number"].get()
+            work_sheets.Cells(12, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
+            cur_row = 14
+            total_fee = 0
+            total_inGST = 0
+            for service in data["Invoices"]["Details"].values():
+                if service["Expand"].get():
+                    work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
+                    work_sheets.Cells(cur_row + 1, 2).Value = "Payment Instalments"
+                    work_sheets.Cells(cur_row + 1, 7).Value = "Amount"
+                    work_sheets.Cells(cur_row + 1, 8).Value = "This pay"
+                    cur_row += 2
+                    for item in service["Content"]:
+                        if len(item["Service"].get()) != 0:
+                            work_sheets.Cells(cur_row, 1).Value = item["Service"].get()
+                            work_sheets.Cells(cur_row, 7).Value = item["Fee"].get()
+                            if item["Number"].get() == inv:
+                                work_sheets.Cells(cur_row, 8).Value = item["Fee"].get()
+                                work_sheets.Cells(cur_row, 9).Value = item["Fee"].get()
+                                work_sheets.Cells(cur_row, 10).Value = item["in.GST"].get()
+                                total_fee += float(item["Fee"].get())
+                                total_inGST += float(item["in.GST"].get())
+                            cur_row += 1
+                else:
+                    work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
+                    work_sheets.Cells(cur_row+1, 2).Value = "Payment Instalments"
+                    work_sheets.Cells(cur_row + 1, 7).Value = "Amount"
+                    work_sheets.Cells(cur_row + 1, 8).Value = "This pay"
+                    work_sheets.Cells(cur_row+2, 1).Value = "The Full amount for design and documentation"
+                    work_sheets.Cells(cur_row+2, 7).Value = service["Fee"].get()
+                    if service["Number"].get() == inv:
+                        work_sheets.Cells(cur_row+2, 8).Value = service["Fee"].get()
+                        work_sheets.Cells(cur_row+2, 9).Value = service["Fee"].get()
+                        work_sheets.Cells(cur_row+2, 10).Value = service["in.GST"].get()
+                        total_fee += float(service["Fee"].get())
+                        total_inGST += float(service["in.GST"].get())
+                    cur_row+=3
+                cur_row+=1
+            cur_row+=1
+            for service in data["Variation"]:
+                if len(service["Service"].get())==0 and len(service["Fee"].get())==0:
+                    continue
                 work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
-                work_sheets.Cells(cur_row + 1, 2).Value = "Payment Instalments"
-                work_sheets.Cells(cur_row + 1, 7).Value = "Amount"
-                work_sheets.Cells(cur_row + 1, 8).Value = "This pay"
-                cur_row += 2
-                for item in service["Content"]:
-                    if len(item["Service"].get()) != 0:
-                        work_sheets.Cells(cur_row, 1).Value = item["Service"].get()
-                        work_sheets.Cells(cur_row, 7).Value = item["Fee"].get()
-                        if item["Number"].get() == inv:
-                            work_sheets.Cells(cur_row, 8).Value = item["Fee"].get()
-                            work_sheets.Cells(cur_row, 9).Value = item["Fee"].get()
-                            work_sheets.Cells(cur_row, 10).Value = item["in.GST"].get()
-                            total_fee += float(item["Fee"].get())
-                            total_inGST += float(item["in.GST"].get())
-                        cur_row += 1
-            else:
-                work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
-                work_sheets.Cells(cur_row+1, 2).Value = "Payment Instalments"
-                work_sheets.Cells(cur_row + 1, 7).Value = "Amount"
-                work_sheets.Cells(cur_row + 1, 8).Value = "This pay"
-                work_sheets.Cells(cur_row+2, 1).Value = "The Full amount for design and documentation"
-                work_sheets.Cells(cur_row+2, 7).Value = service["Fee"].get()
+                work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
                 if service["Number"].get() == inv:
-                    work_sheets.Cells(cur_row+2, 8).Value = service["Fee"].get()
-                    work_sheets.Cells(cur_row+2, 9).Value = service["Fee"].get()
-                    work_sheets.Cells(cur_row+2, 10).Value = service["in.GST"].get()
+                    work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
+                    work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
+                    work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
                     total_fee += float(service["Fee"].get())
                     total_inGST += float(service["in.GST"].get())
-                cur_row+=3
-            cur_row+=1
-        cur_row+=1
-        for service in data["Variation"]:
-            if len(service["Service"].get())==0:
-                continue
-            work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
-            work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
-            if service["Number"].get() == inv:
-                work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
-                work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
-                work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
-                total_fee += float(service["Fee"].get())
-                total_inGST += float(service["in.GST"].get())
-            cur_row += 2
+                cur_row += 2
 
-        work_sheets.Cells(33, 9).Value = str(total_fee)
-        work_sheets.Cells(33, 10).Value = str(total_inGST)
-        work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, invoice_name))
-        work_book.Close(True)
-    except PermissionError:
-        messagebox.showerror("Error", "Please close the preview or file before you use it")
-    except Exception as e:
-        messagebox.showerror("Error", "Please Close the pdf before you generate a new one")
-        print(e)
-    else:
-        webbrowser.open(os.path.join(database_dir, invoice_name))
-        save(app)
-        config_state(app)
-        config_log(app)
-    try:
-        excel.ScreenUpdating = True
-        excel.DisplayAlerts = True
-        excel.EnableEvents = True
-        work_book.Close(True)
-    except:
-        pass
+            work_sheets.Cells(33, 9).Value = str(total_fee)
+            work_sheets.Cells(33, 10).Value = str(total_inGST)
+            work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, invoice_name))
+            work_book.Close(True)
+        except PermissionError:
+            messagebox.showerror("Error", "Please close the preview or file before you use it")
+        except Exception as e:
+            messagebox.showerror("Error", "Please Close the pdf before you generate a new one")
+            print(e)
+        else:
+            webbrowser.open(os.path.join(database_dir, invoice_name))
+            save(app)
+            app.log.log_generate_invoices(app, inv)
+            config_state(app)
+            config_log(app)
+        try:
+            excel.ScreenUpdating = True
+            excel.DisplayAlerts = True
+            excel.EnableEvents = True
+            work_book.Close(True)
+        except:
+            pass
 
 
 def email(app, *args):
     data = app.data
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
-    pdf_name = f'Mechanical Fee Proposal revision {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
+    pdf_name = f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
 
-    if not data["State"]["Email to Client"].get():
+    if not data["State"]["Generate Proposal"].get():
         messagebox.showerror("Error", "Please Generate a pdf first")
         return
     elif not os.path.exists(os.path.join(database_dir, pdf_name)):
@@ -559,7 +571,7 @@ def email(app, *args):
 
 def chase(app, *args):
     data = app.data
-    if not data["State"]["Fee Accepted"].get():
+    if not data["State"]["Email to Client"].get():
         messagebox.showerror("Error", "Please Sent the fee proposal to client first")
         return
 
@@ -592,11 +604,15 @@ def email_invoice(app, inv):
     inv = f"INV{str(inv+1)}"
     data = app.data
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
-    pdf_name = inv+".pdf"
+    pdf_name = f'PCE INV {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}.pdf'
 
+    if not os.path.exists(os.path.join(database_dir, pdf_name)):
+        messagebox.showerror("Error", f"Please generate the invoice before you send to client")
+        return
     # if not data["State"]["Fee Accepted"].get():
     #     messagebox.showerror("Error", "Please Sent the fee proposal to client first")
     #     return
+
 
     if not "OUTLOOK.EXE" in (p.name() for p in psutil.process_iter()):
         os.startfile("outlook")

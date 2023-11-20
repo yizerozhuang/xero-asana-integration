@@ -1,15 +1,16 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 # from tkinterdnd2 import TkinterDnD
 
 from app_log import AppLog
 from project_info_page import ProjectInfoPage
 from fee_proposal_page import FeeProposalPage
-from fee_accpeted_page import FeeAcceptedPage
+# from fee_accpeted_page import FeeAcceptedPage
 from financial_panel import FinancialPanelPage
-from utility import rename_new_folder, excel_print_pdf, email, chase, save, load, config_state, config_log
-from asana_function import update_asana
+from utility import *
+from asana_function import update_asana, rename_asana_project
 from xero_function import login_xero, update_xero
+from email_server import email_server
 
 from PIL import Image, ImageTk
 import time
@@ -54,58 +55,83 @@ class App(tk.Tk):
         # Utility Part
         utility_frame = tk.LabelFrame(self.main_frame, text="Utility", font=self.conf["font"])
         utility_frame.pack(side=tk.TOP)
+        
+        state_frame = tk.LabelFrame(utility_frame, font=self.conf["font"])
+        state_frame.pack(side=tk.LEFT)
 
-        tk.Button(utility_frame, text="Rename Folder", command=lambda: rename_new_folder(self), bg="brown", fg="white",
+        tk.Button(state_frame, text="Set Up Project", command=self._finish_setup, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=0, column=0)
+        tk.Button(state_frame, text="Preview Fee Proposal", bg="brown", command=lambda: excel_print_pdf(self), fg="white",
+                  font=self.conf["font"]).grid(row=0, column=1)
+        tk.Button(state_frame, text="Email to Client", command=lambda: email(self), bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=0, column=2)
+        tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=0, column=3)
+        
+        function_frame = tk.LabelFrame(utility_frame, font=self.conf["font"])
+        function_frame.pack(side=tk.RIGHT, fill=tk.Y)
+
+        tk.Button(function_frame, text="Rename Project", command=self._rename_project, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
 
-        tk.Button(utility_frame, text="Preview Fee Proposal", bg="brown", command=lambda: excel_print_pdf(self),
-                  fg="white",
+        tk.Button(function_frame, text="Update Asana", command=lambda: update_asana(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
 
-        tk.Button(utility_frame, text="Email to Client", command=lambda: email(self), bg="brown", fg="white",
+        tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
-        tk.Button(utility_frame, text="Chase Client", command=lambda: chase(self), bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=3)
 
-        tk.Button(utility_frame, text="Update Asana", command=lambda: update_asana(self), bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=4)
-
-        tk.Button(utility_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=1, column=4)
-
-        tk.Button(utility_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=2, column=4)
+        tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=1, column=2)
 
         self.data["State"] = {
             "Set Up": tk.BooleanVar(),
             "Generate Proposal": tk.BooleanVar(),
             "Email to Client": tk.BooleanVar(),
             "Fee Accepted": tk.BooleanVar(),
-            "Done": tk.BooleanVar(),
             "Quote Unsuccessful": tk.BooleanVar()
         }
 
-        tk.Checkbutton(utility_frame, variable=self.data["State"]["Set Up"], state=tk.DISABLED,
-                       text="Set Up").grid(row=1, column=0)
-        tk.Checkbutton(utility_frame, variable=self.data["State"]["Generate Proposal"], state=tk.DISABLED,
-                       text="Generate Proposal").grid(row=1, column=1)
-        tk.Checkbutton(utility_frame, variable=self.data["State"]["Email to Client"], state=tk.DISABLED,
-                       text="Email to Client").grid(row=1, column=2)
-        tk.Checkbutton(utility_frame, variable=self.data["State"]["Fee Accepted"], state=tk.DISABLED,
-                       text="Fee Accepted").grid(row=1, column=3)
+        tk.Label(state_frame, text="Set Up").grid(row=1, column=0)
+        tk.Label(state_frame, text="Generate Proposal").grid(row=1, column=1)
+        tk.Label(state_frame, text="Email to Client").grid(row=1, column=2)
+        tk.Label(state_frame, text="Fee Accepted").grid(row=1, column=3)
+
+        # tk.Checkbutton(state_frame, variable=self.data["State"]["Set Up"], state=tk.DISABLED,
+        #                text="Set Up").grid(row=1, column=0)
+        # tk.Checkbutton(state_frame, variable=self.data["State"]["Generate Proposal"], state=tk.DISABLED,
+        #                text="Generate Proposal").grid(row=1, column=1)
+        # tk.Checkbutton(state_frame, variable=self.data["State"]["Email to Client"], state=tk.DISABLED,
+        #                text="Email to Client").grid(row=1, column=2)
+        # tk.Checkbutton(state_frame, variable=self.data["State"]["Fee Accepted"], state=tk.DISABLED,
+        #                text="Fee Accepted").grid(row=1, column=3)
+
+        self.set_up_state=tk.Label(state_frame, bg="yellow")
+        self.set_up_state.grid(row=2, column=0, sticky="ew")
+        self.proposal_state=tk.Label(state_frame, bg="red")
+        self.proposal_state.grid(row=2, column=1, sticky="ew")
+        self.email_state=tk.Label(state_frame, bg="red")
+        self.email_state.grid(row=2, column=2, sticky="ew")
+        self.accept_state=tk.Label(state_frame, bg="red")
+        self.accept_state.grid(row=2, column=3, sticky="ew")
+
+        self.data["State"]["Set Up"].trace("w", self._update_rec)
+        self.data["State"]["Generate Proposal"].trace("w", self._update_rec)
+        self.data["State"]["Email to Client"].trace("w", self._update_rec)
+        self.data["State"]["Fee Accepted"].trace("w", self._update_rec)
+
         self.load_project_quotation = tk.StringVar()
         self.load_project_quotation.trace("w", self.load_project)
         self.state_dict = {
-            "Set Up": ttk.Combobox(utility_frame, textvariable=self.load_project_quotation),
-            "Generate Proposal": ttk.Combobox(utility_frame, textvariable=self.load_project_quotation),
-            "Email to Client": ttk.Combobox(utility_frame, textvariable=self.load_project_quotation),
-            "Fee Accepted": ttk.Combobox(utility_frame, textvariable=self.load_project_quotation)
+            "Set Up": ttk.Combobox(state_frame, textvariable=self.load_project_quotation),
+            "Generate Proposal": ttk.Combobox(state_frame, textvariable=self.load_project_quotation),
+            "Email to Client": ttk.Combobox(state_frame, textvariable=self.load_project_quotation),
+            "Fee Accepted": ttk.Combobox(state_frame, textvariable=self.load_project_quotation)
         }
 
-        self.state_dict["Set Up"].grid(row=2, column=0)
-        self.state_dict["Generate Proposal"].grid(row=2, column=1)
-        self.state_dict["Email to Client"].grid(row=2, column=2)
-        self.state_dict["Fee Accepted"].grid(row=2, column=3)
+        self.state_dict["Set Up"].grid(row=3, column=0)
+        self.state_dict["Generate Proposal"].grid(row=3, column=1)
+        self.state_dict["Email to Client"].grid(row=3, column=2)
+        self.state_dict["Fee Accepted"].grid(row=3, column=3)
 
         self.data["Email"] = {
             "Fee Proposal": tk.StringVar(),
@@ -120,16 +146,16 @@ class App(tk.Tk):
         change_page_frame.pack(side=tk.BOTTOM)
 
         tk.Button(change_page_frame, text="Project Info",
-                  command=lambda: self.show_frame(self.page_info_page), bg="brown", fg="white",
+                  command=lambda: self.show_frame(self.page_info_page), bg="green", fg="black",
                   font=self.conf["font"]).grid(row=0, column=0)
         tk.Button(change_page_frame, text="Fee Details",
-                  command=lambda: self.show_frame(self.fee_proposal_page), bg="brown", fg="white",
+                  command=lambda: self.show_frame(self.fee_proposal_page), bg="green", fg="black",
                   font=self.conf["font"]).grid(row=0, column=1)
         # tk.Button(change_page_frame, text="Log Files",
-        #           command=lambda: self.show_frame(self.fee_accepted_page), bg="brown", fg="white",
+        #           command=lambda: self.show_frame(self.fee_accepted_page), bg="green", fg="black",
         #           font=self.conf["font"]).grid(row=0, column=2)
         tk.Button(change_page_frame, text="Financial Panel",
-                  command=lambda: self.show_frame(self.financial_panel_page), bg="brown", fg="white",
+                  command=lambda: self.show_frame(self.financial_panel_page), bg="green", fg="black",
                   font=self.conf["font"]).grid(row=0, column=3)
 
     def main_context_frame(self):
@@ -158,6 +184,14 @@ class App(tk.Tk):
             return
         ingst.set(str(num))
 
+    def _minus_update(self, fee, bill, total, *args):
+        fee_amount = 0 if len(fee.get().strip()) == 0 else fee.get()
+        bill_amount = 0 if len(bill.get().strip()) == 0 else bill.get()
+        try:
+            total.set(str(round(float(fee_amount)-float(bill_amount))))
+        except ValueError:
+            total.set("Error")
+
     def _sum_update(self, fee_list, total, *args):
         sum = 0
         for fee in fee_list:
@@ -182,18 +216,24 @@ class App(tk.Tk):
             drop_down.set("")
 
     def auto_check(self):
-        def thread_task():
-            while True:
-                time.sleep(10)
-                # save(self)
-                config_state(self)
-                if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) != 0:
-                    try:
-                        config_log(self)
-                    except:
-                        continue
+        def running_email_server():
+            email_server(self)
 
-        _thread.start_new_thread(thread_task, ())
+        _thread.start_new_thread(running_email_server, ())
+
+        # def check_log_and_save():
+        #     while True:
+        #         print("auto confined")
+        #         time.sleep(10)
+        #         # save(self)
+        #         config_state(self)
+        #         if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) != 0:
+        #             try:
+        #                 config_log(self)
+        #             except:
+        #                 continue
+        #
+        # _thread.start_new_thread(check_log_and_save, ())
 
     def confirm(self):
         if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
@@ -203,8 +243,8 @@ class App(tk.Tk):
             self.destroy()
 
     def _update_xero(self):
-        if not self.data["State"]["Done"].get():
-            messagebox.showerror("Error", "You haven't update a fee accountant yet, please update a fee acceptance before you update xero")
+        if not self.data["State"][""].get():
+            messagebox.showerror("Error", "You haven't update a fee acceptant yet, please update a fee acceptance before you update xero")
             return
         elif len(self.data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get())==0:
             messagebox.showerror("Error", "Please Generate An Invoice Number Fist")
@@ -226,3 +266,41 @@ class App(tk.Tk):
             update_xero(self, contact)
         except RuntimeError:
             messagebox.showerror("Error", "You  should login into xero first")
+
+    def _finish_setup(self):
+        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
+            messagebox.showerror("Error", "Please Create an quotation Number first")
+            return
+
+        finish_setup(self)
+
+    def _rename_project(self):
+        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
+            messagebox.showerror("Error", "Please Create an quotation Number first")
+            return
+
+        old_folder = rename_project(self)
+        if rename_asana_project(self, old_folder):
+            messagebox.showinfo("Renamed", f"Rename the folder and asana from {old_folder} to {self.data['Project Info']['Project']['Quotation Number'].get()}-{self.data['Project Info']['Project']['Project Name'].get()}")
+        else:
+            messagebox.showinfo("Renamed", f"Rename the folder from {old_folder} to {self.data['Project Info']['Project']['Quotation Number'].get()}-{self.data['Project Info']['Project']['Project Name'].get()}")
+        save(self)
+        config_log(self)
+        config_state(self)
+    def _update_rec(self, *args):
+        if self.data["State"]["Fee Accepted"].get():
+            self._config_color_code(["green"]*4)
+        elif self.data["State"]["Email to Client"].get():
+            self._config_color_code(["green", "green", "green", "yellow"])
+        elif self.data["State"]["Generate Proposal"].get():
+            self._config_color_code(["green", "green", "yellow", "red"])
+        elif self.data["State"]["Set Up"].get():
+            self._config_color_code(["green", "yellow", "red", "red"])
+        else:
+            self._config_color_code(["yellow", "red", "red", "red"])
+
+    def _config_color_code(self, l):
+        self.set_up_state.config(bg=l[0])
+        self.proposal_state.config(bg=l[1])
+        self.email_state.config(bg=l[2])
+        self.accept_state.config(bg=l[3])

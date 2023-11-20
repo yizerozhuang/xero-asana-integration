@@ -77,3 +77,23 @@ def update_asana(app, *args):
     messagebox.showinfo("Success", "Update/Create Asana Success")
     app.log.log_update_asana(app)
     config_log(app)
+
+def rename_asana_project(app, old_folder, *args):
+    data = app.data
+    all_projects = clearn_response(project_api_instance.get_projects_for_workspace(workspace_gid))
+    projects_id_map = name_id_map(all_projects)
+
+    all_task = clearn_response(task_api_instance.get_tasks(project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
+
+    task_id_map = name_id_map(all_task)
+    if old_folder in task_id_map.keys():
+        task_id = task_id_map[old_folder]
+        body = asana.TasksTaskGidBody(
+            {
+                "name": data["Project Info"]["Project"]["Quotation Number"].get() + "-" +
+                        data["Project Info"]["Project"]["Project Name"].get()
+            }
+        )
+        task_api_instance.update_task(task_gid=task_id, body=body)
+        return True
+    return False
