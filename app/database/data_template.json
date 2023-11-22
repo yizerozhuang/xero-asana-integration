@@ -19,44 +19,44 @@
             "Project Number": "",
             "Shop Name": "",
             "Project Type": "Restaurant",
-            "Service Type": [
-                {
+            "Service Type": {
+                "Mechanical Service": {
                     "Service": "Mechanical Service",
                     "Include": false
                 },
-                {
+                "CFD Service": {
                     "Service": "CFD Service",
                     "Include": false
                 },
-                {
+                "Electrical Service":{
                     "Service": "Electrical Service",
                     "Include": false
                 },
-                {
+                "Hydraulic Service":{
                     "Service": "Hydraulic Service",
                     "Include": false
                 },
-                {
+                "Fire Service":{
                     "Service": "Fire Service",
                     "Include": false
                 },
-                {
+                "Kitchen Ventilation":{
                     "Service": "Kitchen Ventilation",
                     "Include": false
                 },
-                {
+                "Mech Review":{
                     "Service": "Mech Review",
                     "Include": false
                 },
-                {
+                "Installation":{
                     "Service": "Installation",
                     "Include": false
                 },
-                {
+                "Miscellaneous":{
                     "Service": "Miscellaneous",
                     "Include": false
                 }
-            ]
+            }
         },
         "Client": {
             "Client Full Name": "",
@@ -256,5 +256,11 @@
             "Part1": "",
             "Part2": ""
         }
+    },
+    "Archive": {
+        "Scope": {},
+        "Invoice": {},
+        "Bill": {},
+        "Profit": {}
     }
 }

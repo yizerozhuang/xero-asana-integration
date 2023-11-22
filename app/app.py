@@ -71,17 +71,25 @@ class App(tk.Tk):
         function_frame = tk.LabelFrame(utility_frame, font=self.conf["font"])
         function_frame.pack(side=tk.RIGHT, fill=tk.Y)
 
-        tk.Button(function_frame, text="Rename Project", command=self._rename_project, bg="brown", fg="white",
+        tk.Button(function_frame, width=10, text="Open Folder", command=self.open_folder, bg="brown",
+                  fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
 
-        tk.Button(function_frame, text="Update Asana", command=lambda: update_asana(self), bg="brown", fg="white",
+        tk.Button(function_frame, width=10, text="Open Database", command=self.open_database, bg="brown",
+                  fg="white",
+                  font=self.conf["font"]).grid(row=1, column=0)
+
+        tk.Button(function_frame, text="Rename Project", command=self._rename_project, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
 
-        tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
+        tk.Button(function_frame, text="Update Asana", command=lambda: update_asana(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
 
+        tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=0, column=3)
+
         tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=1, column=2)
+                  font=self.conf["font"]).grid(row=1, column=3)
 
         self.data["State"] = {
             "Set Up": tk.BooleanVar(),
@@ -161,10 +169,9 @@ class App(tk.Tk):
     def main_context_frame(self):
         # main frame page
         self.page_info_page = ProjectInfoPage(self.main_frame, self)
-        self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
         # self.fee_accepted_page = FeeAcceptedPage(self.main_frame, self)
+        self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
         self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
-
     def show_frame(self, page):
         self.page_info_page.pack_forget()
         self.fee_proposal_page.pack_forget()
@@ -243,7 +250,7 @@ class App(tk.Tk):
             self.destroy()
 
     def _update_xero(self):
-        if not self.data["State"][""].get():
+        if not self.data["State"]["Fee Accepted"].get():
             messagebox.showerror("Error", "You haven't update a fee acceptant yet, please update a fee acceptance before you update xero")
             return
         elif len(self.data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get())==0:
@@ -304,3 +311,24 @@ class App(tk.Tk):
         self.proposal_state.config(bg=l[1])
         self.email_state.config(bg=l[2])
         self.accept_state.config(bg=l[3])
+
+    def open_folder(self):
+        quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
+        folder_name = self.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+                      self.data["Project Info"]["Project"]["Project Name"].get()
+        folder_path = os.path.join(self.conf["working_dir"], folder_name)
+        if len(quotation_number) == 0:
+            messagebox.showerror("Error", "Please enter a Quotation Number before you load")
+        elif not os.path.exists(folder_path):
+            messagebox.showerror("Error", f"Python cannot find the folder {folder_path}")
+        else:
+            webbrowser.open(folder_path)
+    def open_database(self):
+        quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
+        database_path = os.path.join(self.conf["database_dir"], quotation_number)
+        if len(quotation_number) == 0:
+            messagebox.showerror("Error", "Please enter a Quotation Number before you load")
+        elif not os.path.exists(database_path):
+            messagebox.showerror("Error", f"Python cannot find the folder {database_path}")
+        else:
+            webbrowser.open(database_path)

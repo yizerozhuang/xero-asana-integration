@@ -1,6 +1,7 @@
 import email
 from email.header import decode_header
 import imaplib
+import smtplib
 
 from config import CONFIGURATION
 
@@ -11,7 +12,8 @@ import os
 import json
 import time
 from datetime import datetime
-
+from PyPDF2 import PdfReader
+from win32com import client as win32client
 
 # username = "yee_test@outlook.com"
 # password = "Zero0929"
@@ -22,6 +24,11 @@ def email_server(app=None):
     username = "bridge@pcen.com.au"
     password = "PcE$yD2023"
     imap_server = "mail.pcen.com.au"
+    smap_server = "mail.pcen.com.au"
+    smap_port = 587
+
+    from_addr = "bridge@pcen.com.au"
+    to_addr = "yeezhuang@gmail.com"
 
     log = AppLog()
 
@@ -44,8 +51,8 @@ def email_server(app=None):
         messages = messages[0].split(b' ') if len(messages[0]) != 0 else []
         if status == "OK":
             for mail in messages:
-                res, msg = imap.fetch(mail, "(RFC822)")
-                for response in msg:
+                res, msg_data = imap.fetch(mail, "(RFC822)")
+                for response in msg_data:
                     if isinstance(response, tuple):
                         # parse a bytes email into a message object
                         msg = email.message_from_bytes(response[1])
@@ -69,38 +76,81 @@ def email_server(app=None):
                         print("From:", From)
                         print("Date:", Date)
                         if subject.startswith("Fwd: ") or subject.startswith("FW: "):
-                            project_name = subject.split("Fwd: ")[-1].split("FW: ")[-1]
-                            current_quotation = get_quotation_number()
-                            folder_name = current_quotation + "-" + project_name
-                            folder_path = os.path.join(conf["working_dir"], folder_name)
-                            create_new_folder(folder_name, conf)
+                            if _fee_acceptance(msg):
+                                database_dir = conf["database_dir"]
+                                for part in msg.walk():
+                                    # extract content type of email
+                                    content_disposition = str(part.get("Content-Disposition"))
+                                    # get the email body
+                                    if "attachment" in content_disposition:
+                                        # download attachment
+                                        filename = part.get_filename()
+                                        if filename:
+                                            folder_name = os.path.join(conf["working_dir"], "app", "cache")
+                                            filepath = os.path.join(folder_name, filename)
+                                            # download attachment and save it
+                                            open(filepath, "wb").write(part.get_payload(decode=True))
+                                            parts = []
+                                            def visitor_body(text, cm, tm, fontDict, fontSize):
+                                                x = tm[4]
+                                                y = tm[5]
+                                                if y > 650 and y < 750 and x > 200:
+                                                    parts.append(text)
+                                            reader = PdfReader(filepath)
+                                            page = reader.pages[0]
+                                            page.extract_text(visitor_text=visitor_body)
+                                            if "Reference:" in parts or " Reference:" in parts:
+                                                quotation_number = parts[-1]
+                                                revision = parts[-3]
+                                                fee_acceptance_name = f"Fee Acceptance Rev {revision}.pdf"
+                                                data_json_file_name = os.path.join(database_dir, quotation_number, "data.json")
+                                                data_json = json.load(open(data_json_file_name))
+                                                data_json["State"]["Fee Accepted"] = True
+                                                with open(data_json_file_name, "w") as f:
+                                                    json.dump(data_json, f, indent=4)
+                                                open(os.path.join(database_dir, quotation_number, fee_acceptance_name), "wb").write(part.get_payload(decode=True))
+                                                if not app is None:
+                                                    app.log.log_fee_accept_file(app)
+                                                    config_state(app)
+                                                    config_log(app)
+                                                print("Fee Accepted")
+                                                break
+                                message = email.message_from_bytes(msg_data[0][1])
+                                message.replace_header("Subject", "Error when processing Bridge")
+                                message.replace_header("From", from_addr)
+                                message.replace_header("To", to_addr)
 
-                            database_dir = os.path.join(conf["database_dir"], current_quotation)
-                            data_json = json.load(open(os.path.join(conf["database_dir"], "data_template.json")))
-                            data_json["Project Info"]["Project"]["Project Name"] = project_name
-                            data_json["Project Info"]["Project"]["Quotation Number"] = current_quotation
-                            data_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
-                            os.makedirs(database_dir)
-                            with open(os.path.join(database_dir, "data.json"), "w") as f:
-                                json_object = json.dumps(data_json, indent=4)
-                                f.write(json_object)
-                            log.log_create_folder(From.split("<")[-1].split(">")[0], current_quotation)
-
-                            if msg.is_multipart():
+                                smtp = smtplib.SMTP(smap_server, smap_port)
+                                smtp.starttls()
+                                smtp.login(username, password)
+                                smtp.sendmail(from_addr, to_addr, message.as_string())
+                                print("Sent Email to admin")
+                                smtp.quit()
+                            else:
                                 # iterate over email parts
+                                project_name = subject.split("Fwd: ")[-1].split("FW: ")[-1]
+                                current_quotation = get_quotation_number()
+                                folder_name = current_quotation + "-" + project_name
+                                folder_path = os.path.join(conf["working_dir"], folder_name)
+                                create_new_folder(folder_name, conf)
+
+                                database_dir = os.path.join(conf["database_dir"], current_quotation)
+                                data_json = json.load(open(os.path.join(conf["database_dir"], "data_template.json")))
+                                data_json["Project Info"]["Project"]["Project Name"] = project_name
+                                data_json["Project Info"]["Project"]["Quotation Number"] = current_quotation
+                                data_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
+                                os.makedirs(database_dir)
+                                with open(os.path.join(database_dir, "data.json"), "w") as f:
+                                    json_object = json.dumps(data_json, indent=4)
+                                    f.write(json_object)
+                                log.log_create_folder(From.split("<")[-1].split(">")[0], current_quotation)
                                 for part in msg.walk():
                                     # extract content type of email
                                     content_type = part.get_content_type()
                                     content_disposition = str(part.get("Content-Disposition"))
                                     # get the email body
-                                    try:
-                                        body = part.get_payload(decode=True).decode()
-                                    except:
-                                        pass
-                                    if content_type == "text/plain" and "attachment" not in content_disposition:
-                                        # print text/plain emails and skip attachments
-                                        # print(body)
-                                        pass
+                                    if content_type == "text/plain":
+                                        print(part.get_payload())
                                     elif "attachment" in content_disposition:
                                         # download attachment
                                         filename = part.get_filename()
@@ -109,15 +159,10 @@ def email_server(app=None):
                                             filepath = os.path.join(folder_name, filename)
                                             # download attachment and save it
                                             open(filepath, "wb").write(part.get_payload(decode=True))
-                            else:
-                                # extract content type of email
-                                content_type = msg.get_content_type()
-                                # get the email body
-                                body = msg.get_payload(decode=True).decode()
-                                if content_type == "text/plain":
-                                    # print only text email parts
-                                    print(body)
-                            print("Create New Project")
+                                if not app is None:
+                                    config_state(app)
+                                    config_log(app)
+                                print("Create New Project")
                             # if content_type == "text/html":
                             #     # if it's HTML, create a new HTML file and open it in browser
                             #     folder_name = clean(subject)
@@ -146,10 +191,12 @@ def email_server(app=None):
                             else:
                                 app.data["State"]["Email to Client"].set(True)
                                 app.data["Email"]["Fee Proposal"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
+                                quotation_number = subject[0:8]
+                                app.log.log_email_to_client(From.split("<")[-1].split(">")[0], quotation_number)
                                 save(app)
                                 config_state(app)
                                 config_log(app)
-                            print("Update State")
+                            print("Update Email")
                         elif subject.startswith("Re: "):
                             if app is None:
                                 quotation_number = subject[4:12]
@@ -165,22 +212,48 @@ def email_server(app=None):
                                     json.dump(data_json, f, indent=4)
                                 log.log_chase_client(From.split("<")[-1].split(">")[0], quotation_number)
                             else:
+                                quotation_number = subject[4:12]
                                 if len(app.data["Email"]["First Chase"].get())==0:
                                     app.data["Email"]["First Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
                                 elif len(app.data["Email"]["Second Chase"].get())==0:
                                     app.data["Email"]["Second Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
                                 elif len(app.data["Email"]["Thrid Chase"].get())==0:
                                     app.data["Email"]["Third Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
+                                app.log.log_chase_client(From.split("<")[-1].split(">")[0], quotation_number)
                                 save(app)
                                 config_state(app)
                                 config_log(app)
 
                             print("Chase Client")
+                        else:
+                            message = email.message_from_bytes(msg_data[0][1])
+                            message.replace_header("Subject", "Error when processing Bridge")
+                            message.replace_header("From", from_addr)
+                            message.replace_header("To", to_addr)
+
+                            smtp = smtplib.SMTP(smap_server, smap_port)
+                            smtp.starttls()
+                            smtp.login(username, password)
+                            smtp.sendmail(from_addr, to_addr, message.as_string())
+                            print("Sent Email to admin")
+                            smtp.quit()
         print("Process Sleep")
         time.sleep(10)
         print("Process Start")
     imap.close()
     imap.logout()
+
+
+def _fee_acceptance(msg):
+    for part in msg.walk():
+        content_type = part.get_content_type()
+        # get the email body
+        if content_type == "text/plain":
+            if "$$$" in part.get_payload():
+                return True
+    return False
+
+
 
 if __name__ == '__main__':
     email_server()

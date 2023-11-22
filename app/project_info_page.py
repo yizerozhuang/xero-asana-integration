@@ -68,11 +68,19 @@ class ProjectInfoPage(tk.Frame):
         tk.Label(project_frame, width=30, text="Quotation Number", font=self.conf["font"]).grid(row=1, column=0,
                                                                                                 padx=(10, 0))
         project["Quotation Number"] = tk.StringVar()
-        tk.Entry(project_frame, width=34, font=self.conf["font"], fg="blue",
+        tk.Entry(project_frame, width=45, font=self.conf["font"], fg="blue",
                  textvariable=project["Quotation Number"]).grid(row=1,
                                                                 column=1,
                                                                 columnspan=2,
                                                                 padx=(0, 10))
+
+        tk.Label(project_frame, width=30, text="Project Number", font=self.conf["font"]).grid(row=2, column=0,
+                                                                                              padx=(10, 0))
+        project["Project Number"] = tk.StringVar()
+        tk.Entry(project_frame, width=45, font=self.conf["font"], fg="blue",
+                 textvariable=project["Project Number"]).grid(row=2, column=1, columnspan=2, padx=(0, 10))
+
+
         save_load_frame = tk.Frame(project_frame)
         save_load_frame.grid(row=1, column=3, rowspan=2)
 
@@ -80,16 +88,6 @@ class ProjectInfoPage(tk.Frame):
                   font=self.conf["font"]).grid(row=0, column=0)
         tk.Button(save_load_frame, width=8, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(save_load_frame, width=10, height=2, text="Open Folder", command=self.open_folder, bg="brown",
-                  fg="white",
-                  font=self.conf["font"]).grid(row=0, column=2)
-
-
-        tk.Label(project_frame, width=30, text="Project Number", font=self.conf["font"]).grid(row=2, column=0,
-                                                                                              padx=(10, 0))
-        project["Project Number"] = tk.StringVar()
-        tk.Entry(project_frame, width=34, font=self.conf["font"], fg="blue",
-                 textvariable=project["Project Number"]).grid(row=2, column=1, columnspan=2, padx=(0, 10))
 
         project["Project Name"].trace("w", self._update_quotation_number)
 
@@ -119,20 +117,17 @@ class ProjectInfoPage(tk.Frame):
                 button.grid(row=6, column=i - 5, sticky="W")
 
         service_types = ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service",
-                         "Kitchen Ventilation", "Mech Review",
-                         "Installation", "Miscellaneous"]
+                         "Kitchen Ventilation", "Mech Review", "Installation", "Miscellaneous"]
 
         tk.Label(project_frame, width=30, text="Service Type", font=self.conf["font"]).grid(row=7, column=0)
 
-        project["Service Type"] = []
+        project["Service Type"] = {}
         for i, service in enumerate(service_types):
-            project["Service Type"].append(
-                {
-                    "Service": tk.StringVar(value=service),
-                    "Include": tk.BooleanVar()
-                }
-            )
-            button = tk.Checkbutton(project_frame, text=service, variable=project["Service Type"][i]["Include"],
+            project["Service Type"][service] = {
+                "Service": tk.StringVar(value=service),
+                "Include": tk.BooleanVar()
+            }
+            button = tk.Checkbutton(project_frame, text=service, variable=project["Service Type"][service]["Include"],
                                     font=self.conf["font"])
             if i < 3:
                 button.grid(row=7, column=i + 1, sticky="W")
@@ -141,14 +136,10 @@ class ProjectInfoPage(tk.Frame):
             else:
                 button.grid(row=9, column=i - 5, sticky="W")
 
-        project["Service Type"][0]["Include"].trace("w",
-                                                    lambda a, b, c: self._update_service(project["Service Type"][0]))
-        project["Service Type"][2]["Include"].trace("w",
-                                                    lambda a, b, c: self._update_service(project["Service Type"][2]))
-        project["Service Type"][3]["Include"].trace("w",
-                                                    lambda a, b, c: self._update_service(project["Service Type"][3]))
-        project["Service Type"][4]["Include"].trace("w",
-                                                    lambda a, b, c: self._update_service(project["Service Type"][4]))
+        project["Service Type"]["Mechanical Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Mechanical Service"]))
+        project["Service Type"]["Electrical Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Electrical Service"]))
+        project["Service Type"]["Hydraulic Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Hydraulic Service"]))
+        project["Service Type"]["Fire Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Fire Service"]))
 
 
     def client_part(self):
@@ -346,18 +337,6 @@ class ProjectInfoPage(tk.Frame):
             messagebox.showerror("Error", f"The quotation {quotation_number} number doesn't exist")
         else:
             load(self.app)
-
-    def open_folder(self):
-        quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
-        folder_name = self.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                      self.data["Project Info"]["Project"]["Project Name"].get()
-        folder_path = os.path.join(self.conf["working_dir"], folder_name)
-        if len(quotation_number) == 0:
-            messagebox.showerror("Error", "Please enter a Quotation Number before you load")
-        elif not os.path.exists(folder_path):
-            messagebox.showerror("Error", f"Python cannot find the folder {folder_path}")
-        else:
-            webbrowser.open(folder_path)
 
 
     def quote_unsuccessful(self):

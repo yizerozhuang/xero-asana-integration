@@ -61,8 +61,8 @@ def update_asana(app, *args):
             "name": data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get(),
             "custom_fields": {
                 custom_field_id_map["Status"]: status_id_map["Fee Proposal"],
-                custom_field_id_map["Services"]: [service_id_map[service["Service"].get()] for service in
-                                                  data["Project Info"]["Project"]["Service Type"] if service["Include"].get()],
+                custom_field_id_map["Services"]: [service_id_map[key] for key, value in
+                                                  data["Project Info"]["Project"]["Service Type"].items() if value["Include"].get() and not value["Archive"].get()],
                 custom_field_id_map["Shop name"]: data["Project Info"]["Project"]["Shop Name"].get(),
                 custom_field_id_map["Apt/Room/Area"]: data["Project Info"]["Building Features"]["Total Area"].get() + "m2",
                 custom_field_id_map["Feature/Notes"]: data["Project Info"]["Building Features"]["Feature/Notes"].get(),
@@ -85,9 +85,12 @@ def rename_asana_project(app, old_folder, *args):
 
     all_task = clearn_response(task_api_instance.get_tasks(project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
 
+
+
     task_id_map = name_id_map(all_task)
     if old_folder in task_id_map.keys():
         task_id = task_id_map[old_folder]
+
         body = asana.TasksTaskGidBody(
             {
                 "name": data["Project Info"]["Project"]["Quotation Number"].get() + "-" +
@@ -97,3 +100,110 @@ def rename_asana_project(app, old_folder, *args):
         task_api_instance.update_task(task_gid=task_id, body=body)
         return True
     return False
+
+def change_asana_quotation(app, new_quotation):
+    data = app.data
+    all_projects = clearn_response(project_api_instance.get_projects_for_workspace(workspace_gid))
+    projects_id_map = name_id_map(all_projects)
+    all_task = clearn_response(task_api_instance.get_tasks(project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
+    task_id_map = name_id_map(all_task)
+    # try:
+    old_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
+    task_id = task_id_map[old_name]
+
+    all_custom_fields = clearn_response(task_api_instance.get_task(task_id))["custom_fields"]
+    custom_field_id_map = name_id_map(all_custom_fields)
+
+    status_field = clearn_response(custom_fields_api_instance.get_custom_field(custom_field_id_map["Status"]))
+    status_id_map = name_id_map(status_field["enum_options"])
+
+    body = asana.TasksTaskGidBody(
+        {
+            "name": new_quotation + "-" + data["Project Info"]["Project"]["Project Name"].get(),
+            "custom_fields": {custom_field_id_map["Status"]: status_id_map["Design"]}
+        }
+    )
+    task_api_instance.update_task(task_gid=task_id, body=body)
+    # except KeyError as e:
+    #     print(e)
+    #     messagebox.showerror("Error", "Cannot found the asana project, please contact the admin")
+
+def update_asana_invoices(app):
+    data = app.data
+
+    all_projects = clearn_response(project_api_instance.get_projects_for_workspace(workspace_gid))
+    projects_id_map = name_id_map(all_projects)
+    all_task = clearn_response(task_api_instance.get_tasks(project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
+    task_id_map = name_id_map(all_task)
+    task_id = task_id_map[app.data["Project Info"]["Project"]["Quotation Number"].get()+"-"+app.data["Project Info"]["Project"]["Project Name"].get()]
+
+    all_subtask = clearn_response(task_api_instance.get_subtasks_for_task(task_id))
+    subtask_id_map = name_id_map(all_subtask)
+
+    for key, value in subtask_id_map.items():
+        if key.startswith("INV "):
+            inv_id = value
+            break
+
+    # inv_id = subtask_id_map["INV 3xxxxx, 1 of 1, refer checklist inside."]
+
+    invoices = {
+        "INV1": [],
+        "INV2": [],
+        "INV3": [],
+        "INV4": [],
+        "INV5": [],
+        "INV6": []
+    }
+
+    for inv in ["INV1", "INV2", "INV3", "INV4", "INV5", "INV6"]:
+        for key, service in data["Invoices"]["Details"].items():
+            if service["Expand"].get():
+                for i in range(app.conf["n_items"]):
+                    if service["Content"][i]["Number"].get() == inv:
+                        invoices[inv].append(
+                            {
+                                "Service": service["Content"][i]["Service"].get(),
+                                "Fee": service["Content"][i]["Fee"].get()
+                            }
+                        )
+            else:
+                if service["Number"].get() == inv:
+                    invoices[inv].append(
+                        {
+                            "Service": service["Service"].get(),
+                            "Fee": service["Fee"].get()
+                        }
+                    )
+    invoices_list = []
+    for key, value in invoices.items():
+        if len(value) != 0:
+            invoices_list.append(value)
+
+    all_custom_fields = clearn_response(task_api_instance.get_task(inv_id))["custom_fields"]
+    custom_field_id_map = name_id_map(all_custom_fields)
+
+    status_field = clearn_response(custom_fields_api_instance.get_custom_field(custom_field_id_map["Invoice Status"]))
+    status_id_map = name_id_map(status_field["enum_options"])
+
+    body = asana.TasksTaskGidBody(
+        {
+            "name": "INV " + data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get(),
+            "custom_fields":{
+                custom_field_id_map["Invoice Status"]: status_id_map["Draft"],
+                custom_field_id_map["Net"]: str(sum([float(item["Fee"]) for item in invoices["INV1"]]))
+            }
+        }
+    )
+    task_api_instance.update_task(task_gid=inv_id, body=body)
+    for i in range(len(invoices_list)-1):
+        name = "INV " + data["Financial Panel"]["Invoice Details"][f"INV{i+2}"]["Number"].get() if len(data["Financial Panel"]["Invoice Details"][f"INV{i+2}"]["Number"].get()) !=0 else "INV 3xxxxx"
+        body = asana.TasksTaskGidBody(
+            {
+                "name": name,
+                "include":["parent"]
+            }
+        )
+        task_api_instance.duplicate_task(body=body, task_gid=inv_id)
+
+

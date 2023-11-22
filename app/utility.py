@@ -13,8 +13,7 @@ import subprocess
 from config import CONFIGURATION
 
 def reset(app):
-    database_dir = os.path.join(app.conf["database_dir"], app.data["Project Info"]["Project"]["Quotation Number"].get())
-    if os.path.exists(database_dir) and len(app.data["Project Info"]["Project"]["Quotation Number"].get()) != 0:
+    if len(app.data["Project Info"]["Project"]["Quotation Number"].get()) != 0:
         save(app)
     database_dir = os.path.join(app.conf["database_dir"], "data_template.json")
     template_json = json.load(open(database_dir))
@@ -217,11 +216,28 @@ def rename_project(app):
         if folder[:5].isdigit():
             quotation_number, project_name = folder.split("-", 1)
             old_dir = os.path.join(working_dir, folder)
-            new_dir = os.path.join(working_dir,
-                                   f'{data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}')
-            if quotation_number == data["Project Info"]["Project"]["Quotation Number"].get() or project_name == data["Project Info"]["Project"]["Project Name"].get():
+            new_dir = os.path.join(working_dir, f'{data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}')
+            if quotation_number == data["Project Info"]["Project"]["Quotation Number"].get():
                 os.rename(old_dir, new_dir)
                 return folder
+
+def change_quotation_number(app, new_quotation_number):
+    working_dir = app.conf["working_dir"]
+    database_dir = app.conf["database_dir"]
+
+    old_folder_name = app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + app.data["Project Info"]["Project"]["Project Name"].get()
+    old_folder = os.path.join(working_dir, old_folder_name)
+
+    new_folder = os.path.join(working_dir, new_quotation_number + "-" + app.data["Project Info"]["Project"]["Project Name"].get())
+
+    if not os.path.exists(old_folder):
+        messagebox.showerror("Error", f"Can not found the folder {old_folder_name}")
+        return
+
+    os.rename(old_folder, new_folder)
+    old_database = os.path.join(database_dir, app.data["Project Info"]["Project"]["Quotation Number"].get())
+    new_database = os.path.join(database_dir, new_quotation_number)
+    os.rename(old_database, new_database)
 
 def rename_new_folder(app):
     data = app.data
@@ -284,11 +300,12 @@ def _check_fee(app):
 
 def excel_print_pdf(app, *args):
     data = app.data
-    pdf_name = f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
+    pdf_name = _get_proposal_name(app)
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
-    services = [key for key in data["Fee Proposal"]["Scope"].keys()]
+    services = [key for key, value in data["Project Info"]["Project"]["Service Type"].items() if value['Include'].get()]
+    adobe = win32client.dynamic.Dispatch("AcroExch.AVDoc")
     page = len(services) // 2 + 1
 
     if not data["State"]["Set Up"].get():
@@ -307,14 +324,17 @@ def excel_print_pdf(app, *args):
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
     pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
                 str(file).startswith("Mechanical Fee Proposal")]
+
     if len(pdf_list) != 0:
         current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"]["Revision"].get() == str(int(current_revision) + 1):
             old_pdf_path = os.path.join(database_dir, f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {current_revision}.pdf')
-            ps = subprocess.Popen([old_pdf_path], shell=True)
+            adobe.open(old_pdf_path, old_pdf_path)
             overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
             if not overwrite:
                 return
+            else:
+                adobe.close(0)
         else:
             messagebox.showerror("Error",
                                  f'Current revision is {current_revision}, you can not use revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
@@ -349,7 +369,7 @@ def excel_print_pdf(app, *args):
         work_sheets.Cells(2, 8).Value = data["Fee Proposal"]["Reference"]["Date"].get()
         work_sheets.Cells(3, 8).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
         work_sheets.Cells(6, 1).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
-        work_sheets.Cells(8, 1).Value = f"Thank you for giving us the opportunity to submit this fee proposal for our {', '.join([value['Service'].get() for value in data['Project Info']['Project']['Service Type'] if value['Include'].get()])} for the above project."
+        work_sheets.Cells(8, 1).Value = f"Thank you for giving us the opportunity to submit this fee proposal for our {', '.join([key for key, value in data['Project Info']['Project']['Service Type'].items() if value['Include'].get()])} for the above project."
         work_sheets.Cells(16, 7).Value = data["Fee Proposal"]["Time"]["Fee Proposal"]["Start"].get() + "-" + \
                                          data["Fee Proposal"]["Time"]["Fee Proposal"]["End"].get()
         work_sheets.Cells(21, 7).Value = data["Fee Proposal"]["Time"]["Pre-design"]["Start"].get() + "-" + \
@@ -359,8 +379,8 @@ def excel_print_pdf(app, *args):
         cur_row = 52
         cur_index = 1
         for i, _ in enumerate(data['Fee Proposal']['Scope'].items()):
-            cur_row = cur_row if i % 2 == 0 else 84 + (i - 1) // 2 * 46
             key, service = _
+            cur_row = cur_row if i % 2 == 0 else 84 + (i - 1) // 2 * 46
             extra_list = ["Extend", "Exclusion", "Deliverables"]
             for extra in extra_list:
                 work_sheets.Cells(cur_row, 1).Value = "2." + str(cur_index)
@@ -405,7 +425,7 @@ def excel_print_pdf(app, *args):
         print(e)
     else:
         app.data["State"]["Generate Proposal"].set(True)
-        webbrowser.open(os.path.join(database_dir, pdf_name))
+        adobe.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
         save(app)
         config_state(app)
         app.log.log_fee_proposal(app)
@@ -415,8 +435,13 @@ def excel_print_pdf(app, *args):
         excel.DisplayAlerts = True
         excel.EnableEvents = True
         work_book.Close(True)
+        adobe.close(0)
     except:
         pass
+
+def _get_proposal_name(app):
+    data = app.data
+    return f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
 
 def excel_print_invoice(app, inv):
     inv = f"INV{str(inv+1)}"
@@ -541,9 +566,13 @@ def email(app, *args):
 
     if not "OUTLOOK.EXE" in (p.name() for p in psutil.process_iter()):
         os.startfile("outlook")
+
+    # user_email_dic = json.load(open(os.path.join(app.conf["database_dir"], "user_email.json")))
+
     ol = win32client.Dispatch("Outlook.Application")
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
+    # newmail.From = user_email_dic[app.user]
     newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-Mechanical Fee Proposal - {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
     newmail.CC = "felix@pcen.com.au"

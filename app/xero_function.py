@@ -1,4 +1,4 @@
-from xero_python.accounting import AccountingApi, Account, AccountType, Contact, Contacts, Phone, LineItem, Invoice, Invoices
+from xero_python.accounting import AccountingApi, Account, AccountType, Contact, Contacts, Phone, LineItem, Invoice, Invoices, Bill
 from xero_python.api_client import ApiClient
 from xero_python.api_client.configuration import Configuration
 from xero_python.api_client.oauth2 import OAuth2Token
@@ -9,13 +9,18 @@ from flask import Flask, url_for, redirect
 from flask_oauthlib.contrib.client import OAuth, OAuth2Application
 from flask_session import Session
 
+from tkinter import messagebox
+
 from utility import remove_none
+from asana_function import update_asana_invoices
+
 
 import _thread
 from datetime import datetime
 import webbrowser
 from functools import wraps
 import os
+
 
 # configure main flask application
 flask_app = Flask(__name__)
@@ -131,6 +136,18 @@ def get_xero_tenant_id():
     for connection in identity_api.get_connections():
         if connection.tenant_type == "ORGANISATION":
             return connection.tenant_id
+def contact_name_contact_id(api_list):
+    res = dict()
+    for item in api_list:
+        res[item["name"]] = item["contact_id"]
+    return res
+
+def invoice_number_invoice_id(api_list):
+    res = dict()
+    for item in api_list:
+        res[item["invoice_number"]] = item["invoice_id"]
+    return res
+
 @xero_token_required
 def update_xero(app, contact_name):
     data = app.data
@@ -140,18 +157,13 @@ def update_xero(app, contact_name):
         xero_tenant_id
     )
     contacts_list = remove_none(contacts.to_dict())["contacts"]
-    def contact_name_contact_id(api_list):
-        res = dict()
-        for item in api_list:
-            res[item["name"]] = item["contact_id"]
-        return res
     # need to handle if it's not in the client
     contacts_name_map = contact_name_contact_id(contacts_list)
     if contact_name in contacts_name_map.keys():
         contact_id = contacts_name_map[contact_name]
         contact = Contact(contact_id)
     else:
-        contact = create_contact(app, contact_name)
+        contact = Contact(create_contact(app, contact_name))
 
     # we need an account of type BANK
     # where = "Type==\"BANK\""
@@ -163,57 +175,87 @@ def update_xero(app, contact_name):
     #     account = Account(account_id=account_id)
     # except AccountingBadRequestException as exception:
     #     pass
-    #only first one
-    line_item_list = []
-    for key, service in data["Invoices"]["Details"].items():
-        if service["Expand"].get():
-            for i in range(3):
-                if service["Content"][i]["Number"].get() == "INV1":
+    all_invoices = remove_none(accounting_api.get_invoices(xero_tenant_id).to_dict())["invoices"]
+    invoice_number_map = invoice_number_invoice_id(all_invoices)
+
+    invoices_list = []
+    for inv in ["INV1", "INV2", "INV3", "INV4", "INV5", "INV6"]:
+        if len(app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0 or app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get() in invoice_number_map.keys():
+            continue
+        line_item_list = []
+        for key, service in data["Invoices"]["Details"].items():
+            if service["Expand"].get():
+                for i in range(app.conf["n_items"]):
+                    if service["Content"][i]["Number"].get() == inv:
+                        try:
+                            line_item_list.append(
+                                LineItem(
+                                    description=service["Content"][i]["Service"].get(),
+                                    quantity=1,
+                                    unit_amount=int(service["Content"][i]["Fee"].get()),
+                                    account_code="200"
+                                )
+                            )
+                        except ValueError:
+                            continue
+            else:
+                if service["Number"].get() == inv:
                     try:
                         line_item_list.append(
                             LineItem(
-                                description=service["Content"][i]["Service"].get(),
+                                description=key,
                                 quantity=1,
-                                unit_amount=int(service["Content"][i]["Fee"].get()),
+                                unit_amount=int(service["Fee"].get()),
                                 account_code="200"
                             )
                         )
                     except ValueError:
                         continue
-        else:
-            if service["Number"].get() == "INV1":
-                try:
-                    line_item_list.append(
+        invoices_list.append(
+            Invoice(
+                type="ACCREC",
+                contact=contact,
+                date=datetime.today(),
+                due_date=datetime.today(),
+                line_items=line_item_list,
+                invoice_number=data["Financial Panel"]["Invoice Details"][inv]["Number"].get(),
+                reference=data["Project Info"]["Project"]["Project Name"].get(),
+                status="DRAFT"
+            )
+        )
+
+    for bill in app.data["Bills"]["Details"].values():
+        for sub_bill in bill["Content"]:
+            bill_number = app.data["Project Info"]["Project"]["Quotation Number"].get() + sub_bill["Number"].get()
+            if len(sub_bill["Number"].get()) == 0:
+                continue
+            invoices_list.append(
+                Invoice(
+                    type="ACCPAY",
+                    contact=contact,
+                    date=datetime.today(),
+                    due_date=datetime.today(),
+                    line_items=[
                         LineItem(
-                            description=key,
+                            description=sub_bill["Service"].get(),
                             quantity=1,
-                            unit_amount=int(service["Fee"].get()),
+                            unit_amount=int(sub_bill["Fee"].get()),
                             account_code="200"
                         )
-                    )
-                except ValueError:
-                    continue
-    # we need multiple invoices
+                    ],
+                    invoice_number=bill_number,
+                    reference=data["Project Info"]["Project"]["Project Name"].get(),
+                    status="DRAFT"
+                )
+            )
 
-    invoice_1 = Invoice(
-        type="ACCREC",
-        contact=contact,
-        date=datetime.today(),
-        due_date=datetime.today(),
-        line_items=line_item_list,
-        invoice_number=data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get(),
-        reference=data["Project Info"]["Project"]["Project Name"].get(),
-        status="DRAFT"
-    )
-    invoices = Invoices(invoices=[invoice_1])
+    invoices = Invoices(invoices=invoices_list)
 
-    try:
-        created_invoices = accounting_api.create_invoices(
-            xero_tenant_id, invoices
-        )
-        invoice_1_id = getvalue(created_invoices, "invoices.0.invoice_id", "")
-    except AccountingBadRequestException as exception:
-        pass
+    accounting_api.update_or_create_invoices(xero_tenant_id, invoices)
+    update_asana_invoices(app)
+
+
+    messagebox.showinfo("Update", "the invoices and bill is updated to xero")
 
     #[BATCHPAYMENTS:CREATE]
     # xero_tenant_id = get_xero_tenant_id()
@@ -257,16 +299,8 @@ def update_xero(app, contact_name):
 
 @xero_token_required
 def create_contact(app, name):
-    data = app.data
     xero_tenant_id = get_xero_tenant_id()
     accounting_api = AccountingApi(api_client)
-    # phones = []
-    # if data["Project Info"]["Client"]["Contact Number"].get() !=0:
-    #     phone = Phone(
-    #         phone_number=data["Project Info"]["Client"]["Contact Number"].get(),
-    #         phone_type="MOBILE"
-    #     )
-    #     phones.append(phone)
 
     new_contact = Contact(
         name=name
@@ -275,5 +309,4 @@ def create_contact(app, name):
 
 
     api_response = accounting_api.create_contacts(xero_tenant_id, contacts)
-    print(api_response)
-    return api_response["contacts"][0]
+    return api_response.to_dict()["contacts"][0]["contact_id"]

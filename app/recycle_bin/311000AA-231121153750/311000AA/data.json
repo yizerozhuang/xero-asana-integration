@@ -14,49 +14,58 @@
     },
     "Project Info": {
         "Project": {
-            "Project Name": "test_fee_proposal",
+            "Project Name": "test",
             "Quotation Number": "311000AA",
             "Project Number": "",
             "Shop Name": "",
             "Project Type": "Restaurant",
-            "Service Type": [
-                {
+            "Service Type": {
+                "Mechanical Service": {
+                    "Archive": false,
                     "Service": "Mechanical Service",
                     "Include": true
                 },
-                {
+                "CFD Service": {
+                    "Archive": false,
                     "Service": "CFD Service",
-                    "Include": true
+                    "Include": false
                 },
-                {
+                "Electrical Service": {
+                    "Archive": false,
                     "Service": "Electrical Service",
                     "Include": true
                 },
-                {
+                "Hydraulic Service": {
+                    "Archive": true,
                     "Service": "Hydraulic Service",
-                    "Include": true
+                    "Include": false
                 },
-                {
+                "Fire Service": {
+                    "Archive": false,
                     "Service": "Fire Service",
-                    "Include": true
+                    "Include": false
                 },
-                {
+                "Kitchen Ventilation": {
+                    "Archive": false,
                     "Service": "Kitchen Ventilation",
                     "Include": false
                 },
-                {
+                "Mech Review": {
+                    "Archive": false,
                     "Service": "Mech Review",
                     "Include": false
                 },
-                {
+                "Installation": {
+                    "Archive": false,
                     "Service": "Installation",
                     "Include": false
                 },
-                {
+                "Miscellaneous": {
+                    "Archive": false,
                     "Service": "Miscellaneous",
                     "Include": false
                 }
-            ]
+            }
         },
         "Client": {
             "Client Full Name": "",
@@ -137,8 +146,8 @@
     },
     "Fee Proposal": {
         "Reference": {
-            "Date": "20-Nov-2023",
-            "Revision": "1"
+            "Date": "21-Nov-2023",
+            "Revision": "2"
         },
         "Time": {
             "Fee Proposal": {
@@ -366,73 +375,18 @@
                         "Item": "Coordination with related services"
                     }
                 ]
-            },
-            "Fire Service": {
-                "Extend": [
-                    {
-                        "Include": true,
-                        "Item": "The emergency lights, exit and directional signage"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "Automatic Detection and warning System"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "Portable Fire Extinguisher System"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "Sprinkler system"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "Liaise with relevant authorities and consultants"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "1 off site visit"
-                    }
-                ],
-                "Exclusion": [
-                    {
-                        "Include": true,
-                        "Item": "BCA DTS requirement compliance"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "Any applicable fire engineering report by C10 Fire Engineer"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "Section 74B certificate based on base building fire safety measures"
-                    }
-                ],
-                "Deliverables": [
-                    {
-                        "Include": true,
-                        "Item": "Full set of Fire Protection Service drawings in PDF format"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "Fire Protection Service design certificate"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "Coordination with related services"
-                    }
-                ]
             }
         }
     },
     "Invoices": {
         "Details": {
             "Mechanical Service": {
+                "Archive": false,
                 "Service": "Mechanical Service",
                 "Fee": "1000",
                 "in.GST": "1100.0",
                 "Expand": false,
-                "Number": "None",
+                "Number": "INV2",
                 "Content": [
                     {
                         "Service": "",
@@ -461,23 +415,24 @@
                 ]
             },
             "Electrical Service": {
+                "Archive": false,
                 "Service": "Electrical Service",
-                "Fee": "2000",
-                "in.GST": "2200.0",
-                "Expand": false,
+                "Fee": "400.0",
+                "in.GST": "440.0",
+                "Expand": true,
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
+                        "Service": "item1",
+                        "Fee": "200",
+                        "in.GST": "220.0",
+                        "Number": "INV1"
                     },
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
+                        "Service": "item2",
+                        "Fee": "200",
+                        "in.GST": "220.0",
+                        "Number": "INV2"
                     },
                     {
                         "Service": "",
@@ -494,42 +449,10 @@
                 ]
             },
             "Hydraulic Service": {
+                "Archive": true,
                 "Service": "Hydraulic Service",
-                "Fee": "2000",
-                "in.GST": "2200.0",
-                "Expand": false,
-                "Number": "None",
-                "Content": [
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
-                    }
-                ]
-            },
-            "Fire Service": {
-                "Service": "Fire Service",
-                "Fee": "1000",
-                "in.GST": "1100.0",
+                "Fee": "",
+                "in.GST": "",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -560,8 +483,8 @@
                 ]
             }
         },
-        "Fee": "6000.0",
-        "in.GST": "6600.0"
+        "Fee": "1400.0",
+        "in.GST": "1540.0"
     },
     "Variation": [
         {
@@ -574,32 +497,32 @@
             "Service": "",
             "Fee": "",
             "in.GST": "",
-            "Number": "None"
+            "Number": "INV3"
         },
         {
             "Service": "",
             "Fee": "",
             "in.GST": "",
-            "Number": "None"
+            "Number": "INV1"
         },
         {
             "Service": "",
             "Fee": "",
             "in.GST": "",
-            "Number": "None"
+            "Number": "INV2"
         }
     ],
     "Financial Panel": {
         "Invoice Details": {
             "INV1": {
                 "Number": "",
-                "Fee": "0",
-                "in.GST": "0.0"
+                "Fee": "200.0",
+                "in.GST": "220.0"
             },
             "INV2": {
                 "Number": "",
-                "Fee": "0",
-                "in.GST": "0.0"
+                "Fee": "1200.0",
+                "in.GST": "1320.0"
             },
             "INV3": {
                 "Number": "",
@@ -652,6 +575,7 @@
     "Bills": {
         "Details": {
             "Mechanical Service": {
+                "Archive": "0",
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -660,19 +584,13 @@
                 "V1": "",
                 "V2": "",
                 "V3": "",
-                "Paid": "",
+                "Paid": "1000.0",
                 "Content": [
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": ""
+                        "Service": "elec 30%",
+                        "Fee": "1000",
+                        "in.GST": "1100.0",
+                        "Number": "A"
                     },
                     {
                         "Service": "",
@@ -689,6 +607,7 @@
                 ]
             },
             "Electrical Service": {
+                "Archive": "0",
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -699,12 +618,6 @@
                 "V3": "",
                 "Paid": "",
                 "Content": [
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": ""
-                    },
                     {
                         "Service": "",
                         "Fee": "",
@@ -726,6 +639,7 @@
                 ]
             },
             "Hydraulic Service": {
+                "Archive": "1",
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -736,49 +650,6 @@
                 "V3": "",
                 "Paid": "",
                 "Content": [
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": ""
-                    }
-                ]
-            },
-            "Fire Service": {
-                "Service": "",
-                "Fee": "",
-                "in.GST": "",
-                "Number": "",
-                "Ori": "",
-                "V1": "",
-                "V2": "",
-                "V3": "",
-                "Paid": "",
-                "Content": [
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": ""
-                    },
                     {
                         "Service": "",
                         "Fee": "",
@@ -806,8 +677,8 @@
     "Profits": {
         "Details": {
             "Mechanical Service": {
-                "Fee": "1000",
-                "in.GST": "1100",
+                "Fee": "",
+                "in.GST": "",
                 "Context": [
                     {
                         "Fee": "",
@@ -828,52 +699,8 @@
                 ]
             },
             "Electrical Service": {
-                "Fee": "2000",
-                "in.GST": "2200",
-                "Context": [
-                    {
-                        "Fee": "",
-                        "in.GST": ""
-                    },
-                    {
-                        "Fee": "",
-                        "in.GST": ""
-                    },
-                    {
-                        "Fee": "",
-                        "in.GST": ""
-                    },
-                    {
-                        "Fee": "",
-                        "in.GST": ""
-                    }
-                ]
-            },
-            "Hydraulic Service": {
-                "Fee": "2000",
-                "in.GST": "2200",
-                "Context": [
-                    {
-                        "Fee": "",
-                        "in.GST": ""
-                    },
-                    {
-                        "Fee": "",
-                        "in.GST": ""
-                    },
-                    {
-                        "Fee": "",
-                        "in.GST": ""
-                    },
-                    {
-                        "Fee": "",
-                        "in.GST": ""
-                    }
-                ]
-            },
-            "Fire Service": {
-                "Fee": "1000",
-                "in.GST": "1100",
+                "Fee": "",
+                "in.GST": "",
                 "Context": [
                     {
                         "Fee": "",
@@ -894,7 +721,7 @@
                 ]
             }
         },
-        "Fee": "6000.0",
-        "in.GST": "6600.0"
+        "Fee": "1400.0",
+        "in.GST": "1540.0"
     }
 }
