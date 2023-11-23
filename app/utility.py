@@ -183,8 +183,6 @@ def config_log(app):
 
 def get_quotation_number():
     working_dir = CONFIGURATION["database_dir"]
-
-
     current_quotation_list = [dir for dir in os.listdir(working_dir) if
                               dir.startswith(date.today().strftime("%y%m000")[1:])]
     if len(current_quotation_list) == 0:
@@ -293,7 +291,7 @@ def create_new_folder(folder_name, conf):
 def _check_fee(app):
     data = app.data
     for service_fee in data["Invoices"]["Details"].values():
-        if len(service_fee["Fee"].get()) == 0:
+        if len(service_fee["Fee"].get()) == 0 and service_fee["Service"].get() != "Variation":
             return False
     return True
 
@@ -329,7 +327,8 @@ def excel_print_pdf(app, *args):
         current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"]["Revision"].get() == str(int(current_revision) + 1):
             old_pdf_path = os.path.join(database_dir, f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {current_revision}.pdf')
-            adobe.open(old_pdf_path, old_pdf_path)
+            # adobe.open(old_pdf_path, old_pdf_path)
+            webbrowser.open(old_pdf_path)
             overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
             if not overwrite:
                 return
@@ -346,7 +345,7 @@ def excel_print_pdf(app, *args):
 
     total_fee = 0
     total_ist = 0
-    for service in data["Invoices"]["Details"].values():
+    for service in [value for value in data["Invoices"]["Details"].values() if value["Service"].get() != "Variation"]:
         total_fee += float(service["Fee"].get())
         total_ist += float(service["in.GST"].get())
     try:
@@ -401,7 +400,7 @@ def excel_print_pdf(app, *args):
             work_sheets.Cells(cur_row + i, 1).Value = "•"
             work_sheets.Cells(cur_row + i, 2).Value = project
         cur_row += 34
-        for i, service in enumerate(data["Invoices"]["Details"].values()):
+        for i, service in enumerate([ value for value in data["Invoices"]["Details"].values() if value["Service"].get() != "Variation"]):
             work_sheets.Cells(cur_row + i, 2).Value = service["Service"].get() + " design and documentation"
             work_sheets.Cells(cur_row + i, 6).Value = service["Fee"].get()
             work_sheets.Cells(cur_row + i, 7).Value = service["in.GST"].get()
@@ -425,7 +424,8 @@ def excel_print_pdf(app, *args):
         print(e)
     else:
         app.data["State"]["Generate Proposal"].set(True)
-        adobe.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
+        # adobe.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
+        webbrowser.open(os.path.join(database_dir, pdf_name))
         save(app)
         config_state(app)
         app.log.log_fee_proposal(app)
@@ -435,7 +435,7 @@ def excel_print_pdf(app, *args):
         excel.DisplayAlerts = True
         excel.EnableEvents = True
         work_book.Close(True)
-        adobe.close(0)
+        # adobe.close(0)
     except:
         pass
 
@@ -575,7 +575,7 @@ def email(app, *args):
     # newmail.From = user_email_dic[app.user]
     newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-Mechanical Fee Proposal - {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au"
+    newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
@@ -672,3 +672,39 @@ def email_invoice(app, inv):
     newmail.Attachments.Add(os.path.join(database_dir, pdf_name))
     save(app)
     config_state(app)
+
+def get_invoice_item(app):
+    data = app.data
+    res = {
+        "INV1": [],
+        "INV2": [],
+        "INV3": [],
+        "INV4": [],
+        "INV5": [],
+        "INV6": []
+    }
+    for inv in res.keys():
+        for key, service in data["Invoices"]["Details"].items():
+            if service["Expand"].get():
+                for i in range(app.conf["n_items"]):
+                    if len(service["Content"][i]["Service"].get()) == 0 or len(service["Content"][i]["Fee"].get()) == 0:
+                        continue
+                    if service["Content"][i]["Number"].get() == inv:
+
+                        res[inv].append(
+                            {
+                                "Item": service["Content"][i]["Service"].get(),
+                                "Fee": service["Content"][i]["Fee"].get(),
+                                "in.GST": service["Content"][i]["in.GST"].get()
+                            }
+                        )
+            else:
+                if service["Number"].get() == inv:
+                    res[inv].append(
+                        {
+                            "Item": service["Content"][i]["Service"].get(),
+                            "Fee": service["Content"][i]["Fee"].get(),
+                            "in.GST": service["Content"][i]["in.GST"].get()
+                        }
+                    )
+    return res

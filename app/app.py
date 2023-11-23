@@ -45,7 +45,7 @@ class App(tk.Tk):
         self.change_page_frame()
         self.main_context_frame()
 
-        self.show_frame(self.page_info_page)
+        self.show_frame(self.project_info_page)
 
         self.protocol("WM_DELETE_WINDOW", self.confirm)
         config_state(self)
@@ -154,7 +154,7 @@ class App(tk.Tk):
         change_page_frame.pack(side=tk.BOTTOM)
 
         tk.Button(change_page_frame, text="Project Info",
-                  command=lambda: self.show_frame(self.page_info_page), bg="green", fg="black",
+                  command=lambda: self.show_frame(self.project_info_page), bg="green", fg="black",
                   font=self.conf["font"]).grid(row=0, column=0)
         tk.Button(change_page_frame, text="Fee Details",
                   command=lambda: self.show_frame(self.fee_proposal_page), bg="green", fg="black",
@@ -168,16 +168,88 @@ class App(tk.Tk):
 
     def main_context_frame(self):
         # main frame page
-        self.page_info_page = ProjectInfoPage(self.main_frame, self)
+        self.project_info_page = ProjectInfoPage(self.main_frame, self)
         # self.fee_accepted_page = FeeAcceptedPage(self.main_frame, self)
         self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
         self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
+        self._update_variation()
+    def _update_variation(self):
+        # variation = [
+        #     {
+        #         "Service": tk.StringVar(),
+        #         "Fee": tk.StringVar(),
+        #         "in.GST": tk.StringVar(),
+        #         "Number": tk.StringVar(value="None")
+        #     } for _ in range(self.conf["n_variation"])
+        # ]
+        # self.data["Variation"] = variation
+        # ist_update_fuc = lambda i: lambda a, b, c: self.app._ist_update(variation[i]["Fee"], variation[i]["in.GST"])
+        # for i in range(self.conf["n_variation"]):
+        #     variation[i]["Fee"].trace("w", ist_update_fuc(i))
+        #     variation[i]["Fee"].trace("w", self.update_sum)
+        #
+        # for i in range(self.conf["n_variation"]):
+        #     variation_frame = tk.LabelFrame(self.fee_frame)
+        #     variation_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        #     tk.Label(variation_frame, width=10, text="", font=self.conf["font"]).grid(row=0, column=0)
+        #     tk.Entry(variation_frame, width=50, textvariable=variation[i]["Service"], font=self.conf["font"],
+        #              fg="blue").grid(row=0, column=1)
+        #     tk.Entry(variation_frame, width=20, textvariable=variation[i]["Fee"], font=self.conf["font"],
+        #              fg="blue").grid(row=0, column=2, padx=(40, 0))
+        #     tk.Label(variation_frame, width=20, textvariable=variation[i]["in.GST"], font=self.conf["font"]).grid(row=0,
+        #                                                                                                           column=3)
+
+        variation_var = {
+            "Service": tk.StringVar(value="Variation"),
+            "Include": tk.BooleanVar(value=True)
+        }
+
+        self.fee_proposal_page.update_fee(variation_var)
+        self.fee_proposal_page.fee_dic["Variation"]["Expand"].grid_forget()
+        tk.Label(self.fee_proposal_page.fee_frames["Variation"], text="", width=10).grid(row=0, column=0)
+        self.fee_proposal_page.fee_dic["Variation"]["Service"].config(text="Variation")
+        self.fee_proposal_page.fee_frames["Variation"].pack(side=tk.BOTTOM)
+
+        self.financial_panel_page.update_invoice(variation_var)
+        self.financial_panel_page.invoice_dic["Variation"]["Service"].config(text="Variation")
+
+        self.financial_panel_page.update_bill(variation_var)
+        self.financial_panel_page.update_profit(variation_var)
+
+        self.data["Invoices"]["Details"]["Variation"]["Expand"].set(True)
+
+        for i in range(self.conf["n_items"]-1, -1, -1):
+            self.financial_panel_page.invoice_dic["Variation"]["Expand"][i].pack_forget()
+            self.financial_panel_page.invoice_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
+        self.financial_panel_page.invoice_frames["Variation"].pack_forget()
+        self.financial_panel_page.invoice_frames["Variation"].pack(fill=tk.X, side=tk.BOTTOM)
+        for i in range(self.conf["n_items"]-1, -1, -1):
+            self.financial_panel_page.bill_dic["Variation"]["Expand"][i].pack_forget()
+            self.financial_panel_page.bill_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
+        self.financial_panel_page.bill_frames["Variation"].pack_forget()
+        self.financial_panel_page.bill_frames["Variation"].pack(fill=tk.X, side=tk.BOTTOM)
+        for i in range(self.conf["n_items"]-1, -1, -1):
+            self.financial_panel_page.profit_dic["Variation"]["Expand"][i].pack_forget()
+            self.financial_panel_page.profit_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
+        self.financial_panel_page.profit_frames["Variation"].pack_forget()
+        self.financial_panel_page.profit_frames["Variation"].pack(fill=tk.X, side=tk.BOTTOM)
+        # self.update_fee(variation_var)
+        # self.data["Invoices"]["Details"]["Variation"]["Expand"].set(True)
+        # self.fee_dic["Variation"]["Expand"].grid_forget()
+        # tk.Label(self.fee_frames["Variation"], text="", width=10).grid(row=0, column=0)
+        # self.fee_dic["Variation"]["Service"].config(text="Variation")
+        # self.fee_frames["Variation"].pack(side=tk.BOTTOM)
+        # self.financial_panel_page.update_invoice(variation_var)
+        # self.financial_panel_page.update_bill(variation_var)
+        # self.financial_panel_page.update_profit(variation_var)
+
     def show_frame(self, page):
-        self.page_info_page.pack_forget()
+        self.project_info_page.pack_forget()
         self.fee_proposal_page.pack_forget()
         # self.fee_accepted_page.pack_forget()
         self.financial_panel_page.pack_forget()
         page.pack(fill=tk.BOTH, expand=1)
+
 
     def _ist_update(self, fee, ingst):
         tax_rate = self.conf["tax rates"]

@@ -97,23 +97,22 @@ class FinancialPanelPage(tk.Frame):
             invoice[f"INV{str(i+1)}"]["in.GST"].trace("w", update_ingst_dollar_sign_fuc(i))
             invoice[f"INV{str(i+1)}"]["Fee"].trace("w", ist_fuc(i))
 
-        details = self.data["Invoices"]["Details"]
-        invoice_details = self.data["Financial Panel"]["Invoice Details"]
+        # details = self.data["Invoices"]["Details"]
+        # invoice_details = self.data["Financial Panel"]["Invoice Details"]
 
-        self.variation_label_list = []
-        update_label_fuc = lambda i: lambda a, b, c: self.update_fee_label(self.data["Variation"][i]["Fee"], self.variation_label_list[i])
-        for i in range(self.conf["n_variation"]):
-            variation_frame = tk.LabelFrame(self.invoice_frame)
-            variation_frame.pack(side=tk.BOTTOM, fill=tk.X)
-            tk.Label(variation_frame, textvariable=self.data["Variation"][i]["Service"], width=35, font=self.conf["font"]).grid(row=0, column=0)
-            self.variation_label_list.append(tk.Label(variation_frame, text="$0/$0.0", width=15, font=self.conf["font"]))
-            self.variation_label_list[i].grid(row=0, column=1)
-            self.data["Variation"][i]["Fee"].trace("w", update_label_fuc(i))
-            for j in range(6):
-                tk.Radiobutton(variation_frame, width=6, variable=self.data["Variation"][i]["Number"], value="INV" + str(j + 1)).grid(row=0, column=j+2, padx=(2,0))
-            self.data["Variation"][i]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
-            self.data["Variation"][i]["Number"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
-
+        # self.variation_label_list = []
+        # update_label_fuc = lambda i: lambda a, b, c: self.update_fee_label(self.data["Variation"][i]["Fee"], self.variation_label_list[i])
+        # for i in range(self.conf["n_variation"]):
+        #     variation_frame = tk.LabelFrame(self.invoice_frame)
+        #     variation_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        #     tk.Label(variation_frame, textvariable=self.data["Variation"][i]["Service"], width=35, font=self.conf["font"]).grid(row=0, column=0)
+        #     self.variation_label_list.append(tk.Label(variation_frame, text="$0/$0.0", width=15, font=self.conf["font"]))
+        #     self.variation_label_list[i].grid(row=0, column=1)
+        #     self.data["Variation"][i]["Fee"].trace("w", update_label_fuc(i))
+        #     for j in range(6):
+        #         tk.Radiobutton(variation_frame, width=6, variable=self.data["Variation"][i]["Number"], value="INV" + str(j + 1)).grid(row=0, column=j+2, padx=(2,0))
+        #     self.data["Variation"][i]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
+        #     self.data["Variation"][i]["Number"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
     def update_invoice(self, var):
         details = self.data["Invoices"]["Details"]
         invoice_details = self.data["Financial Panel"]["Invoice Details"]
@@ -203,7 +202,6 @@ class FinancialPanelPage(tk.Frame):
         details[service]["Number"].set("None")
         for i in range(self.conf["n_items"]):
             details[service]["Content"][i]["Number"].set("None")
-
     def invoice_function_part(self):
         remittance = {
             "INV1": {
@@ -283,6 +281,14 @@ class FinancialPanelPage(tk.Frame):
         tk.Label(sub_title, width=10, text="V1", font=self.conf["font"]).grid(row=0, column=1, padx=(60, 0))
         tk.Label(sub_title, width=10, text="V2", font=self.conf["font"]).grid(row=0, column=2, padx=(70, 0))
         tk.Label(sub_title, width=10, text="V3", font=self.conf["font"]).grid(row=0, column=3, padx=(70, 0))
+
+        total_frame = tk.LabelFrame(self.bill_frame)
+        total_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        tk.Label(total_frame, width=35, text="Bill Total", font=self.conf["font"]).grid(row=0, column=0)
+        self.total_label = tk.Label(total_frame, width=15, textvariable=bills["Fee"], font=self.conf["font"])
+        self.total_label.grid(row=0, column=1)
+        self.total_ingst_label = tk.Label(total_frame, width=15, textvariable=bills["in.GST"], font=self.conf["font"])
+        self.total_ingst_label.grid(row=1, column=1)
     def update_bill(self, var):
         details = self.data["Bills"]["Details"]
         archive = self.data["Archive"]["Bill"]
@@ -416,10 +422,12 @@ class FinancialPanelPage(tk.Frame):
                 for i in range(self.conf["n_items"]-1):
                     details[service]["Content"][i]["Fee"].trace("w", ist_update_fuc(i))
                     details[service]["Content"][i]["Fee"].trace("w", lambda a, b, c: self.app._sum_update([details[service]["Content"][j]["Fee"] for j in range(self.conf["n_items"]-1)], details[service]["Paid"]))
-                extra_list = ["Ori", "V1", "V2", "V3"]
 
+                extra_list = ["Ori", "V1", "V2", "V3"]
                 for extra in extra_list:
                     details[service][extra].trace("w", lambda a, b, c: self.app._sum_update([details[service][e] for e in extra_list], details[service]["Fee"]))
+                details[service]["Fee"].trace("w", lambda a, b, c:self.app._sum_update([value["Fee"] for value in details.values()], self.data["Bills"]["Fee"]))
+                details[service]["in.GST"].trace("w", lambda a, b, c:self.app._sum_update([value["in.GST"] for value in details.values()], self.data["Bills"]["in.GST"]))
             self.bill_frames[service].pack(fill=tk.X)
             for i in range(self.conf["n_items"]):
                 self.bill_dic[service]["Expand"][i].pack(fill=tk.X)
@@ -461,7 +469,7 @@ class FinancialPanelPage(tk.Frame):
         bills_details = self.data["Bills"]["Details"]
         profits_details = self.data["Profits"]["Details"]
         archive = self.data["Archive"]["Profit"]
-        variation = self.data["Variation"]
+        # variation = self.data["Variation"]
         service = var["Service"].get()
         include = var["Include"].get()
         if include:
@@ -502,8 +510,8 @@ class FinancialPanelPage(tk.Frame):
                 bills_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._minus_update(
                     invoices_details[service]["in.GST"], bills_details[service]["in.GST"], profits_details[service]["in.GST"]))
 
-                profits_details[service]["Fee"].trace("w", lambda a, b, c: self.app._sum_update([service["Fee"] for service in profits_details.values()] + [var["Fee"] for var in variation], self.data["Profits"]["Fee"]))
-                profits_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._sum_update([service["in.GST"] for service in profits_details.values()] + [var["in.GST"] for var in variation], self.data["Profits"]["in.GST"]))
+                profits_details[service]["Fee"].trace("w", lambda a, b, c: self.app._sum_update([service["Fee"] for service in profits_details.values()], self.data["Profits"]["Fee"]))
+                profits_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._sum_update([service["in.GST"] for service in profits_details.values()], self.data["Profits"]["in.GST"]))
                 # self.data["Invoices"]["Fee"].trace("w", lambda a, b, c: )
                 for i in range(self.conf["n_items"]):
                     tk.Label(self.profit_dic[service]["Expand"][i], text="").pack(pady=2)
@@ -512,7 +520,7 @@ class FinancialPanelPage(tk.Frame):
             for i in range(self.conf["n_items"]):
                 self.profit_dic[service]["Expand"][i].pack(fill=tk.X)
             self.app._sum_update(
-                [service["Fee"] for service in profits_details.values()] + [var["Fee"] for var in variation],
+                [service["Fee"] for service in profits_details.values()],
                 self.data["Profits"]["Fee"])
             # self.profit_dic[service]["in.GST"].grid(row=1, column=0)
 
@@ -522,7 +530,7 @@ class FinancialPanelPage(tk.Frame):
                 self.profit_dic[service]["Expand"][i].pack_forget()
             archive[service] = profits_details.pop(service)
             self.app._sum_update(
-                [service["Fee"] for service in profits_details.values()] + [var["Fee"] for var in variation],
+                [service["Fee"] for service in profits_details.values()],
                 self.data["Profits"]["Fee"])
     def fee_acceptance_part(self):
         fee_acceptance_frame = tk.LabelFrame(self.main_context_frame, text="Update Fee Acceptance", font=self.conf["font"])
@@ -568,13 +576,13 @@ class FinancialPanelPage(tk.Frame):
                         fee_value[index] += round(float(service["Fee"].get()), 2)
                     except ValueError:
                         continue
-        for variation in self.data["Variation"]:
-            if variation["Number"].get() != "None":
-                index = variation["Number"].get()
-                try:
-                    fee_value[index] += round(float(variation["Fee"].get()), 2)
-                except ValueError:
-                    continue
+        # for variation in self.data["Variation"]:
+        #     if variation["Number"].get() != "None":
+        #         index = variation["Number"].get()
+        #         try:
+        #             fee_value[index] += round(float(variation["Fee"].get()), 2)
+        #         except ValueError:
+        #             continue
         for i in range(6):
             invoice_list[f"INV{str(i+1)}"]["Fee"].set(str(fee_value[f"INV{str(i+1)}"]))
 

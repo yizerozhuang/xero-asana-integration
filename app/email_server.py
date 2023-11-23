@@ -78,6 +78,7 @@ def email_server(app=None):
                         if subject.startswith("Fwd: ") or subject.startswith("FW: "):
                             if _fee_acceptance(msg):
                                 database_dir = conf["database_dir"]
+                                found = False
                                 for part in msg.walk():
                                     # extract content type of email
                                     content_disposition = str(part.get("Content-Disposition"))
@@ -100,32 +101,39 @@ def email_server(app=None):
                                             page = reader.pages[0]
                                             page.extract_text(visitor_text=visitor_body)
                                             if "Reference:" in parts or " Reference:" in parts:
+                                                found = True
                                                 quotation_number = parts[-1]
                                                 revision = parts[-3]
                                                 fee_acceptance_name = f"Fee Acceptance Rev {revision}.pdf"
-                                                data_json_file_name = os.path.join(database_dir, quotation_number, "data.json")
-                                                data_json = json.load(open(data_json_file_name))
-                                                data_json["State"]["Fee Accepted"] = True
-                                                with open(data_json_file_name, "w") as f:
-                                                    json.dump(data_json, f, indent=4)
-                                                open(os.path.join(database_dir, quotation_number, fee_acceptance_name), "wb").write(part.get_payload(decode=True))
-                                                if not app is None:
-                                                    app.log.log_fee_accept_file(app)
+                                                open(os.path.join(database_dir, quotation_number, fee_acceptance_name),
+                                                     "wb").write(part.get_payload(decode=True))
+                                                app.log.log_fee_accept_file(From.split("<")[-1].split(">")[0],
+                                                                            quotation_number)
+                                                if not app is None and app.data["Project Info"]["Project"]["Quotation Number"].get() == quotation_number:
+                                                    app.data["State"]["Fee Accepted"].set(True)
+                                                    save(app)
                                                     config_state(app)
                                                     config_log(app)
+                                                else:
+                                                    data_json_file_name = os.path.join(database_dir, quotation_number, "data.json")
+                                                    data_json = json.load(open(data_json_file_name))
+                                                    data_json["State"]["Fee Accepted"] = True
+                                                    with open(data_json_file_name, "w") as f:
+                                                        json.dump(data_json, f, indent=4)
                                                 print("Fee Accepted")
                                                 break
-                                message = email.message_from_bytes(msg_data[0][1])
-                                message.replace_header("Subject", "Error when processing Bridge")
-                                message.replace_header("From", from_addr)
-                                message.replace_header("To", to_addr)
+                                if not found:
+                                    message = email.message_from_bytes(msg_data[0][1])
+                                    message.replace_header("Subject", "Error when processing Bridge")
+                                    message.replace_header("From", from_addr)
+                                    message.replace_header("To", to_addr)
 
-                                smtp = smtplib.SMTP(smap_server, smap_port)
-                                smtp.starttls()
-                                smtp.login(username, password)
-                                smtp.sendmail(from_addr, to_addr, message.as_string())
-                                print("Sent Email to admin")
-                                smtp.quit()
+                                    smtp = smtplib.SMTP(smap_server, smap_port)
+                                    smtp.starttls()
+                                    smtp.login(username, password)
+                                    smtp.sendmail(from_addr, to_addr, message.as_string())
+                                    print("Sent Email to admin")
+                                    smtp.quit()
                             else:
                                 # iterate over email parts
                                 project_name = subject.split("Fwd: ")[-1].split("FW: ")[-1]
@@ -176,7 +184,15 @@ def email_server(app=None):
                             #     # open in the default browser
                             # print("=" * 100)
                         elif subject[0:6].isdigit():
-                            if app is None:
+                            if not app is None and app.data["Project Info"]["Project"]["Quotation Number"].get() == subject[0:8]:
+                                app.data["State"]["Email to Client"].set(True)
+                                app.data["Email"]["Fee Proposal"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
+                                quotation_number = subject[0:8]
+                                app.log.log_email_to_client(From.split("<")[-1].split(">")[0], quotation_number)
+                                save(app)
+                                config_state(app)
+                                config_log(app)
+                            else:
                                 quotation_number = subject[0:8]
                                 database_dir = os.path.join(conf["database_dir"], quotation_number, "data.json")
                                 data_json = json.load(open(database_dir))
@@ -188,17 +204,21 @@ def email_server(app=None):
                                 with open(database_dir, "w") as f:
                                     json.dump(data_json, f, indent=4)
                                 log.log_email_to_client(From.split("<")[-1].split(">")[0], quotation_number)
-                            else:
-                                app.data["State"]["Email to Client"].set(True)
-                                app.data["Email"]["Fee Proposal"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
-                                quotation_number = subject[0:8]
-                                app.log.log_email_to_client(From.split("<")[-1].split(">")[0], quotation_number)
+                            print("Update Email")
+                        elif subject.startswith("Re: "):
+                            if not app is None and app.data["Project Info"]["Project"]["Quotation Number"].get() == subject[4:12]:
+                                quotation_number = subject[4:12]
+                                if len(app.data["Email"]["First Chase"].get())==0:
+                                    app.data["Email"]["First Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
+                                elif len(app.data["Email"]["Second Chase"].get())==0:
+                                    app.data["Email"]["Second Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
+                                elif len(app.data["Email"]["Thrid Chase"].get())==0:
+                                    app.data["Email"]["Third Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
+                                app.log.log_chase_client(From.split("<")[-1].split(">")[0], quotation_number)
                                 save(app)
                                 config_state(app)
                                 config_log(app)
-                            print("Update Email")
-                        elif subject.startswith("Re: "):
-                            if app is None:
+                            else:
                                 quotation_number = subject[4:12]
                                 database_dir = os.path.join(conf["database_dir"], quotation_number, "data.json")
                                 data_json = json.load(open(database_dir))
@@ -211,18 +231,6 @@ def email_server(app=None):
                                 with open(database_dir, "w") as f:
                                     json.dump(data_json, f, indent=4)
                                 log.log_chase_client(From.split("<")[-1].split(">")[0], quotation_number)
-                            else:
-                                quotation_number = subject[4:12]
-                                if len(app.data["Email"]["First Chase"].get())==0:
-                                    app.data["Email"]["First Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
-                                elif len(app.data["Email"]["Second Chase"].get())==0:
-                                    app.data["Email"]["Second Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
-                                elif len(app.data["Email"]["Thrid Chase"].get())==0:
-                                    app.data["Email"]["Third Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
-                                app.log.log_chase_client(From.split("<")[-1].split(">")[0], quotation_number)
-                                save(app)
-                                config_state(app)
-                                config_log(app)
 
                             print("Chase Client")
                         else:

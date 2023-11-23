@@ -54,9 +54,8 @@ class AppLog:
         self.log_to_file(self.format("Update Asana", app.user),
                          app.data["Project Info"]["Project"]["Quotation Number"].get())
 
-    def log_fee_accept_file(self, app):
-        self.log_to_file(self.format("log fee accept file", app.user),
-                         app.data["Project Info"]["Project"]["Quotation Number"].get())
+    def log_fee_accept_file(self, user, quotation):
+        self.log_to_file(self.format("log fee accept file", user), quotation)
 
     def log_generate_invoices(self, app, inv):
         self.log_to_file(self.format(f"Generate Invoice {app.data['Financial Panel']['Invoice Details'][inv]['Number'].get()}", app.user),
