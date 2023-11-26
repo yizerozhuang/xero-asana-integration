@@ -2,7 +2,7 @@ import shutil
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-from utility import excel_print_invoice, email_invoice, save, config_log, config_state, change_quotation_number
+from utility import excel_print_invoice, email_invoice, save, config_log, config_state, change_quotation_number, get_invoice_item
 from asana_function import update_asana, change_asana_quotation
 
 import os
@@ -437,7 +437,6 @@ class FinancialPanelPage(tk.Frame):
             self.bill_frames[service].pack_forget()
             for i in range(self.conf["n_items"]):
                 self.bill_dic[service]["Expand"][i].pack_forget()
-
     def profit_part(self):
         profits = {
             "Details": dict(),
@@ -547,35 +546,33 @@ class FinancialPanelPage(tk.Frame):
                   command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev3")).grid(row=0, column=6)
     def _on_mousewheel(self, event):
         self.main_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-
     def reset_scrollregion(self, event):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
-
     def update_invoice_sum(self, details, invoice_list):
-        fee_value = {
-            "INV1": 0,
-            "INV2": 0,
-            "INV3": 0,
-            "INV4": 0,
-            "INV5": 0,
-            "INV6": 0,
-        }
-        for service in details.values():
-            if service["Expand"].get():
-                for i in range(self.conf["n_items"]):
-                    if service["Content"][i]["Number"].get() != "None":
-                        index = service["Content"][i]["Number"].get()
-                        try:
-                            fee_value[index] += round(float(service["Content"][i]["Fee"].get()), 2)
-                        except ValueError:
-                            continue
-            else:
-                if service["Number"].get() != "None":
-                    index = service["Number"].get()
-                    try:
-                        fee_value[index] += round(float(service["Fee"].get()), 2)
-                    except ValueError:
-                        continue
+        # fee_value = {
+        #     "INV1": 0,
+        #     "INV2": 0,
+        #     "INV3": 0,
+        #     "INV4": 0,
+        #     "INV5": 0,
+        #     "INV6": 0,
+        # }
+        # for service in details.values():
+        #     if service["Expand"].get():
+        #         for i in range(self.conf["n_items"]):
+        #             if service["Content"][i]["Number"].get() != "None":
+        #                 index = service["Content"][i]["Number"].get()
+        #                 try:
+        #                     fee_value[index] += round(float(service["Content"][i]["Fee"].get()), 2)
+        #                 except ValueError:
+        #                     continue
+        #     else:
+        #         if service["Number"].get() != "None":
+        #             index = service["Number"].get()
+        #             try:
+        #                 fee_value[index] += round(float(service["Fee"].get()), 2)
+        #             except ValueError:
+        #                 continue
         # for variation in self.data["Variation"]:
         #     if variation["Number"].get() != "None":
         #         index = variation["Number"].get()
@@ -583,9 +580,9 @@ class FinancialPanelPage(tk.Frame):
         #             fee_value[index] += round(float(variation["Fee"].get()), 2)
         #         except ValueError:
         #             continue
+        invoice_items = get_invoice_item(self.app)
         for i in range(6):
-            invoice_list[f"INV{str(i+1)}"]["Fee"].set(str(fee_value[f"INV{str(i+1)}"]))
-
+            invoice_list[f"INV{str(i+1)}"]["Fee"].set(sum([float(inv["Fee"]) if not inv["Fee"] == "" else 0 for inv in invoice_items[f"INV{str(i+1)}"]]))
     def update_fee_label(self, fee, label):
         if len(fee.get().strip())==0:
             label.config(text="$0/$0.0")
@@ -597,7 +594,6 @@ class FinancialPanelPage(tk.Frame):
             label.config(text=f"${fee}/${ingst}")
         except:
             label.config(text="Error")
-
     def update_dollar_sign(self, fee, label):
         if len(fee.get()) == 0:
             label.config(text="")
@@ -605,7 +601,6 @@ class FinancialPanelPage(tk.Frame):
         else:
             fee = fee.get()
         label.config(text=f"${fee}")
-
     def generate_invoice_number(self):
         if not self.data["State"]["Fee Accepted"].get():
             messagebox.showerror("Error", "You need to upload a fee acceptance first")
@@ -630,7 +625,6 @@ class FinancialPanelPage(tk.Frame):
                 self.data["Project Info"]["Project"]["Quotation Number"].set(current_inv_number)
                 self.data["Project Info"]["Project"]["Project Number"].set(current_inv_number)
                 messagebox.showinfo("updated", "folder name and asana updated")
-
     def _get_current_invoice_number(self):
         invoice_dir = os.path.join(self.conf["database_dir"], "invoices.json")
         invoices = json.load(open(invoice_dir))
@@ -641,7 +635,6 @@ class FinancialPanelPage(tk.Frame):
         with open(invoice_dir, "w", encoding='utf-8') as f:
             json.dump(invoices, f, ensure_ascii=False, indent=4)
         return res
-
     def upload_file(self, **kwargs):
         filename_list = []
         if "bill_number" in kwargs.keys():

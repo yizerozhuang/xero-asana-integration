@@ -1,6 +1,6 @@
 import asana
 from tkinter import messagebox
-from utility import remove_none, config_log
+from utility import remove_none, config_log, get_invoice_item
 
 asana_configuration = asana.Configuration()
 asana_configuration.access_token = '1/1205463377927189:4825d7e7924a9dd8dd44a9c826e45455'
@@ -147,38 +147,39 @@ def update_asana_invoices(app):
 
     # inv_id = subtask_id_map["INV 3xxxxx, 1 of 1, refer checklist inside."]
 
-    invoices = {
-        "INV1": [],
-        "INV2": [],
-        "INV3": [],
-        "INV4": [],
-        "INV5": [],
-        "INV6": []
-    }
-
-    for inv in ["INV1", "INV2", "INV3", "INV4", "INV5", "INV6"]:
-        for key, service in data["Invoices"]["Details"].items():
-            if service["Expand"].get():
-                for i in range(app.conf["n_items"]):
-                    if service["Content"][i]["Number"].get() == inv:
-                        invoices[inv].append(
-                            {
-                                "Service": service["Content"][i]["Service"].get(),
-                                "Fee": service["Content"][i]["Fee"].get()
-                            }
-                        )
-            else:
-                if service["Number"].get() == inv:
-                    invoices[inv].append(
-                        {
-                            "Service": service["Service"].get(),
-                            "Fee": service["Fee"].get()
-                        }
-                    )
-    invoices_list = []
-    for key, value in invoices.items():
-        if len(value) != 0:
-            invoices_list.append(value)
+    # invoices = {
+    #     "INV1": [],
+    #     "INV2": [],
+    #     "INV3": [],
+    #     "INV4": [],
+    #     "INV5": [],
+    #     "INV6": []
+    # }
+    #
+    # for inv in ["INV1", "INV2", "INV3", "INV4", "INV5", "INV6"]:
+    #     for key, service in data["Invoices"]["Details"].items():
+    #         if service["Expand"].get():
+    #             for i in range(app.conf["n_items"]):
+    #                 if service["Content"][i]["Number"].get() == inv:
+    #                     invoices[inv].append(
+    #                         {
+    #                             "Service": service["Content"][i]["Service"].get(),
+    #                             "Fee": service["Content"][i]["Fee"].get()
+    #                         }
+    #                     )
+    #         else:
+    #             if service["Number"].get() == inv:
+    #                 invoices[inv].append(
+    #                     {
+    #                         "Service": service["Service"].get(),
+    #                         "Fee": service["Fee"].get()
+    #                     }
+    #                 )
+    # invoices_list = []
+    # for key, value in invoices.items():
+    #     if len(value) != 0:
+    #         invoices_list.append(value)
+    invoice_item = get_invoice_item(app)
 
     all_custom_fields = clearn_response(task_api_instance.get_task(inv_id))["custom_fields"]
     custom_field_id_map = name_id_map(all_custom_fields)
@@ -201,7 +202,7 @@ def update_asana_invoices(app):
         body = asana.TasksTaskGidBody(
             {
                 "name": name,
-                "include":["parent"]
+                "include": ["parent"]
             }
         )
         task_api_instance.duplicate_task(body=body, task_gid=inv_id)

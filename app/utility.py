@@ -294,8 +294,6 @@ def _check_fee(app):
         if len(service_fee["Fee"].get()) == 0 and service_fee["Service"].get() != "Variation":
             return False
     return True
-
-
 def excel_print_pdf(app, *args):
     data = app.data
     pdf_name = _get_proposal_name(app)
@@ -303,8 +301,9 @@ def excel_print_pdf(app, *args):
     resource_dir = app.conf["resource_dir"]
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
     services = [key for key, value in data["Project Info"]["Project"]["Service Type"].items() if value['Include'].get()]
-    adobe = win32client.dynamic.Dispatch("AcroExch.AVDoc")
+    # adobe = win32client.dynamic.Dispatch("AcroExch.AVDoc")
     page = len(services) // 2 + 1
+    row_per_page = 44
 
     if not data["State"]["Set Up"].get():
         messagebox.showerror("Error", "Please finish Set Up first")
@@ -332,8 +331,8 @@ def excel_print_pdf(app, *args):
             overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
             if not overwrite:
                 return
-            else:
-                adobe.close(0)
+            # else:
+                # adobe.close(0)
         else:
             messagebox.showerror("Error",
                                  f'Current revision is {current_revision}, you can not use revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
@@ -379,7 +378,7 @@ def excel_print_pdf(app, *args):
         cur_index = 1
         for i, _ in enumerate(data['Fee Proposal']['Scope'].items()):
             key, service = _
-            cur_row = cur_row if i % 2 == 0 else 84 + (i - 1) // 2 * 46
+            cur_row = cur_row if i % 2 == 0 else 84 + (i - 1) // 2 * row_per_page
             extra_list = ["Extend", "Exclusion", "Deliverables"]
             for extra in extra_list:
                 work_sheets.Cells(cur_row, 1).Value = "2." + str(cur_index)
@@ -393,12 +392,13 @@ def excel_print_pdf(app, *args):
                         work_sheets.Cells(cur_row, 2).Value = scope["Item"].get()
                 cur_row += 2
                 cur_index += 1
-        cur_row = 102 + (page - 1) * 46
+        cur_row = 102 + (page - 1) * row_per_page
         project_type = data["Project Info"]["Project"]["Project Type"].get()
         past_projects = json.load(open(past_projects_dir, encoding="utf-8"))[project_type]
         for i, project in enumerate(past_projects):
             work_sheets.Cells(cur_row + i, 1).Value = "•"
             work_sheets.Cells(cur_row + i, 2).Value = project
+
         cur_row += 34
         for i, service in enumerate([ value for value in data["Invoices"]["Details"].values() if value["Service"].get() != "Variation"]):
             work_sheets.Cells(cur_row + i, 2).Value = service["Service"].get() + " design and documentation"
@@ -438,11 +438,9 @@ def excel_print_pdf(app, *args):
         # adobe.close(0)
     except:
         pass
-
 def _get_proposal_name(app):
     data = app.data
     return f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
-
 def excel_print_invoice(app, inv):
     inv = f"INV{str(inv+1)}"
     data = app.data
@@ -549,8 +547,6 @@ def excel_print_invoice(app, inv):
             work_book.Close(True)
         except:
             pass
-
-
 def email(app, *args):
     data = app.data
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
@@ -596,8 +592,6 @@ def email(app, *args):
     newmail.Display()
     save(app)
     config_state(app)
-
-
 def chase(app, *args):
     data = app.data
     if not data["State"]["Email to Client"].get():
@@ -628,7 +622,6 @@ def chase(app, *args):
     newmail.Display()
     save(app)
     config_state(app)
-
 def email_invoice(app, inv):
     inv = f"INV{str(inv+1)}"
     data = app.data
@@ -672,7 +665,6 @@ def email_invoice(app, inv):
     newmail.Attachments.Add(os.path.join(database_dir, pdf_name))
     save(app)
     config_state(app)
-
 def get_invoice_item(app):
     data = app.data
     res = {
@@ -690,7 +682,6 @@ def get_invoice_item(app):
                     if len(service["Content"][i]["Service"].get()) == 0 or len(service["Content"][i]["Fee"].get()) == 0:
                         continue
                     if service["Content"][i]["Number"].get() == inv:
-
                         res[inv].append(
                             {
                                 "Item": service["Content"][i]["Service"].get(),
@@ -702,9 +693,9 @@ def get_invoice_item(app):
                 if service["Number"].get() == inv:
                     res[inv].append(
                         {
-                            "Item": service["Content"][i]["Service"].get(),
-                            "Fee": service["Content"][i]["Fee"].get(),
-                            "in.GST": service["Content"][i]["in.GST"].get()
+                            "Item": service["Service"].get(),
+                            "Fee": service["Fee"].get(),
+                            "in.GST": service["in.GST"].get()
                         }
                     )
     return res

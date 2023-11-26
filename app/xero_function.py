@@ -175,12 +175,12 @@ def update_xero(app, contact_name):
     #     account = Account(account_id=account_id)
     # except AccountingBadRequestException as exception:
     #     pass
-    all_invoices = remove_none(accounting_api.get_invoices(xero_tenant_id).to_dict())["invoices"]
-    invoice_number_map = invoice_number_invoice_id(all_invoices)
+    # all_invoices = remove_none(accounting_api.get_invoices(xero_tenant_id).to_dict())["invoices"]
+    # invoice_number_map = invoice_number_invoice_id(all_invoices)
 
     invoices_list = []
     for inv in ["INV1", "INV2", "INV3", "INV4", "INV5", "INV6"]:
-        if len(app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0 or app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get() in invoice_number_map.keys():
+        if len(app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0:
             continue
         line_item_list = []
         for key, service in data["Invoices"]["Details"].items():
@@ -219,7 +219,7 @@ def update_xero(app, contact_name):
                 due_date=datetime.today(),
                 line_items=line_item_list,
                 invoice_number=data["Financial Panel"]["Invoice Details"][inv]["Number"].get(),
-                reference=data["Project Info"]["Project"]["Project Name"].get(),
+                reference=data["Project Info"]["Project"]["Quotation Number"].get()+data["Project Info"]["Project"]["Project Name"].get(),
                 status="DRAFT"
             )
         )
@@ -244,7 +244,7 @@ def update_xero(app, contact_name):
                         )
                     ],
                     invoice_number=bill_number,
-                    reference=data["Project Info"]["Project"]["Project Name"].get(),
+                    reference=data["Project Info"]["Project"]["Quotation Number"].get()+data["Project Info"]["Project"]["Project Name"].get(),
                     status="DRAFT"
                 )
             )
@@ -296,7 +296,6 @@ def update_xero(app, contact_name):
     #         getvalue(created_batch_payments, "batch_payments.0.batch_payment_id", "")
     #     )
     #     json = serialize_model(created_batch_payments)
-
 @xero_token_required
 def create_contact(app, name):
     xero_tenant_id = get_xero_tenant_id()
