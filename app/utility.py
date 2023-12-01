@@ -3,6 +3,7 @@ from tkinter import messagebox
 from custom_dialog import FileSelectDialog
 
 from win32com import client as win32client
+import win32com.client.makepy
 import shutil
 import os
 import webbrowser
@@ -10,8 +11,12 @@ import json
 from datetime import date, datetime
 import psutil
 import subprocess
-from config import CONFIGURATION
+from config import CONFIGURATION as conf
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 def reset(app):
     if len(app.data["Project Info"]["Project"]["Quotation Number"].get()) != 0:
         save(app)
@@ -19,6 +24,12 @@ def reset(app):
     template_json = json.load(open(database_dir))
     template_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
     convert_to_data(template_json, app.data)
+    app.data["Archive"] = {
+        "Scope": {},
+        "Invoice": {},
+        "Bill": {},
+        "Profit": {}
+    }
     app.log_text.set("")
 
 
@@ -28,24 +39,60 @@ def save(app):
     database_dir = os.path.join(app.conf["database_dir"], data_json["Project Info"]["Project"]["Quotation Number"])
     # if len(data["Project Info"]["Project"]["Quotation Number"].get()) != 6 or len(data["Project Info"]["Project"]["Quotation Number"].get()) != 8:
     #     return
-
     if not os.path.exists(database_dir):
         os.mkdir(database_dir)
     with open(os.path.join(database_dir, "data.json"), "w") as f:
         json_object = json.dumps(data_json, indent=4)
         f.write(json_object)
+    save_invoice_state(app)
     # current_folder_name = [folder for folder in os.listdir(app.conf["working_dir"]) if folder.startswith(data["Project Info"]["Project"]["Quotation Number"])][0]
     # print(current_folder_name)
 
 
 def load(app):
     data = app.data
-    database_dir = os.path.join(app.conf["database_dir"],
-                                data["Project Info"]["Project"]["Quotation Number"].get().upper())
+    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get().upper())
     data_json = json.load(open(os.path.join(database_dir, "data.json")))
     convert_to_data(data_json, data)
+    load_invoice_state(app)
+    config_state(app)
     config_log(app)
 
+def save_invoice_state(app):
+    data = app.data
+    inv_dir = os.path.join(app.conf["database_dir"], "invoices.json")
+    inv_json = json.load(open(inv_dir))
+    for inv in data["Financial Panel"]["Invoice Details"].values():
+        if len(inv["Number"].get())!=0:
+            inv_json[inv["Number"].get()] = inv["State"].get()
+    with open(inv_dir, "w") as f:
+        json.dump(inv_json, f, indent=4)
+
+    bill_dir = os.path.join(app.conf["database_dir"], "bills.json")
+    bill_json = json.load(open(bill_dir))
+    for bill in data["Bills"]["Details"].values():
+        for item in bill["Content"]:
+            if len(item["Number"].get()) != 0:
+                bill_json[data["Project Info"]["Project"]["Project Number"].get()+item["Number"].get()] = item["State"].get()
+    with open(bill_dir, "w") as f:
+        json.dump(bill_json, f, indent=4)
+
+
+
+def load_invoice_state(app):
+    data = app.data
+    inv_dir = os.path.join(app.conf["database_dir"], "invoices.json")
+    inv_json = json.load(open(inv_dir))
+    for inv in data["Financial Panel"]["Invoice Details"].values():
+        if len(inv["Number"].get()) != 0:
+            inv["State"].set(inv_json[inv["Number"].get()])
+
+    bill_dir = os.path.join(app.conf["database_dir"], "bills.json")
+    bill_json = json.load(open(bill_dir))
+    for bill in data["Bills"]["Details"].values():
+        for item in bill["Content"]:
+            if len(item["Number"].get()) !=0:
+                item["State"].set(bill_json[data["Project Info"]["Project"]["Project Number"].get()+item["Number"].get()])
 
 def convert_to_json(obj):
     if isinstance(obj, list):
@@ -58,9 +105,10 @@ def convert_to_json(obj):
 
 def convert_to_data(json, data):
     if isinstance(json, list):
-        # try:
-        [convert_to_data(json[i], data[i]) for i in range(len(data))]
-        # except IndexError:
+        try:
+            [convert_to_data(json[i], data[i]) for i in range(len(data))]
+        except IndexError:
+            pass
         #     data.append(
         #         {
         #             "Include": tk.BooleanVar(value=True),
@@ -69,7 +117,10 @@ def convert_to_data(json, data):
         #     )
         #     convert_to_data(json[len(data)-1], data[-1])
     elif isinstance(json, dict):
-        [convert_to_data(json[k], data[k]) for k in json.keys()]
+        try:
+            [convert_to_data(json[k], data[k]) for k in data.keys()]
+        except KeyError:
+            pass
     else:
         if data.get() != json:
             data.set(json)
@@ -78,7 +129,7 @@ def convert_to_data(json, data):
 def finish_setup(app):
     data = app.data
     folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"][
-        "Project Name"].get()
+        "Project Name"].get().strip()
     working_dir = os.path.join(app.conf["working_dir"], folder_name)
 
     if not os.path.exists(working_dir):
@@ -182,7 +233,7 @@ def config_log(app):
 
 
 def get_quotation_number():
-    working_dir = CONFIGURATION["database_dir"]
+    working_dir = conf["database_dir"]
     current_quotation_list = [dir for dir in os.listdir(working_dir) if
                               dir.startswith(date.today().strftime("%y%m000")[1:])]
     if len(current_quotation_list) == 0:
@@ -226,16 +277,23 @@ def change_quotation_number(app, new_quotation_number):
     old_folder_name = app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + app.data["Project Info"]["Project"]["Project Name"].get()
     old_folder = os.path.join(working_dir, old_folder_name)
 
-    new_folder = os.path.join(working_dir, new_quotation_number + "-" + app.data["Project Info"]["Project"]["Project Name"].get())
-
     if not os.path.exists(old_folder):
         messagebox.showerror("Error", f"Can not found the folder {old_folder_name}")
-        return
+        return False
 
-    os.rename(old_folder, new_folder)
-    old_database = os.path.join(database_dir, app.data["Project Info"]["Project"]["Quotation Number"].get())
-    new_database = os.path.join(database_dir, new_quotation_number)
-    os.rename(old_database, new_database)
+    new_folder = os.path.join(working_dir, new_quotation_number + "-" + app.data["Project Info"]["Project"]["Project Name"].get())
+
+    try:
+        old_database = os.path.join(database_dir, app.data["Project Info"]["Project"]["Quotation Number"].get())
+        new_database = os.path.join(database_dir, new_quotation_number)
+        os.rename(old_database, new_database)
+        os.rename(old_folder, new_folder)
+        return True
+    except PermissionError:
+        messagebox.showerror("Error", "Please Close all file relate to this Project so Bridge can rename this")
+        return False
+
+
 
 def rename_new_folder(app):
     data = app.data
@@ -297,13 +355,17 @@ def _check_fee(app):
 def excel_print_pdf(app, *args):
     data = app.data
     pdf_name = _get_proposal_name(app)
+    excel_name = f'Mechanical_Fee_Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
+
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
     services = [key for key, value in data["Project Info"]["Project"]["Service Type"].items() if value['Include'].get()]
-    # adobe = win32client.dynamic.Dispatch("AcroExch.AVDoc")
+    # win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
+    # adobe = win32com.client.DispatchEx('AcroExch.App')
+    # avDoc = win32client.dynamic.Dispatch("AcroExch.AVDoc")
     page = len(services) // 2 + 1
-    row_per_page = 44
+    row_per_page = 46
 
     if not data["State"]["Set Up"].get():
         messagebox.showerror("Error", "Please finish Set Up first")
@@ -320,19 +382,22 @@ def excel_print_pdf(app, *args):
     elif not page in [1, 2, 3]:
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
     pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
-                str(file).startswith("Mechanical Fee Proposal")]
+                str(file).startswith("Mechanical Fee Proposal") and str(file).endswith(".pdf")]
 
     if len(pdf_list) != 0:
         current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"]["Revision"].get() == str(int(current_revision) + 1):
             old_pdf_path = os.path.join(database_dir, f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {current_revision}.pdf')
-            # adobe.open(old_pdf_path, old_pdf_path)
+            # avDoc.open(old_pdf_path, old_pdf_path)
             webbrowser.open(old_pdf_path)
             overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
             if not overwrite:
                 return
-            # else:
-                # adobe.close(0)
+            else:
+                # avDoc.close(0)
+                for proc in psutil.process_iter():
+                    if proc.name() == "Acrobat.exe":
+                        proc.kill()
         else:
             messagebox.showerror("Error",
                                  f'Current revision is {current_revision}, you can not use revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
@@ -347,17 +412,18 @@ def excel_print_pdf(app, *args):
     for service in [value for value in data["Invoices"]["Details"].values() if value["Service"].get() != "Variation"]:
         total_fee += float(service["Fee"].get())
         total_ist += float(service["in.GST"].get())
-    try:
+
         shutil.copy(os.path.join(resource_dir, "xlsx", f"fee_proposal_template_{page}.xlsx"),
-                    os.path.join(database_dir, "fee proposal.xlsx"))
-        excel = win32client.Dispatch("Excel.Application")
+                    os.path.join(database_dir, excel_name))
+    excel = win32client.Dispatch("Excel.Application")
+    try:
         excel.ScreenUpdating = False
         excel.DisplayAlerts = False
         excel.EnableEvents = False
-        work_book = excel.Workbooks.Open(os.path.join(database_dir, "fee proposal.xlsx"))
     except Exception as e:
-        messagebox.showerror("Error", e)
-        return
+        pass
+    work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
+        # messagebox.showerror("Error", e)
     try:
         work_sheets = work_book.Worksheets[0]
         work_sheets.Cells(1, 2).Value = data["Project Info"]["Client"]["Client Full Name"].get()
@@ -424,7 +490,7 @@ def excel_print_pdf(app, *args):
         print(e)
     else:
         app.data["State"]["Generate Proposal"].set(True)
-        # adobe.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
+        # avDoc.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
         webbrowser.open(os.path.join(database_dir, pdf_name))
         save(app)
         config_state(app)
@@ -448,6 +514,9 @@ def excel_print_invoice(app, inv):
     invoice_name = f'PCE INV {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}.pdf'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
+    # win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
+    # adobe = win32com.client.DispatchEx('AcroExch.App')
+    # avDoc = win32client.dynamic.Dispatch("AcroExch.AVDoc")
 
     if len(data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0:
         messagebox.showerror("Error", "You need to generate a invoice number before you generate the Invoice")
@@ -455,10 +524,17 @@ def excel_print_invoice(app, inv):
 
     rewrite = True
     if os.path.exists(os.path.join(database_dir, invoice_name)):
+        old_pdf_path=os.path.join(database_dir, invoice_name)
+        # avDoc.open(old_pdf_path, old_pdf_path)
+        webbrowser.open(old_pdf_path)
         rewrite = messagebox.askyesno("Warming", f"Existing file PCE INV {invoice_name}")
         if not rewrite:
             return
-
+        else:
+            #     avDoc.close(0)
+            for proc in psutil.process_iter():
+                if proc.name() == "Acrobat.exe":
+                    proc.kill()
     if rewrite:
         shutil.copy(os.path.join(resource_dir, "xlsx", f"invoice_template.xlsx"),
                     os.path.join(database_dir, excel_name))
@@ -479,6 +555,8 @@ def excel_print_invoice(app, inv):
             total_fee = 0
             total_inGST = 0
             for service in data["Invoices"]["Details"].values():
+                if service["Service"].get() == "Variation":
+                    continue
                 if service["Expand"].get():
                     work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
                     work_sheets.Cells(cur_row + 1, 2).Value = "Payment Instalments"
@@ -512,18 +590,18 @@ def excel_print_invoice(app, inv):
                     cur_row+=3
                 cur_row+=1
             cur_row+=1
-            for service in data["Variation"]:
-                if len(service["Service"].get())==0 and len(service["Fee"].get())==0:
-                    continue
-                work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
-                work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
-                if service["Number"].get() == inv:
-                    work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
-                    work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
-                    work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
-                    total_fee += float(service["Fee"].get())
-                    total_inGST += float(service["in.GST"].get())
-                cur_row += 2
+            # for service in data["Variation"]:
+            #     if len(service["Service"].get())==0 and len(service["Fee"].get())==0:
+            #         continue
+            #     work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
+            #     work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
+            #     if service["Number"].get() == inv:
+            #         work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
+            #         work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
+            #         work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
+            #         total_fee += float(service["Fee"].get())
+            #         total_inGST += float(service["in.GST"].get())
+            #     cur_row += 2
 
             work_sheets.Cells(33, 9).Value = str(total_fee)
             work_sheets.Cells(33, 10).Value = str(total_inGST)
@@ -535,7 +613,9 @@ def excel_print_invoice(app, inv):
             messagebox.showerror("Error", "Please Close the pdf before you generate a new one")
             print(e)
         else:
-            webbrowser.open(os.path.join(database_dir, invoice_name))
+            invoice_path = os.path.join(database_dir, invoice_name)
+            webbrowser.open(invoice_path)
+            # avDoc.open(invoice_path, invoice_path)
             save(app)
             app.log.log_generate_invoices(app, inv)
             config_state(app)
@@ -547,7 +627,7 @@ def excel_print_invoice(app, inv):
             work_book.Close(True)
         except:
             pass
-def email(app, *args):
+def email_fee_proposal(app, *args):
     data = app.data
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     pdf_name = f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
@@ -643,7 +723,7 @@ def email_invoice(app, inv):
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'Invoice {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au"
+    newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
@@ -699,3 +779,85 @@ def get_invoice_item(app):
                         }
                     )
     return res
+
+def update_app_invoices(app, inv_list):
+    data = app.data
+    invoices_dir = os.path.join(app.conf["database_dir"], "invoices.json")
+    invoices_json = json.load(open(invoices_dir))
+
+    bills_dir = os.path.join(app.conf["database_dir"], "bills.json")
+    bills_json = json.load(open(bills_dir))
+
+    for state, inv_dict in inv_list["Invoices"].items():
+        for inv_number, value in inv_dict.items():
+            if state == "PAID":
+                invoices_json[inv_number] = "Paid"
+            elif state == "VOIDED":
+                invoices_json[inv_number] = "Void"
+
+    for state, bill_dict in inv_list["Bills"].items():
+        for bill_number, value in bill_dict.items():
+            if state == "SUBMITTED":
+                bills_json[bill_number] = "Awaiting approval"
+            elif state == "AUTHORISED":
+                bills_json[bill_number] = "Awaiting payment"
+            elif state == "PAID":
+                bills_json[bill_number] = "Paid"
+            elif state == "VOIDED":
+                bills_json[bill_number] = "Void"
+
+    for key, value in data["Financial Panel"]["Invoice Details"].items():
+        if value["Number"].get() in inv_list["Invoices"]["PAID"].keys():
+            value["State"].set("Paid")
+        elif value["Number"].get() in inv_list["Invoices"]["VOIDED"].keys():
+            value["State"].set("Void")
+
+    for value in data["Bills"]["Details"].values():
+        for item in value["Content"]:
+            bill_number = data["Project Info"]["Project"]["Project Number"].get() + item["Number"].get()
+            if bill_number in inv_list["Bills"]["SUBMITTED"].keys():
+                item["State"].set("Awaiting approval")
+                value = inv_list["Bills"]["SUBMITTED"][bill_number]
+                if value["line_amount_types"] == 'NoTax':
+                    item["no.GST"].set(True)
+                    item["Fee"].set(str(value["sub_total"]))
+                elif value["line_amount_types"] == 'Exclusive':
+                    item["no.GST"].set(False)
+                    item["Fee"].set(str(value["sub_total"]))
+                elif value["line_amount_types"] == 'Inclusive':
+                    item["no.GST"].set(False)
+                    item["Fee"].set(str(value["sub_total"]))
+            elif bill_number in inv_list["Bills"]["AUTHORISED"].keys():
+                item["State"].set("Awaiting payment")
+            elif bill_number in inv_list["Bills"]["PAID"].keys():
+                item["State"].set("Paid")
+            elif bill_number in inv_list["Bills"]["VOIDED"].keys():
+                item["State"].set("Void")
+
+    with open(invoices_dir, "w") as f:
+        json.dump(invoices_json, f, indent=4)
+
+    with open(bills_dir, "w") as f:
+        json.dump(bills_json, f, indent=4)
+
+
+
+def send_email_with_attachment(filename):
+    msg = MIMEMultipart()
+    msg['From'] = conf["bridge_email"]
+    msg['To'] = conf["xero_bill_email"]
+    msg['Subject'] = f"Bill Number: {filename.split('-')[0]}"
+
+    part = MIMEBase("application", "octet-stream")
+    with open(filename, "rb") as file:
+        part.set_payload(file.read())
+    encoders.encode_base64(part)
+    attach_msg =f"attachment; filename={os.path.basename(filename)}"
+    part.add_header("Content-Disposition", attach_msg)
+    msg.attach(part)
+    smtp = smtplib.SMTP(conf["smap_server"], conf["smap_port"])
+    smtp.starttls()
+    smtp.login(conf["email_username"], conf["email_password"])
+    smtp.sendmail(conf["bridge_email"], conf["xero_bill_email"], msg.as_string())
+    smtp.quit()
+    print("Email sent to xero")

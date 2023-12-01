@@ -3,7 +3,7 @@ from email.header import decode_header
 import imaplib
 import smtplib
 
-from config import CONFIGURATION
+from config import CONFIGURATION as conf
 
 from utility import get_quotation_number, create_new_folder, save, config_state, config_log
 from app_log import AppLog
@@ -14,6 +14,7 @@ import time
 from datetime import datetime
 from PyPDF2 import PdfReader
 from win32com import client as win32client
+from asana_function import update_asana
 
 # username = "yee_test@outlook.com"
 # password = "Zero0929"
@@ -21,11 +22,11 @@ from win32com import client as win32client
 
 
 def email_server(app=None):
-    username = "bridge@pcen.com.au"
-    password = "PcE$yD2023"
-    imap_server = "mail.pcen.com.au"
-    smap_server = "mail.pcen.com.au"
-    smap_port = 587
+    username = conf["email_username"]
+    password = conf["email_password"]
+    imap_server = conf["imap_server"]
+    smap_server = conf["smap_server"]
+    smap_port = conf["smap_port"]
 
     from_addr = "bridge@pcen.com.au"
     to_addr = "yeezhuang@gmail.com"
@@ -38,7 +39,6 @@ def email_server(app=None):
         "Felix YE <felixyeqing@gmail.com>",
         "<admin@pcen.com.au>"
     ]
-    conf = CONFIGURATION
 
 
     imap = imaplib.IMAP4_SSL(imap_server)
@@ -47,7 +47,12 @@ def email_server(app=None):
 
 
     while True:
-        status, messages = imap.search(None, "(UNSEEN)")
+        try:
+            status, messages = imap.search(None, "(UNSEEN)")
+        except Exception as e:
+            time.sleep(10)
+            print(e)
+            continue
         messages = messages[0].split(b' ') if len(messages[0]) != 0 else []
         if status == "OK":
             for mail in messages:
@@ -112,6 +117,7 @@ def email_server(app=None):
                                                 if not app is None and app.data["Project Info"]["Project"]["Quotation Number"].get() == quotation_number:
                                                     app.data["State"]["Fee Accepted"].set(True)
                                                     save(app)
+                                                    update_asana(app)
                                                     config_state(app)
                                                     config_log(app)
                                                 else:
@@ -233,6 +239,28 @@ def email_server(app=None):
                                 log.log_chase_client(From.split("<")[-1].split(">")[0], quotation_number)
 
                             print("Chase Client")
+                        elif subject.startswith("Invoice"):
+                            inv_number = subject.split(" ")[1].split("-")[0]
+                            online = False
+                            if not app is None:
+                                app_invoice = [value["Number"].get() for key, value in
+                                               app.data["Financial Panel"]["Invoice Details"].items() if
+                                               len(value["Number"].get()) != 0]
+                                if inv_number in app_invoice:
+                                    online = True
+
+                            if online:
+                                for key, value in app.data["Financial Panel"]["Invoice Details"].items():
+                                    if value["Number"].get() == inv_number:
+                                        value["State"].set("Sent")
+                                        break
+                            else:
+                                database_dir = os.path.join(conf["database_dir"], "invoices.json")
+                                data_json = json.load(open(database_dir))
+                                data_json[inv_number] = "Sent"
+                                with open(database_dir, "w") as f:
+                                    json.dump(data_json, f, indent=4)
+                            print("Invoice Sent")
                         else:
                             message = email.message_from_bytes(msg_data[0][1])
                             message.replace_header("Subject", "Error when processing Bridge")

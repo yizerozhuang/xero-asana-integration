@@ -2,7 +2,7 @@ import shutil
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-from utility import excel_print_invoice, email_invoice, save, config_log, config_state, change_quotation_number, get_invoice_item
+from utility import excel_print_invoice, email_invoice, save, config_log, config_state, change_quotation_number, get_invoice_item, send_email_with_attachment
 from asana_function import update_asana, change_asana_quotation
 
 import os
@@ -67,7 +67,8 @@ class FinancialPanelPage(tk.Frame):
             invoice[f"INV{str(i+1)}"] = {
                 "Number": tk.StringVar(),
                 "Fee": tk.StringVar(),
-                "in.GST": tk.StringVar()
+                "in.GST": tk.StringVar(),
+                "State": tk.StringVar(value="Backlog")
             }
             tk.Label(title_frame, width=8, text="INV"+str(i+1), font=self.conf["font"]).grid(row=0, column=i+2, sticky="ew", padx=(2,0))
             self.invoice_dic["Number"][f"INV{str(i+1)}"] = tk.Entry(invoice_number_frame, state=tk.DISABLED, textvariable=invoice[f"INV{str(i+1)}"]["Number"], width=8, font=self.conf["font"], fg="blue")
@@ -76,12 +77,14 @@ class FinancialPanelPage(tk.Frame):
         total_frame = tk.LabelFrame(self.invoice_frame)
         total_frame.pack(side=tk.BOTTOM, fill=tk.X)
         tk.Label(total_frame, width=35, text="Invoice Total", font=self.conf["font"]).grid(row=0, column=0)
-        self.total_label = tk.Label(total_frame, width=15, text="$0", font=self.conf["font"])
+        # self.total_label = tk.Label(total_frame, width=15, text="$0", font=self.conf["font"])
+        self.total_label = tk.Label(total_frame, width=15, textvariable=self.data["Invoices"]["Fee"], font=self.conf["font"])
         self.total_label.grid(row=0, column=1)
-        self.data["Invoices"]["Fee"].trace("w", lambda a, b, c: self.update_dollar_sign(self.data["Invoices"]["Fee"], self.total_label))
-        self.total_ingst_label = tk.Label(total_frame, width=15, text="$0", font=self.conf["font"])
+        # self.data["Invoices"]["Fee"].trace("w", lambda a, b, c: self.update_dollar_sign(self.data["Invoices"]["Fee"], self.total_label))
+        # self.total_ingst_label = tk.Label(total_frame, width=15, text="$0", font=self.conf["font"])
+        self.total_ingst_label = tk.Label(total_frame, width=15, textvariable=self.data["Invoices"]["in.GST"], font=self.conf["font"])
         self.total_ingst_label.grid(row=1, column=1)
-        self.data["Invoices"]["in.GST"].trace("w", lambda a,b,c: self.update_dollar_sign(self.data["Invoices"]["in.GST"], self.total_ingst_label))
+        # self.data["Invoices"]["in.GST"].trace("w", lambda a,b,c: self.update_dollar_sign(self.data["Invoices"]["in.GST"], self.total_ingst_label))
         ist_fuc = lambda i: lambda a, b, c: self.app._ist_update(invoice[f"INV{str(i+1)}"]["Fee"], invoice[f"INV{str(i+1)}"]["in.GST"])
         self.invoice_total_list = []
         update_dollar_sign_fuc = lambda i: lambda a, b, c: self.update_dollar_sign(invoice[f"INV{str(i+1)}"]["Fee"], self.invoice_total_list[i])
@@ -90,10 +93,10 @@ class FinancialPanelPage(tk.Frame):
 
         for i in range(6):
             self.invoice_total_list.append(tk.Label(total_frame, width=8, font=self.conf["font"]))
-            self.invoice_total_list[i].grid(row=0, column=2 + i, padx=(2,0))
+            self.invoice_total_list[i].grid(row=0, column=2 + i, padx=(2, 0))
             invoice[f"INV{str(i + 1)}"]["Fee"].trace("w", update_dollar_sign_fuc(i))
             self.invoice_ingst_list.append(tk.Label(total_frame, width=8, font=self.conf["font"]))
-            self.invoice_ingst_list[i].grid(row=1, column=2 + i, padx=(2,0))
+            self.invoice_ingst_list[i].grid(row=1, column=2 + i, padx=(2, 0))
             invoice[f"INV{str(i+1)}"]["in.GST"].trace("w", update_ingst_dollar_sign_fuc(i))
             invoice[f"INV{str(i+1)}"]["Fee"].trace("w", ist_fuc(i))
 
@@ -235,10 +238,13 @@ class FinancialPanelPage(tk.Frame):
         invoice_function_frame.grid(row=1, column=0, sticky="ew")
         print_invoice_function = lambda i: lambda: excel_print_invoice(self.app, i)
         email_invoice_function = lambda i: lambda: email_invoice(self.app, i)
-        upload_invoice_function = lambda i, part: lambda: self.upload_file(invoice=self.data["Financial Panel"]["Invoice Details"]["INV"+str(i+1)]["Number"].get(), part=part)
+        upload_invoice_function = lambda i, part: lambda: self.upload_file(remittance="Remittance", invoice=self.data["Financial Panel"]["Invoice Details"]["INV"+str(i+1)]["Number"].get(), part=part, inv=f"INV{str(i+1)}")
+        self.invoice_label_list = []
         for i in range(6):
             tk.Label(invoice_function_frame, width=20, text="Invoice Number: ", font=self.conf["font"]).grid(row=i, column=0)
-            tk.Label(invoice_function_frame, width=10, textvariable=self.data["Financial Panel"]["Invoice Details"][f"INV{str(i+1)}"]["Number"], font=self.conf["font"]).grid(row=i, column=1)
+            self.invoice_label_list.append(tk.Label(invoice_function_frame, width=10, textvariable=self.data["Financial Panel"]["Invoice Details"][f"INV{str(i+1)}"]["Number"], font=self.conf["font"]))
+            self.invoice_label_list[i].grid(row=i, column=1)
+            self.data["Financial Panel"]["Invoice Details"][f"INV{str(i+1)}"]["State"].trace("w", self.invoice_color_code)
             tk.Button(invoice_function_frame, text="Preview", font=self.conf["font"], bg="brown", fg="white",
                       command=print_invoice_function(i)).grid(row=i, column=2)
             tk.Button(invoice_function_frame, text="Email", font=self.conf["font"], bg="brown", fg="white",
@@ -248,11 +254,11 @@ class FinancialPanelPage(tk.Frame):
             tk.Entry(invoice_function_frame, width=10, font=self.conf["font"], fg="blue",
                      textvariable=remittance[f"INV{str(i+1)}"]["Part1"]).grid(row=i, column=5)
             tk.Button(invoice_function_frame, text="Upload Part1", bg="brown", fg="white", font=self.conf["font"],
-                      command=upload_invoice_function(i, "Part 1")).grid(row=i, column=6)
+                      command=upload_invoice_function(i, "Part1")).grid(row=i, column=6)
             tk.Entry(invoice_function_frame, width=10, font=self.conf["font"], fg="blue",
                      textvariable=remittance[f"INV{str(i+1)}"]["Part2"]).grid(row=i, column=7)
             tk.Button(invoice_function_frame, text="Upload Part2", bg="brown", fg="white", font=self.conf["font"],
-                      command=upload_invoice_function(i, "Part 2")).grid(row=i, column=8)
+                      command=upload_invoice_function(i, "Part2")).grid(row=i, column=8)
     def bill_part(self):
         bills = {
             "Details": dict(),
@@ -302,6 +308,7 @@ class FinancialPanelPage(tk.Frame):
                     "Service": tk.StringVar(),
                     "Fee": tk.StringVar(),
                     "in.GST": tk.StringVar(),
+                    "no.GST": tk.BooleanVar(),
                     "Number": tk.StringVar(),
                     "Ori": tk.StringVar(),
                     "V1": tk.StringVar(),
@@ -313,6 +320,8 @@ class FinancialPanelPage(tk.Frame):
                             "Service": tk.StringVar(),
                             "Fee": tk.StringVar(),
                             "in.GST": tk.StringVar(),
+                            "no.GST": tk.BooleanVar(),
+                            "State": tk.StringVar(value="Draft"),
                             "Number": tk.StringVar()
                         } for _ in range(self.conf["n_items"]-1)
                     ]
@@ -321,13 +330,17 @@ class FinancialPanelPage(tk.Frame):
                 self.bill_dic[service] = {
                     "Service": tk.Entry(self.bill_frames[service],
                                         textvariable=details[service]["Service"],
-                                        width=30,
+                                        width=20,
                                         font=self.conf["font"],
                                         fg="blue"),
                     "Fee": tk.Label(self.bill_frames[service],
                                     textvariable=details[service]["Fee"],
                                     width=10,
                                     font=self.conf["font"]),
+                    "no.GST": tk.Checkbutton(self.bill_frames[service],
+                                             variable=details[service]["no.GST"],
+                                             text="No GST",
+                                             width=6),
                     "Ori": {
                         "Fee": tk.Entry(self.bill_frames[service],
                                         textvariable=details[service]["Ori"], width=10, font=self.conf["font"], fg="blue"),
@@ -340,27 +353,26 @@ class FinancialPanelPage(tk.Frame):
                                         textvariable=details[service]["V1"], width=10, font=self.conf["font"], fg="blue"),
                         "Upload": tk.Button(self.bill_frames[service],
                                             command=lambda: self.upload_file(bill_description=details[service]["Service"].get(),
-                                                                             origin="Sub Variation 1"), width=10, text="Upload", bg="brown", fg="white")
+                                                                             origin="V1"), width=10, text="Upload", bg="brown", fg="white")
                     },
                     "V2": {
                         "Fee": tk.Entry(self.bill_frames[service],
                                         textvariable=details[service]["V2"], width=10, font=self.conf["font"], fg="blue"),
                         "Upload": tk.Button(self.bill_frames[service],
                                             command=lambda: self.upload_file(bill_description=details[service]["Service"].get(),
-                                                                             origin="Sub Variation 2"), width=10, text="Upload", bg="brown", fg="white")
+                                                                             origin="V2"), width=10, text="Upload", bg="brown", fg="white")
                     },
                     "V3": {
                         "Fee": tk.Entry(self.bill_frames[service],
                                         textvariable=details[service]["V3"], width=10, font=self.conf["font"], fg="blue"),
                         "Upload": tk.Button(self.bill_frames[service],
                                             command=lambda: self.upload_file(bill_description=details[service]["Service"].get(),
-                                                                             origin="Sub Variation 3"), width=10, text="Upload", bg="brown", fg="white")
+                                                                             origin="V3"), width=10, text="Upload", bg="brown", fg="white")
                     },
                     "Expand": [tk.LabelFrame(self.bill_frame) for _ in range(self.conf["n_items"])]
 
                 }
-                upload_file_fuc = lambda i: lambda : self.upload_file(bill_number=details[service]["Content"][i]["Number"].get(),
-                                                                      bill_description=details[service]["Content"][i]["Service"].get())
+                upload_file_fuc = lambda i: lambda : self.upload_file(bill_number=details[service]["Content"][i]["Number"].get(), service=service, i=str(i))
                 self.bill_dic[service]["Content"] = [
                     {
                         "Number": tk.Entry(self.bill_dic[service]["Expand"][i],
@@ -383,6 +395,10 @@ class FinancialPanelPage(tk.Frame):
                                            width=10,
                                            textvariable=details[service]["Content"][i]["in.GST"],
                                            font=self.conf["font"]),
+                        "no.GST": tk.Checkbutton(self.bill_dic[service]["Expand"][i],
+                                                 variable=details[service]["Content"][i]["no.GST"],
+                                                 width=6,
+                                                 text="No GST"),
                         "Upload": tk.Button(self.bill_dic[service]["Expand"][i],
                                             command=upload_file_fuc(i),
                                             width=8,
@@ -398,30 +414,37 @@ class FinancialPanelPage(tk.Frame):
                                                           font=self.conf["font"])
 
                 self.bill_dic[service]["Service"].grid(row=0, column=0)
-                self.bill_dic[service]["Ori"]["Fee"].grid(row=0, column=1)
-                self.bill_dic[service]["Ori"]["Upload"].grid(row=0, column=2)
-                self.bill_dic[service]["V1"]["Fee"].grid(row=0, column=3)
-                self.bill_dic[service]["V1"]["Upload"].grid(row=0, column=4)
-                self.bill_dic[service]["V2"]["Fee"].grid(row=0, column=5)
-                self.bill_dic[service]["V2"]["Upload"].grid(row=0, column=6)
-                self.bill_dic[service]["V3"]["Fee"].grid(row=0, column=7)
-                self.bill_dic[service]["V3"]["Upload"].grid(row=0, column=8)
-                self.bill_dic[service]["Fee"].grid(row=0, column=9)
+                self.bill_dic[service]["no.GST"].grid(row=0, column=1)
+                self.bill_dic[service]["Ori"]["Fee"].grid(row=0, column=2)
+                self.bill_dic[service]["Ori"]["Upload"].grid(row=0, column=3)
+                self.bill_dic[service]["V1"]["Fee"].grid(row=0, column=4)
+                self.bill_dic[service]["V1"]["Upload"].grid(row=0, column=5)
+                self.bill_dic[service]["V2"]["Fee"].grid(row=0, column=6)
+                self.bill_dic[service]["V2"]["Upload"].grid(row=0, column=7)
+                self.bill_dic[service]["V3"]["Fee"].grid(row=0, column=8)
+                self.bill_dic[service]["V3"]["Upload"].grid(row=0, column=9)
+                self.bill_dic[service]["Fee"].grid(row=0, column=10)
                 self.bill_dic[service]["Paid"].pack(side=tk.RIGHT)
                 for i in range(self.conf["n_items"]-1):
                     self.bill_dic[service]["Content"][i]["Number"].grid(row=0, column=0, padx=(0, 3))
                     self.bill_dic[service]["Content"][i]["Service"].grid(row=0, column=1)
                     self.bill_dic[service]["Content"][i]["Fee"].grid(row=0, column=2)
                     self.bill_dic[service]["Content"][i]["in.GST"].grid(row=0, column=3)
-                    self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=4)
+                    self.bill_dic[service]["Content"][i]["no.GST"].grid(row=0, column=4)
+                    self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=5, padx=(400, 0))
 
 
-                ist_update_fuc = lambda i: lambda a, b, c: self.app._ist_update(details[service]["Content"][i]["Fee"], details[service]["Content"][i]["in.GST"])
+                ist_update_fuc = lambda i: lambda a, b, c: self.app._ist_update(details[service]["Content"][i]["Fee"], details[service]["Content"][i]["in.GST"], details[service]["Content"][i]["no.GST"])
+                details[service]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(details[service]["Fee"], details[service]["in.GST"], details[service]["no.GST"]))
+                details[service]["no.GST"].trace("w", lambda a, b, c: self.app._ist_update(details[service]["Fee"], details[service]["in.GST"], details[service]["no.GST"]))
 
-                details[service]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(details[service]["Fee"], details[service]["in.GST"]))
+
+                bill_color_code_fuc = lambda i : lambda a,b,c: self.bill_color_code(details[service]["Content"][i]["State"], self.bill_dic[service]["Content"][i]["in.GST"])
                 for i in range(self.conf["n_items"]-1):
                     details[service]["Content"][i]["Fee"].trace("w", ist_update_fuc(i))
+                    details[service]["Content"][i]["no.GST"].trace("w", ist_update_fuc(i))
                     details[service]["Content"][i]["Fee"].trace("w", lambda a, b, c: self.app._sum_update([details[service]["Content"][j]["Fee"] for j in range(self.conf["n_items"]-1)], details[service]["Paid"]))
+                    details[service]["Content"][i]["State"].trace("w", bill_color_code_fuc(i))
 
                 extra_list = ["Ori", "V1", "V2", "V3"]
                 for extra in extra_list:
@@ -468,7 +491,6 @@ class FinancialPanelPage(tk.Frame):
         bills_details = self.data["Bills"]["Details"]
         profits_details = self.data["Profits"]["Details"]
         archive = self.data["Archive"]["Profit"]
-        # variation = self.data["Variation"]
         service = var["Service"].get()
         include = var["Include"].get()
         if include:
@@ -483,7 +505,7 @@ class FinancialPanelPage(tk.Frame):
                         {
                             "Fee": tk.StringVar(),
                             "in.GST": tk.StringVar(),
-                        } for _ in range(self.conf["n_items"])
+                        } for _ in range(self.conf["n_items"]-1)
                     ]
                 }
 
@@ -498,16 +520,21 @@ class FinancialPanelPage(tk.Frame):
                                        font=self.conf["font"]),
                     "Expand": [tk.LabelFrame(self.profit_frame) for _ in range(self.conf["n_items"])]
                 }
-
-
                 invoices_details[service]["Fee"].trace("w", lambda a, b, c: self.app._minus_update(invoices_details[service]["Fee"],
-                                                                                                   bills_details[service]["Fee"], profits_details[service]["Fee"]))
-                bills_details[service]["Fee"].trace("w", lambda a, b, c: self.app._minus_update(
-                    invoices_details[service]["Fee"], bills_details[service]["Fee"], profits_details[service]["Fee"]))
+                                                                                                   bills_details[service]["Fee"],
+                                                                                                   profits_details[service]["Fee"]))
 
-                invoices_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._minus_update(invoices_details[service]["in.GST"], bills_details[service]["in.GST"], profits_details[service]["in.GST"]))
-                bills_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._minus_update(
-                    invoices_details[service]["in.GST"], bills_details[service]["in.GST"], profits_details[service]["in.GST"]))
+                bills_details[service]["Fee"].trace("w", lambda a, b, c: self.app._minus_update(invoices_details[service]["Fee"],
+                                                                                                bills_details[service]["Fee"],
+                                                                                                profits_details[service]["Fee"]))
+
+                invoices_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._minus_update(invoices_details[service]["in.GST"],
+                                                                                                      bills_details[service]["in.GST"],
+                                                                                                      profits_details[service]["in.GST"]))
+
+                bills_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._minus_update(invoices_details[service]["in.GST"],
+                                                                                                   bills_details[service]["in.GST"],
+                                                                                                   profits_details[service]["in.GST"]))
 
                 profits_details[service]["Fee"].trace("w", lambda a, b, c: self.app._sum_update([service["Fee"] for service in profits_details.values()], self.data["Profits"]["Fee"]))
                 profits_details[service]["in.GST"].trace("w", lambda a, b, c: self.app._sum_update([service["in.GST"] for service in profits_details.values()], self.data["Profits"]["in.GST"]))
@@ -515,6 +542,7 @@ class FinancialPanelPage(tk.Frame):
                 for i in range(self.conf["n_items"]):
                     tk.Label(self.profit_dic[service]["Expand"][i], text="").pack(pady=2)
                 self.profit_dic[service]["Fee"].pack(pady=1)
+
             self.profit_frames[service].pack()
             for i in range(self.conf["n_items"]):
                 self.profit_dic[service]["Expand"][i].pack(fill=tk.X)
@@ -537,49 +565,18 @@ class FinancialPanelPage(tk.Frame):
         tk.Label(fee_acceptance_frame, text="Fee Acceptance", font=self.conf["font"]).grid(row=0, column=0)
         tk.Label(fee_acceptance_frame, text="Rev1", font=self.conf["font"]).grid(row=0, column=1)
         tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
-                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev1")).grid(row=0, column=2)
+                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev 1")).grid(row=0, column=2)
         tk.Label(fee_acceptance_frame, text="Rev2", font=self.conf["font"]).grid(row=0, column=3)
         tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
-                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev2")).grid(row=0, column=4)
+                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev 2")).grid(row=0, column=4)
         tk.Label(fee_acceptance_frame, text="Rev3", font=self.conf["font"]).grid(row=0, column=5)
         tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
-                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev3")).grid(row=0, column=6)
+                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev 3")).grid(row=0, column=6)
     def _on_mousewheel(self, event):
         self.main_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
     def reset_scrollregion(self, event):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
     def update_invoice_sum(self, details, invoice_list):
-        # fee_value = {
-        #     "INV1": 0,
-        #     "INV2": 0,
-        #     "INV3": 0,
-        #     "INV4": 0,
-        #     "INV5": 0,
-        #     "INV6": 0,
-        # }
-        # for service in details.values():
-        #     if service["Expand"].get():
-        #         for i in range(self.conf["n_items"]):
-        #             if service["Content"][i]["Number"].get() != "None":
-        #                 index = service["Content"][i]["Number"].get()
-        #                 try:
-        #                     fee_value[index] += round(float(service["Content"][i]["Fee"].get()), 2)
-        #                 except ValueError:
-        #                     continue
-        #     else:
-        #         if service["Number"].get() != "None":
-        #             index = service["Number"].get()
-        #             try:
-        #                 fee_value[index] += round(float(service["Fee"].get()), 2)
-        #             except ValueError:
-        #                 continue
-        # for variation in self.data["Variation"]:
-        #     if variation["Number"].get() != "None":
-        #         index = variation["Number"].get()
-        #         try:
-        #             fee_value[index] += round(float(variation["Fee"].get()), 2)
-        #         except ValueError:
-        #             continue
         invoice_items = get_invoice_item(self.app)
         for i in range(6):
             invoice_list[f"INV{str(i+1)}"]["Fee"].set(sum([float(inv["Fee"]) if not inv["Fee"] == "" else 0 for inv in invoice_items[f"INV{str(i+1)}"]]))
@@ -616,15 +613,16 @@ class FinancialPanelPage(tk.Frame):
             if inv is None:
                 messagebox.showerror("Error", "You cant generate more than 6 invoices")
                 return
-
             current_inv_number = self._get_current_invoice_number()
-            self.data["Financial Panel"]["Invoice Details"][inv]["Number"].set(current_inv_number)
             if inv == "INV1":
-                change_asana_quotation(self.app, current_inv_number)
-                change_quotation_number(self.app, current_inv_number)
-                self.data["Project Info"]["Project"]["Quotation Number"].set(current_inv_number)
-                self.data["Project Info"]["Project"]["Project Number"].set(current_inv_number)
-                messagebox.showinfo("updated", "folder name and asana updated")
+                update = change_quotation_number(self.app, current_inv_number)
+                if update:
+                    change_asana_quotation(self.app, current_inv_number)
+                    self.data["Financial Panel"]["Invoice Details"][inv]["Number"].set(current_inv_number)
+                    self.data["Project Info"]["Project"]["Quotation Number"].set(current_inv_number)
+                    self.data["Project Info"]["Project"]["Project Number"].set(current_inv_number)
+                    save(self.app)
+                    messagebox.showinfo("updated", "folder name and asana updated")
     def _get_current_invoice_number(self):
         invoice_dir = os.path.join(self.conf["database_dir"], "invoices.json")
         invoices = json.load(open(invoice_dir))
@@ -636,21 +634,58 @@ class FinancialPanelPage(tk.Frame):
             json.dump(invoices, f, ensure_ascii=False, indent=4)
         return res
     def upload_file(self, **kwargs):
-        filename_list = []
-        if "bill_number" in kwargs.keys():
-            if len(self.data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get()) ==0:
-                messagebox.showerror("Error", "Please generate first invoice number before you upload bill file")
-                return
-            filename_list.append(self.data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get())
-
         for key, value in kwargs.items():
             if len(value.strip()) == 0:
                 messagebox.showerror("Warming", f"You need to enter {key.replace('_', ' ')} before you upload the file")
                 return
-            filename_list.append(value)
-        filename = "-".join(filename_list)
+        filename=None
+        if "remittance" in kwargs.keys():
+            if kwargs["part"] == "Full Amount":
+                filename=f"Remittance {kwargs['invoice']} ${self.data['Financial Panel']['Invoice Details'][kwargs['inv']]['Fee'].get()}"
+            elif kwargs["part"] == "Part1":
+                filename=f"Remittance {kwargs['invoice']} ${self.data['Remittances'][kwargs['inv']]['Part1'].get()}-${self.data['Financial Panel']['Invoice Details'][kwargs['inv']]['Fee'].get()}"
+            else:
+                amount = str(float(self.data['Remittances'][kwargs['inv']]['Part1'].get())+
+                             float(self.data['Remittances'][kwargs['inv']]['Part2'].get()))
+                filename = f"Remittances {kwargs['invoice']} ${amount} ${self.data['Financial Panel']['Invoice Details'][kwargs['inv']]['Fee'].get()}"
+        elif "bill_description" in kwargs.keys():
+            filename = f"{kwargs['bill_description']}-{kwargs['origin']}"
+        elif "bill_number" in kwargs.keys():
+            if len(self.data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get())==0:
+                messagebox.showerror("Error", "Please generate first invoice number before you upload bill file")
+                return
+            # service = kwargs["service"]
+            # i = int(kwargs["i"])
+            # if i == 0:
+            #     amount = f"${self.data['Bills']['Details'][service]['Content'][0]['Fee'].get()}-${self.data['Bills']['Details'][service]['Fee'].get()}"
+            # elif i == 1:
+            #     _ = str(float(self.data['Bills']['Details'][service]['Content'][0]['Fee'].get())+
+            #             float(self.data['Bills']['Details'][service]['Content'][1]['Fee'].get()))
+            #     amount = f"${_}-${self.data['Bills']['Details'][service]['Fee'].get()}"
+            # else:
+            #     _ = str(
+            #         float(self.data['Bills']['Details'][service]['Content'][0]['Fee'].get()) +
+            #         float(self.data['Bills']['Details'][service]['Content'][1]['Fee'].get()) +
+            #         float(self.data['Bills']['Details'][service]['Content'][2]['Fee'].get())
+            #     )
+            #     amount = f"${_}-${self.data['Bills']['Details'][service]['Fee'].get()}"
+            filename = f'{self.data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get()+kwargs["bill_number"]}-original'
+
+        elif "fee_acceptance" in kwargs.keys():
+            filename = kwargs["fee_acceptance"]
+        else:
+            messagebox.showerror("Error", "Unable to Upload the file, please contact Administer")
+            return
+        # if "part" in kwargs.keys():
+        #     if kwargs["part"] == "Full Amount":
+        #         kwargs["part"] = "$" + self.data["Financial Panel"]["Invoice Details"][f"INV{kwargs['index']+1}"]["Fee"].get()
+        #     kwargs.pop("index")
+            # elif kwargs["part"] == "Part 1":
+            #     kwargs["part"] = "$" + self.data["Financial Panel"]["Invoice Details"][f"INV {kwargs['index']+1}"]["Fee"].get()
+            # else:
+            #     kwargs["part"] = self.data["Financial Panel"]["Invoice Details"][f"INV {kwargs['index']+1}"]["Fee"]
+
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
-        folder_dir = os.path.join(database_dir, filename)
 
         if len(filename.strip()) == 0:
             messagebox.showerror("Error", "Please input a file name first")
@@ -668,21 +703,78 @@ class FinancialPanelPage(tk.Frame):
             if file == "":
                 return
             try:
-                shutil.copy(file.replace("/", "\\"), folder_dir+os.path.splitext(file)[1])
+                folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
+                shutil.copy(file, folder_dir)
             except PermissionError:
                 messagebox.showerror("Error", "Please close the file before you upload it")
+                return
             except Exception as e:
                 print(e)
                 messagebox.showerror("Error", "Some error occurs, please contact Administrator")
-            else:
-                if "fee_acceptance" in kwargs.keys():
-                    self.data["State"]["Fee Accepted"].set(True)
+                return
+            if "fee_acceptance" in kwargs.keys():
+                update = messagebox.askyesno("Asana", "Do you want to update asana or not")
+                if update:
                     update_asana(self.app)
-                    self.app.log.log_fee_accept_file(self.app)
-                    save(self.app)
-                    config_state(self.app)
-                    config_log(self.app)
-                messagebox.showinfo("upload", f"the file {file} has upload to database")
+                self.data["State"]["Fee Accepted"].set(True)
+                self.app.log.log_fee_accept_file(self.app.user, self.data["Project Info"]["Project"]["Quotation Number"].get())
+                save(self.app)
+                config_state(self.app)
+                config_log(self.app)
+            elif "bill_number" in kwargs.keys():
+                try:
+                    send_email_with_attachment(folder_dir)
+                except Exception as e:
+                    print(e)
+                    messagebox.showerror("Error", "Unable to upload the file to xero")
+                    return
+                # service = kwargs["service"]
+                # i = int(kwargs["i"])
+                # self.data["Bills"]["Details"][service]["Content"][i]["State"].set("Submitted")
+                messagebox.showinfo("Upload", f"the file {file} has upload to database {folder_dir}, and upload to Xero")
+                return
+            messagebox.showinfo("upload", f"the file {file} has upload to database {folder_dir}")
+
+    def invoice_color_code(self, *args):
+        for i in range(6):
+            state = self.data["Financial Panel"]["Invoice Details"][f"INV{str(i+1)}"]["State"].get()
+            if state=="Backlog":
+                self.invoice_label_list[i].config(bg=self.app.cget('bg'))
+            elif state=="Sent":
+                self.invoice_label_list[i].config(bg="red")
+            elif state=="Paid":
+                self.invoice_label_list[i].config(bg="green")
+            elif state=="Void":
+                self.invoice_label_list[i].config(bg="purple")
+            else:
+                raise ValueError
+
+    def bill_color_code(self, state, label, *args):
+        state = state.get()
+        if state=="Draft":
+            label.config(bg=self.app.cget('bg'))
+        elif state=="Awaiting approval":
+            label.config(bg="red")
+        elif state=="Awaiting payment":
+            label.config(bg="orange")
+        elif state=="Paid":
+            label.config(bg="green")
+        elif state=="Void":
+            label.config(bg="Purple")
+        else:
+            raise ValueError
+
+    # def no_gst_update(self,nogst, fee, ingst, *args):
+    #     if nogst.get():
+    #         fee.trace("w", lambda a, b, c: self.no_gst(fee, ingst))
+    #         self.no_gst(fee, ingst)
+    #     else:
+    #         fee.trace("w", lambda a, b, c: self.app._ist_update(fee, ingst))
+    #         self.app._ist_update(fee, ingst)
+    #
+    # def no_gst(self, fee, ingst, *args):
+    #     ingst.set(fee.get())
+
     # def _expand_bill(self, service):
     #     details = self.data["Invoices"]["Details"]
     #     bill_fee = self.data["Financial Panel"]["Bill Details"]

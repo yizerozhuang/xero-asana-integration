@@ -41,7 +41,7 @@ class App(tk.Tk):
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=1)
 
-        self.utility_frame()
+        self.utility_part()
         self.change_page_frame()
         self.main_context_frame()
 
@@ -51,25 +51,25 @@ class App(tk.Tk):
         config_state(self)
         self.auto_check()
 
-    def utility_frame(self):
+    def utility_part(self):
         # Utility Part
-        utility_frame = tk.LabelFrame(self.main_frame, text="Utility", font=self.conf["font"])
-        utility_frame.pack(side=tk.TOP)
+        self.utility_frame = tk.LabelFrame(self.main_frame, text="Utility", font=self.conf["font"])
+        self.utility_frame.pack(side=tk.TOP)
         
-        state_frame = tk.LabelFrame(utility_frame, font=self.conf["font"])
-        state_frame.pack(side=tk.LEFT)
+        state_frame = tk.LabelFrame(self.utility_frame, font=self.conf["font"])
+        state_frame.grid(row=0, column=1)
 
         tk.Button(state_frame, text="Set Up Project", command=self._finish_setup, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
         tk.Button(state_frame, text="Preview Fee Proposal", bg="brown", command=lambda: excel_print_pdf(self), fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(state_frame, text="Email to Client", command=lambda: email(self), bg="brown", fg="white",
+        tk.Button(state_frame, text="Email to Client", command=lambda: email_fee_proposal(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
         tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
         
-        function_frame = tk.LabelFrame(utility_frame, font=self.conf["font"])
-        function_frame.pack(side=tk.RIGHT, fill=tk.Y)
+        function_frame = tk.LabelFrame(self.utility_frame, font=self.conf["font"])
+        function_frame.grid(row=0, column=2, sticky="ns")
 
         tk.Button(function_frame, width=10, text="Open Folder", command=self.open_folder, bg="brown",
                   fg="white",
@@ -148,6 +148,30 @@ class App(tk.Tk):
             "Third Chase": tk.StringVar()
         }
 
+        legend_frame = tk.LabelFrame(self.utility_frame)
+        legend_frame.grid(row=0, column=3)
+
+        tk.Label(legend_frame, text="Invoice States: ").grid(row=0, column=0)
+
+        _ = tk.LabelFrame(legend_frame)
+        _.grid(row=0, column=1, sticky="ew")
+        tk.Label(_, text="Backlog").pack()
+
+        tk.Label(legend_frame, text="Sent", bg="red").grid(row=0, column=2, sticky="ew")
+        tk.Label(legend_frame, text="Paid", bg="green").grid(row=0, column=4, sticky="ew")
+        tk.Label(legend_frame, text="Void", bg="purple").grid(row=0, column=5, sticky="ew")
+
+        tk.Label(legend_frame, text="Bill States: ").grid(row=1, column=0)
+
+        _ = tk.LabelFrame(legend_frame)
+        _.grid(row=1, column=1, sticky="ew")
+        tk.Label(_, text="Draft").pack()
+
+        tk.Label(legend_frame, text="Awaiting approval", bg="red").grid(row=1, column=2, sticky="ew")
+        tk.Label(legend_frame, text="Awaiting payment", bg="orange").grid(row=1, column=3, sticky="ew")
+        tk.Label(legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
+        tk.Label(legend_frame, text="Void", bg="purple").grid(row=1, column=5, sticky="ew")
+
     def change_page_frame(self):
         # change page
         change_page_frame = tk.LabelFrame(self.main_frame, text="Change Page")
@@ -173,6 +197,8 @@ class App(tk.Tk):
         self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
         self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
         self._update_variation()
+        self._project_number_page()
+
     def _update_variation(self):
         # variation = [
         #     {
@@ -243,6 +269,14 @@ class App(tk.Tk):
         # self.financial_panel_page.update_bill(variation_var)
         # self.financial_panel_page.update_profit(variation_var)
 
+    def _project_number_page(self):
+        project_number_frame = tk.LabelFrame(self.utility_frame)
+        project_number_frame.grid(row=0, column=0, sticky="ns")
+        tk.Label(project_number_frame, text="Project Number: ", font=self.conf["font"]).grid(row=0, column=0)
+        tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Quotation Number"], font=self.conf["font"]).grid(row=0, column=1)
+        tk.Label(project_number_frame, text="Project Name: ", font=self.conf["font"]).grid(row=1, column=0)
+        tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=1, column=1)
+
     def show_frame(self, page):
         self.project_info_page.pack_forget()
         self.fee_proposal_page.pack_forget()
@@ -251,7 +285,11 @@ class App(tk.Tk):
         page.pack(fill=tk.BOTH, expand=1)
 
 
-    def _ist_update(self, fee, ingst):
+    def _ist_update(self, fee, ingst, no_gst=None):
+        if not no_gst is None and no_gst.get():
+            ingst.set(fee.get())
+            return
+
         tax_rate = self.conf["tax rates"]
         if len(fee.get()) == 0:
             ingst.set("")

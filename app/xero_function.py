@@ -11,7 +11,7 @@ from flask_session import Session
 
 from tkinter import messagebox
 
-from utility import remove_none
+from utility import remove_none, update_app_invoices
 from asana_function import update_asana_invoices
 
 
@@ -148,6 +148,54 @@ def invoice_number_invoice_id(api_list):
         res[item["invoice_number"]] = item["invoice_id"]
     return res
 
+def _process_invoices(inv_list):
+    # res = {
+    #     "DRAFT":{},
+    #     "SUBMITTED":{},
+    #     "DELETED": {},
+    #     "AUTHORISED": {},
+    #     "PAID":{},
+    #     "VOIDED":{},
+    #     "NONE": {}
+    # }
+    # for inv in inv_list:
+    #     res[inv["status"]][inv["invoice_number"]] = inv["invoice_id"]
+    # return res
+
+    res = {
+        "Invoices": {
+            "DRAFT": {},
+            "SUBMITTED": {},
+            "DELETED": {},
+            "AUTHORISED": {},
+            "PAID": {},
+            "VOIDED": {},
+            "NONE": {}
+        },
+        "Bills": {
+            "DRAFT": {},
+            "SUBMITTED": {},
+            "DELETED": {},
+            "AUTHORISED": {},
+            "PAID": {},
+            "VOIDED": {},
+            "NONE": {}
+        }
+    }
+    for inv in inv_list:
+        if inv["type"] == "ACCREC":
+            res["Invoices"][inv["status"]][inv["invoice_number"]] ={
+                "sub_total": inv["sub_total"],
+                "line_amount_types": inv["line_amount_types"].value
+            }
+        elif inv["type"] == "ACCPAY":
+            res["Bills"][inv["status"]][inv["invoice_number"]] = {
+                "sub_total": inv["sub_total"],
+                "line_amount_types": inv["line_amount_types"].value
+            }
+    return res
+
+
 @xero_token_required
 def update_xero(app, contact_name):
     data = app.data
@@ -175,12 +223,31 @@ def update_xero(app, contact_name):
     #     account = Account(account_id=account_id)
     # except AccountingBadRequestException as exception:
     #     pass
+
     # all_invoices = remove_none(accounting_api.get_invoices(xero_tenant_id).to_dict())["invoices"]
     # invoice_number_map = invoice_number_invoice_id(all_invoices)
 
+
+    # submitted_where = "Status==SUBMITTED"
+    #
+    # submitted_invoice = remove_none(accounting_api.get_invoices(xero_tenant_id, where=submitted_where).to_dict())["invoices"]
+    # submitted_invoice_id = invoice_number_invoice_id(submitted_invoice)
+    #
+    # approve_where = 'Status==AUTHORISED'
+    #
+    # approve_invoice = remove_none(accounting_api.get_invoices(xero_tenant_id, where=approve_where).to_dict())["invoices"]
+    # approve_invoice_id = invoice_number_invoice_id(approve_invoice)
+    #
+    paid_where = 'Status=="PAID"'
+
+    paid_invoice = remove_none(accounting_api.get_invoices(xero_tenant_id, where=paid_where).to_dict())["invoices"]
+
+    paid_invoice_id = invoice_number_invoice_id(paid_invoice)
+
+
     invoices_list = []
     for inv in ["INV1", "INV2", "INV3", "INV4", "INV5", "INV6"]:
-        if len(app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0:
+        if len(app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0 or app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get() in paid_invoice_id.keys():
             continue
         line_item_list = []
         for key, service in data["Invoices"]["Details"].items():
@@ -219,41 +286,47 @@ def update_xero(app, contact_name):
                 due_date=datetime.today(),
                 line_items=line_item_list,
                 invoice_number=data["Financial Panel"]["Invoice Details"][inv]["Number"].get(),
-                reference=data["Project Info"]["Project"]["Quotation Number"].get()+data["Project Info"]["Project"]["Project Name"].get(),
-                status="DRAFT"
+                reference=data["Project Info"]["Project"]["Quotation Number"].get()+"-"+data["Project Info"]["Project"]["Project Name"].get(),
+                status="AUTHORISED"
             )
         )
 
-    for bill in app.data["Bills"]["Details"].values():
-        for sub_bill in bill["Content"]:
-            bill_number = app.data["Project Info"]["Project"]["Quotation Number"].get() + sub_bill["Number"].get()
-            if len(sub_bill["Number"].get()) == 0:
-                continue
-            invoices_list.append(
-                Invoice(
-                    type="ACCPAY",
-                    contact=contact,
-                    date=datetime.today(),
-                    due_date=datetime.today(),
-                    line_items=[
-                        LineItem(
-                            description=sub_bill["Service"].get(),
-                            quantity=1,
-                            unit_amount=int(sub_bill["Fee"].get()),
-                            account_code="200"
-                        )
-                    ],
-                    invoice_number=bill_number,
-                    reference=data["Project Info"]["Project"]["Quotation Number"].get()+data["Project Info"]["Project"]["Project Name"].get(),
-                    status="DRAFT"
-                )
-            )
-
+    # for bill in app.data["Bills"]["Details"].values():
+    #     for sub_bill in bill["Content"]:
+    #         bill_number = app.data["Project Info"]["Project"]["Quotation Number"].get() + sub_bill["Number"].get()
+    #         if len(sub_bill["Number"].get()) == 0:
+    #             continue
+    #         invoices_list.append(
+    #             Invoice(
+    #                 type="ACCPAY",
+    #                 contact=contact,
+    #                 date=datetime.today(),
+    #                 due_date=datetime.today(),
+    #                 line_items=[
+    #                     LineItem(
+    #                         description=sub_bill["Service"].get(),
+    #                         quantity=1,
+    #                         unit_amount=int(sub_bill["Fee"].get()),
+    #                         account_code="200"
+    #                     )
+    #                 ],
+    #                 invoice_number=bill_number,
+    #                 reference=data["Project Info"]["Project"]["Quotation Number"].get()+"-"+data["Project Info"]["Project"]["Project Name"].get(),
+    #                 status="AUTHORISED"
+    #             )
+    #         )
     invoices = Invoices(invoices=invoices_list)
+    try:
+        accounting_api.update_or_create_invoices(xero_tenant_id, invoices)
+    except Exception as e:
+        print(e)
+        print("No Data Processed")
 
-    accounting_api.update_or_create_invoices(xero_tenant_id, invoices)
+    all_invoices = _process_invoices(accounting_api.get_invoices(xero_tenant_id).to_dict()["invoices"])
+
+    update_app_invoices(app, all_invoices)
+
     update_asana_invoices(app)
-
 
     messagebox.showinfo("Update", "the invoices and bill is updated to xero")
 
@@ -309,3 +382,4 @@ def create_contact(app, name):
 
     api_response = accounting_api.create_contacts(xero_tenant_id, contacts)
     return api_response.to_dict()["contacts"][0]["contact_id"]
+

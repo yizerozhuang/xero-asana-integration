@@ -166,32 +166,6 @@
         "Fee": "",
         "in.GST": ""
     },
-    "Variation": [
-        {
-            "Service": "",
-            "Fee": "",
-            "in.GST": "",
-            "Number": "None"
-        },
-        {
-            "Service": "",
-            "Fee": "",
-            "in.GST": "",
-            "Number": "None"
-        },
-        {
-            "Service": "",
-            "Fee": "",
-            "in.GST": "",
-            "Number": "None"
-        },
-        {
-            "Service": "",
-            "Fee": "",
-            "in.GST": "",
-            "Number": "None"
-        }
-    ],
     "Profits": {
         "Details": {},
         "Fee": "",
