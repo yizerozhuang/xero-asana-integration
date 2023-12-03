@@ -4,10 +4,14 @@ from pathlib import Path
 
 CONFIGURATION = {
     "font": ["Calibri", 11],
+    "service_list":["Mechanical Service", "Electrical Service", "Hydraulic Service", "Fire Service"],
+    "invoice_list": ["Mechanical Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Variation"],
+    "extra_list":["Extend", "Exclusion", "Deliverables"],
     "tax rates": 1.1,
     "n_building": 5,
     "n_drawing": 5,
     "n_items": 4,
+    "n_bills": 3,
     "n_invoice": 6,
     "n_variation": 4,
     "bridge_email": "bridge@pcen.com.au",

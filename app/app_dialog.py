@@ -6,6 +6,18 @@ from tkinter import simpledialog, ttk, messagebox
 import os
 import shutil
 
+
+class AppDialog:
+    def __init__(self, master=None, **options):
+        if not master:
+            master = options.get('parent')
+        self.master = master
+        self.options = options
+    def show(self):
+        pass
+
+
+
 class FileSelectDialog(simpledialog.Dialog):
     def __init__(self, app, dir_list, title=None):
         self.dir_list = dir_list

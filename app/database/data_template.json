@@ -1,4 +1,5 @@
 {
+    "Asana_id": "",
     "State": {
         "Set Up": false,
         "Generate Proposal": false,
@@ -59,52 +60,52 @@
             }
         },
         "Client": {
-            "Client Full Name": "",
-            "Client Contact Type": "Architect",
-            "Client Company": "",
-            "Client Address": "",
-            "Client ABN": "",
+            "Full Name": "",
+            "Contact Type": "Architect",
+            "Company": "",
+            "Address": "",
+            "ABN": "",
             "Contact Number": "",
             "Contact Email": ""
         },
         "Main Contact": {
-            "Main Contact Full Name": "",
-            "Main Contact Contact Type": "Architect",
-            "Main Contact Company": "",
-            "Main Contact Address": "",
-            "Main Contact ABN": "",
-            "Main Contact Number": "",
-            "Main Contact Email": ""
+            "Full Name": "",
+            "Contact Type": "Architect",
+            "Company": "",
+            "Address": "",
+            "ABN": "",
+            "Contact Number": "",
+            "Contact Email": ""
         },
         "Building Features": {
             "Details": [
                 {
                     "Levels": "",
-                    "Space/room Description": "",
-                    "Area/m^2": ""
+                    "Space": "",
+                    "Area": ""
                 },
                 {
                     "Levels": "",
-                    "Space/room Description": "",
-                    "Area/m^2": ""
+                    "Space": "",
+                    "Area": ""
                 },
                 {
                     "Levels": "",
-                    "Space/room Description": "",
-                    "Area/m^2": ""
+                    "Space": "",
+                    "Area": ""
                 },
                 {
                     "Levels": "",
-                    "Space/room Description": "",
-                    "Area/m^2": ""
+                    "Space": "",
+                    "Area": ""
                 },
                 {
                     "Levels": "",
-                    "Space/room Description": "",
-                    "Area/m^2": ""
+                    "Space": "",
+                    "Area": ""
                 }
             ],
-            "Feature/Notes": "",
+            "Feature": "",
             "Total Area": "0"
         },
         "Drawing": [
@@ -154,87 +155,530 @@
                 "End": "2"
             }
         },
-        "Scope": {}
+        "Scope": {
+            "Mechanical Service": {
+                "Extend": [],
+                "Exclusion": [],
+                "Deliverables": []
+            },
+            "Electrical Service": {
+                "Extend": [],
+                "Exclusion": [],
+                "Deliverables": []
+            },
+            "Hydraulic Service": {
+                "Extend": [],
+                "Exclusion": [],
+                "Deliverables": []
+            },
+            "Fire Service": {
+                "Extend": [],
+                "Exclusion": [],
+                "Deliverables": []
+            }
+        }
     },
     "Invoices": {
-        "Details": {},
+        "Details": {
+            "Mechanical Service": {
+                "Service": "Mechanical Service",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Electrical Service": {
+                "Service": "Electrical Service",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Hydraulic Service": {
+                "Service": "Hydraulic Service",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Fire Service": {
+                "Service": "Fire Service",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Variation": {
+                "Service": "Variation",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": true,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            }
+        },
         "Fee": "",
         "in.GST": ""
     },
     "Bills": {
-        "Details": {},
+        "Details": {
+            "Mechanical Service": {
+                "Include": false,
+                "Service": "Mechanical Service",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": "",
+                "Ori": "",
+                "V1": "",
+                "V2": "",
+                "V3": "",
+                "Paid": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Electrical Service": {
+                "Include": false,
+                "Service": "Electrical Service",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": "",
+                "Ori": "",
+                "V1": "",
+                "V2": "",
+                "V3": "",
+                "Paid": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Hydraulic Service": {
+                "Include": false,
+                "Service": "Hydraulic Service",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": "",
+                "Ori": "",
+                "V1": "",
+                "V2": "",
+                "V3": "",
+                "Paid": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Fire Service": {
+                "Include": false,
+                "Service": "Fire Service",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": "",
+                "Ori": "",
+                "V1": "",
+                "V2": "",
+                "V3": "",
+                "Paid": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Variation": {
+                "Include": false,
+                "Service": "Variation",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": "",
+                "Ori": "",
+                "V1": "",
+                "V2": "",
+                "V3": "",
+                "Paid": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            }
+        },
         "Fee": "",
         "in.GST": ""
     },
     "Profits": {
-        "Details": {},
-        "Fee": "",
-        "in.GST": ""
-    },
-    "Financial Panel": {
-        "Invoice Details": {
-            "INV1": {
-                "Number": "",
+        "Details": {
+            "Mechanical Service": {
+                "Include": false,
                 "Fee": "",
                 "in.GST": ""
             },
-            "INV2": {
-                "Number": "",
+            "Electrical Service": {
+                "Include": false,
                 "Fee": "",
                 "in.GST": ""
             },
-            "INV3": {
-                "Number": "",
+            "Hydraulic Service": {
+                "Include": false,
                 "Fee": "",
                 "in.GST": ""
             },
-            "INV4": {
-                "Number": "",
+            "Fire Service": {
+                "Include": false,
                 "Fee": "",
                 "in.GST": ""
             },
-            "INV5": {
-                "Number": "",
-                "Fee": "",
-                "in.GST": ""
-            },
-            "INV6": {
-                "Number": "",
+            "Variation": {
+                "Include": false,
                 "Fee": "",
                 "in.GST": ""
             }
-        }
+        },
+        "Fee": "",
+        "in.GST": ""
     },
-    "Remittances": {
-        "INV1": {
+    "Invoices Number": [
+        {
+            "Number": "",
+            "Fee": "",
+            "in.GST": "",
+            "State": "",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "",
+            "in.GST": "",
+            "State": "",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "",
+            "in.GST": "",
+            "State": "",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "",
+            "in.GST": "",
+            "State": "",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "",
+            "in.GST": "",
+            "State": "",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "",
+            "in.GST": "",
+            "State": "",
+            "Asana_id": "",
+            "Xero_id": ""
+        }
+    ],
+    "Remittances": [
+        {
             "Part1": "",
             "Part2": ""
         },
-        "INV2": {
+        {
             "Part1": "",
             "Part2": ""
         },
-        "INV3": {
+        {
+            "Part1": "",
+            "Part2": ""
+        },{
             "Part1": "",
             "Part2": ""
         },
-        "INV4": {
+        {
             "Part1": "",
             "Part2": ""
         },
-        "INV5": {
-            "Part1": "",
-            "Part2": ""
-        },
-        "INV6":{
+        {
             "Part1": "",
             "Part2": ""
         }
-    },
-    "Archive": {
-        "Scope": {},
-        "Invoice": {},
-        "Bill": {},
-        "Profit": {}
-    }
+    ]
 }
