@@ -218,7 +218,7 @@ def email_server(app=None):
                                     app.data["Email"]["First Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
                                 elif len(app.data["Email"]["Second Chase"].get())==0:
                                     app.data["Email"]["Second Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
-                                elif len(app.data["Email"]["Thrid Chase"].get())==0:
+                                elif len(app.data["Email"]["Third Chase"].get())==0:
                                     app.data["Email"]["Third Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
                                 app.log.log_chase_client(From.split("<")[-1].split(">")[0], quotation_number)
                                 save(app)
@@ -243,14 +243,13 @@ def email_server(app=None):
                             inv_number = subject.split(" ")[1].split("-")[0]
                             online = False
                             if not app is None:
-                                app_invoice = [value["Number"].get() for key, value in
-                                               app.data["Financial Panel"]["Invoice Details"].items() if
+                                app_invoice = [value["Number"].get() for value in
+                                               app.data["Invoices Number"] if
                                                len(value["Number"].get()) != 0]
                                 if inv_number in app_invoice:
                                     online = True
-
                             if online:
-                                for key, value in app.data["Financial Panel"]["Invoice Details"].items():
+                                for value in app.data["Invoices Number"]:
                                     if value["Number"].get() == inv_number:
                                         value["State"].set("Sent")
                                         break

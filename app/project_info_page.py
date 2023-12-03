@@ -5,6 +5,7 @@ from utility import load, get_quotation_number, save, reset, finish_setup, delet
 
 import os
 import webbrowser
+import json
 
 
 class ProjectInfoPage(tk.Frame):
@@ -84,6 +85,7 @@ class ProjectInfoPage(tk.Frame):
         save_load_frame = tk.Frame(project_frame)
         save_load_frame.grid(row=1, column=3, rowspan=2)
 
+
         tk.Button(save_load_frame, width=10, height=2, text="Clear Up", command=lambda: reset(self.app), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
         tk.Button(save_load_frame, width=8, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
@@ -139,10 +141,10 @@ class ProjectInfoPage(tk.Frame):
         update_service_fuc = lambda s : lambda a, b, c: self._update_service(project["Service Type"][s])
         for service in self.conf["service_list"]:
             project["Service Type"][service]["Include"].trace("w", update_service_fuc(service))
-        project["Service Type"]["Variation"] = {
-                "Service": tk.StringVar(value="Variation"),
-                "Include": tk.BooleanVar(value=True)
-        }
+        # project["Service Type"]["Variation"] = {
+        #         "Service": tk.StringVar(value="Variation"),
+        #         "Include": tk.BooleanVar(value=True)
+        # }
 
         # project["Service Type"]["Mechanical Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Mechanical Service"]))
         # project["Service Type"]["Electrical Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Electrical Service"]))
@@ -338,13 +340,27 @@ class ProjectInfoPage(tk.Frame):
 
     def load_data(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
-        database_dir = os.path.join(self.conf["database_dir"], quotation_number)
+        project_number = self.data["Project Info"]["Project"]["Project Number"].get()
+        project_quotation_dir = os.path.join(self.conf["database_dir"], "project_quotation_number_map.json")
+        project_quotation_json = json.load(open(project_quotation_dir))
+
+
         if len(quotation_number) == 0:
-            messagebox.showerror("Error", "Please enter a Quotation Number before you load")
-        elif not os.path.exists(database_dir):
+            if len(project_number) == 0:
+                messagebox.showerror("Error", "Please enter a Quotation Number or Project Number before you load")
+                return
+            elif not project_number in project_quotation_json.keys():
+                messagebox.showerror("Error", "Cannot found the Project Number")
+                return
+            else:
+                quotation_number = project_quotation_json[project_number]
+
+        database_dir = os.path.join(self.conf["database_dir"], quotation_number)
+
+        if not os.path.exists(database_dir):
             messagebox.showerror("Error", f"The quotation {quotation_number} number doesn't exist")
         else:
-            load(self.app)
+            load(self.app, quotation_number)
 
 
     def quote_unsuccessful(self):

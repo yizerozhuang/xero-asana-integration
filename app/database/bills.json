@@ -25,5 +25,7 @@
     "311054C": "Void",
     "311055A": "Paid",
     "311055B": "Awaiting approval",
-    "311055F": "Void"
+    "311055F": "Void",
+    "312004A": "Awaiting approval",
+    "312004B": "Draft"
 }

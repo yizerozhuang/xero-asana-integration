@@ -55,11 +55,14 @@ def save(app):
     # print(current_folder_name)
 
 
-def load(app):
+def load(app, quotation_number=None):
     data = app.data
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get().upper())
+    if quotation_number is None:
+        quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
+    database_dir = os.path.join(app.conf["database_dir"], quotation_number)
     data_json = json.load(open(os.path.join(database_dir, "data.json")))
     convert_to_data(data_json, data)
+
 
     for service in app.data["Project Info"]["Project"]["Service Type"].values():
         if service["Include"].get():
@@ -131,31 +134,20 @@ def convert_to_data(json, data):
                         }
                     )
                     convert_to_data(json[i], data[i])
-        else:
-            pop_list = []
+        elif len(json) < len(data):
+            data = data[0: len(json)]
             for i in range(len(data)):
-                try:
-                    convert_to_data(json[i], data[i])
-                except IndexError:
-                    pop_list.append(i)
-            for i in pop_list:
-                data.pop(i)
-        #     data.append(
-        #         {
-        #             "Include": tk.BooleanVar(value=True),
-        #             "Item": tk.StringVar()
-        #         }
-        #     )
-        #     convert_to_data(json[len(data)-1], data[-1])
+                convert_to_data(json[i], data[i])
+
     elif isinstance(json, dict):
         for key in json.keys():
-            try:
-                convert_to_data(json[key], data[key])
-            except:
-                pass
+            convert_to_data(json[key], data[key])
     else:
         if data.get() != json:
-            data.set(json)
+            try:
+                data.set(json)
+            except:
+                print()
 
 
 def finish_setup(app):
@@ -292,18 +284,24 @@ def rename_project(app):
     dir_list = os.listdir(working_dir)
     data = app.data
 
+    if len(data["Project Info"]["Project"]["Project Number"].get()) !=0:
+        current_quotation = data["Project Info"]["Project"]["Project Number"].get()
+    else:
+        current_quotation = data["Project Info"]["Project"]["Quotation Number"].get()
+
     for folder in dir_list:
         if folder[:5].isdigit():
             quotation_number, project_name = folder.split("-", 1)
-            old_dir = os.path.join(working_dir, folder)
-            new_dir = os.path.join(working_dir, f'{data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}')
-            if quotation_number == data["Project Info"]["Project"]["Quotation Number"].get():
+
+            if quotation_number == current_quotation:
+                old_dir = os.path.join(working_dir, folder)
+                new_dir = os.path.join(working_dir, current_quotation+"-"+data["Project Info"]["Project"]["Project Name"].get())
                 os.rename(old_dir, new_dir)
                 return folder
 
 def change_quotation_number(app, new_quotation_number):
     working_dir = app.conf["working_dir"]
-    database_dir = app.conf["database_dir"]
+    # database_dir = app.conf["database_dir"]
 
     old_folder_name = app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + app.data["Project Info"]["Project"]["Project Name"].get()
     old_folder = os.path.join(working_dir, old_folder_name)
@@ -315,9 +313,9 @@ def change_quotation_number(app, new_quotation_number):
     new_folder = os.path.join(working_dir, new_quotation_number + "-" + app.data["Project Info"]["Project"]["Project Name"].get())
 
     try:
-        old_database = os.path.join(database_dir, app.data["Project Info"]["Project"]["Quotation Number"].get())
-        new_database = os.path.join(database_dir, new_quotation_number)
-        os.rename(old_database, new_database)
+        # old_database = os.path.join(database_dir, app.data["Project Info"]["Project"]["Quotation Number"].get())
+        # new_database = os.path.join(database_dir, new_quotation_number)
+        # os.rename(old_database, new_database)
         os.rename(old_folder, new_folder)
         return True
     except PermissionError:
@@ -380,9 +378,10 @@ def create_new_folder(folder_name, conf):
 def _check_fee(app):
     data = app.data
     for service_fee in data["Invoices"]["Details"].values():
-        if len(service_fee["Fee"].get()) == 0 and service_fee["Service"].get() != "Variation":
+        if len(service_fee["Fee"].get()) == 0 and service_fee["Service"].get() != "Variation" and service_fee["Include"].get():
             return False
     return True
+
 def excel_print_pdf(app, *args):
     data = app.data
     pdf_name = _get_proposal_name(app)
@@ -391,7 +390,11 @@ def excel_print_pdf(app, *args):
     resource_dir = app.conf["resource_dir"]
 
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
-    services = [key for key, value in data["Project Info"]["Project"]["Service Type"].items() if value['Include'].get()]
+    services = []
+    for service in app.conf["service_list"]:
+        if data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
+            services.append(service)
+    # services = [key for key, value in data["Project Info"]["Project"]["Service Type"].items() if value['Include'].get()]
     # win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
     # adobe = win32com.client.DispatchEx('AcroExch.App')
     # avDoc = win32client.dynamic.Dispatch("AcroExch.AVDoc")
@@ -440,7 +443,7 @@ def excel_print_pdf(app, *args):
 
     total_fee = 0
     total_ist = 0
-    for service in [value for value in data["Invoices"]["Details"].values() if value["Service"].get() != "Variation"]:
+    for service in [value for value in data["Invoices"]["Details"].values() if value["Service"].get() != "Variation" and value["Include"].get()]:
         total_fee += float(service["Fee"].get())
         total_ist += float(service["in.GST"].get())
 
@@ -457,9 +460,9 @@ def excel_print_pdf(app, *args):
         # messagebox.showerror("Error", e)
     try:
         work_sheets = work_book.Worksheets[0]
-        work_sheets.Cells(1, 2).Value = data["Project Info"]["Client"]["Client Full Name"].get()
-        work_sheets.Cells(5, 2).Value = data["Project Info"]["Client"]["Client Full Name"].get()
-        work_sheets.Cells(2, 2).Value = data["Project Info"]["Client"]["Client Company"].get()
+        work_sheets.Cells(1, 2).Value = data["Project Info"]["Client"]["Full Name"].get()
+        work_sheets.Cells(5, 2).Value = data["Project Info"]["Client"]["Full Name"].get()
+        work_sheets.Cells(2, 2).Value = data["Project Info"]["Client"]["Company"].get()
         work_sheets.Cells(1, 8).Value = data["Project Info"]["Project"]["Quotation Number"].get()
         work_sheets.Cells(2, 8).Value = data["Fee Proposal"]["Reference"]["Date"].get()
         work_sheets.Cells(3, 8).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
@@ -473,8 +476,10 @@ def excel_print_pdf(app, *args):
                                          data["Fee Proposal"]["Time"]["Documentation"]["End"].get()
         cur_row = 52
         cur_index = 1
-        for i, _ in enumerate(data['Fee Proposal']['Scope'].items()):
-            key, service = _
+        i = 0
+        for key, service in data['Fee Proposal']['Scope'].items():
+            if not service["Include"].get():
+                continue
             cur_row = cur_row if i % 2 == 0 else 84 + (i - 1) // 2 * row_per_page
             extra_list = ["Extend", "Exclusion", "Deliverables"]
             for extra in extra_list:
@@ -489,6 +494,8 @@ def excel_print_pdf(app, *args):
                         work_sheets.Cells(cur_row, 2).Value = scope["Item"].get()
                 cur_row += 2
                 cur_index += 1
+            i+=1
+
         cur_row = 102 + (page - 1) * row_per_page
         project_type = data["Project Info"]["Project"]["Project Type"].get()
         past_projects = json.load(open(past_projects_dir, encoding="utf-8"))[project_type]
@@ -497,7 +504,7 @@ def excel_print_pdf(app, *args):
             work_sheets.Cells(cur_row + i, 2).Value = project
 
         cur_row += 34
-        for i, service in enumerate([ value for value in data["Invoices"]["Details"].values() if value["Service"].get() != "Variation"]):
+        for i, service in enumerate([ value for value in data["Invoices"]["Details"].values() if value["Service"].get() != "Variation" and value["Include"].get()]):
             work_sheets.Cells(cur_row + i, 2).Value = service["Service"].get() + " design and documentation"
             work_sheets.Cells(cur_row + i, 6).Value = service["Fee"].get()
             work_sheets.Cells(cur_row + i, 7).Value = service["in.GST"].get()
@@ -539,7 +546,6 @@ def _get_proposal_name(app):
     data = app.data
     return f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
 def excel_print_invoice(app, inv):
-    inv = f"INV{str(inv+1)}"
     data = app.data
     excel_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.xlsx'
     invoice_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.pdf'
@@ -558,7 +564,7 @@ def excel_print_invoice(app, inv):
         old_pdf_path=os.path.join(database_dir, invoice_name)
         # avDoc.open(old_pdf_path, old_pdf_path)
         webbrowser.open(old_pdf_path)
-        rewrite = messagebox.askyesno("Warming", f"Existing file PCE INV {invoice_name}")
+        rewrite = messagebox.askyesno("Warming", f"Existing file PCE INV {invoice_name}.pdf do you want to rewrite?")
         if not rewrite:
             return
         else:
@@ -576,9 +582,9 @@ def excel_print_invoice(app, inv):
         work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
         try:
             work_sheets = work_book.Worksheets[0]
-            work_sheets.Cells(4, 1).Value = data["Project Info"]["Client"]["Client Full Name"].get()
-            work_sheets.Cells(6, 1).Value = data["Project Info"]["Client"]["Client Company"].get()
-            work_sheets.Cells(7, 1).Value = data["Project Info"]["Client"]["Client Address"].get()
+            work_sheets.Cells(4, 1).Value = data["Project Info"]["Client"]["Full Name"].get()
+            work_sheets.Cells(6, 1).Value = data["Project Info"]["Client"]["Company"].get()
+            work_sheets.Cells(7, 1).Value = data["Project Info"]["Client"]["Address"].get()
             work_sheets.Cells(4, 10).Value = datetime.today().strftime("%d-%b-%Y")
             work_sheets.Cells(5, 10).Value = data["Invoices Number"][inv]["Number"].get()
             work_sheets.Cells(12, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
@@ -586,7 +592,7 @@ def excel_print_invoice(app, inv):
             total_fee = 0
             total_inGST = 0
             for service in data["Invoices"]["Details"].values():
-                if service["Service"].get() == "Variation":
+                if not service["Include"].get() or service["Service"].get()=="Variation":
                     continue
                 if service["Expand"].get():
                     work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
@@ -595,10 +601,10 @@ def excel_print_invoice(app, inv):
                     work_sheets.Cells(cur_row + 1, 8).Value = "This pay"
                     cur_row += 2
                     for item in service["Content"]:
-                        if len(item["Service"].get()) != 0:
+                        if len(item["Fee"].get()) != 0:
                             work_sheets.Cells(cur_row, 1).Value = item["Service"].get()
                             work_sheets.Cells(cur_row, 7).Value = item["Fee"].get()
-                            if item["Number"].get() == inv:
+                            if item["Number"].get() == f"INV{str(inv+1)}":
                                 work_sheets.Cells(cur_row, 8).Value = item["Fee"].get()
                                 work_sheets.Cells(cur_row, 9).Value = item["Fee"].get()
                                 work_sheets.Cells(cur_row, 10).Value = item["in.GST"].get()
@@ -612,15 +618,27 @@ def excel_print_invoice(app, inv):
                     work_sheets.Cells(cur_row + 1, 8).Value = "This pay"
                     work_sheets.Cells(cur_row+2, 1).Value = "The Full amount for design and documentation"
                     work_sheets.Cells(cur_row+2, 7).Value = service["Fee"].get()
-                    if service["Number"].get() == inv:
+                    if service["Number"].get() == f"INV{str(inv+1)}":
                         work_sheets.Cells(cur_row+2, 8).Value = service["Fee"].get()
                         work_sheets.Cells(cur_row+2, 9).Value = service["Fee"].get()
                         work_sheets.Cells(cur_row+2, 10).Value = service["in.GST"].get()
-                        total_fee += float(service["Fee"].get())
-                        total_inGST += float(service["in.GST"].get())
+                        total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
+                        total_inGST += float(service["in.GST"].get()) if len(service["Fee"].get()) !=0 else 0
                     cur_row+=3
                 cur_row+=1
             cur_row+=1
+            for service in data["Invoices"]["Details"]["Variation"]["Content"]:
+                if service["Fee"].get()==0:
+                    continue
+                work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
+                work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
+                if service["Number"].get() == f"INV{str(inv+1)}":
+                    work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
+                    work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
+                    work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
+                    total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
+                    total_inGST += float(service["in.GST"].get()) if len(service["Fee"].get()) !=0 else 0
+                cur_row += 2
             # for service in data["Variation"]:
             #     if len(service["Service"].get())==0 and len(service["Fee"].get())==0:
             #         continue
@@ -681,12 +699,12 @@ def email_fee_proposal(app, *args):
     newmail = ol.CreateItem(olmailitem)
     # newmail.From = user_email_dic[app.user]
     newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-Mechanical Fee Proposal - {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}'
-    newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
+    newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
     newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
-    first_name = data["Project Info"]["Main Contact"]["Main Contact Full Name"].get().split(" ")[0]
+    first_name = data["Project Info"]["Main Contact"]["Full Name"].get().split(" ")[0]
     message = f"""
     Dear {first_name},<br>
 
@@ -715,12 +733,12 @@ def chase(app, *args):
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'Re: {data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
-    newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au"
+    newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
+    newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
-    first_name = data["Project Info"]["Main Contact"]["Main Contact Full Name"].get().split(" ")[0]
+    first_name = data["Project Info"]["Main Contact"]["Full Name"].get().split(" ")[0]
     message = f"""
     Hi {first_name},<br>
     I wanted to circle back regarding the fee proposal we sent on {data["Email"]["Fee Proposal"].get()}. Do you have any questions or concerns? We're looking forward to working with you and hearing your feedback. <br>
@@ -734,7 +752,6 @@ def chase(app, *args):
     save(app)
     config_state(app)
 def email_invoice(app, inv):
-    inv = f"INV{str(inv+1)}"
     data = app.data
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     pdf_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.pdf'
@@ -753,12 +770,12 @@ def email_invoice(app, inv):
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'Invoice {data["Invoices Number"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
-    newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
+    newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
     newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
-    first_name = data["Project Info"]["Client"]["Client Full Name"].get().split(" ")[0]
+    first_name = data["Project Info"]["Client"]["Full Name"].get().split(" ")[0]
     message = f"""
     Hi {first_name},<br>
     I hope this email finds you well and energized for the week ahead.<br>
@@ -781,6 +798,8 @@ def get_invoice_item(app):
     res = [[] for _ in range(6)]
     for i in range(6):
         for key, service in data["Invoices"]["Details"].items():
+            if not service["Include"].get():
+                continue
             if service["Expand"].get():
                 for j in range(app.conf["n_items"]):
                     if len(service["Content"][j]["Service"].get()) == 0 or len(service["Content"][j]["Fee"].get()) == 0:
@@ -788,20 +807,21 @@ def get_invoice_item(app):
                     if service["Content"][j]["Number"].get() == f"INV{i+1}":
                         res[i].append(
                             {
-                                "Item": service["Content"][i]["Service"].get(),
-                                "Fee": service["Content"][i]["Fee"].get(),
-                                "in.GST": service["Content"][i]["in.GST"].get()
+                                "Item": service["Content"][j]["Service"].get(),
+                                "Fee": service["Content"][j]["Fee"].get(),
+                                "in.GST": service["Content"][j]["in.GST"].get()
                             }
                         )
             else:
                 if service["Number"].get() == f"INV{i+1}":
-                    res[i].append(
-                        {
-                            "Item": service["Service"].get(),
-                            "Fee": service["Fee"].get(),
-                            "in.GST": service["in.GST"].get()
-                        }
-                    )
+                    if len(service["Fee"].get()) != 0:
+                        res[i].append(
+                            {
+                                "Item": service["Service"].get(),
+                                "Fee": service["Fee"].get(),
+                                "in.GST": service["in.GST"].get()
+                            }
+                        )
     return res
 
 def update_app_invoices(app, inv_list):
@@ -830,7 +850,7 @@ def update_app_invoices(app, inv_list):
             elif state == "VOIDED":
                 bills_json[bill_number] = "Void"
 
-    for key, value in data["Invoices Number"].items():
+    for value in data["Invoices Number"]:
         if value["Number"].get() in inv_list["Invoices"]["PAID"].keys():
             value["State"].set("Paid")
         elif value["Number"].get() in inv_list["Invoices"]["VOIDED"].keys():

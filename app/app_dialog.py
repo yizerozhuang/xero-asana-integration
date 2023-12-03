@@ -16,8 +16,6 @@ class AppDialog:
     def show(self):
         pass
 
-
-
 class FileSelectDialog(simpledialog.Dialog):
     def __init__(self, app, dir_list, title=None):
         self.dir_list = dir_list

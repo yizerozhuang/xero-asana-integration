@@ -1,19 +1,15 @@
-import tkinter as tk
 from tkinter import ttk
-# from tkinterdnd2 import TkinterDnD
 
 from app_log import AppLog
 from project_info_page import ProjectInfoPage
 from fee_proposal_page import FeeProposalPage
-# from fee_accpeted_page import FeeAcceptedPage
 from financial_panel import FinancialPanelPage
 from utility import *
-from asana_function import update_asana, rename_asana_project
+from asana_function import update_asana
 from xero_function import login_xero, update_xero
 from email_server import email_server
 
 from PIL import Image, ImageTk
-import time
 import _thread
 import os
 
@@ -49,12 +45,6 @@ class App(tk.Tk):
 
         config_state(self)
         self.auto_check()
-
-    def init_app(self):
-        self.utility_part()
-        self.change_page_part()
-        self.main_context_part()
-        self.show_frame(self.current_page)
 
     def utility_part(self):
         self.data["Asana_id"] = tk.StringVar()
@@ -102,11 +92,11 @@ class App(tk.Tk):
         tk.Button(function_frame, text="Rename Project", command=self._rename_project, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
 
-        tk.Button(function_frame, text="Update Asana", command=lambda: update_asana(self), bg="brown", fg="white",
+        tk.Button(function_frame, text="Update Asana", command=self._update_asana, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
 
-        tk.Button(function_frame, text="Open Asana", command=lambda: update_asana(self), bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=1, column=2)
+        # tk.Button(function_frame, text="Open Asana", command=lambda: update_asana(self), bg="brown", fg="white",
+        #           font=self.conf["font"]).grid(row=1, column=2)
 
         tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
@@ -256,11 +246,13 @@ class App(tk.Tk):
             self.financial_panel_page.invoice_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
         self.financial_panel_page.invoice_frames["Variation"].pack_forget()
         self.financial_panel_page.invoice_frames["Variation"].pack(fill=tk.X, side=tk.BOTTOM)
+
         for i in range(self.conf["n_bills"], -1, -1):
             self.financial_panel_page.bill_dic["Variation"]["Expand"][i].pack_forget()
             self.financial_panel_page.bill_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
         self.financial_panel_page.bill_frames["Variation"].pack_forget()
         self.financial_panel_page.bill_frames["Variation"].pack(fill=tk.X, side=tk.BOTTOM)
+
         for i in range(self.conf["n_bills"], -1, -1):
             self.financial_panel_page.profit_dic["Variation"]["Expand"][i].pack_forget()
             self.financial_panel_page.profit_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
@@ -282,9 +274,22 @@ class App(tk.Tk):
         project_number_frame = tk.LabelFrame(self.utility_frame)
         project_number_frame.grid(row=0, column=0, sticky="ns")
         tk.Label(project_number_frame, text="Project Number: ", font=self.conf["font"]).grid(row=0, column=0)
-        tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Quotation Number"], font=self.conf["font"]).grid(row=0, column=1)
+
+        self.project_number_label = tk.Label(project_number_frame, font=self.conf["font"])
+        self.project_number_label.grid(row=0, column=1)
+        self.data["Project Info"]["Project"]["Quotation Number"].trace("w",self._update_project_number_label)
+        self.data["Project Info"]["Project"]["Project Number"].trace("w",self._update_project_number_label)
+
+        # tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Quotation Number"], font=self.conf["font"]).grid(row=0, column=1)
+
         tk.Label(project_number_frame, text="Project Name: ", font=self.conf["font"]).grid(row=1, column=0)
         tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=1, column=1)
+
+    def _update_project_number_label(self, *args):
+        if len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
+            self.project_number_label.config(text=self.data["Project Info"]["Project"]["Quotation Number"].get())
+        else:
+            self.project_number_label.config(text=self.data["Project Info"]["Project"]["Project Number"].get())
 
     def show_frame(self, page):
         self.project_info_page.pack_forget()
@@ -379,24 +384,32 @@ class App(tk.Tk):
                 pass
             self.destroy()
 
+    def _update_asana(self):
+        try:
+            update_asana(self)
+        except Exception as e:
+            print(e)
+            return
+        messagebox.showinfo("Update", "Successful Update Asana")
+
     def _update_xero(self):
         if not self.data["State"]["Fee Accepted"].get():
             messagebox.showerror("Error", "You haven't update a fee acceptant yet, please update a fee acceptance before you update xero")
             return
-        elif len(self.data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get())==0:
-            messagebox.showerror("Error", "Please Generate An Invoice Number Fist")
+        elif len(self.data["Project Info"]["Project"]["Project Number"].get())==0:
+            messagebox.showerror("Error", "Please Generate An Project Number Fist")
             return
-        if len(self.data["Project Info"]["Client"]["Client Full Name"].get()) == 0:
-            if len(self.data["Project Info"]["Client"]["Client Company"].get()) == 0:
+        if len(self.data["Project Info"]["Client"]["Full Name"].get()) == 0:
+            if len(self.data["Project Info"]["Client"]["Company"].get()) == 0:
                 messagebox.showerror("Error", "You should at least provide client name or client company")
                 return
             else:
-                contact = self.data["Project Info"]["Client"]["Client Company"].get()
+                contact = self.data["Project Info"]["Client"]["Company"].get()
         else:
-            if len(self.data["Project Info"]["Client"]["Client Company"].get()) == 0:
-                contact = self.data["Project Info"]["Client"]["Client Full Name"].get()
+            if len(self.data["Project Info"]["Client"]["Company"].get()) == 0:
+                contact = self.data["Project Info"]["Client"]["Full Name"].get()
             else:
-                contact = self.data["Project Info"]["Client"]["Client Company"].get() + ", " + self.data["Project Info"]["Client"]["Client Full Name"].get()
+                contact = self.data["Project Info"]["Client"]["Company"].get() + ", " + self.data["Project Info"]["Client"]["Full Name"].get()
         try:
             update_xero(self, contact)
         except RuntimeError:
@@ -409,10 +422,12 @@ class App(tk.Tk):
             return
 
         old_folder = rename_project(self)
-        if rename_asana_project(self, old_folder):
-            messagebox.showinfo("Renamed", f"Rename the folder and asana from {old_folder} to {self.data['Project Info']['Project']['Quotation Number'].get()}-{self.data['Project Info']['Project']['Project Name'].get()}")
-        else:
+
+        if len(self.data["Asana_id"].get()) == 0:
             messagebox.showinfo("Renamed", f"Rename the folder from {old_folder} to {self.data['Project Info']['Project']['Quotation Number'].get()}-{self.data['Project Info']['Project']['Project Name'].get()}")
+        else:
+            update_asana(self)
+            messagebox.showinfo("Renamed", f"Rename the folder and asana from {old_folder} to {self.data['Project Info']['Project']['Quotation Number'].get()}-{self.data['Project Info']['Project']['Project Name'].get()}")
         save(self)
         config_log(self)
         config_state(self)

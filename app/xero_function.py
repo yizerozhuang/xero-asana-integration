@@ -11,7 +11,7 @@ from flask_session import Session
 
 from tkinter import messagebox
 
-from utility import remove_none, update_app_invoices
+from utility import remove_none, update_app_invoices, get_invoice_item
 from asana_function import update_asana_invoices
 
 
@@ -244,40 +244,24 @@ def update_xero(app, contact_name):
 
     paid_invoice_id = invoice_number_invoice_id(paid_invoice)
 
+    invoice_item = get_invoice_item(app)
 
     invoices_list = []
-    for inv in ["INV1", "INV2", "INV3", "INV4", "INV5", "INV6"]:
-        if len(app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0 or app.data["Financial Panel"]["Invoice Details"][inv]["Number"].get() in paid_invoice_id.keys():
+
+
+    for i in range(6):
+        if len(data["Invoices Number"][i]["Number"].get()) == 0 or data["Invoices Number"][i]["Number"].get() in paid_invoice_id.keys() or len(invoice_item[i]) == 0:
             continue
         line_item_list = []
-        for key, service in data["Invoices"]["Details"].items():
-            if service["Expand"].get():
-                for i in range(app.conf["n_items"]):
-                    if service["Content"][i]["Number"].get() == inv:
-                        try:
-                            line_item_list.append(
-                                LineItem(
-                                    description=service["Content"][i]["Service"].get(),
-                                    quantity=1,
-                                    unit_amount=int(service["Content"][i]["Fee"].get()),
-                                    account_code="200"
-                                )
-                            )
-                        except ValueError:
-                            continue
-            else:
-                if service["Number"].get() == inv:
-                    try:
-                        line_item_list.append(
-                            LineItem(
-                                description=key,
-                                quantity=1,
-                                unit_amount=int(service["Fee"].get()),
-                                account_code="200"
-                            )
-                        )
-                    except ValueError:
-                        continue
+        for item in invoice_item[i]:
+            line_item_list.append(
+                LineItem(
+                    description=item["Item"],
+                    quantity=1,
+                    unit_amount=int(item["Fee"]),
+                    account_code="200"
+                )
+            )
         invoices_list.append(
             Invoice(
                 type="ACCREC",
@@ -285,8 +269,8 @@ def update_xero(app, contact_name):
                 date=datetime.today(),
                 due_date=datetime.today(),
                 line_items=line_item_list,
-                invoice_number=data["Financial Panel"]["Invoice Details"][inv]["Number"].get(),
-                reference=data["Project Info"]["Project"]["Quotation Number"].get()+"-"+data["Project Info"]["Project"]["Project Name"].get(),
+                invoice_number=data["Invoices Number"][i]["Number"].get(),
+                reference=data["Project Info"]["Project"]["Project Name"].get(),
                 status="AUTHORISED"
             )
         )
@@ -323,12 +307,16 @@ def update_xero(app, contact_name):
         print("No Data Processed")
 
     all_invoices = _process_invoices(accounting_api.get_invoices(xero_tenant_id).to_dict()["invoices"])
-
+    #
     update_app_invoices(app, all_invoices)
+    #
+    if len(app.data["Asana_id"].get()) != 0:
+        update_asana_invoices(app)
+    #
+    # messagebox.showinfo("Update", "the invoices and bill is updated to xero")
 
-    update_asana_invoices(app)
 
-    messagebox.showinfo("Update", "the invoices and bill is updated to xero")
+
 
     #[BATCHPAYMENTS:CREATE]
     # xero_tenant_id = get_xero_tenant_id()

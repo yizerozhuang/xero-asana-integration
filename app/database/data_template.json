@@ -356,12 +356,13 @@
                 "Service": "Mechanical Service",
                 "Fee": "",
                 "in.GST": "",
-                "no.GST": "",
+                "no.GST": false,
                 "Ori": "",
                 "V1": "",
                 "V2": "",
                 "V3": "",
                 "Paid": "",
+                "Paid.GST": "",
                 "Content": [
                     {
                         "Service": "",
@@ -400,12 +401,13 @@
                 "Service": "Electrical Service",
                 "Fee": "",
                 "in.GST": "",
-                "no.GST": "",
+                "no.GST": false,
                 "Ori": "",
                 "V1": "",
                 "V2": "",
                 "V3": "",
                 "Paid": "",
+                "Paid.GST": "",
                 "Content": [
                     {
                         "Service": "",
@@ -444,12 +446,13 @@
                 "Service": "Hydraulic Service",
                 "Fee": "",
                 "in.GST": "",
-                "no.GST": "",
+                "no.GST": false,
                 "Ori": "",
                 "V1": "",
                 "V2": "",
                 "V3": "",
                 "Paid": "",
+                "Paid.GST": "",
                 "Content": [
                     {
                         "Service": "",
@@ -488,12 +491,13 @@
                 "Service": "Fire Service",
                 "Fee": "",
                 "in.GST": "",
-                "no.GST": "",
+                "no.GST": false,
                 "Ori": "",
                 "V1": "",
                 "V2": "",
                 "V3": "",
                 "Paid": "",
+                "Paid.GST": "",
                 "Content": [
                     {
                         "Service": "",
@@ -529,15 +533,16 @@
             },
             "Variation": {
                 "Include": false,
-                "Service": "Variation",
+                "Service": "",
                 "Fee": "",
                 "in.GST": "",
-                "no.GST": "",
+                "no.GST": false,
                 "Ori": "",
                 "V1": "",
                 "V2": "",
                 "V3": "",
                 "Paid": "",
+                "Paid.GST": "",
                 "Content": [
                     {
                         "Service": "",
@@ -611,7 +616,7 @@
             "Number": "",
             "Fee": "",
             "in.GST": "",
-            "State": "",
+            "State": "Backlog",
             "Asana_id": "",
             "Xero_id": ""
         },
@@ -619,7 +624,7 @@
             "Number": "",
             "Fee": "",
             "in.GST": "",
-            "State": "",
+            "State": "Backlog",
             "Asana_id": "",
             "Xero_id": ""
         },
@@ -627,7 +632,7 @@
             "Number": "",
             "Fee": "",
             "in.GST": "",
-            "State": "",
+            "State": "Backlog",
             "Asana_id": "",
             "Xero_id": ""
         },
@@ -635,7 +640,7 @@
             "Number": "",
             "Fee": "",
             "in.GST": "",
-            "State": "",
+            "State": "Backlog",
             "Asana_id": "",
             "Xero_id": ""
         },
@@ -643,7 +648,7 @@
             "Number": "",
             "Fee": "",
             "in.GST": "",
-            "State": "",
+            "State": "Backlog",
             "Asana_id": "",
             "Xero_id": ""
         },
@@ -651,7 +656,7 @@
             "Number": "",
             "Fee": "",
             "in.GST": "",
-            "State": "",
+            "State": "Backlog",
             "Asana_id": "",
             "Xero_id": ""
         }

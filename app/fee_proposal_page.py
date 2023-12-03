@@ -220,82 +220,63 @@ class FeeProposalPage(tk.Frame):
 
         if include:
             invoices_details[service]["Include"].set(True)
-            # if service in archive:
-            #     invoices_details[service] = archive.pop(service)
-            # else:
-            #     invoices_details[service] = {
-            #         "Service": tk.StringVar(value=service),
-            #         "Fee": tk.StringVar(),
-            #         "in.GST": tk.StringVar(),
-            #         "Expand": tk.BooleanVar(),
-            #         "Number": tk.StringVar(value="None"),
-            #         "Content": [
-            #             {
-            #                 "Service": tk.StringVar(),
-            #                 "Fee": tk.StringVar(),
-            #                 "in.GST": tk.StringVar(),
-            #                 "Number": tk.StringVar(value="None")
-            #             } for _ in range(self.conf["n_items"])
-            #         ]
-            #     }
-
-            self.fee_frames[service] = tk.LabelFrame(self.fee_frame)
-            self.fee_frames[service].pack()
-            self.fee_dic[service] = {
-                "Service": tk.Label(self.fee_frames[service],
-                                    text=service + " design and documentation",
-                                    width=50,
-                                    font=self.conf["font"]),
-                "Fee": tk.Entry(self.fee_frames[service],
-                                textvariable=invoices_details[service]["Fee"],
-                                width=20,
-                                font=self.conf["font"],
-                                fg="blue"),
-                "in.GST": tk.Label(self.fee_frames[service],
-                                   textvariable=invoices_details[service]["in.GST"],
-                                   width=20,
-                                   font=self.conf["font"]),
-                "Expand": tk.Checkbutton(self.fee_frames[service],
-                                         text="Expand",
-                                         variable=invoices_details[service]["Expand"],
-                                         font=self.conf["font"]),
-                "Content": {
-                    "Details": [
-                        {
-                            "Service": tk.Entry(self.fee_frames[service],
-                                                width=36,
+            if not service in self.fee_dic:
+                self.fee_frames[service] = tk.LabelFrame(self.fee_frame)
+                self.fee_frames[service].pack()
+                self.fee_dic[service] = {
+                    "Service": tk.Label(self.fee_frames[service],
+                                        text=service + " design and documentation",
+                                        width=50,
+                                        font=self.conf["font"]),
+                    "Fee": tk.Entry(self.fee_frames[service],
+                                    textvariable=invoices_details[service]["Fee"],
+                                    width=20,
+                                    font=self.conf["font"],
+                                    fg="blue"),
+                    "in.GST": tk.Label(self.fee_frames[service],
+                                       textvariable=invoices_details[service]["in.GST"],
+                                       width=20,
+                                       font=self.conf["font"]),
+                    "Expand": tk.Checkbutton(self.fee_frames[service],
+                                             text="Expand",
+                                             variable=invoices_details[service]["Expand"],
+                                             font=self.conf["font"]),
+                    "Content": {
+                        "Details": [
+                            {
+                                "Service": tk.Entry(self.fee_frames[service],
+                                                    width=36,
+                                                    font=self.conf["font"],
+                                                    fg="blue",
+                                                    textvariable=invoices_details[service]["Content"][i]["Service"]),
+                                "Fee": tk.Entry(self.fee_frames[service],
+                                                width=20,
                                                 font=self.conf["font"],
                                                 fg="blue",
-                                                textvariable=invoices_details[service]["Content"][i]["Service"]),
-                            "Fee": tk.Entry(self.fee_frames[service],
-                                            width=20,
-                                            font=self.conf["font"],
-                                            fg="blue",
-                                            textvariable=invoices_details[service]["Content"][i]["Fee"]),
-                            "in.GST": tk.Label(self.fee_frames[service],
-                                               width=17,
-                                               textvariable=invoices_details[service]["Content"][i]["in.GST"],
-                                               font=self.conf["font"])
-                        } for i in range(self.conf["n_items"])
-                    ],
-                    "Service": tk.Label(self.fee_frames[service], width=36, text=service + " Total",
+                                                textvariable=invoices_details[service]["Content"][i]["Fee"]),
+                                "in.GST": tk.Label(self.fee_frames[service],
+                                                   width=17,
+                                                   textvariable=invoices_details[service]["Content"][i]["in.GST"],
+                                                   font=self.conf["font"])
+                            } for i in range(self.conf["n_items"])
+                        ],
+                        "Service": tk.Label(self.fee_frames[service], width=36, text=service + " Total",
+                                            font=self.conf["font"]),
+                        "Fee": tk.Label(self.fee_frames[service],
+                                        width=20,
+                                        textvariable=invoices_details[service]["Fee"],
                                         font=self.conf["font"]),
-                    "Fee": tk.Label(self.fee_frames[service],
-                                    width=20,
-                                    textvariable=invoices_details[service]["Fee"],
-                                    font=self.conf["font"]),
-                    "in.GST": tk.Label(self.fee_frames[service],
-                                       width=17,
-                                       textvariable=invoices_details[service]["in.GST"],
-                                       font=self.conf["font"])
+                        "in.GST": tk.Label(self.fee_frames[service],
+                                           width=17,
+                                           textvariable=invoices_details[service]["in.GST"],
+                                           font=self.conf["font"])
+                    }
                 }
-            }
 
-            self.fee_dic[service]["Expand"].grid(row=0, column=0)
-            self.fee_dic[service]["Service"].grid(row=0, column=1)
-            self.fee_dic[service]["Fee"].grid(row=0, column=2)
-            self.fee_dic[service]["in.GST"].grid(row=0, column=3)
-
+                self.fee_dic[service]["Expand"].grid(row=0, column=0)
+                self.fee_dic[service]["Service"].grid(row=0, column=1)
+                self.fee_dic[service]["Fee"].grid(row=0, column=2)
+                self.fee_dic[service]["in.GST"].grid(row=0, column=3)
 
             self.fee_frames[service].pack()
             self.update_sum()
