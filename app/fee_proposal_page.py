@@ -5,7 +5,7 @@ import os
 import json
 
 
-# from scope_list import ScopeList
+from scope_list import ScopeList
 
 class FeeProposalPage(tk.Frame):
     def __init__(self, parent, app):
@@ -76,21 +76,78 @@ class FeeProposalPage(tk.Frame):
                 row=i, column=3)
             tk.Label(time_frame, text=" business day", font=self.conf["font"]).grid(row=i, column=4)
 
-    def scope_part(self):
+    def _reset_scope(self):
+        service_list = self.conf["service_list"]
+        extra_list = self.conf["extra_list"]
         scope = dict()
-        self.data["Fee Proposal"]["Scope"] = scope
+        for service in service_list:
+            scope[service] = {
+                "Include":tk.BooleanVar()
+            }
+            for extra in extra_list:
+                # scope[service][extra] = ScopeList(self.app, service, extra)
+                scope[service][extra] = []
+        scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
+        scope_data = json.load(open(scope_dir))
+        for service in service_list:
+            for extra in extra_list:
+                items = scope_data[service][extra]
+                for context in items:
+                    scope[service][extra].append(
+                        {
+                            "Include": tk.BooleanVar(value=True),
+                            "Item": tk.StringVar(value=context)
+                        }
+                    )
 
-        self.data["Archive"] = {
-            "Scope": {},
-            "Invoice": {},
-            "Bill": {},
-            "Profit": {}
-        }
+        self.data["Fee Proposal"]["Scope"] = scope
+    def scope_part(self):
+        self._reset_scope()
+
 
         self.scope_frame = tk.LabelFrame(self.main_context_frame, text="Scope of Work", font=self.conf["font"])
         self.scope_frame.pack(fill=tk.BOTH, expand=1, padx=20)
         self.scope_frames = {}
         self.append_context = dict()
+
+
+    def update_scope(self, var):
+        scope = self.data["Fee Proposal"]["Scope"]
+        service = var["Service"].get()
+        include = var["Include"].get()
+        extra_list = self.conf["extra_list"]
+        if include:
+            scope[service]["Include"].set(True)
+            self.scope_frames[service] = dict()
+            self.scope_frames[service]["Main Frame"] = tk.LabelFrame(self.scope_frame, text=service, font=self.conf["font"])
+            self.scope_frames[service]["Main Frame"].pack()
+            self.append_context[service] = dict()
+
+            for i, extra in enumerate(extra_list):
+                extra_frame = tk.LabelFrame(self.scope_frames[service]["Main Frame"], text=extra, font=self.conf["font"])
+                extra_frame.pack()
+                self.scope_frames[service][extra] = tk.Frame(extra_frame)
+                self.scope_frames[service][extra].pack()
+                color_list = ["white", "azure"]
+                for j, context in enumerate(scope[service][extra]):
+                    tk.Checkbutton(self.scope_frames[service][extra], variable=scope[service][extra][j]["Include"]).grid(row=j, column=0)
+                    tk.Entry(self.scope_frames[service][extra], width=100, textvariable=scope[service][extra][j]["Item"],
+                             font=self.conf["font"], bg=color_list[j % 2]).grid(row=j, column=1)
+
+                self.append_context[service][extra] = {
+                    "Item": tk.StringVar(),
+                    "Add": tk.BooleanVar()
+                }
+                append_frame = tk.Frame(extra_frame)
+                append_frame.pack()
+                tk.Entry(append_frame, width=95, textvariable=self.append_context[service][extra]["Item"]).grid(row=0,
+                                                                                                                column=0)
+                tk.Checkbutton(append_frame, variable=self.append_context[service][extra]["Add"], text="Add to Database").grid(row=0, column=1)
+                func = lambda extra: lambda: self._append_value(service, extra)
+                tk.Button(append_frame, text="Submit", command=func(extra)).grid(row=0, column=2)
+        else:
+            scope[service]["Include"].set(False)
+            self.scope_frames[service]["Main Frame"].destroy()
 
     def fee_part(self):
         invoices = {
@@ -98,6 +155,41 @@ class FeeProposalPage(tk.Frame):
             "Fee": tk.StringVar(),
             "in.GST": tk.StringVar()
         }
+        for service in self.conf["invoice_list"]:
+            invoices["Details"][service] = {
+                "Include": tk.BooleanVar(),
+                "Service": tk.StringVar(value=service),
+                "Fee": tk.StringVar(),
+                "in.GST": tk.StringVar(),
+                "Expand": tk.BooleanVar(),
+                "Number": tk.StringVar(value="None"),
+                "Content": [
+                    {
+                        "Service": tk.StringVar(),
+                        "Fee": tk.StringVar(),
+                        "in.GST": tk.StringVar(),
+                        "Number": tk.StringVar(value="None")
+                    } for _ in range(self.conf["n_items"])
+                ]
+            }
+            expand_fun = lambda service : lambda a, b, c: self._expand(service)
+            invoices["Details"][service]["Expand"].trace("w", expand_fun(service))
+
+            ist_update_fun = lambda service : lambda a, b, c: self.app._ist_update(invoices["Details"][service]["Fee"], invoices["Details"][service]["in.GST"])
+            invoices["Details"][service]["Fee"].trace("w", ist_update_fun(service))
+            # invoices["Details"][service]["Fee"].trace("w", self.update_sum)
+            invoices["Details"][service]["in.GST"].trace("w", self.update_sum)
+            for i in range(self.conf["n_items"]):
+
+                func = lambda i: lambda a, b, c: self.app._ist_update(
+                    invoices["Details"][service]["Content"][i]["Fee"],
+                    invoices["Details"][service]["Content"][i]["in.GST"])
+                invoices["Details"][service]["Content"][i]["Fee"].trace("w", func(i))
+
+                sum_fun = lambda service: lambda a, b, c: self.app._sum_update(
+                    [item["Fee"] for item in invoices["Details"][service]["Content"]], invoices["Details"][service]["Fee"])
+                invoices["Details"][service]["Content"][i]["Fee"].trace("w", sum_fun(service))
+
         self.data["Invoices"] = invoices
 
         self.fee_frames = dict()
@@ -107,7 +199,7 @@ class FeeProposalPage(tk.Frame):
         self.fee_frame.pack(fill=tk.BOTH, expand=1, padx=20)
 
         top_frame = tk.LabelFrame(self.fee_frame)
-        top_frame.pack()
+        top_frame.pack(side=tk.TOP)
         tk.Label(top_frame, text="", width=6, font=self.conf["font"]).grid(row=0, column=0)
         tk.Label(top_frame, width=50, text="Services", font=self.conf["font"]).grid(row=0, column=1)
         tk.Label(top_frame, width=20, text="ex.GST", font=self.conf["font"]).grid(row=0, column=2)
@@ -120,162 +212,96 @@ class FeeProposalPage(tk.Frame):
 
         tk.Label(bottom_frame, width=20, textvariable=invoices["Fee"], font=self.conf["font"]).grid(row=0, column=2)
         tk.Label(bottom_frame, width=20, textvariable=invoices["in.GST"], font=self.conf["font"]).grid(row=0, column=3)
-
-
-    def update_scope(self, var):
-        scope = self.data["Fee Proposal"]["Scope"]
-        archive = self.data["Archive"]["Scope"]
-        service = var["Service"].get()
-        include = var["Include"].get()
-        extra_list = ["Extend", "Exclusion", "Deliverables"]
-        scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
-        scope_data = json.load(open(scope_dir))
-        if include:
-            if service in archive:
-                scope[service] = archive.pop(service)
-            else:
-                scope[service] = dict()
-                for i, extra in enumerate(extra_list):
-                    items = scope_data[service][extra]
-                    scope[service][extra] = []
-                    for j, context in enumerate(items):
-                        scope[service][extra].append(
-                            {
-                                "Include": tk.BooleanVar(value=True),
-                                "Item": tk.StringVar(value=context)
-                            }
-                        )
-
-            self.scope_frames[service] = tk.LabelFrame(self.scope_frame, text=service, font=self.conf["font"])
-            self.scope_frames[service].pack()
-            self.append_context[service] = dict()
-
-            for i, extra in enumerate(extra_list):
-                extra_frame = tk.LabelFrame(self.scope_frames[service], text=extra, font=self.conf["font"])
-                extra_frame.pack()
-                color_list = ["white", "azure"]
-                for j, context in enumerate(scope[service][extra]):
-                    tk.Checkbutton(extra_frame, variable=scope[service][extra][j]["Include"]).grid(row=j, column=0)
-                    tk.Entry(extra_frame, width=100, textvariable=scope[service][extra][j]["Item"],
-                             font=self.conf["font"], bg=color_list[j % 2]).grid(row=j, column=1)
-
-                self.append_context[service][extra] = {
-                    "Item": tk.StringVar(),
-                    "Add": tk.BooleanVar()
-                }
-                append_frame = tk.Frame(extra_frame)
-                append_frame.grid(row=999, column=0, columnspan=2)
-                tk.Entry(append_frame, width=95, textvariable=self.append_context[service][extra]["Item"]).grid(row=0,
-                                                                                                                column=0)
-                tk.Checkbutton(append_frame, variable=self.append_context[service][extra]["Add"],
-                               text="Add to Database").grid(row=0, column=1)
-                func = lambda extra: lambda: self._append_value(service, extra)
-                tk.Button(append_frame, text="Submit", command=func(extra)).grid(row=0, column=2)
-        else:
-            self.scope_frames[service].destroy()
-            archive[service] = scope.pop(service)
-
     def update_fee(self, var):
         invoices_details = self.data["Invoices"]["Details"]
-        archive = self.data["Archive"]["Invoice"]
+        # archive = self.data["Archive"]["Invoice"]
         service = var["Service"].get()
         include = var["Include"].get()
 
         if include:
-            if service in archive:
-                invoices_details[service] = archive.pop(service)
-            else:
-                invoices_details[service] = {
-                    "Service": tk.StringVar(value=service),
-                    "Fee": tk.StringVar(),
-                    "in.GST": tk.StringVar(),
-                    "Expand": tk.BooleanVar(),
-                    "Number": tk.StringVar(value="None"),
-                    "Content": [
-                        {
-                            "Service": tk.StringVar(),
-                            "Fee": tk.StringVar(),
-                            "in.GST": tk.StringVar(),
-                            "Number": tk.StringVar(value="None")
-                        } for _ in range(self.conf["n_items"])
-                    ]
-                }
-                invoices_details[service]["Expand"].trace("w", lambda a, b, c: self._expand(service))
+            invoices_details[service]["Include"].set(True)
+            # if service in archive:
+            #     invoices_details[service] = archive.pop(service)
+            # else:
+            #     invoices_details[service] = {
+            #         "Service": tk.StringVar(value=service),
+            #         "Fee": tk.StringVar(),
+            #         "in.GST": tk.StringVar(),
+            #         "Expand": tk.BooleanVar(),
+            #         "Number": tk.StringVar(value="None"),
+            #         "Content": [
+            #             {
+            #                 "Service": tk.StringVar(),
+            #                 "Fee": tk.StringVar(),
+            #                 "in.GST": tk.StringVar(),
+            #                 "Number": tk.StringVar(value="None")
+            #             } for _ in range(self.conf["n_items"])
+            #         ]
+            #     }
 
-                invoices_details[service]["Fee"].trace("w", lambda a, b, c: self.app._ist_update(
-                    invoices_details[service]["Fee"], invoices_details[service]["in.GST"]))
-                invoices_details[service]["Fee"].trace("w", self.update_sum)
-                invoices_details[service]["in.GST"].trace("w", self.update_sum)
-                self.fee_frames[service] = tk.LabelFrame(self.fee_frame)
-                self.fee_frames[service].pack()
-                self.fee_dic[service] = {
-                    "Service": tk.Label(self.fee_frames[service],
-                                        text=service + " design and documentation",
-                                        width=50,
-                                        font=self.conf["font"]),
-                    "Fee": tk.Entry(self.fee_frames[service],
-                                    textvariable=invoices_details[service]["Fee"],
-                                    width=20,
-                                    font=self.conf["font"],
-                                    fg="blue"),
-                    "in.GST": tk.Label(self.fee_frames[service],
-                                       textvariable=invoices_details[service]["in.GST"],
-                                       width=20,
-                                       font=self.conf["font"]),
-                    "Expand": tk.Checkbutton(self.fee_frames[service],
-                                             text="Expand",
-                                             variable=invoices_details[service]["Expand"],
-                                             font=self.conf["font"]),
-                    "Content": {
-                        "Details": [
-                            {
-                                "Service": tk.Entry(self.fee_frames[service],
-                                                    width=36,
-                                                    font=self.conf["font"],
-                                                    fg="blue",
-                                                    textvariable=invoices_details[service]["Content"][i]["Service"]),
-                                "Fee": tk.Entry(self.fee_frames[service],
-                                                width=20,
+            self.fee_frames[service] = tk.LabelFrame(self.fee_frame)
+            self.fee_frames[service].pack()
+            self.fee_dic[service] = {
+                "Service": tk.Label(self.fee_frames[service],
+                                    text=service + " design and documentation",
+                                    width=50,
+                                    font=self.conf["font"]),
+                "Fee": tk.Entry(self.fee_frames[service],
+                                textvariable=invoices_details[service]["Fee"],
+                                width=20,
+                                font=self.conf["font"],
+                                fg="blue"),
+                "in.GST": tk.Label(self.fee_frames[service],
+                                   textvariable=invoices_details[service]["in.GST"],
+                                   width=20,
+                                   font=self.conf["font"]),
+                "Expand": tk.Checkbutton(self.fee_frames[service],
+                                         text="Expand",
+                                         variable=invoices_details[service]["Expand"],
+                                         font=self.conf["font"]),
+                "Content": {
+                    "Details": [
+                        {
+                            "Service": tk.Entry(self.fee_frames[service],
+                                                width=36,
                                                 font=self.conf["font"],
                                                 fg="blue",
-                                                textvariable=invoices_details[service]["Content"][i]["Fee"]),
-                                "in.GST": tk.Label(self.fee_frames[service],
-                                                   width=17,
-                                                   textvariable=invoices_details[service]["Content"][i]["in.GST"],
-                                                   font=self.conf["font"])
-                            } for i in range(self.conf["n_items"])
-                        ],
-                        "Service": tk.Label(self.fee_frames[service], width=36, text=service + " Total",
-                                            font=self.conf["font"]),
-                        "Fee": tk.Label(self.fee_frames[service],
-                                        width=20,
-                                        textvariable=invoices_details[service]["Fee"],
+                                                textvariable=invoices_details[service]["Content"][i]["Service"]),
+                            "Fee": tk.Entry(self.fee_frames[service],
+                                            width=20,
+                                            font=self.conf["font"],
+                                            fg="blue",
+                                            textvariable=invoices_details[service]["Content"][i]["Fee"]),
+                            "in.GST": tk.Label(self.fee_frames[service],
+                                               width=17,
+                                               textvariable=invoices_details[service]["Content"][i]["in.GST"],
+                                               font=self.conf["font"])
+                        } for i in range(self.conf["n_items"])
+                    ],
+                    "Service": tk.Label(self.fee_frames[service], width=36, text=service + " Total",
                                         font=self.conf["font"]),
-                        "in.GST": tk.Label(self.fee_frames[service],
-                                           width=17,
-                                           textvariable=invoices_details[service]["in.GST"],
-                                           font=self.conf["font"])
-                    }
+                    "Fee": tk.Label(self.fee_frames[service],
+                                    width=20,
+                                    textvariable=invoices_details[service]["Fee"],
+                                    font=self.conf["font"]),
+                    "in.GST": tk.Label(self.fee_frames[service],
+                                       width=17,
+                                       textvariable=invoices_details[service]["in.GST"],
+                                       font=self.conf["font"])
                 }
-                for i in range(self.conf["n_items"]):
-                    func = lambda i: lambda a, b, c: self.app._ist_update(
-                        invoices_details[service]["Content"][i]["Fee"],
-                        invoices_details[service]["Content"][i]["in.GST"])
-                    invoices_details[service]["Content"][i]["Fee"].trace("w", func(i))
-                    sum_fun = lambda a, b, c: self.app._sum_update(
-                        [item["Fee"] for item in invoices_details[service]["Content"]],
-                        invoices_details[service]["Fee"])
-                    invoices_details[service]["Content"][i]["Fee"].trace("w", sum_fun)
+            }
 
-                self.fee_dic[service]["Expand"].grid(row=0, column=0)
-                self.fee_dic[service]["Service"].grid(row=0, column=1)
-                self.fee_dic[service]["Fee"].grid(row=0, column=2)
-                self.fee_dic[service]["in.GST"].grid(row=0, column=3)
+            self.fee_dic[service]["Expand"].grid(row=0, column=0)
+            self.fee_dic[service]["Service"].grid(row=0, column=1)
+            self.fee_dic[service]["Fee"].grid(row=0, column=2)
+            self.fee_dic[service]["in.GST"].grid(row=0, column=3)
+
 
             self.fee_frames[service].pack()
             self.update_sum()
         else:
-            archive[service] = invoices_details.pop(service)
+            # archive[service] = invoices_details.pop(service)
+            invoices_details[service]["Include"].set(False)
             self.fee_frames[service].pack_forget()
             self.update_sum()
 
@@ -284,8 +310,8 @@ class FeeProposalPage(tk.Frame):
         scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
         scope = self.app.data["Fee Proposal"]["Scope"]
         item = self.append_context[service][extra]["Item"].get()
-        if item == "":
-            messagebox.showwarning(title="Error", message="You cant need to enter some context")
+        if len(item.strip()) == 0:
+            messagebox.showwarning(title="Error", message="You need to enter some context")
             return
         scope[service][extra].append(
             {
@@ -293,17 +319,11 @@ class FeeProposalPage(tk.Frame):
                 "Item": tk.StringVar(value=item)
             }
         )
-        if extra == "Extend":
-            index = 0
-        elif extra == "Exclusion":
-            index = 1
-        else:
-            index = 2
-        tk.Entry(self.scope_frames[service].winfo_children()[index], width=100,
+        tk.Entry(self.scope_frames[service][extra], width=100,
                  textvariable=scope[service][extra][-1]["Item"],
                  font=self.conf["font"]).grid(row=len(scope[service][extra]), column=1)
 
-        tk.Checkbutton(self.scope_frames[service].winfo_children()[index],
+        tk.Checkbutton(self.scope_frames[service][extra],
                        variable=scope[service][extra][-1]["Include"]).grid(row=len(scope[service][extra]), column=0)
 
         if self.append_context[service][extra]["Add"].get():
@@ -362,13 +382,11 @@ class FeeProposalPage(tk.Frame):
         # variation = self.data["Variation"]
         sum = 0
         ist_sum = 0
-        fee_list = [value for value in details.values()]
-        for fee in fee_list:
-            if len(fee["Fee"].get().strip())==0 or len(fee["in.GST"].get().strip())==0:
-                continue
-            else:
+        for fee in details.values():
+            if len(fee["Fee"].get().strip()) != 0 and fee["Include"].get():
                 try:
                     sum += float(fee["Fee"].get())
+                    # ist_sum += float(fee["Fee"].get()) * self.conf["tax rates"]
                     ist_sum += float(fee["in.GST"].get())
                 except ValueError as e:
                     total.set("Error")

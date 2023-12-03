@@ -22,7 +22,6 @@ class App(tk.Tk):
     def __init__(self, conf, user, *args, **kwargs):
         # TkinterDnD.Tk.__init__(self, *args, **kwargs)
         tk.Tk.__init__(self, *args, **kwargs)
-
         self.title("Premium Consulting Engineers")
         self.conf = conf
         self.user = user
@@ -30,28 +29,49 @@ class App(tk.Tk):
         self.log_text = tk.StringVar()
         logo = Image.open(os.path.join(self.conf["resource_dir"], "jpg", "logo.jpg"))
         render = ImageTk.PhotoImage(logo)
-        # self.option_add('*Dialog.msg.font', 'Helvetica 24')
-        # self.master.option_add('*Dialog.msg.width', 34)
-        # self.master.option_add("*Dialog.msg.wrapLength", "6i")
-        # self.option_add('*Dialog.msg.font', self.conf[    "msg_font"])
         self.iconphoto(False, render)
         self.state("zoomed")
         self.data = {}
-        # the main frame
+
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=1)
 
-        self.utility_part()
-        self.change_page_frame()
-        self.main_context_frame()
 
-        self.show_frame(self.project_info_page)
+        self.utility_part()
+        self.change_page_part()
+        self.main_context_part()
+
+        self.current_page = self.project_info_page
+
+        self.show_frame(self.current_page)
 
         self.protocol("WM_DELETE_WINDOW", self.confirm)
+
         config_state(self)
         self.auto_check()
 
+    def init_app(self):
+        self.utility_part()
+        self.change_page_part()
+        self.main_context_part()
+        self.show_frame(self.current_page)
+
     def utility_part(self):
+        self.data["Asana_id"] = tk.StringVar()
+        self.data["State"] = {
+            "Set Up": tk.BooleanVar(),
+            "Generate Proposal": tk.BooleanVar(),
+            "Email to Client": tk.BooleanVar(),
+            "Fee Accepted": tk.BooleanVar(),
+            "Quote Unsuccessful": tk.BooleanVar()
+        }
+        self.data["Email"] = {
+            "Fee Proposal": tk.StringVar(),
+            "First Chase": tk.StringVar(),
+            "Second Chase": tk.StringVar(),
+            "Third Chase": tk.StringVar()
+        }
+
         # Utility Part
         self.utility_frame = tk.LabelFrame(self.main_frame, text="Utility", font=self.conf["font"])
         self.utility_frame.pack(side=tk.TOP)
@@ -61,7 +81,7 @@ class App(tk.Tk):
 
         tk.Button(state_frame, text="Set Up Project", command=self._finish_setup, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
-        tk.Button(state_frame, text="Preview Fee Proposal", bg="brown", command=lambda: excel_print_pdf(self), fg="white",
+        tk.Button(state_frame, text="Preview Fee Proposal", bg="brown", command=self._preview_fee_proposal, fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
         tk.Button(state_frame, text="Email to Client", command=lambda: email_fee_proposal(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
@@ -85,19 +105,14 @@ class App(tk.Tk):
         tk.Button(function_frame, text="Update Asana", command=lambda: update_asana(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
 
+        tk.Button(function_frame, text="Open Asana", command=lambda: update_asana(self), bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=1, column=2)
+
         tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
 
         tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=1, column=3)
-
-        self.data["State"] = {
-            "Set Up": tk.BooleanVar(),
-            "Generate Proposal": tk.BooleanVar(),
-            "Email to Client": tk.BooleanVar(),
-            "Fee Accepted": tk.BooleanVar(),
-            "Quote Unsuccessful": tk.BooleanVar()
-        }
 
         tk.Label(state_frame, text="Set Up").grid(row=1, column=0)
         tk.Label(state_frame, text="Generate Proposal").grid(row=1, column=1)
@@ -122,10 +137,10 @@ class App(tk.Tk):
         self.accept_state=tk.Label(state_frame, bg="red")
         self.accept_state.grid(row=2, column=3, sticky="ew")
 
-        self.data["State"]["Set Up"].trace("w", self._update_rec)
-        self.data["State"]["Generate Proposal"].trace("w", self._update_rec)
-        self.data["State"]["Email to Client"].trace("w", self._update_rec)
-        self.data["State"]["Fee Accepted"].trace("w", self._update_rec)
+        self.data["State"]["Set Up"].trace("w", self._update_project_state)
+        self.data["State"]["Generate Proposal"].trace("w", self._update_project_state)
+        self.data["State"]["Email to Client"].trace("w", self._update_project_state)
+        self.data["State"]["Fee Accepted"].trace("w", self._update_project_state)
 
         self.load_project_quotation = tk.StringVar()
         self.load_project_quotation.trace("w", self.load_project)
@@ -141,12 +156,6 @@ class App(tk.Tk):
         self.state_dict["Email to Client"].grid(row=3, column=2)
         self.state_dict["Fee Accepted"].grid(row=3, column=3)
 
-        self.data["Email"] = {
-            "Fee Proposal": tk.StringVar(),
-            "First Chase": tk.StringVar(),
-            "Second Chase": tk.StringVar(),
-            "Third Chase": tk.StringVar()
-        }
 
         legend_frame = tk.LabelFrame(self.utility_frame)
         legend_frame.grid(row=0, column=3)
@@ -172,7 +181,7 @@ class App(tk.Tk):
         tk.Label(legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
         tk.Label(legend_frame, text="Void", bg="purple").grid(row=1, column=5, sticky="ew")
 
-    def change_page_frame(self):
+    def change_page_part(self):
         # change page
         change_page_frame = tk.LabelFrame(self.main_frame, text="Change Page")
         change_page_frame.pack(side=tk.BOTTOM)
@@ -183,14 +192,11 @@ class App(tk.Tk):
         tk.Button(change_page_frame, text="Fee Details",
                   command=lambda: self.show_frame(self.fee_proposal_page), bg="green", fg="black",
                   font=self.conf["font"]).grid(row=0, column=1)
-        # tk.Button(change_page_frame, text="Log Files",
-        #           command=lambda: self.show_frame(self.fee_accepted_page), bg="green", fg="black",
-        #           font=self.conf["font"]).grid(row=0, column=2)
         tk.Button(change_page_frame, text="Financial Panel",
                   command=lambda: self.show_frame(self.financial_panel_page), bg="green", fg="black",
-                  font=self.conf["font"]).grid(row=0, column=3)
+                  font=self.conf["font"]).grid(row=0, column=2)
 
-    def main_context_frame(self):
+    def main_context_part(self):
         # main frame page
         self.project_info_page = ProjectInfoPage(self.main_frame, self)
         # self.fee_accepted_page = FeeAcceptedPage(self.main_frame, self)
@@ -198,6 +204,7 @@ class App(tk.Tk):
         self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
         self._update_variation()
         self._project_number_page()
+
 
     def _update_variation(self):
         # variation = [
@@ -244,21 +251,23 @@ class App(tk.Tk):
 
         self.data["Invoices"]["Details"]["Variation"]["Expand"].set(True)
 
-        for i in range(self.conf["n_items"]-1, -1, -1):
+        for i in range(self.conf["n_bills"], -1, -1):
             self.financial_panel_page.invoice_dic["Variation"]["Expand"][i].pack_forget()
             self.financial_panel_page.invoice_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
         self.financial_panel_page.invoice_frames["Variation"].pack_forget()
         self.financial_panel_page.invoice_frames["Variation"].pack(fill=tk.X, side=tk.BOTTOM)
-        for i in range(self.conf["n_items"]-1, -1, -1):
+        for i in range(self.conf["n_bills"], -1, -1):
             self.financial_panel_page.bill_dic["Variation"]["Expand"][i].pack_forget()
             self.financial_panel_page.bill_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
         self.financial_panel_page.bill_frames["Variation"].pack_forget()
         self.financial_panel_page.bill_frames["Variation"].pack(fill=tk.X, side=tk.BOTTOM)
-        for i in range(self.conf["n_items"]-1, -1, -1):
+        for i in range(self.conf["n_bills"], -1, -1):
             self.financial_panel_page.profit_dic["Variation"]["Expand"][i].pack_forget()
             self.financial_panel_page.profit_dic["Variation"]["Expand"][i].pack(fill=tk.X, side=tk.BOTTOM)
         self.financial_panel_page.profit_frames["Variation"].pack_forget()
         self.financial_panel_page.profit_frames["Variation"].pack(fill=tk.X, side=tk.BOTTOM)
+
+
         # self.update_fee(variation_var)
         # self.data["Invoices"]["Details"]["Variation"]["Expand"].set(True)
         # self.fee_dic["Variation"]["Expand"].grid_forget()
@@ -284,6 +293,14 @@ class App(tk.Tk):
         self.financial_panel_page.pack_forget()
         page.pack(fill=tk.BOTH, expand=1)
 
+    def _finish_setup(self):
+        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
+            messagebox.showerror("Error", "Please Create an quotation Number first")
+            return
+        finish_setup(self)
+
+    def _preview_fee_proposal(self):
+        excel_print_pdf(self)
 
     def _ist_update(self, fee, ingst, no_gst=None):
         if not no_gst is None and no_gst.get():
@@ -337,7 +354,6 @@ class App(tk.Tk):
             email_server(self)
 
         _thread.start_new_thread(running_email_server, ())
-
         # def check_log_and_save():
         #     while True:
         #         print("auto confined")
@@ -356,7 +372,11 @@ class App(tk.Tk):
         if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
             self.destroy()
         else:
-            save(self)
+            try:
+                save(self)
+            except Exception as e:
+                print(e)
+                pass
             self.destroy()
 
     def _update_xero(self):
@@ -366,8 +386,6 @@ class App(tk.Tk):
         elif len(self.data["Financial Panel"]["Invoice Details"]["INV1"]["Number"].get())==0:
             messagebox.showerror("Error", "Please Generate An Invoice Number Fist")
             return
-
-
         if len(self.data["Project Info"]["Client"]["Client Full Name"].get()) == 0:
             if len(self.data["Project Info"]["Client"]["Client Company"].get()) == 0:
                 messagebox.showerror("Error", "You should at least provide client name or client company")
@@ -384,12 +402,6 @@ class App(tk.Tk):
         except RuntimeError:
             messagebox.showerror("Error", "You  should login into xero first")
 
-    def _finish_setup(self):
-        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
-            messagebox.showerror("Error", "Please Create an quotation Number first")
-            return
-
-        finish_setup(self)
 
     def _rename_project(self):
         if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
@@ -404,7 +416,8 @@ class App(tk.Tk):
         save(self)
         config_log(self)
         config_state(self)
-    def _update_rec(self, *args):
+
+    def _update_project_state(self, *args):
         if self.data["State"]["Fee Accepted"].get():
             self._config_color_code(["green"]*4)
         elif self.data["State"]["Email to Client"].get():
@@ -433,6 +446,7 @@ class App(tk.Tk):
             messagebox.showerror("Error", f"Python cannot find the folder {folder_path}")
         else:
             webbrowser.open(folder_path)
+
     def open_database(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
         database_path = os.path.join(self.conf["database_dir"], quotation_number)

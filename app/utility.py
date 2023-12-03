@@ -1,6 +1,7 @@
 from tkinter import messagebox
+import tkinter as tk
 
-from custom_dialog import FileSelectDialog
+from app_dialog import FileSelectDialog
 
 from win32com import client as win32client
 import win32com.client.makepy
@@ -23,13 +24,18 @@ def reset(app):
     database_dir = os.path.join(app.conf["database_dir"], "data_template.json")
     template_json = json.load(open(database_dir))
     template_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
+
     convert_to_data(template_json, app.data)
-    app.data["Archive"] = {
-        "Scope": {},
-        "Invoice": {},
-        "Bill": {},
-        "Profit": {}
-    }
+
+    app.fee_proposal_page._reset_scope()
+
+    for service in app.data["Project Info"]["Project"]["Service Type"].values():
+        if service["Include"].get():
+            service["Include"].set(False)
+            service["Include"].set(True)
+
+
+
     app.log_text.set("")
 
 
@@ -54,6 +60,12 @@ def load(app):
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get().upper())
     data_json = json.load(open(os.path.join(database_dir, "data.json")))
     convert_to_data(data_json, data)
+
+    for service in app.data["Project Info"]["Project"]["Service Type"].values():
+        if service["Include"].get():
+            service["Include"].set(False)
+            service["Include"].set(True)
+
     load_invoice_state(app)
     config_state(app)
     config_log(app)
@@ -62,7 +74,7 @@ def save_invoice_state(app):
     data = app.data
     inv_dir = os.path.join(app.conf["database_dir"], "invoices.json")
     inv_json = json.load(open(inv_dir))
-    for inv in data["Financial Panel"]["Invoice Details"].values():
+    for inv in data["Invoices Number"]:
         if len(inv["Number"].get())!=0:
             inv_json[inv["Number"].get()] = inv["State"].get()
     with open(inv_dir, "w") as f:
@@ -83,7 +95,7 @@ def load_invoice_state(app):
     data = app.data
     inv_dir = os.path.join(app.conf["database_dir"], "invoices.json")
     inv_json = json.load(open(inv_dir))
-    for inv in data["Financial Panel"]["Invoice Details"].values():
+    for inv in data["Invoices Number"]:
         if len(inv["Number"].get()) != 0:
             inv["State"].set(inv_json[inv["Number"].get()])
 
@@ -105,10 +117,29 @@ def convert_to_json(obj):
 
 def convert_to_data(json, data):
     if isinstance(json, list):
-        try:
-            [convert_to_data(json[i], data[i]) for i in range(len(data))]
-        except IndexError:
-            pass
+        if len(json) == len(data):
+            [convert_to_data(json[i], data[i]) for i in range(len(json))]
+        elif len(json) > len(data):
+            for i in range(len(json)):
+                try:
+                    convert_to_data(json[i], data[i])
+                except IndexError:
+                    data.append(
+                        {
+                            "Include": tk.BooleanVar(value=True),
+                            "Item": tk.StringVar()
+                        }
+                    )
+                    convert_to_data(json[i], data[i])
+        else:
+            pop_list = []
+            for i in range(len(data)):
+                try:
+                    convert_to_data(json[i], data[i])
+                except IndexError:
+                    pop_list.append(i)
+            for i in pop_list:
+                data.pop(i)
         #     data.append(
         #         {
         #             "Include": tk.BooleanVar(value=True),
@@ -117,10 +148,11 @@ def convert_to_data(json, data):
         #     )
         #     convert_to_data(json[len(data)-1], data[-1])
     elif isinstance(json, dict):
-        try:
-            [convert_to_data(json[k], data[k]) for k in data.keys()]
-        except KeyError:
-            pass
+        for key in json.keys():
+            try:
+                convert_to_data(json[key], data[key])
+            except:
+                pass
     else:
         if data.get() != json:
             data.set(json)
@@ -128,8 +160,7 @@ def convert_to_data(json, data):
 
 def finish_setup(app):
     data = app.data
-    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"][
-        "Project Name"].get().strip()
+    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get().strip()
     working_dir = os.path.join(app.conf["working_dir"], folder_name)
 
     if not os.path.exists(working_dir):
@@ -510,15 +541,15 @@ def _get_proposal_name(app):
 def excel_print_invoice(app, inv):
     inv = f"INV{str(inv+1)}"
     data = app.data
-    excel_name = f'PCE INV {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}.xlsx'
-    invoice_name = f'PCE INV {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}.pdf'
+    excel_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.xlsx'
+    invoice_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.pdf'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     # win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
     # adobe = win32com.client.DispatchEx('AcroExch.App')
     # avDoc = win32client.dynamic.Dispatch("AcroExch.AVDoc")
 
-    if len(data["Financial Panel"]["Invoice Details"][inv]["Number"].get()) == 0:
+    if len(data["Invoices Number"][inv]["Number"].get()) == 0:
         messagebox.showerror("Error", "You need to generate a invoice number before you generate the Invoice")
         return
 
@@ -549,7 +580,7 @@ def excel_print_invoice(app, inv):
             work_sheets.Cells(6, 1).Value = data["Project Info"]["Client"]["Client Company"].get()
             work_sheets.Cells(7, 1).Value = data["Project Info"]["Client"]["Client Address"].get()
             work_sheets.Cells(4, 10).Value = datetime.today().strftime("%d-%b-%Y")
-            work_sheets.Cells(5, 10).Value = data["Financial Panel"]["Invoice Details"][inv]["Number"].get()
+            work_sheets.Cells(5, 10).Value = data["Invoices Number"][inv]["Number"].get()
             work_sheets.Cells(12, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
             cur_row = 14
             total_fee = 0
@@ -706,7 +737,7 @@ def email_invoice(app, inv):
     inv = f"INV{str(inv+1)}"
     data = app.data
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
-    pdf_name = f'PCE INV {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}.pdf'
+    pdf_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.pdf'
 
     if not os.path.exists(os.path.join(database_dir, pdf_name)):
         messagebox.showerror("Error", f"Please generate the invoice before you send to client")
@@ -721,7 +752,7 @@ def email_invoice(app, inv):
     ol = win32client.Dispatch("Outlook.Application")
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
-    newmail.Subject = f'Invoice {data["Financial Panel"]["Invoice Details"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
+    newmail.Subject = f'Invoice {data["Invoices Number"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Main Contact Email"].get()}'
     newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
@@ -747,22 +778,15 @@ def email_invoice(app, inv):
     config_state(app)
 def get_invoice_item(app):
     data = app.data
-    res = {
-        "INV1": [],
-        "INV2": [],
-        "INV3": [],
-        "INV4": [],
-        "INV5": [],
-        "INV6": []
-    }
-    for inv in res.keys():
+    res = [[] for _ in range(6)]
+    for i in range(6):
         for key, service in data["Invoices"]["Details"].items():
             if service["Expand"].get():
-                for i in range(app.conf["n_items"]):
-                    if len(service["Content"][i]["Service"].get()) == 0 or len(service["Content"][i]["Fee"].get()) == 0:
+                for j in range(app.conf["n_items"]):
+                    if len(service["Content"][j]["Service"].get()) == 0 or len(service["Content"][j]["Fee"].get()) == 0:
                         continue
-                    if service["Content"][i]["Number"].get() == inv:
-                        res[inv].append(
+                    if service["Content"][j]["Number"].get() == f"INV{i+1}":
+                        res[i].append(
                             {
                                 "Item": service["Content"][i]["Service"].get(),
                                 "Fee": service["Content"][i]["Fee"].get(),
@@ -770,8 +794,8 @@ def get_invoice_item(app):
                             }
                         )
             else:
-                if service["Number"].get() == inv:
-                    res[inv].append(
+                if service["Number"].get() == f"INV{i+1}":
+                    res[i].append(
                         {
                             "Item": service["Service"].get(),
                             "Fee": service["Fee"].get(),
@@ -806,7 +830,7 @@ def update_app_invoices(app, inv_list):
             elif state == "VOIDED":
                 bills_json[bill_number] = "Void"
 
-    for key, value in data["Financial Panel"]["Invoice Details"].items():
+    for key, value in data["Invoices Number"].items():
         if value["Number"].get() in inv_list["Invoices"]["PAID"].keys():
             value["State"].set("Paid")
         elif value["Number"].get() in inv_list["Invoices"]["VOIDED"].keys():
