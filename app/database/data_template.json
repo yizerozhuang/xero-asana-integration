@@ -7,6 +7,7 @@
         "Fee Accepted": false,
         "Quote Unsuccessful": false
     },
+    "Email_Content": "",
     "Email": {
         "Fee Proposal": "",
         "First Chase": "",
@@ -175,6 +176,11 @@
                 "Extend": [],
                 "Exclusion": [],
                 "Deliverables": []
+            },
+            "Installation":{
+                "Extend": [],
+                "Exclusion": [],
+                "Deliverables": []
             }
         }
     },
@@ -312,6 +318,39 @@
                     }
                 ]
             },
+            "Installation": {
+                "Service": "Installation",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
             "Variation": {
                 "Service": "Variation",
                 "Fee": "",
@@ -353,7 +392,7 @@
         "Details": {
             "Mechanical Service": {
                 "Include": false,
-                "Service": "Mechanical Service",
+                "Service": "",
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
@@ -398,7 +437,7 @@
             },
             "Electrical Service": {
                 "Include": false,
-                "Service": "Electrical Service",
+                "Service": "",
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
@@ -443,7 +482,7 @@
             },
             "Hydraulic Service": {
                 "Include": false,
-                "Service": "Hydraulic Service",
+                "Service": "",
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
@@ -488,7 +527,52 @@
             },
             "Fire Service": {
                 "Include": false,
-                "Service": "Fire Service",
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Ori": "",
+                "V1": "",
+                "V2": "",
+                "V3": "",
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Installation": {
+                "Include": false,
+                "Service": "",
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
@@ -598,6 +682,11 @@
                 "in.GST": ""
             },
             "Fire Service": {
+                "Include": false,
+                "Fee": "",
+                "in.GST": ""
+            },
+            "Installation": {
                 "Include": false,
                 "Fee": "",
                 "in.GST": ""

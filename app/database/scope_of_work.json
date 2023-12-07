@@ -89,5 +89,19 @@
             "Fire Protection Service design certificate",
             "Coordination with related services"
         ]
+    },
+    "Installation": {
+        "Extend": [
+            "Demolish existing old cassette, condenser on roof and associated cable, wire and fittings.",
+            "Supply and install 1 off Dakin split cassette unit, model FCA100 (10.0 kW cooling capacity).",
+            "Supply and install refrigeration piping, wire and control to the unit.",
+            "Commissioning of the newly installed split cassette system.",
+            "12-month defect liability period."
+        ],
+        "Exclusion": [
+            "Scissor lift hire.",
+            "Builders works and penetration"
+        ],
+        "Deliverables": []
     }
 }

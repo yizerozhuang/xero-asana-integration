@@ -53,6 +53,7 @@ def email_server(app=None):
             time.sleep(10)
             print(e)
             continue
+
         messages = messages[0].split(b' ') if len(messages[0]) != 0 else []
         if status == "OK":
             for mail in messages:
@@ -77,9 +78,15 @@ def email_server(app=None):
 
                         # if From not in allow_email:
                         #     continue
-                        print("Subject:", subject)
+                        email_content = []
+                        print("Subject:", subject.strip())
+                        email_content.append(f"Subject: {subject.strip()}")
                         print("From:", From)
+                        email_content.append(f"From: {From}")
                         print("Date:", Date)
+                        email_content.append(f"Date: {Date}")
+                        email_content.append("Content: ")
+
                         if subject.startswith("Fwd: ") or subject.startswith("FW: "):
                             if _fee_acceptance(msg):
                                 database_dir = conf["database_dir"]
@@ -142,7 +149,7 @@ def email_server(app=None):
                                     smtp.quit()
                             else:
                                 # iterate over email parts
-                                project_name = subject.split("Fwd: ")[-1].split("FW: ")[-1]
+                                project_name = subject.split("Fwd: ")[-1].split("FW: ")[-1].strip()
                                 current_quotation = get_quotation_number()
                                 folder_name = current_quotation + "-" + project_name
                                 folder_path = os.path.join(conf["working_dir"], folder_name)
@@ -154,9 +161,6 @@ def email_server(app=None):
                                 data_json["Project Info"]["Project"]["Quotation Number"] = current_quotation
                                 data_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
                                 os.makedirs(database_dir)
-                                with open(os.path.join(database_dir, "data.json"), "w") as f:
-                                    json_object = json.dumps(data_json, indent=4)
-                                    f.write(json_object)
                                 log.log_create_folder(From.split("<")[-1].split(">")[0], current_quotation)
                                 for part in msg.walk():
                                     # extract content type of email
@@ -164,7 +168,7 @@ def email_server(app=None):
                                     content_disposition = str(part.get("Content-Disposition"))
                                     # get the email body
                                     if content_type == "text/plain":
-                                        print(part.get_payload())
+                                        email_content.append(part.get_payload().replace("=20", "").replace("\n", ""))
                                     elif "attachment" in content_disposition:
                                         # download attachment
                                         filename = part.get_filename()
@@ -173,6 +177,12 @@ def email_server(app=None):
                                             filepath = os.path.join(folder_name, filename)
                                             # download attachment and save it
                                             open(filepath, "wb").write(part.get_payload(decode=True))
+
+                                data_json["Email_Content"] = "\n".join(email_content)
+
+                                with open(os.path.join(database_dir, "data.json"), "w") as f:
+                                    json_object = json.dumps(data_json, indent=4)
+                                    f.write(json_object)
                                 if not app is None:
                                     config_state(app)
                                     config_log(app)

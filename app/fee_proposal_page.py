@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 from datetime import date
 import os
 import json
@@ -15,6 +15,7 @@ class FeeProposalPage(tk.Frame):
         self.app.data["Fee Proposal"] = dict()
         self.data = app.data
         self.conf = app.conf
+        self.messagebox = app.messagebox
 
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=1, side=tk.LEFT)
@@ -103,8 +104,6 @@ class FeeProposalPage(tk.Frame):
         self.data["Fee Proposal"]["Scope"] = scope
     def scope_part(self):
         self._reset_scope()
-
-
         self.scope_frame = tk.LabelFrame(self.main_context_frame, text="Scope of Work", font=self.conf["font"])
         self.scope_frame.pack(fill=tk.BOTH, expand=1, padx=20)
         self.scope_frames = {}
@@ -174,21 +173,25 @@ class FeeProposalPage(tk.Frame):
             }
             expand_fun = lambda service : lambda a, b, c: self._expand(service)
             invoices["Details"][service]["Expand"].trace("w", expand_fun(service))
+            invoices["Details"][service]["Expand"].trace("w", self.update_sum)
+
 
             ist_update_fun = lambda service : lambda a, b, c: self.app._ist_update(invoices["Details"][service]["Fee"], invoices["Details"][service]["in.GST"])
             invoices["Details"][service]["Fee"].trace("w", ist_update_fun(service))
             # invoices["Details"][service]["Fee"].trace("w", self.update_sum)
             invoices["Details"][service]["in.GST"].trace("w", self.update_sum)
+
+            func = lambda service, i: lambda a, b, c: self.app._ist_update(
+                invoices["Details"][service]["Content"][i]["Fee"],
+                invoices["Details"][service]["Content"][i]["in.GST"])
+            sum_fun = lambda service: lambda a, b, c: self.app._sum_update(
+                [item["Fee"] for item in invoices["Details"][service]["Content"]], invoices["Details"][service]["Fee"])
             for i in range(self.conf["n_items"]):
 
-                func = lambda i: lambda a, b, c: self.app._ist_update(
-                    invoices["Details"][service]["Content"][i]["Fee"],
-                    invoices["Details"][service]["Content"][i]["in.GST"])
-                invoices["Details"][service]["Content"][i]["Fee"].trace("w", func(i))
+                invoices["Details"][service]["Content"][i]["Fee"].trace("w", func(service, i))
 
-                sum_fun = lambda service: lambda a, b, c: self.app._sum_update(
-                    [item["Fee"] for item in invoices["Details"][service]["Content"]], invoices["Details"][service]["Fee"])
                 invoices["Details"][service]["Content"][i]["Fee"].trace("w", sum_fun(service))
+            invoices["Details"][service]["Expand"].trace("w", sum_fun(service))
 
         self.data["Invoices"] = invoices
 
@@ -292,7 +295,7 @@ class FeeProposalPage(tk.Frame):
         scope = self.app.data["Fee Proposal"]["Scope"]
         item = self.append_context[service][extra]["Item"].get()
         if len(item.strip()) == 0:
-            messagebox.showwarning(title="Error", message="You need to enter some context")
+            self.messagebox.show_error(title="Error", message="You need to enter some context")
             return
         scope[service][extra].append(
             {
@@ -327,7 +330,6 @@ class FeeProposalPage(tk.Frame):
                 self.fee_dic[service]["Content"]["Details"][i]["Fee"].grid(row=i + 1, column=2)
                 self.fee_dic[service]["Content"]["Details"][i]["in.GST"].grid(row=i + 1, column=3)
 
-            details[service]["Fee"].set("")
 
             self.fee_dic[service]["Content"]["Service"].grid(row=self.conf["n_items"] + 1,
                                                              column=1)
@@ -339,12 +341,9 @@ class FeeProposalPage(tk.Frame):
             self.fee_dic[service]["in.GST"].grid_forget()
         else:
             for i in range(self.conf["n_items"]):
-                details[service]["Content"][i]["Service"].set("")
-                details[service]["Content"][i]["Fee"].set("")
                 self.fee_dic[service]["Content"]["Details"][i]["Service"].grid_forget()
                 self.fee_dic[service]["Content"]["Details"][i]["Fee"].grid_forget()
                 self.fee_dic[service]["Content"]["Details"][i]["in.GST"].grid_forget()
-            details[service]["Fee"].set("")
 
             self.fee_dic[service]["Content"]["Service"].grid_forget()
             self.fee_dic[service]["Content"]["Fee"].grid_forget()

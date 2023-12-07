@@ -8,6 +8,7 @@ from utility import *
 from asana_function import update_asana
 from xero_function import login_xero, update_xero
 from email_server import email_server
+from app_messagebox import AppMessagebox
 
 from PIL import Image, ImageTk
 import _thread
@@ -22,6 +23,13 @@ class App(tk.Tk):
         self.conf = conf
         self.user = user
         self.log = AppLog()
+
+        self.current_quotation = tk.StringVar()
+        self.current_project_name = tk.StringVar()
+        self.current_project_number = tk.StringVar()
+        # self.project_number = ""
+
+        self.messagebox = AppMessagebox()
         self.log_text = tk.StringVar()
         logo = Image.open(os.path.join(self.conf["resource_dir"], "jpg", "logo.jpg"))
         render = ImageTk.PhotoImage(logo)
@@ -44,7 +52,7 @@ class App(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.confirm)
 
         config_state(self)
-        self.auto_check()
+        # self.auto_check()
 
     def utility_part(self):
         self.data["Asana_id"] = tk.StringVar()
@@ -61,6 +69,7 @@ class App(tk.Tk):
             "Second Chase": tk.StringVar(),
             "Third Chase": tk.StringVar()
         }
+        self.data["Email_Content"] = tk.StringVar()
 
         # Utility Part
         self.utility_frame = tk.LabelFrame(self.main_frame, text="Utility", font=self.conf["font"])
@@ -69,11 +78,11 @@ class App(tk.Tk):
         state_frame = tk.LabelFrame(self.utility_frame, font=self.conf["font"])
         state_frame.grid(row=0, column=1)
 
-        tk.Button(state_frame, text="Set Up Project", command=self._finish_setup, bg="brown", fg="white",
+        tk.Button(state_frame, text="Set Up", command=self._finish_setup, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
         tk.Button(state_frame, text="Preview Fee Proposal", bg="brown", command=self._preview_fee_proposal, fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(state_frame, text="Email to Client", command=lambda: email_fee_proposal(self), bg="brown", fg="white",
+        tk.Button(state_frame, text="Email To Client", command=lambda: email_fee_proposal(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
         tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
@@ -95,7 +104,7 @@ class App(tk.Tk):
         tk.Button(function_frame, text="Update Asana", command=self._update_asana, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
 
-        # tk.Button(function_frame, text="Open Asana", command=lambda: update_asana(self), bg="brown", fg="white",
+        # tk.Button(function_frame, text="Open Asana", command=self._open_asana, bg="brown", fg="white",
         #           font=self.conf["font"]).grid(row=1, column=2)
 
         tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
@@ -104,10 +113,10 @@ class App(tk.Tk):
         tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=1, column=3)
 
-        tk.Label(state_frame, text="Set Up").grid(row=1, column=0)
-        tk.Label(state_frame, text="Generate Proposal").grid(row=1, column=1)
-        tk.Label(state_frame, text="Email to Client").grid(row=1, column=2)
-        tk.Label(state_frame, text="Fee Accepted").grid(row=1, column=3)
+        tk.Label(state_frame, text="To Set Up").grid(row=1, column=0)
+        tk.Label(state_frame, text="To Gen Fee").grid(row=1, column=1)
+        tk.Label(state_frame, text="To Email").grid(row=1, column=2)
+        tk.Label(state_frame, text="To Win").grid(row=1, column=3)
 
         # tk.Checkbutton(state_frame, variable=self.data["State"]["Set Up"], state=tk.DISABLED,
         #                text="Set Up").grid(row=1, column=0)
@@ -134,6 +143,7 @@ class App(tk.Tk):
 
         self.load_project_quotation = tk.StringVar()
         self.load_project_quotation.trace("w", self.load_project)
+
         self.state_dict = {
             "Set Up": ttk.Combobox(state_frame, textvariable=self.load_project_quotation),
             "Generate Proposal": ttk.Combobox(state_frame, textvariable=self.load_project_quotation),
@@ -273,23 +283,31 @@ class App(tk.Tk):
     def _project_number_page(self):
         project_number_frame = tk.LabelFrame(self.utility_frame)
         project_number_frame.grid(row=0, column=0, sticky="ns")
-        tk.Label(project_number_frame, text="Project Number: ", font=self.conf["font"]).grid(row=0, column=0)
+        tk.Label(project_number_frame, text="Quotation Number", font=self.conf["font"]).grid(row=0, column=0)
+        tk.Label(project_number_frame, text="Project Number: ", font=self.conf["font"]).grid(row=1, column=0)
+        tk.Label(project_number_frame, text="Project Name: ", font=self.conf["font"]).grid(row=2, column=0)
 
-        self.project_number_label = tk.Label(project_number_frame, font=self.conf["font"])
-        self.project_number_label.grid(row=0, column=1)
-        self.data["Project Info"]["Project"]["Quotation Number"].trace("w",self._update_project_number_label)
-        self.data["Project Info"]["Project"]["Project Number"].trace("w",self._update_project_number_label)
+        self.quotation_number_label = tk.Label(project_number_frame, textvariable=self.current_quotation, font=self.conf["font"])
+        self.quotation_number_label.grid(row=0, column=1)
+        # self.data["Project Info"][]
+        # self.current_quotation.trace("w", self._update_quotation_number_label)
+        tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Number"], font=self.conf["font"]).grid(row=1, column=1)
+        tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=2, column=1)
 
-        # tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Quotation Number"], font=self.conf["font"]).grid(row=0, column=1)
+        # self.project_number_label = tk.Label(project_number_frame, font=self.conf["font"])
+        # self.project_number_label.grid(row=0, column=1)
+        # self.data["Project Info"]["Project"]["Quotation Number"].trace("w",self._update_project_number_label)
+        # self.data["Project Info"]["Project"]["Project Number"].trace("w",self._update_project_number_label)
+        #
+        # # tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Quotation Number"], font=self.conf["font"]).grid(row=0, column=1)
+        #
+        # tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=1, column=1)
 
-        tk.Label(project_number_frame, text="Project Name: ", font=self.conf["font"]).grid(row=1, column=0)
-        tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=1, column=1)
-
-    def _update_project_number_label(self, *args):
-        if len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
-            self.project_number_label.config(text=self.data["Project Info"]["Project"]["Quotation Number"].get())
-        else:
-            self.project_number_label.config(text=self.data["Project Info"]["Project"]["Project Number"].get())
+    # def _update_quotation_number_label(self, *args):
+    #     if len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
+    #         self.quotation_number_label.config(text=self.data["Project Info"]["Project"]["Quotation Number"].get())
+    #     else:
+    #         self.quotation_number_label.config(text=self.data["Project Info"]["Project"]["Project Number"].get())
 
     def show_frame(self, page):
         self.project_info_page.pack_forget()
@@ -300,12 +318,13 @@ class App(tk.Tk):
 
     def _finish_setup(self):
         if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
-            messagebox.showerror("Error", "Please Create an quotation Number first")
+            self.messagebox.show_error("Please Create an quotation Number first")
+            # messagebox.showerror("Error", "\n Please Create an quotation Number first\n  \n")
             return
         finish_setup(self)
 
     def _preview_fee_proposal(self):
-        excel_print_pdf(self)
+        preview_fee_proposal(self)
 
     def _ist_update(self, fee, ingst, no_gst=None):
         if not no_gst is None and no_gst.get():
@@ -344,13 +363,17 @@ class App(tk.Tk):
         total.set(str(round(sum, 2)))
 
     def load_project(self, *args):
-        if len(self.load_project_quotation.get()) == 0:
-            return
-        if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) !=0:
-            save(self)
-        self.data["Project Info"]["Project"]["Quotation Number"].set(self.load_project_quotation.get().split("-")[0])
-        load(self)
+        # if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) !=0:
+        #     save(self)
+
+        # load(self, self.load_project_quotation.get().split("-")[0])
+        load_quotation = self.load_project_quotation.get().split("-")[0]
+        self.data["Project Info"]["Project"]["Quotation Number"].set(load_quotation)
+
+        load_data(self)
+
         self.load_project_quotation.set("")
+
         for drop_down in self.state_dict.values():
             drop_down.set("")
 
@@ -378,6 +401,8 @@ class App(tk.Tk):
             self.destroy()
         else:
             try:
+                if len(self.current_quotation.get())!=0:
+                    self.data["Project Info"]["Prject"]["Quotation Number"].set(self.current_quotation.get())
                 save(self)
             except Exception as e:
                 print(e)
@@ -390,18 +415,23 @@ class App(tk.Tk):
         except Exception as e:
             print(e)
             return
-        messagebox.showinfo("Update", "Successful Update Asana")
+        self.messagebox.show_update("Successful Update Asana")
+
+    # def _open_asana(self):
+    #     if len(self.data["Asana_id"]) !=0:
+    #         self.messagebox.show_error("Please Update Asana Before you Open")
+    #         return
 
     def _update_xero(self):
         if not self.data["State"]["Fee Accepted"].get():
-            messagebox.showerror("Error", "You haven't update a fee acceptant yet, please update a fee acceptance before you update xero")
+            self.messagebox.show_error("Please upload a fee acceptance before you update xero")
             return
         elif len(self.data["Project Info"]["Project"]["Project Number"].get())==0:
-            messagebox.showerror("Error", "Please Generate An Project Number Fist")
+            self.messagebox.show_error("Please Generate An Project Number Fist")
             return
         if len(self.data["Project Info"]["Client"]["Full Name"].get()) == 0:
             if len(self.data["Project Info"]["Client"]["Company"].get()) == 0:
-                messagebox.showerror("Error", "You should at least provide client name or client company")
+                self.messagebox.show_error("You should at least provide client name or client company")
                 return
             else:
                 contact = self.data["Project Info"]["Client"]["Company"].get()
@@ -410,24 +440,32 @@ class App(tk.Tk):
                 contact = self.data["Project Info"]["Client"]["Full Name"].get()
             else:
                 contact = self.data["Project Info"]["Client"]["Company"].get() + ", " + self.data["Project Info"]["Client"]["Full Name"].get()
+        true = False
         try:
-            update_xero(self, contact)
+            true=update_xero(self, contact)
         except RuntimeError:
-            messagebox.showerror("Error", "You  should login into xero first")
-
+            self.messagebox.show_error("You Haven't login xero yet")
+            return
+        if true:
+            self.messagebox.show_update("Update Xero and Asana Successful")
+        else:
+            self.messagebox.show_error("Can not update Xero and Asana")
 
     def _rename_project(self):
         if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
-            messagebox.showerror("Error", "Please Create an quotation Number first")
+            self.messagebox.show_error("Please Create an Quotation Number first")
+            return
+        try:
+            old_dir, new_dir = rename_project(self)
+        except PermissionError:
+            self.messagebox.show_error("Bridge wont able to rename the folder, Please close anything related to the folder")
             return
 
-        old_folder = rename_project(self)
-
         if len(self.data["Asana_id"].get()) == 0:
-            messagebox.showinfo("Renamed", f"Rename the folder from {old_folder} to {self.data['Project Info']['Project']['Quotation Number'].get()}-{self.data['Project Info']['Project']['Project Name'].get()}")
+            self.messagebox.file_info("Rename Folder", old_dir, new_dir)
         else:
             update_asana(self)
-            messagebox.showinfo("Renamed", f"Rename the folder and asana from {old_folder} to {self.data['Project Info']['Project']['Quotation Number'].get()}-{self.data['Project Info']['Project']['Project Name'].get()}")
+            self.messagebox.file_info("Rename Folder and Asana", old_dir, new_dir)
         save(self)
         config_log(self)
         config_state(self)
@@ -452,13 +490,19 @@ class App(tk.Tk):
 
     def open_folder(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
-        folder_name = self.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                      self.data["Project Info"]["Project"]["Project Name"].get()
+
+        if len(self.data["Project Info"]["Project"]["Project Number"].get()) ==0:
+            folder_name = self.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+                          self.data["Project Info"]["Project"]["Project Name"].get()
+        else:
+            folder_name = self.data["Project Info"]["Project"]["Project Number"].get() + "-" + \
+                          self.data["Project Info"]["Project"]["Project Name"].get()
         folder_path = os.path.join(self.conf["working_dir"], folder_name)
+
         if len(quotation_number) == 0:
-            messagebox.showerror("Error", "Please enter a Quotation Number before you load")
+            self.messagebox.show_error("Please enter a Quotation Number before you load")
         elif not os.path.exists(folder_path):
-            messagebox.showerror("Error", f"Python cannot find the folder {folder_path}")
+            self.messagebox.show_error(f"Python cannot find the folder {folder_path}")
         else:
             webbrowser.open(folder_path)
 
@@ -466,8 +510,8 @@ class App(tk.Tk):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
         database_path = os.path.join(self.conf["database_dir"], quotation_number)
         if len(quotation_number) == 0:
-            messagebox.showerror("Error", "Please enter a Quotation Number before you load")
+            self.messagebox.show_error("Please enter a Quotation Number before you load")
         elif not os.path.exists(database_path):
-            messagebox.showerror("Error", f"Python cannot find the folder {database_path}")
+            self.messagebox.show_error(f"Python cannot find the folder {database_path}")
         else:
             webbrowser.open(database_path)

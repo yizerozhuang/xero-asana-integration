@@ -312,6 +312,7 @@ def update_xero(app, contact_name):
     #
     if len(app.data["Asana_id"].get()) != 0:
         update_asana_invoices(app)
+    return True
     #
     # messagebox.showinfo("Update", "the invoices and bill is updated to xero")
 

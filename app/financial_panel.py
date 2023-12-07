@@ -4,7 +4,7 @@ from tkinter import ttk, messagebox, filedialog
 
 from utility import excel_print_invoice, email_invoice, save, config_log, config_state, change_quotation_number, get_invoice_item, send_email_with_attachment
 from scope_list import ScopeList
-from asana_function import update_asana
+from asana_function import update_asana, update_asana_invoices
 
 import os
 import json
@@ -18,6 +18,7 @@ class FinancialPanelPage(tk.Frame):
         self.app = app
         self.data = app.data
         self.conf = app.conf
+        self.messagebox = app.messagebox
         
         self.main_frame = tk.Frame(self, bg="blue")
         self.main_frame.pack(fill=tk.BOTH, expand=1, side=tk.LEFT, anchor="nw")
@@ -640,18 +641,21 @@ class FinancialPanelPage(tk.Frame):
                 [service["Fee"] for service in profits_details.values()],
                 self.data["Profits"]["Fee"])
     def fee_acceptance_part(self):
-        fee_acceptance_frame = tk.LabelFrame(self.main_context_frame, text="Update Fee Acceptance", font=self.conf["font"])
+        fee_acceptance_frame = tk.LabelFrame(self.main_context_frame, text="Upload Fee Acceptance", font=self.conf["font"])
         fee_acceptance_frame.grid(row=1, column=1, sticky="news", columnspan=2)
         tk.Label(fee_acceptance_frame, text="Fee Acceptance", font=self.conf["font"]).grid(row=0, column=0)
-        tk.Label(fee_acceptance_frame, text="Rev1", font=self.conf["font"]).grid(row=0, column=1)
+        # tk.Label(fee_acceptance_frame, text="Rev1", font=self.conf["font"]).grid(row=0, column=1)
         tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
-                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev 1")).grid(row=0, column=2)
-        tk.Label(fee_acceptance_frame, text="Rev2", font=self.conf["font"]).grid(row=0, column=3)
+                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance")).grid(row=0, column=1)
+        tk.Label(fee_acceptance_frame, text="Verbal Acceptance", font=self.conf["font"]).grid(row=1, column=0)
         tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
-                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev 2")).grid(row=0, column=4)
-        tk.Label(fee_acceptance_frame, text="Rev3", font=self.conf["font"]).grid(row=0, column=5)
-        tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
-                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev 3")).grid(row=0, column=6)
+                  command=self.verbal_acceptance).grid(row=1, column=1)
+        # tk.Label(fee_acceptance_frame, text="Rev2", font=self.conf["font"]).grid(row=0, column=3)
+        # tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
+        #           command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev 2")).grid(row=0, column=4)
+        # tk.Label(fee_acceptance_frame, text="Rev3", font=self.conf["font"]).grid(row=0, column=5)
+        # tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
+        #           command=lambda: self.upload_file(fee_acceptance="Fee Acceptance Rev 3")).grid(row=0, column=6)
     def _on_mousewheel(self, event):
         self.main_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
     def reset_scrollregion(self, event):
@@ -680,10 +684,10 @@ class FinancialPanelPage(tk.Frame):
     #     label.config(text=f"${fee}")
     def generate_invoice_number(self):
         if not self.data["State"]["Fee Accepted"].get():
-            messagebox.showerror("Error", "You need to upload a fee acceptance first")
+            self.messagebox.show_error("You need to upload a fee acceptance first")
             return
 
-        generate = messagebox.askyesno("Warming", "Are you sure you want to generate the invoice number?")
+        generate = self.messagebox.ask_yes_no("Are you sure you want to generate the invoice number?")
         if generate:
             inv = None
             for i, value in enumerate(self.data["Invoices Number"]):
@@ -692,12 +696,12 @@ class FinancialPanelPage(tk.Frame):
                     break
 
             if inv is None:
-                messagebox.showerror("Error", "You cant generate more than 6 invoices")
+                self.messagebox.show_error("You cant generate more than 6 invoices")
                 return
 
             current_inv_number = self._get_current_invoice_number()
             if inv == 0:
-                update = change_quotation_number(self.app, current_inv_number)
+                old_folder, new_folder, update = change_quotation_number(self.app, current_inv_number)
                 if update:
                     self.data["Invoices Number"][inv]["Number"].set(current_inv_number)
                     self.data["Project Info"]["Project"]["Project Number"].set(current_inv_number)
@@ -708,13 +712,19 @@ class FinancialPanelPage(tk.Frame):
                         json_object = json.dumps(project_quotation_json, indent=4)
                         f.write(json_object)
                     save(self.app)
-                    if len(self.data["Asana_id"].get()) !=0:
-                        update_asana(self.app)
-                        messagebox.showinfo("updated", "folder name and asana updated")
-                    else:
-                        messagebox.showinfo("updated", "folder name updated")
+                    yes_asana = self.messagebox.file_ask_yes_no("Rename", old_folder, new_folder, "Asana")
+                else:
+                    self.messagebox.show_error(f"Fail to rename the folder from {old_folder} to {new_folder}, Please close all the file relate in the folder")
+                    return
             else:
                 self.data["Invoices Number"][inv]["Number"].set(current_inv_number)
+                yes_asana = self.messagebox.ask_yes_no("Invoice Generate, Do you want to update asana")
+            if yes_asana:
+                update_asana(self.app)
+                update_asana_invoices(self.app)
+
+                self.messagebox.show_update("Folder name and asana updated")
+
 
     def _get_current_invoice_number(self):
         invoice_dir = os.path.join(self.conf["database_dir"], "invoices.json")
@@ -727,11 +737,11 @@ class FinancialPanelPage(tk.Frame):
             json.dump(invoices, f, ensure_ascii=False, indent=4)
         return res
     def upload_file(self, **kwargs):
+        database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         for key, value in kwargs.items():
             if len(value.strip()) == 0:
-                messagebox.showerror("Warming", f"You need to enter {key.replace('_', ' ')} before you upload the file")
+                self.messagebox.show_error(f"You need to enter {key.replace('_', ' ')} before you upload the file")
                 return
-        filename=None
         if "remittance" in kwargs.keys():
             number = kwargs['invoice']
             i = int(kwargs['i'])
@@ -748,7 +758,7 @@ class FinancialPanelPage(tk.Frame):
             filename = f"{kwargs['bill_description']}-{kwargs['origin']}"
         elif "bill_number" in kwargs.keys():
             if len(self.data["Project Info"]["Project"]["Project Number"].get())==0:
-                messagebox.showerror("Error", "Please generate first invoice number before you upload bill file")
+                self.messagebox.show_error("Please generate first invoice number before you upload bill file")
                 return
             # service = kwargs["service"]
             # i = int(kwargs["i"])
@@ -766,11 +776,24 @@ class FinancialPanelPage(tk.Frame):
             #     )
             #     amount = f"${_}-${self.data['Bills']['Details'][service]['Fee'].get()}"
             filename = f'{self.data["Project Info"]["Project"]["Project Number"].get()+kwargs["bill_number"]}-original'
-
         elif "fee_acceptance" in kwargs.keys():
-            filename = kwargs["fee_acceptance"]
+            if not self.data["State"]["Email to Client"].get():
+                self.messagebox.show_error("You need to send the Email to Client first")
+                return
+
+            acceptance_list = [file for file in os.listdir(os.path.join(database_dir)) if str(file).startswith("Fee Acceptance")]
+
+            if len(acceptance_list) != 0:
+                current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in acceptance_list]))
+                overwrite = self.messagebox.ask_yes_no(f"Current Fee Acceptance {current_revision} found, do you want to Overwrite")
+                if overwrite:
+                    filename = kwargs["fee_acceptance"]+f" Rev {current_revision}"
+                else:
+                    filename = kwargs["fee_acceptance"] + f" Rev {str(int(current_revision)+1)}"
+            else:
+                filename = kwargs["fee_acceptance"]+" Rev 1"
         else:
-            messagebox.showerror("Error", "Unable to Upload the file, please contact Administer")
+            self.messagebox.show_error("Unable to Upload the file, Please contact Administer")
             return
         # if "part" in kwargs.keys():
         #     if kwargs["part"] == "Full Amount":
@@ -781,19 +804,21 @@ class FinancialPanelPage(tk.Frame):
             # else:
             #     kwargs["part"] = self.data["Invoices Number"][f"INV {kwargs['index']+1}"]["Fee"]
 
-        database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
 
         if len(filename.strip()) == 0:
-            messagebox.showerror("Error", "Please input a file name first")
+            self.messagebox.show_error("Please input a file name first")
             return
 
+
+
         rewrite = True
-        for file in os.listdir(database_dir):
-            if os.path.splitext(file)[0] == filename:
-                rewrite = messagebox.askyesno("Warming", "Existing folder found, do you want to rewrite")
-                if not rewrite:
-                    return
-                break
+        if not "fee_acceptance" in kwargs.keys():
+            for file in os.listdir(database_dir):
+                if os.path.splitext(file)[0] == filename:
+                    rewrite = self.messagebox.ask_yes_no(f"Existing file {file} found, Do you want to rewrite")
+                    if not rewrite:
+                        return
+                    break
         if rewrite:
             file = filedialog.askopenfilename()
             if file == "":
@@ -802,17 +827,18 @@ class FinancialPanelPage(tk.Frame):
                 folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
                 shutil.copy(file, folder_dir)
             except PermissionError:
-                messagebox.showerror("Error", "Please close the file before you upload it")
+                self.messagebox.show_error("Please Close the file before you upload it")
                 return
             except Exception as e:
                 print(e)
-                messagebox.showerror("Error", "Some error occurs, please contact Administrator")
+                self.messagebox.show_error("Some error occurs, please contact Administrator")
                 return
             if "fee_acceptance" in kwargs.keys():
-                update = messagebox.askyesno("Asana", "Do you want to update asana or not")
+                update = self.messagebox.ask_yes_no("Do you want to Update asana ?")
                 self.data["State"]["Fee Accepted"].set(True)
                 if update:
                     update_asana(self.app)
+                    update_asana_invoices(self.app)
                 self.app.log.log_fee_accept_file(self.app.user, self.data["Project Info"]["Project"]["Quotation Number"].get())
                 save(self.app)
                 config_state(self.app)
@@ -822,14 +848,33 @@ class FinancialPanelPage(tk.Frame):
                     send_email_with_attachment(folder_dir)
                 except Exception as e:
                     print(e)
-                    messagebox.showerror("Error", "Unable to upload the file to xero")
+                    self.messagebox.show_error("Unable to upload the File to xero")
                     return
                 # service = kwargs["service"]
                 # i = int(kwargs["i"])
                 # self.data["Bills"]["Details"][service]["Content"][i]["State"].set("Submitted")
-                messagebox.showinfo("Upload", f"the file {file} has upload to database {folder_dir}, and upload to Xero")
+                self.messagebox.file_info("Upload", file, folder_dir, "And Xero Upload")
                 return
-            messagebox.showinfo("upload", f"the file {file} has upload to database {folder_dir}")
+            self.messagebox.file_info("Upload", file, folder_dir)
+
+    def verbal_acceptance(self):
+        database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        resource_dir = os.path.join(self.conf["resource_dir"], "txt", "Verbal Fee Acceptance.txt")
+
+        if not self.data["State"]["Email to Client"].get():
+            self.messagebox.show_error("You need to send the Email to Client first")
+            return
+
+        shutil.copy(resource_dir, database_dir)
+        update = self.messagebox.ask_yes_no("Verbal Fee Acceptance updated, Do you want to Update asana ?")
+        self.data["State"]["Fee Accepted"].set(True)
+        if update:
+            update_asana(self.app)
+            update_asana_invoices(self.app)
+        self.app.log.log_fee_accept_file(self.app.user, self.data["Project Info"]["Project"]["Quotation Number"].get())
+        save(self.app)
+        config_state(self.app)
+        config_log(self.app)
 
     def invoice_color_code(self, *args):
         for i in range(6):

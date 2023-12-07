@@ -1,11 +1,16 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter.scrolledtext import ScrolledText
+from tkinter import ttk
 
-from utility import load, get_quotation_number, save, reset, finish_setup, delete_project, config_state, config_log
+from utility import load_data, get_quotation_number, save, reset, finish_setup, delete_project, config_state, config_log
+from asana_function import update_asana
+
 
 import os
 import webbrowser
 import json
+
+
 
 
 class ProjectInfoPage(tk.Frame):
@@ -16,6 +21,7 @@ class ProjectInfoPage(tk.Frame):
         self.app.data["Project Info"] = dict()
         self.data = app.data
         self.conf = app.conf
+        self.messagebox = self.app.messagebox
 
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=1)
@@ -28,11 +34,12 @@ class ProjectInfoPage(tk.Frame):
                               lambda e: self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all")))
         self.app.bind("<MouseWheel>", self._on_mousewheel, add="+")
         self.main_context_frame = tk.LabelFrame(self.main_canvas, text="Main Context")
-        self.main_canvas.create_window((0, 0), window=self.main_context_frame, anchor="center")
+        self.main_canvas.create_window((0, 0), window=self.main_context_frame, anchor="nw")
 
-        self.main_log_frame = tk.LabelFrame(self.main_canvas, text="Log")
-        self.main_canvas.create_window((800, -600), window=self.main_log_frame, anchor="nw")
+        # self.main_log_frame = tk.LabelFrame(self.main_canvas, text="Log")
+        # self.main_canvas.create_window((800, -600), window=self.main_log_frame, anchor="nw")
 
+        # self.search_part()
         self.log_part()
         self.project_part()
         self.client_part()
@@ -42,9 +49,18 @@ class ProjectInfoPage(tk.Frame):
         self.finish_part()
 
     def log_part(self):
-        log_frame = tk.Frame(self.main_log_frame)
-        log_frame.pack()
-        tk.Label(log_frame, textvariable=self.app.log_text, font=self.conf["font"], justify=tk.LEFT).pack(anchor="w")
+        # log_frame = tk.Frame(self.main_context_frame)
+        # log_frame.grid(row=0, column=1, column_span=6)
+        # tk.Entry(log_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], justify=tk.LEFT).pack(anchor="w")
+        self.app.email_text = tk.Text(self.main_context_frame, font=self.conf["font"], height=68)
+        self.app.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
+        tk.Label(self.main_context_frame, textvariable=self.app.log_text, font=self.conf["font"], justify=tk.LEFT).grid(row=0, column=2, rowspan=6, sticky="n")
+
+    # def search_part(self):
+    #     search_frame = tk.LabelFrame(self.main_context_frame)
+    #     search_frame.pack(padx=10)
+    #     tk.Label(search_frame, text="Search Bar", font=self.conf["font"], width=20).grid(row=0, column=0)
+    #     tk.Entry(search_frame, width=100).grid(row=0, column=1)
 
     def project_part(self):
         # User_information frame
@@ -52,7 +68,7 @@ class ProjectInfoPage(tk.Frame):
         self.data["Project Info"]["Project"] = project
 
         project_frame = tk.LabelFrame(self.main_context_frame, text="Project Information", font=self.conf["font"])
-        project_frame.pack(padx=20)
+        project_frame.grid(row=0, column=0)
 
         tk.Label(project_frame, width=30, text="Project Name", font=self.conf["font"]).grid(row=0, column=0,
                                                                                             padx=(10, 0))
@@ -151,14 +167,13 @@ class ProjectInfoPage(tk.Frame):
         # project["Service Type"]["Hydraulic Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Hydraulic Service"]))
         # project["Service Type"]["Fire Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Fire Service"]))
 
-
     def client_part(self):
         client = dict()
         self.data["Project Info"]["Client"] = client
 
         # client frame
         client_frame = tk.LabelFrame(self.main_context_frame, text="Client", font=self.conf["font"])
-        client_frame.pack(padx=20)
+        client_frame.grid(row=1, column=0)
 
         tk.Label(client_frame, width=30, text="Client Full Name", font=self.conf["font"]).grid(row=0, column=0,
                                                                                                padx=(10, 0))
@@ -196,7 +211,7 @@ class ProjectInfoPage(tk.Frame):
         self.data["Project Info"]["Main Contact"] = main_contact
 
         contact_frame = tk.LabelFrame(self.main_context_frame, text="Main Contact", font=self.conf["font"])
-        contact_frame.pack(padx=20)
+        contact_frame.grid(row=2, column=0)
 
         tk.Label(contact_frame, width=30, text="Main Contact Full Name", font=self.conf["font"]).grid(row=0, column=0,
                                                                                                       padx=(10, 0))
@@ -247,7 +262,7 @@ class ProjectInfoPage(tk.Frame):
         self.data["Project Info"]["Building Features"] = building_features
 
         build_feature_frame = tk.LabelFrame(self.main_context_frame, text="Building Features", font=self.conf["font"])
-        build_feature_frame.pack(padx=20)
+        build_feature_frame.grid(row=3, column=0)
 
         tk.Label(build_feature_frame, text="Levels", font=self.conf["font"]).grid(row=0, column=0)
         tk.Label(build_feature_frame, text="Space/room Description", font=self.conf["font"]).grid(row=0, column=1)
@@ -283,7 +298,7 @@ class ProjectInfoPage(tk.Frame):
         self.app.data["Project Info"]["Drawing"] = drawing
 
         drawing_number_frame = tk.LabelFrame(self.main_context_frame, text="Drawing Number", font=self.conf["font"])
-        drawing_number_frame.pack(padx=20)
+        drawing_number_frame.grid(row=4, column=0)
 
         tk.Label(drawing_number_frame, text="Drawing Number", font=self.conf["font"]).grid(row=0, column=0)
         tk.Label(drawing_number_frame, text="Drawing Name", font=self.conf["font"]).grid(row=0, column=1)
@@ -309,7 +324,7 @@ class ProjectInfoPage(tk.Frame):
 
     def finish_part(self):
         finish_frame = tk.LabelFrame(self.main_context_frame)
-        finish_frame.pack(padx=20, side=tk.RIGHT)
+        finish_frame.grid(row=5, column=0)
 
         tk.Button(finish_frame, text="Delete Project", command=self._delete_project,
                   bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
@@ -331,55 +346,70 @@ class ProjectInfoPage(tk.Frame):
 
     def _delete_project(self):
         if len(self.data["Project Info"]["Project"]["Quotation Number"].get())==0:
-            messagebox.showerror("Error", "You cant delete an empty project")
+            self.messagebox.show_error("You can't delete an empty project")
             return
-        delete = messagebox.askretrycancel('Warming', "Are you sure you want to delete the Project? only the admin can restore after you delete the project")
+        delete = self.messagebox.ask_yes_no("Are you sure you want to delete the Project?")
         if delete:
             delete_project(self.app)
-            messagebox.showinfo("Deleted", f"Project {self.data['Project Info']['Project']['Quotation Number'].get()} deleted")
+            self.messagebox.show_info(f"Project {self.data['Project Info']['Project']['Quotation Number'].get()} deleted")
 
     def load_data(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
-        project_number = self.data["Project Info"]["Project"]["Project Number"].get()
-        project_quotation_dir = os.path.join(self.conf["database_dir"], "project_quotation_number_map.json")
-        project_quotation_json = json.load(open(project_quotation_dir))
+        # project_number = self.data["Project Info"]["Project"]["Project Number"].get()
 
+        # project_quotation_dir = os.path.join(self.conf["database_dir"], "project_quotation_number_map.json")
+        # project_quotation_json = json.load(open(project_quotation_dir))
 
         if len(quotation_number) == 0:
-            if len(project_number) == 0:
-                messagebox.showerror("Error", "Please enter a Quotation Number or Project Number before you load")
-                return
-            elif not project_number in project_quotation_json.keys():
-                messagebox.showerror("Error", "Cannot found the Project Number")
-                return
-            else:
-                quotation_number = project_quotation_json[project_number]
+            self.messagebox.show_error("Please Enter a Quotation Number before You Load")
+            # if len(project_number) == 0:
+            #     self.messagebox.show_error("Please enter a Quotation Number or Project Number before you load")
+            #     return
+            # elif not project_number in project_quotation_json.keys():
+            #     self.messagebox.show_error("Cannot found the Project Number")
+            #     return
+            # else:
+            #     quotation_number = project_quotation_json[project_number]
 
         database_dir = os.path.join(self.conf["database_dir"], quotation_number)
 
         if not os.path.exists(database_dir):
-            messagebox.showerror("Error", f"The quotation {quotation_number} number doesn't exist")
+            self.messagebox.show_error(f"The quotation {quotation_number} number doesn't exist")
         else:
-            load(self.app, quotation_number)
+            load_data(self.app)
 
 
     def quote_unsuccessful(self):
+        if len(self.data["Project Info"]["Project"]["Quotation Number"].get())==0:
+            self.messagebox.show_error("You need to load a project first")
+            return
+
         if self.data["State"]["Quote Unsuccessful"].get():
-            restore = messagebox.askyesno("Warming", "Are you sure you want to restore this project")
+            restore = self.messagebox.ask_yes_no("Are you sure you want to restore this project")
             if restore:
                 self.data["State"]["Quote Unsuccessful"].set(False)
                 save(self.app)
                 config_state(self.app)
                 self.app.log.log_restore(self.app)
                 config_log(self.app)
+                if len(self.data["Asana_id"].get()) != 0:
+                    update_asana(self.app)
+                    self.messagebox.show_info("Quote Unsuccessful and Asana Updated")
+                else:
+                    self.messagebox.show_info("Quote Unsuccessful")
         else:
-            quote = messagebox.askyesno("Warming", "Are you sure you want to put this project in Quote Unsuccessful")
+            quote = self.messagebox.ask_yes_no("Are you sure you want to put this project into Quote Unsuccessful")
             if quote:
                 self.data["State"]["Quote Unsuccessful"].set(True)
                 save(self.app)
                 config_state(self.app)
                 self.app.log.log_unsuccessful(self.app)
                 config_log(self.app)
+                if len(self.data["Asana_id"].get()) != 0:
+                    update_asana(self.app)
+                    self.messagebox.show_info("Project Restore and Asana Updated")
+                else:
+                    self.messagebox.show_info("Project Restore")
 
     def _update_quotation_number(self, *args):
         if self.data["Project Info"]["Project"]["Quotation Number"].get() != "":

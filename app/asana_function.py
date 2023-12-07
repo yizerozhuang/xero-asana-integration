@@ -32,9 +32,38 @@ def update_asana(app, *args):
 
         template_id_map = name_id_map(current_project_template)
         api_respond = clearn_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
-        app.data["Asana_id"].set(api_respond["new_task"]["gid"])
+        new_task_gid = api_respond["new_task"]["gid"]
 
-    task_id = app.data["Asana_id"].get()
+        body = asana.TaskGidAddProjectBody(
+            {
+                    "project": projects_id_map["MP"]
+            }
+        )
+        task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
+        data["Asana_id"].set(new_task_gid)
+    else:
+        try:
+            task_api_instance.get_task(data["Asana_id"].get())
+        except Exception as e:
+            print(e)
+            all_projects = clearn_response(project_api_instance.get_projects_for_workspace(workspace_gid))
+            projects_id_map = name_id_map(all_projects)
+            current_project_template = clearn_response(template_api_instance.get_task_templates(
+                project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
+
+            template_id_map = name_id_map(current_project_template)
+            api_respond = clearn_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
+            new_task_gid = api_respond["new_task"]["gid"]
+            body = asana.TaskGidAddProjectBody(
+                {
+                    "project": projects_id_map["MP"]
+                }
+            )
+            task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
+            data["Asana_id"].set(new_task_gid)
+
+
+    task_id = data["Asana_id"].get()
 
     all_custom_fields = clearn_response(task_api_instance.get_task(task_id))["custom_fields"]
     custom_field_id_map = name_id_map(all_custom_fields)
@@ -53,10 +82,26 @@ def update_asana(app, *args):
     else:
         name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
 
-    if data["State"]["Fee Accepted"].get():
+    if data["State"]["Quote Unsuccessful"].get():
+        status = status_id_map["Quote Unsuccessful"]
+    elif data["State"]["Fee Accepted"].get():
         status = status_id_map["Design"]
     else:
         status = status_id_map["Fee Proposal"]
+    client_name_list = []
+
+    if len(data["Project Info"]["Client"]["Company"].get()) != 0:
+        client_name_list.append(data["Project Info"]["Client"]["Company"].get())
+    if len(data["Project Info"]["Client"]["Full Name"].get()) != 0:
+        client_name_list.append(data["Project Info"]["Client"]["Full Name"].get())
+    client_name = "-".join(client_name_list)
+
+    main_contact_list = []
+    if len(data["Project Info"]["Main Contact"]["Company"].get()) !=0:
+        main_contact_list.append(data["Project Info"]["Main Contact"]["Company"].get())
+    if len(data["Project Info"]["Main Contact"]["Full Name"].get()) != 0:
+        main_contact_list.append(data["Project Info"]["Main Contact"]["Full Name"].get())
+    main_contact_name = "-".join(main_contact_list)
 
     body = asana.TasksTaskGidBody(
         {
@@ -68,8 +113,8 @@ def update_asana(app, *args):
                 custom_field_id_map["Shop name"]: data["Project Info"]["Project"]["Shop Name"].get(),
                 custom_field_id_map["Apt/Room/Area"]: data["Project Info"]["Building Features"]["Total Area"].get() + "m2",
                 custom_field_id_map["Feature/Notes"]: data["Project Info"]["Building Features"]["Feature"].get(),
-                custom_field_id_map["Client"]: data["Project Info"]["Client"]["Full Name"].get(),
-                custom_field_id_map["Main contact"]: data["Project Info"]["Main Contact"]["Full Name"].get(),
+                custom_field_id_map["Client"]: client_name,
+                custom_field_id_map["Main contact"]: main_contact_name,
                 custom_field_id_map["Contact Type"]: contact_id_map[
                     data["Project Info"]["Main Contact"]["Contact Type"].get()]
             }
@@ -182,7 +227,8 @@ def update_asana_invoices(app):
                 "name": name,
                 "custom_fields": {
                     custom_field_id_map["Invoice Status"]: status_id_map[data["Invoices Number"][i]["State"].get()],
-                    custom_field_id_map["Net"]: str(sum([float(item["Fee"]) for item in invoice_item[i]]))
+                    custom_field_id_map["Net"]: str(sum([float(item["Fee"]) for item in invoice_item[i]])),
+                    custom_field_id_map["Gross"]: str(sum([float(item["in.GST"]) for item in invoice_item[i]]))
                 }
             }
         )

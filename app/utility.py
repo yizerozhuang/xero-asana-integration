@@ -13,14 +13,21 @@ from datetime import date, datetime
 import psutil
 import subprocess
 from config import CONFIGURATION as conf
+import _thread
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 def reset(app):
-    if len(app.data["Project Info"]["Project"]["Quotation Number"].get()) != 0:
+    data = app.data
+    # if len(app.current_quotation.get())
+
+    if len(app.current_quotation.get()) != 0:
+        data["Project Info"]["Project"]["Quotation Number"].set(app.current_quotation.get())
         save(app)
+        app.current_quotation.set("")
+
     database_dir = os.path.join(app.conf["database_dir"], "data_template.json")
     template_json = json.load(open(database_dir))
     template_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
@@ -37,7 +44,7 @@ def reset(app):
 
 
     app.log_text.set("")
-
+    app.email_text.delete(1.0, tk.END)
 
 def save(app):
     data = app.data
@@ -54,11 +61,20 @@ def save(app):
     # current_folder_name = [folder for folder in os.listdir(app.conf["working_dir"]) if folder.startswith(data["Project Info"]["Project"]["Quotation Number"])][0]
     # print(current_folder_name)
 
-
-def load(app, quotation_number=None):
+def load_data(app):
     data = app.data
-    if quotation_number is None:
-        quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
+    if len(app.current_quotation.get()) != 0:
+        old_quotation = data["Project Info"]["Project"]["Quotation Number"].get()
+        data["Project Info"]["Project"]["Quotation Number"].set(app.current_quotation.get())
+        save(app)
+        data["Project Info"]["Project"]["Quotation Number"].set(old_quotation)
+    load(app)
+    app.email_text.delete(1.0, tk.END)
+    app.email_text.insert(1.0, app.data["Email_Content"].get())
+
+def load(app):
+    data = app.data
+    quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
     database_dir = os.path.join(app.conf["database_dir"], quotation_number)
     data_json = json.load(open(os.path.join(database_dir, "data.json")))
     convert_to_data(data_json, data)
@@ -69,6 +85,7 @@ def load(app, quotation_number=None):
             service["Include"].set(False)
             service["Include"].set(True)
 
+    app.current_quotation.set(quotation_number)
     load_invoice_state(app)
     config_state(app)
     config_log(app)
@@ -292,12 +309,11 @@ def rename_project(app):
     for folder in dir_list:
         if folder[:5].isdigit():
             quotation_number, project_name = folder.split("-", 1)
-
             if quotation_number == current_quotation:
                 old_dir = os.path.join(working_dir, folder)
                 new_dir = os.path.join(working_dir, current_quotation+"-"+data["Project Info"]["Project"]["Project Name"].get())
                 os.rename(old_dir, new_dir)
-                return folder
+                return old_dir, new_dir
 
 def change_quotation_number(app, new_quotation_number):
     working_dir = app.conf["working_dir"]
@@ -308,7 +324,7 @@ def change_quotation_number(app, new_quotation_number):
 
     if not os.path.exists(old_folder):
         messagebox.showerror("Error", f"Can not found the folder {old_folder_name}")
-        return False
+        return "", "", False
 
     new_folder = os.path.join(working_dir, new_quotation_number + "-" + app.data["Project Info"]["Project"]["Project Name"].get())
 
@@ -317,10 +333,9 @@ def change_quotation_number(app, new_quotation_number):
         # new_database = os.path.join(database_dir, new_quotation_number)
         # os.rename(old_database, new_database)
         os.rename(old_folder, new_folder)
-        return True
+        return old_folder, new_folder, True
     except PermissionError:
-        messagebox.showerror("Error", "Please Close all file relate to this Project so Bridge can rename this")
-        return False
+        return old_folder, new_folder, False
 
 
 
@@ -381,13 +396,23 @@ def _check_fee(app):
         if len(service_fee["Fee"].get()) == 0 and service_fee["Service"].get() != "Variation" and service_fee["Include"].get():
             return False
     return True
+def preview_fee_proposal(app, *args):
+    data = app.data
+    project_type = data["Project Info"]["Project"]["Project Type"].get()
+    if project_type in app.conf["major_projects"]:
+        major_project_fee_proposal(app)
+    elif project_type in app.conf["minor_projects"]:
+        minor_project_fee_proposal(app)
+    else:
+        print("Unsupported Project Type")
 
-def excel_print_pdf(app, *args):
+def minor_project_fee_proposal(app, *args):
     data = app.data
     pdf_name = _get_proposal_name(app)
     excel_name = f'Mechanical_Fee_Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
+    adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
 
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
     services = []
@@ -423,7 +448,10 @@ def excel_print_pdf(app, *args):
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"]["Revision"].get() == str(int(current_revision) + 1):
             old_pdf_path = os.path.join(database_dir, f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {current_revision}.pdf')
             # avDoc.open(old_pdf_path, old_pdf_path)
-            webbrowser.open(old_pdf_path)
+            def open_pdf():
+                subprocess.call([adobe_address, old_pdf_path])
+            _thread.start_new_thread(open_pdf, ())
+
             overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
             if not overwrite:
                 return
@@ -529,7 +557,184 @@ def excel_print_pdf(app, *args):
     else:
         app.data["State"]["Generate Proposal"].set(True)
         # avDoc.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
-        webbrowser.open(os.path.join(database_dir, pdf_name))
+        def open_pdf():
+            subprocess.call([adobe_address, os.path.join(database_dir, pdf_name)])
+        _thread.start_new_thread(open_pdf, ())
+        # webbrowser.open(os.path.join(database_dir, pdf_name))
+        save(app)
+        config_state(app)
+        app.log.log_fee_proposal(app)
+        config_log(app)
+    try:
+        excel.ScreenUpdating = True
+        excel.DisplayAlerts = True
+        excel.EnableEvents = True
+        work_book.Close(True)
+        # adobe.close(0)
+    except:
+        pass
+
+def major_project_fee_proposal(app, *args):
+    data = app.data
+    pdf_name = _get_proposal_name(app)
+    excel_name = f'Mechanical_Fee_Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
+    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    resource_dir = app.conf["resource_dir"]
+    adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
+
+    past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
+    services = []
+    for service in app.conf["service_list"]:
+        if data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
+            services.append(service)
+    page = len(services) // 2 + 1
+    row_per_page = 46
+
+    if not data["State"]["Set Up"].get():
+        messagebox.showerror("Error", "Please finish Set Up first")
+        return
+    elif len(services) == 0:
+        messagebox.showerror("Error", "Please at least select 1 service")
+        return
+    elif not _check_fee(app):
+        messagebox.showerror("Error", "Please go to fee proposal page to complete the fee first")
+        return
+    elif data["Invoices"]["Fee"].get() == "Error":
+        messagebox.showerror(title="Error",
+                             message="There are error in the fee proposal section, please fix the fee section before generate the fee proposal")
+        return
+    elif not page in [1, 2, 3]:
+        messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
+    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
+                str(file).startswith("Mechanical Fee Proposal") and str(file).endswith(".pdf")]
+
+    if len(pdf_list) != 0:
+        current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
+        if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"][
+            "Revision"].get() == str(int(current_revision) + 1):
+            old_pdf_path = os.path.join(database_dir,
+                                        f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {current_revision}.pdf')
+
+            # avDoc.open(old_pdf_path, old_pdf_path)
+            def open_pdf():
+                subprocess.call([adobe_address, old_pdf_path])
+
+            _thread.start_new_thread(open_pdf, ())
+
+            overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
+            if not overwrite:
+                return
+            else:
+                # avDoc.close(0)
+                for proc in psutil.process_iter():
+                    if proc.name() == "Acrobat.exe":
+                        proc.kill()
+        else:
+            messagebox.showerror("Error",
+                                 f'Current revision is {current_revision}, you can not use revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
+            return
+    else:
+        if not data["Fee Proposal"]["Reference"]["Revision"].get() == "1":
+            messagebox.showerror("Error", "There is no other existing fee proposal found, can only have revision 1")
+            return
+
+    total_fee = 0
+    total_ist = 0
+    for service in [value for value in data["Invoices"]["Details"].values() if
+                    value["Service"].get() != "Variation" and value["Include"].get()]:
+        total_fee += float(service["Fee"].get())
+        total_ist += float(service["in.GST"].get())
+
+        shutil.copy(os.path.join(resource_dir, "xlsx", f"fee_proposal_template_{page}.xlsx"),
+                    os.path.join(database_dir, excel_name))
+    excel = win32client.Dispatch("Excel.Application")
+    try:
+        excel.ScreenUpdating = False
+        excel.DisplayAlerts = False
+        excel.EnableEvents = False
+    except Exception as e:
+        pass
+    work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
+    # messagebox.showerror("Error", e)
+    try:
+        work_sheets = work_book.Worksheets[0]
+        work_sheets.Cells(1, 2).Value = data["Project Info"]["Client"]["Full Name"].get()
+        work_sheets.Cells(5, 2).Value = data["Project Info"]["Client"]["Full Name"].get()
+        work_sheets.Cells(2, 2).Value = data["Project Info"]["Client"]["Company"].get()
+        work_sheets.Cells(1, 8).Value = data["Project Info"]["Project"]["Quotation Number"].get()
+        work_sheets.Cells(2, 8).Value = data["Fee Proposal"]["Reference"]["Date"].get()
+        work_sheets.Cells(3, 8).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
+        work_sheets.Cells(6, 1).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
+        work_sheets.Cells(8,
+                          1).Value = f"Thank you for giving us the opportunity to submit this fee proposal for our {', '.join([key for key, value in data['Project Info']['Project']['Service Type'].items() if value['Include'].get()])} for the above project."
+        work_sheets.Cells(16, 7).Value = data["Fee Proposal"]["Time"]["Fee Proposal"]["Start"].get() + "-" + \
+                                         data["Fee Proposal"]["Time"]["Fee Proposal"]["End"].get()
+        work_sheets.Cells(21, 7).Value = data["Fee Proposal"]["Time"]["Pre-design"]["Start"].get() + "-" + \
+                                         data["Fee Proposal"]["Time"]["Pre-design"]["End"].get()
+        work_sheets.Cells(26, 7).Value = data["Fee Proposal"]["Time"]["Documentation"]["Start"].get() + "-" + \
+                                         data["Fee Proposal"]["Time"]["Documentation"]["End"].get()
+        cur_row = 52
+        cur_index = 1
+        i = 0
+        for key, service in data['Fee Proposal']['Scope'].items():
+            if not service["Include"].get():
+                continue
+            cur_row = cur_row if i % 2 == 0 else 84 + (i - 1) // 2 * row_per_page
+            extra_list = ["Extend", "Exclusion", "Deliverables"]
+            for extra in extra_list:
+                work_sheets.Cells(cur_row, 1).Value = "2." + str(cur_index)
+                work_sheets.Cells(cur_row, 2).Value = key + "-" + extra
+                work_sheets.Cells(cur_row, 1).Font.Bold = True
+                work_sheets.Cells(cur_row, 2).Font.Bold = True
+                for scope in service[extra]:
+                    if scope["Include"].get():
+                        cur_row += 1
+                        work_sheets.Cells(cur_row, 1).Value = "•"
+                        work_sheets.Cells(cur_row, 2).Value = scope["Item"].get()
+                cur_row += 2
+                cur_index += 1
+            i += 1
+
+        cur_row = 102 + (page - 1) * row_per_page
+        project_type = data["Project Info"]["Project"]["Project Type"].get()
+        past_projects = json.load(open(past_projects_dir, encoding="utf-8"))[project_type]
+        for i, project in enumerate(past_projects):
+            work_sheets.Cells(cur_row + i, 1).Value = "•"
+            work_sheets.Cells(cur_row + i, 2).Value = project
+
+        cur_row += 34
+        for i, service in enumerate([value for value in data["Invoices"]["Details"].values() if
+                                     value["Service"].get() != "Variation" and value["Include"].get()]):
+            work_sheets.Cells(cur_row + i, 2).Value = service["Service"].get() + " design and documentation"
+            work_sheets.Cells(cur_row + i, 6).Value = service["Fee"].get()
+            work_sheets.Cells(cur_row + i, 7).Value = service["in.GST"].get()
+
+        if page == 3:
+            work_sheets.Cells(cur_row + 4, 6).Value = str(total_fee)
+            work_sheets.Cells(cur_row + 4, 7).Value = str(total_ist)
+        else:
+            work_sheets.Cells(cur_row + 3, 6).Value = str(total_fee)
+            work_sheets.Cells(cur_row + 3, 7).Value = str(total_ist)
+        cur_row += 17
+        work_sheets.Cells(cur_row, 2).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
+        work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, pdf_name))
+        work_book.Close(True)
+    except PermissionError:
+        messagebox.showerror("Error", "Please close the preview or file before you use it")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "Please Contact Administer, the app cant find the file")
+    except Exception as e:
+        messagebox.showerror("Error", "Please Close the pdf before you generate a new one")
+        print(e)
+    else:
+        app.data["State"]["Generate Proposal"].set(True)
+
+        # avDoc.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
+        def open_pdf():
+            subprocess.call([adobe_address, os.path.join(database_dir, pdf_name)])
+
+        _thread.start_new_thread(open_pdf, ())
+        # webbrowser.open(os.path.join(database_dir, pdf_name))
         save(app)
         config_state(app)
         app.log.log_fee_proposal(app)
@@ -551,6 +756,7 @@ def excel_print_invoice(app, inv):
     invoice_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.pdf'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
+    adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
     # win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
     # adobe = win32com.client.DispatchEx('AcroExch.App')
     # avDoc = win32client.dynamic.Dispatch("AcroExch.AVDoc")
@@ -563,7 +769,10 @@ def excel_print_invoice(app, inv):
     if os.path.exists(os.path.join(database_dir, invoice_name)):
         old_pdf_path=os.path.join(database_dir, invoice_name)
         # avDoc.open(old_pdf_path, old_pdf_path)
-        webbrowser.open(old_pdf_path)
+        def open_pdf():
+            subprocess.call([adobe_address, old_pdf_path])
+        _thread.start_new_thread(open_pdf, ())
+        # webbrowser.open(old_pdf_path)
         rewrite = messagebox.askyesno("Warming", f"Existing file PCE INV {invoice_name}.pdf do you want to rewrite?")
         if not rewrite:
             return
@@ -609,7 +818,7 @@ def excel_print_invoice(app, inv):
                                 work_sheets.Cells(cur_row, 9).Value = item["Fee"].get()
                                 work_sheets.Cells(cur_row, 10).Value = item["in.GST"].get()
                                 total_fee += float(item["Fee"].get())
-                                total_inGST += float(item["in.GST"].get())
+                                total_inGST += float(item["in.GST"].get()) if len(item["in.GST"].get()) != 0 else 0
                             cur_row += 1
                 else:
                     work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
@@ -637,7 +846,7 @@ def excel_print_invoice(app, inv):
                     work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
                     work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
                     total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
-                    total_inGST += float(service["in.GST"].get()) if len(service["Fee"].get()) !=0 else 0
+                    total_inGST += float(service["in.GST"].get()) if len(service["in.GST"].get()) !=0 else 0
                 cur_row += 2
             # for service in data["Variation"]:
             #     if len(service["Service"].get())==0 and len(service["Fee"].get())==0:
@@ -663,7 +872,12 @@ def excel_print_invoice(app, inv):
             print(e)
         else:
             invoice_path = os.path.join(database_dir, invoice_name)
-            webbrowser.open(invoice_path)
+
+            def open_pdf():
+                subprocess.call([adobe_address, invoice_path])
+
+            _thread.start_new_thread(open_pdf, ())
+            # webbrowser.open(invoice_path)
             # avDoc.open(invoice_path, invoice_path)
             save(app)
             app.log.log_generate_invoices(app, inv)
@@ -676,6 +890,7 @@ def excel_print_invoice(app, inv):
             work_book.Close(True)
         except:
             pass
+
 def email_fee_proposal(app, *args):
     data = app.data
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
@@ -704,7 +919,11 @@ def email_fee_proposal(app, *args):
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
-    first_name = data["Project Info"]["Main Contact"]["Full Name"].get().split(" ")[0]
+    if len(data["Project Info"]["Main Contact"]["Full Name"].get()) !=0:
+        first_name = data["Project Info"]["Main Contact"]["Full Name"].get().split(" ")[0]
+    else:
+        first_name = data["Project Info"]["Client"]["Full Name"].get().split(" ")[0]
+
     message = f"""
     Dear {first_name},<br>
 

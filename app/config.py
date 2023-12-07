@@ -4,9 +4,11 @@ from pathlib import Path
 
 CONFIGURATION = {
     "font": ["Calibri", 11],
-    "service_list":["Mechanical Service", "Electrical Service", "Hydraulic Service", "Fire Service"],
-    "invoice_list": ["Mechanical Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Variation"],
+    "service_list":["Mechanical Service", "Electrical Service", "Hydraulic Service", "Fire Service","Installation"],
+    "invoice_list": ["Mechanical Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Installation", "Variation"],
     "extra_list":["Extend", "Exclusion", "Deliverables"],
+    "minor_projects": ["Restaurant", "Office", "Commercial", "School", "Others"],
+    "major_projects": ["Group house", "Apartment", "Mixed-use complex"],
     "tax rates": 1.1,
     "n_building": 5,
     "n_drawing": 5,
