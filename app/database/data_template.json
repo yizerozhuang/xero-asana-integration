@@ -8,6 +8,7 @@
         "Quote Unsuccessful": false
     },
     "Email_Content": "",
+    "Address_to": "Client",
     "Email": {
         "Fee Proposal": "",
         "First Chase": "",
@@ -20,6 +21,7 @@
             "Quotation Number":"",
             "Project Number": "",
             "Shop Name": "",
+            "Proposal Type": "Minor",
             "Project Type": "Restaurant",
             "Service Type": {
                 "Mechanical Service": {
@@ -50,7 +52,7 @@
                     "Service": "Mech Review",
                     "Include": false
                 },
-                "Installation":{
+                "Installation": {
                     "Service": "Installation",
                     "Include": false
                 },
@@ -79,35 +81,204 @@
             "Contact Email": ""
         },
         "Building Features": {
-            "Details": [
-                {
-                    "Levels": "",
-                    "Space": "",
-                    "Area": ""
-                },
-                {
-                    "Levels": "",
-                    "Space": "",
-                    "Area": ""
-                },
-                {
-                    "Levels": "",
-                    "Space": "",
-                    "Area": ""
-                },
-                {
-                    "Levels": "",
-                    "Space": "",
-                    "Area": ""
-                },
-                {
-                    "Levels": "",
-                    "Space": "",
-                    "Area": ""
-                }
-            ],
+            "Minor": {
+                "Details": [
+                    {
+                        "Levels": "",
+                        "Space": "",
+                        "Area": ""
+                    },
+                    {
+                        "Levels": "",
+                        "Space": "",
+                        "Area": ""
+                    },
+                    {
+                        "Levels": "",
+                        "Space": "",
+                        "Area": ""
+                    },
+                    {
+                        "Levels": "",
+                        "Space": "",
+                        "Area": ""
+                    },
+                    {
+                        "Levels": "",
+                        "Space": "",
+                        "Area": ""
+                    }
+                ],
+                "Total Area": "0"
+            },
+            "Major": {
+                "Car Park": [
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ]
+                ],
+                "Block": [
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ]
+                ]
+            },
             "Feature": "",
-            "Total Area": "0"
+            "Notes": ""
         },
         "Drawing": [
             {
@@ -157,36 +328,76 @@
             }
         },
         "Scope": {
-            "Mechanical Service": {
-                "Extend": [],
-                "Exclusion": [],
-                "Deliverables": []
+            "Minor": {
+                "Mechanical Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "CFD Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "Electrical Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "Hydraulic Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "Fire Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "Installation": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                }
             },
-            "Electrical Service": {
-                "Extend": [],
-                "Exclusion": [],
-                "Deliverables": []
-            },
-            "Hydraulic Service": {
-                "Extend": [],
-                "Exclusion": [],
-                "Deliverables": []
-            },
-            "Fire Service": {
-                "Extend": [],
-                "Exclusion": [],
-                "Deliverables": []
-            },
-            "Installation":{
-                "Extend": [],
-                "Exclusion": [],
-                "Deliverables": []
+            "Major": {
+                "Mechanical Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "CFD Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "Electrical Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "Hydraulic Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "Fire Service": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                },
+                "Installation": {
+                    "Extend": [],
+                    "Clarifications": [],
+                    "Deliverables": []
+                }
             }
         }
     },
     "Invoices": {
         "Details": {
             "Mechanical Service": {
+                "Include": false,
                 "Service": "Mechanical Service",
                 "Fee": "",
                 "in.GST": "",
@@ -219,7 +430,42 @@
                     }
                 ]
             },
+            "CFD Service": {
+                "Include": false,
+                "Service": "CFD Service",
+                "Fee": "",
+                "in.GST": "",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
             "Electrical Service": {
+                "Include": false,
                 "Service": "Electrical Service",
                 "Fee": "",
                 "in.GST": "",
@@ -253,6 +499,7 @@
                 ]
             },
             "Hydraulic Service": {
+                "Include": false,
                 "Service": "Hydraulic Service",
                 "Fee": "",
                 "in.GST": "",
@@ -286,6 +533,7 @@
                 ]
             },
             "Fire Service": {
+                "Include": false,
                 "Service": "Fire Service",
                 "Fee": "",
                 "in.GST": "",
@@ -319,6 +567,7 @@
                 ]
             },
             "Installation": {
+                "Include": false,
                 "Service": "Installation",
                 "Fee": "",
                 "in.GST": "",
@@ -352,6 +601,7 @@
                 ]
             },
             "Variation": {
+                "Include": true,
                 "Service": "Variation",
                 "Fee": "",
                 "in.GST": "",
@@ -408,6 +658,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -418,6 +669,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -428,6 +680,55 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "CFD Service": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Ori": "",
+                "V1": "",
+                "V2": "",
+                "V3": "",
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -453,6 +754,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -463,6 +765,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -473,6 +776,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -498,6 +802,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -508,6 +813,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -518,6 +824,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -543,6 +850,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -553,6 +861,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -563,6 +872,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -588,6 +898,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -598,6 +909,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -608,6 +920,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -616,7 +929,7 @@
                 ]
             },
             "Variation": {
-                "Include": false,
+                "Include": true,
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -633,6 +946,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -643,6 +957,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -653,6 +968,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Number": "",
                         "Asana_id": "",
@@ -671,6 +987,11 @@
                 "Fee": "",
                 "in.GST": ""
             },
+            "CFD Service": {
+                "Include": false,
+                "Fee": "",
+                "in.GST": ""
+            },
             "Electrical Service": {
                 "Include": false,
                 "Fee": "",
@@ -692,7 +1013,7 @@
                 "in.GST": ""
             },
             "Variation": {
-                "Include": false,
+                "Include": true,
                 "Fee": "",
                 "in.GST": ""
             }
@@ -752,27 +1073,41 @@
     ],
     "Remittances": [
         {
+            "Type": "",
             "Part1": "",
-            "Part2": ""
+            "Part2": "",
+            "Part3": ""
         },
         {
+            "Type": "",
             "Part1": "",
-            "Part2": ""
+            "Part2": "",
+            "Part3": ""
         },
         {
+            "Type": "",
             "Part1": "",
-            "Part2": ""
-        },{
-            "Part1": "",
-            "Part2": ""
+            "Part2": "",
+            "Part3": ""
         },
         {
+            "Type": "",
             "Part1": "",
-            "Part2": ""
+            "Part2": "",
+            "Part3": ""
         },
         {
+            "Type": "",
             "Part1": "",
-            "Part2": ""
+            "Part2": "",
+            "Part3": ""
+        },
+        {
+            "Type": "",
+            "Part1": "",
+            "Part2": "",
+            "Part3": ""
         }
-    ]
+    ],
+    "Verbal Acceptance Note": ""
 }

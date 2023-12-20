@@ -81,25 +81,24 @@ class FeeProposalPage(tk.Frame):
         service_list = self.conf["service_list"]
         extra_list = self.conf["extra_list"]
         scope = dict()
-        for service in service_list:
-            scope[service] = {
-                "Include":tk.BooleanVar()
-            }
-            for extra in extra_list:
-                # scope[service][extra] = ScopeList(self.app, service, extra)
-                scope[service][extra] = []
         scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
         scope_data = json.load(open(scope_dir))
-        for service in service_list:
-            for extra in extra_list:
-                items = scope_data[service][extra]
-                for context in items:
-                    scope[service][extra].append(
-                        {
-                            "Include": tk.BooleanVar(value=True),
-                            "Item": tk.StringVar(value=context)
-                        }
-                    )
+
+        for type in ["Minor", "Major"]:
+            scope[type] = dict()
+            for service in service_list:
+                scope[type][service] = dict()
+                for extra in extra_list:
+                    # scope[service][extra] = ScopeList(self.app, service, extra)
+                    scope[type][service][extra] = []
+                    items = scope_data[type][service][extra]
+                    for context in items:
+                        scope[type][service][extra].append(
+                            {
+                                "Include": tk.BooleanVar(value=True),
+                                "Item": tk.StringVar(value=context)
+                            }
+                        )
 
         self.data["Fee Proposal"]["Scope"] = scope
     def scope_part(self):
@@ -111,17 +110,15 @@ class FeeProposalPage(tk.Frame):
 
 
     def update_scope(self, var):
-        scope = self.data["Fee Proposal"]["Scope"]
+        scope = self.data["Fee Proposal"]["Scope"][self.data["Project Info"]["Project"]["Proposal Type"].get()]
         service = var["Service"].get()
         include = var["Include"].get()
         extra_list = self.conf["extra_list"]
         if include:
-            scope[service]["Include"].set(True)
             self.scope_frames[service] = dict()
             self.scope_frames[service]["Main Frame"] = tk.LabelFrame(self.scope_frame, text=service, font=self.conf["font"])
             self.scope_frames[service]["Main Frame"].pack()
             self.append_context[service] = dict()
-
             for i, extra in enumerate(extra_list):
                 extra_frame = tk.LabelFrame(self.scope_frames[service]["Main Frame"], text=extra, font=self.conf["font"])
                 extra_frame.pack()
@@ -139,13 +136,11 @@ class FeeProposalPage(tk.Frame):
                 }
                 append_frame = tk.Frame(extra_frame)
                 append_frame.pack()
-                tk.Entry(append_frame, width=95, textvariable=self.append_context[service][extra]["Item"]).grid(row=0,
-                                                                                                                column=0)
+                tk.Entry(append_frame, width=95, textvariable=self.append_context[service][extra]["Item"]).grid(row=0, column=0)
                 tk.Checkbutton(append_frame, variable=self.append_context[service][extra]["Add"], text="Add to Database").grid(row=0, column=1)
                 func = lambda extra: lambda: self._append_value(service, extra)
                 tk.Button(append_frame, text="Submit", command=func(extra)).grid(row=0, column=2)
         else:
-            scope[service]["Include"].set(False)
             self.scope_frames[service]["Main Frame"].destroy()
 
     def fee_part(self):
@@ -286,13 +281,15 @@ class FeeProposalPage(tk.Frame):
         else:
             # archive[service] = invoices_details.pop(service)
             invoices_details[service]["Include"].set(False)
+            # invoices_details[service]["Expand"].set(False)
             self.fee_frames[service].pack_forget()
             self.update_sum()
 
 
     def _append_value(self, service, extra):
         scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
-        scope = self.app.data["Fee Proposal"]["Scope"]
+        scope_type = self.data["Project Info"]["Project"]["Proposal Type"].get()
+        scope = self.app.data["Fee Proposal"]["Scope"][scope_type]
         item = self.append_context[service][extra]["Item"].get()
         if len(item.strip()) == 0:
             self.messagebox.show_error(title="Error", message="You need to enter some context")
@@ -312,7 +309,7 @@ class FeeProposalPage(tk.Frame):
 
         if self.append_context[service][extra]["Add"].get():
             scope_data = json.load(open(scope_dir))
-            scope_data[service][extra].append(item)
+            scope_data[scope_type][service][extra].append(item)
             with open(scope_dir, "w") as f:
                 json_object = json.dumps(scope_data, indent=4)
                 f.write(json_object)
@@ -324,6 +321,9 @@ class FeeProposalPage(tk.Frame):
 
     def _expand(self, service):
         details = self.data["Invoices"]["Details"]
+        if not service in self.fee_dic.keys():
+            return
+
         if details[service]["Expand"].get():
             for i in range(self.conf["n_items"]):
                 self.fee_dic[service]["Content"]["Details"][i]["Service"].grid(row=i + 1, column=1)

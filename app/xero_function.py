@@ -1,25 +1,24 @@
-from xero_python.accounting import AccountingApi, Account, AccountType, Contact, Contacts, Phone, LineItem, Invoice, Invoices, Bill
+from xero_python.accounting import AccountingApi, Contact, Contacts, LineItem, Invoice, Invoices
 from xero_python.api_client import ApiClient
 from xero_python.api_client.configuration import Configuration
 from xero_python.api_client.oauth2 import OAuth2Token
-from xero_python.exceptions import AccountingBadRequestException
 from xero_python.identity import IdentityApi
-from xero_python.utils import getvalue
 from flask import Flask, url_for, redirect
 from flask_oauthlib.contrib.client import OAuth, OAuth2Application
 from flask_session import Session
 
-from tkinter import messagebox
 
 from utility import remove_none, update_app_invoices, get_invoice_item
 from asana_function import update_asana_invoices
-
+from config import CONFIGURATION as conf
 
 import _thread
 from datetime import datetime
 import webbrowser
 from functools import wraps
 import os
+import base64
+import requests
 
 
 # configure main flask application
@@ -34,8 +33,8 @@ flask_app.config["SESSION_TYPE"] = "filesystem"
 flask_app.config["ENV"] = "development"
 # flask_app.config.from_pyfile("xero_config.py", silent=True)
 
-flask_app.config["CLIENT_ID"] = "876EFEC2F1AC4729812A3B39152A2DD3"
-flask_app.config["CLIENT_SECRET"] = "jtohs0Oqcoezje-bjYn8n9KaTa9hCm2taATzBIbS3RpaXmOl"
+flask_app.config["CLIENT_ID"] = conf["xero_client_id"]
+flask_app.config["CLIENT_SECRET"] = conf["xero_client_secret"]
 
 # if flask_app.config["ENV"] != "production":
 #     # allow oauth2 loop to run over http (used for local testing only)
@@ -43,6 +42,30 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 Session(flask_app)
 
+scope = [
+    "offline_access",
+    "openid",
+    "profile",
+    "email",
+    "accounting.transactions",
+    "accounting.transactions.read",
+    "accounting.reports.read",
+    "accounting.journals.read",
+    "accounting.settings",
+    "accounting.settings.read",
+    "accounting.contacts",
+    "accounting.contacts.read",
+    "accounting.attachments",
+    "accounting.attachments.read",
+    "assets",
+    "projects",
+    "files",
+    "payroll.employees",
+    "payroll.payruns",
+    "payroll.payslip",
+    "payroll.timesheets",
+    "payroll.settings"
+]
 # configure flask-oauthlib application
 oauth = OAuth(flask_app)
 xero = oauth.remote_app(
@@ -53,16 +76,9 @@ xero = oauth.remote_app(
     endpoint_url="https://api.xero.com/",
     authorization_url="https://login.xero.com/identity/connect/authorize",
     access_token_url="https://identity.xero.com/connect/token",
-    refresh_token_url="https://identity.xero.com/connect/token",
-    scope="offline_access openid profile email accounting.transactions "
-    "accounting.transactions.read accounting.reports.read "
-    "accounting.journals.read accounting.settings accounting.settings.read "
-    "accounting.contacts accounting.contacts.read accounting.attachments "
-    "accounting.attachments.read assets projects "
-    "files "
-    "payroll.employees payroll.payruns payroll.payslip payroll.timesheets payroll.settings",
-    # "paymentservices "
-    # "finance.bankstatementsplus.read finance.cashvalidation.read finance.statements.read finance.accountingactivity.read",
+    refresh_token_url="https://identity.xero.com/conneh_ct/token",
+    scope=" ".join(scope)
+
 )  # type: OAuth2Application
 
 
@@ -82,6 +98,7 @@ def login_xero():
         start_flask()
     _thread.start_new_thread(thread_task, ())
     webbrowser.open_new_tab("http://localhost:1234/login")
+
 
 def start_flask():
     flask_app.run(host='localhost', port=1234)
@@ -136,31 +153,18 @@ def get_xero_tenant_id():
     for connection in identity_api.get_connections():
         if connection.tenant_type == "ORGANISATION":
             return connection.tenant_id
+
 def contact_name_contact_id(api_list):
     res = dict()
     for item in api_list:
         res[item["name"]] = item["contact_id"]
     return res
-
 def invoice_number_invoice_id(api_list):
     res = dict()
     for item in api_list:
         res[item["invoice_number"]] = item["invoice_id"]
     return res
-
 def _process_invoices(inv_list):
-    # res = {
-    #     "DRAFT":{},
-    #     "SUBMITTED":{},
-    #     "DELETED": {},
-    #     "AUTHORISED": {},
-    #     "PAID":{},
-    #     "VOIDED":{},
-    #     "NONE": {}
-    # }
-    # for inv in inv_list:
-    #     res[inv["status"]][inv["invoice_number"]] = inv["invoice_id"]
-    # return res
 
     res = {
         "Invoices": {
@@ -194,7 +198,42 @@ def _process_invoices(inv_list):
                 "line_amount_types": inv["line_amount_types"].value
             }
     return res
+def refresh_token():
+    refresh_url = "https://identity.xero.com/connect/token"
 
+    old_refresh_token = open('xero_refresh_token.txt', 'r').read()
+
+    tokenb4 = f"{conf['xero_client_id']}:{conf['xero_client_secret']}"
+    basic_token = base64.urlsafe_b64encode(tokenb4.encode()).decode()
+
+    headers = {
+      'Authorization': f"Basic {basic_token}",
+      'Content-Type': 'application/x-www-form-urlencoded',
+    }
+    data = {
+        'grant_type': 'refresh_token',
+        'refresh_token': old_refresh_token
+    }
+
+    try:
+        response = requests.post(refresh_url, headers=headers, data=data)
+
+        results = response.json()
+        open('xero_refresh_token.txt', 'w').write(results["refresh_token"])
+        open('xero_access_token.txt', 'w').write(results["access_token"])
+        # store_xero_oauth2_token(response)
+        store_xero_oauth2_token(
+            {
+                "access_token": results["access_token"],
+                "refresh_token": results["refresh_token"],
+                "expires_in": 1800,
+                "token_type": "Bearer",
+                "scope": scope
+            }
+        )
+    except Exception as e:
+        print("ERROR ! Refreshing token error?")
+        print(response.text)
 
 @xero_token_required
 def update_xero(app, contact_name):

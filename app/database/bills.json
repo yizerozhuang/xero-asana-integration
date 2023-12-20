@@ -16,5 +16,19 @@
     "311045B": "Awaiting payment",
     "311042H": "Awaiting payment",
     "311053B": "Awaiting payment",
-    "311053F": "Awaiting payment"
+    "311053F": "Awaiting payment",
+    "312000A": "Awaiting payment",
+    "312000B": "Draft",
+    "311032ha": "Awaiting payment",
+    "311032AZ": "Awaiting payment",
+    "311037b": "Awaiting payment",
+    "307196": "Awaiting payment",
+    "311004A": "Awaiting payment",
+    "311007A": "Awaiting payment",
+    "311055A": "Paid",
+    "311054C": "Void",
+    "311055F": "Void",
+    "312001A": "Draft",
+    "312003A": "Awaiting approval",
+    "312004A": "Draft"
 }

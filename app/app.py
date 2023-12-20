@@ -4,16 +4,17 @@ from app_log import AppLog
 from project_info_page import ProjectInfoPage
 from fee_proposal_page import FeeProposalPage
 from financial_panel import FinancialPanelPage
+from search_bar_page import SearchBarPage
 from utility import *
 from asana_function import update_asana
-from xero_function import login_xero, update_xero
+from xero_function import login_xero, update_xero, refresh_token
 from email_server import email_server
 from app_messagebox import AppMessagebox
 
 from PIL import Image, ImageTk
 import _thread
 import os
-
+import webbrowser
 
 class App(tk.Tk):
     def __init__(self, conf, user, *args, **kwargs):
@@ -40,7 +41,7 @@ class App(tk.Tk):
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=1)
 
-
+        self.default_set_up()
         self.utility_part()
         self.change_page_part()
         self.main_context_part()
@@ -52,9 +53,8 @@ class App(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.confirm)
 
         config_state(self)
-        # self.auto_check()
-
-    def utility_part(self):
+        self.auto_check()
+    def default_set_up(self):
         self.data["Asana_id"] = tk.StringVar()
         self.data["State"] = {
             "Set Up": tk.BooleanVar(),
@@ -70,6 +70,9 @@ class App(tk.Tk):
             "Third Chase": tk.StringVar()
         }
         self.data["Email_Content"] = tk.StringVar()
+        self.data["Address_to"] = tk.StringVar(value="Client")
+
+    def utility_part(self):
 
         # Utility Part
         self.utility_frame = tk.LabelFrame(self.main_frame, text="Utility", font=self.conf["font"])
@@ -82,7 +85,7 @@ class App(tk.Tk):
                   font=self.conf["font"]).grid(row=0, column=0)
         tk.Button(state_frame, text="Preview Fee Proposal", bg="brown", command=self._preview_fee_proposal, fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(state_frame, text="Email To Client", command=lambda: email_fee_proposal(self), bg="brown", fg="white",
+        tk.Button(state_frame, text="Email To Client", command=self._email_fee_proposal, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
         tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
@@ -107,11 +110,14 @@ class App(tk.Tk):
         # tk.Button(function_frame, text="Open Asana", command=self._open_asana, bg="brown", fg="white",
         #           font=self.conf["font"]).grid(row=1, column=2)
 
-        tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=3)
+        # tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
+        #           font=self.conf["font"]).grid(row=0, column=3)
 
         tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=1, column=3)
+                  font=self.conf["font"]).grid(row=0, column=3)
+
+        # tk.Button(function_frame, text="Refresh Token", command=refresh_token, bg="brown", fg="white",
+        #           font=self.conf["font"]).grid(row=2, column=3)
 
         tk.Label(state_frame, text="To Set Up").grid(row=1, column=0)
         tk.Label(state_frame, text="To Gen Fee").grid(row=1, column=1)
@@ -181,29 +187,33 @@ class App(tk.Tk):
         tk.Label(legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
         tk.Label(legend_frame, text="Void", bg="purple").grid(row=1, column=5, sticky="ew")
 
+    def main_context_part(self):
+        # main frame page
+        self.search_bar_page = SearchBarPage(self.main_frame, self)
+        self.project_info_page = ProjectInfoPage(self.main_frame, self)
+        self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
+        self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
+        self._update_variation()
+        self._project_number_page()
+
     def change_page_part(self):
         # change page
         change_page_frame = tk.LabelFrame(self.main_frame, text="Change Page")
         change_page_frame.pack(side=tk.BOTTOM)
 
-        tk.Button(change_page_frame, text="Project Info",
-                  command=lambda: self.show_frame(self.project_info_page), bg="green", fg="black",
+        tk.Button(change_page_frame, text="Search Bar",
+                  command=lambda: self.show_frame(self.search_bar_page), bg="DarkOrange1", fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
-        tk.Button(change_page_frame, text="Fee Details",
-                  command=lambda: self.show_frame(self.fee_proposal_page), bg="green", fg="black",
+        tk.Button(change_page_frame, text="Project Info",
+                  command=lambda: self.show_frame(self.project_info_page), bg="DarkOrange1", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(change_page_frame, text="Financial Panel",
-                  command=lambda: self.show_frame(self.financial_panel_page), bg="green", fg="black",
+        tk.Button(change_page_frame, text="Fee Details",
+                  command=lambda: self.show_frame(self.fee_proposal_page), bg="DarkOrange1", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
+        tk.Button(change_page_frame, text="Financial Panel",
+                  command=lambda: self.show_frame(self.financial_panel_page), bg="DarkOrange1", fg="white",
+                  font=self.conf["font"]).grid(row=0, column=3)
 
-    def main_context_part(self):
-        # main frame page
-        self.project_info_page = ProjectInfoPage(self.main_frame, self)
-        # self.fee_accepted_page = FeeAcceptedPage(self.main_frame, self)
-        self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
-        self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
-        self._update_variation()
-        self._project_number_page()
 
 
     def _update_variation(self):
@@ -283,15 +293,16 @@ class App(tk.Tk):
     def _project_number_page(self):
         project_number_frame = tk.LabelFrame(self.utility_frame)
         project_number_frame.grid(row=0, column=0, sticky="ns")
-        tk.Label(project_number_frame, text="Quotation Number", font=self.conf["font"]).grid(row=0, column=0)
-        tk.Label(project_number_frame, text="Project Number: ", font=self.conf["font"]).grid(row=1, column=0)
+        tk.Label(project_number_frame, text="Project Number: ", font=self.conf["font"]).grid(row=0, column=0)
+        tk.Label(project_number_frame, text="Quotation Number: ", font=self.conf["font"]).grid(row=1, column=0)
         tk.Label(project_number_frame, text="Project Name: ", font=self.conf["font"]).grid(row=2, column=0)
 
+
+        tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Number"], font=self.conf["font"]).grid(row=0, column=1)
         self.quotation_number_label = tk.Label(project_number_frame, textvariable=self.current_quotation, font=self.conf["font"])
-        self.quotation_number_label.grid(row=0, column=1)
+        self.quotation_number_label.grid(row=1, column=1)
         # self.data["Project Info"][]
         # self.current_quotation.trace("w", self._update_quotation_number_label)
-        tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Number"], font=self.conf["font"]).grid(row=1, column=1)
         tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=2, column=1)
 
         # self.project_number_label = tk.Label(project_number_frame, font=self.conf["font"])
@@ -310,6 +321,7 @@ class App(tk.Tk):
     #         self.quotation_number_label.config(text=self.data["Project Info"]["Project"]["Project Number"].get())
 
     def show_frame(self, page):
+        self.search_bar_page.pack_forget()
         self.project_info_page.pack_forget()
         self.fee_proposal_page.pack_forget()
         # self.fee_accepted_page.pack_forget()
@@ -402,7 +414,7 @@ class App(tk.Tk):
         else:
             try:
                 if len(self.current_quotation.get())!=0:
-                    self.data["Project Info"]["Prject"]["Quotation Number"].set(self.current_quotation.get())
+                    self.data["Project Info"]["Project"]["Quotation Number"].set(self.current_quotation.get())
                 save(self)
             except Exception as e:
                 print(e)
@@ -441,11 +453,14 @@ class App(tk.Tk):
             else:
                 contact = self.data["Project Info"]["Client"]["Company"].get() + ", " + self.data["Project Info"]["Client"]["Full Name"].get()
         true = False
-        try:
-            true=update_xero(self, contact)
-        except RuntimeError:
-            self.messagebox.show_error("You Haven't login xero yet")
-            return
+        for i in range(10):
+            try:
+                true=update_xero(self, contact)
+                break
+            except RuntimeError:
+                refresh_token()
+                continue
+                # self.messagebox.show_error("You Haven't login xero yet")
         if true:
             self.messagebox.show_update("Update Xero and Asana Successful")
         else:
@@ -466,9 +481,22 @@ class App(tk.Tk):
         else:
             update_asana(self)
             self.messagebox.file_info("Rename Folder and Asana", old_dir, new_dir)
+
         save(self)
         config_log(self)
         config_state(self)
+
+    def _email_fee_proposal(self):
+        email = False
+        try:
+            email = email_fee_proposal(self)
+        except Exception as e:
+            self.messagebox.show_error("Unable to Create Email")
+            return
+        if email:
+            update = self.messagebox.ask_yes_no("Do you want to update Asana?")
+            if update:
+                update_asana(self)
 
     def _update_project_state(self, *args):
         if self.data["State"]["Fee Accepted"].get():

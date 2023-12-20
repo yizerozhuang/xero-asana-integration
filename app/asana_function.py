@@ -12,6 +12,8 @@ custom_fields_setting_api_instance = asana.CustomFieldSettingsApi(asana_api_clie
 template_api_instance = asana.TaskTemplatesApi(asana_api_client)
 workspace_gid = '1205045058713243'
 
+#
+
 def clearn_response(response):
     response = response.to_dict()["data"]
     return remove_none(response)
@@ -21,6 +23,11 @@ def name_id_map(api_list):
     for item in api_list:
         res[item["name"]] = item["gid"]
     return res
+
+def convert_email_content(email):
+    if email is None or len(email)==0:
+        return "<body> </body>"
+    return "<body>" + email.replace("<", "").replace(">", "") + "</body>"
 
 def update_asana(app, *args):
     data = app.data
@@ -106,12 +113,13 @@ def update_asana(app, *args):
     body = asana.TasksTaskGidBody(
         {
             "name": name,
+            "html_notes": convert_email_content(data["Email_Content"].get()),
             "custom_fields": {
                 custom_field_id_map["Status"]: status,
                 custom_field_id_map["Services"]: [service_id_map[key] for key, value in
                                                   data["Project Info"]["Project"]["Service Type"].items() if value["Include"].get()],
                 custom_field_id_map["Shop name"]: data["Project Info"]["Project"]["Shop Name"].get(),
-                custom_field_id_map["Apt/Room/Area"]: data["Project Info"]["Building Features"]["Total Area"].get() + "m2",
+                custom_field_id_map["Apt/Room/Area"]: data["Project Info"]["Building Features"]["Minor"]["Total Area"].get() + "m2",
                 custom_field_id_map["Feature/Notes"]: data["Project Info"]["Building Features"]["Feature"].get(),
                 custom_field_id_map["Client"]: client_name,
                 custom_field_id_map["Main contact"]: main_contact_name,
