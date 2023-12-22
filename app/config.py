@@ -9,6 +9,7 @@ CONFIGURATION = {
     "invoice_list": ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Installation", "Variation"],
     "extra_list":["Extend", "Clarifications", "Deliverables"],
     "sub_title": ["Design Development", "Construction Documents", "Construction Phase Service"],
+    "major_stage": ["Design Application", "Design Development", "Construction Documentation", "Construction Phase"],
     "tax rates": 1.1,
     "n_building": 5,
     "n_major_building": 8,

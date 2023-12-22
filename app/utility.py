@@ -408,10 +408,10 @@ def _check_fee(app):
     return True
 
 def preview_fee_proposal(app, *args):
-    if app.data["Project Info"]["Project"]["Proposal Type"].get() == "Major":
-        major_project_fee_proposal(app)
-    elif app.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
+    if app.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
         minor_project_fee_proposal(app)
+    elif app.data["Project Info"]["Project"]["Proposal Type"].get() == "Major":
+        major_project_fee_proposal(app)
     else:
         print("Unsupported Project Type")
 
@@ -634,6 +634,11 @@ def major_project_fee_proposal(app, *args):
     pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
                 str(file).startswith("Mechanical Fee Proposal") and str(file).endswith(".pdf")]
 
+    case = _check_case(app)
+    if case == "Error":
+        app.messagebox.show_error("Unsupported Version")
+        return
+
     if len(pdf_list) != 0:
         current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"][
@@ -668,7 +673,7 @@ def major_project_fee_proposal(app, *args):
     #     total_fee += float(service["Fee"].get())
     #     total_ist += float(service["in.GST"].get())
 
-    shutil.copy(os.path.join(resource_dir, "xlsx", f"major_proposal_template_{page}.xlsx"),
+    shutil.copy(os.path.join(resource_dir, "xlsx", f"major_proposal_template_{page}_{case}.xlsx"),
                 os.path.join(database_dir, excel_name))
     excel = win32client.Dispatch("Excel.Application")
     try:
@@ -827,6 +832,27 @@ def major_project_fee_proposal(app, *args):
 def _get_proposal_name(app):
     data = app.data
     return f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
+
+def _check_case(app):
+    data = app.data
+    stages = app.conf["major_stage"]
+    stage_1 = data["Fee Proposal"]["Stage"][stages[0]].get()
+    stage_2 = data["Fee Proposal"]["Stage"][stages[1]].get()
+    stage_3 = data["Fee Proposal"]["Stage"][stages[2]].get()
+    stage_4 = data["Fee Proposal"]["Stage"][stages[3]].get()
+
+    if  stage_1 and stage_2 and stage_3 and stage_4:
+        return "case1"
+    elif stage_1 and stage_2 and stage_3 and not stage_4:
+        return "case2"
+    elif stage_1 and not stage_2 and not stage_3 and not stage_4:
+        return "case3"
+    elif not stage_1 and stage_2 and stage_3 and stage_4:
+        return "case4"
+    elif not stage_1 and stage_2 and stage_3 and not stage_4:
+        return "case5"
+    else:
+        return "Error"
 def excel_print_invoice(app, inv):
     data = app.data
     excel_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.xlsx'

@@ -36,6 +36,7 @@ class FeeProposalPage(tk.Frame):
 
         self.reference_part()
         self.time_part()
+        self.stage_part()
         self.scope_part()
         self.fee_part()
 
@@ -44,7 +45,7 @@ class FeeProposalPage(tk.Frame):
         self.data["Fee Proposal"]["Reference"] = reference
 
         reference_frame = tk.LabelFrame(self.main_context_frame, text="reference")
-        reference_frame.pack(fill=tk.BOTH, expand=1, padx=20)
+        reference_frame.grid(row=0, column=0, sticky="ew", padx=20)
 
         reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
         tk.Label(reference_frame, width=30, text="Date", font=self.conf["font"]).grid(row=0, column=0, padx=(10, 0))
@@ -59,24 +60,40 @@ class FeeProposalPage(tk.Frame):
         time = dict()
         self.data["Fee Proposal"]["Time"] = time
 
-        time_frame = tk.LabelFrame(self.main_context_frame, text="Time Consuming", font=self.conf["font"])
-        time_frame.pack(fill=tk.BOTH, expand=1, padx=20)
+        self.time_frame = tk.LabelFrame(self.main_context_frame, text="Time Consuming", font=self.conf["font"])
+        self.time_frame.grid(row=1, column=0, sticky="ew", padx=20)
 
         stages = ["Fee Proposal", "Pre-design", "Documentation"]
 
         for i, stage in enumerate(stages):
-            tk.Label(time_frame, width=30, text=stage, font=self.conf["font"]).grid(row=i, column=0)
+            tk.Label(self.time_frame, width=30, text=stage, font=self.conf["font"]).grid(row=i, column=0)
             time[stage] = {
                 "Start": tk.StringVar(value="1"),
                 "End": tk.StringVar(value="2")
             }
-            tk.Entry(time_frame, width=20, font=self.conf["font"], fg="blue", textvariable=time[stage]["Start"]).grid(
+            tk.Entry(self.time_frame, width=20, font=self.conf["font"], fg="blue", textvariable=time[stage]["Start"]).grid(
                 row=i, column=1)
-            tk.Label(time_frame, text="-").grid(row=i, column=2)
-            tk.Entry(time_frame, width=20, font=self.conf["font"], fg="blue", textvariable=time[stage]["End"]).grid(
+            tk.Label(self.time_frame, text="-").grid(row=i, column=2)
+            tk.Entry(self.time_frame, width=20, font=self.conf["font"], fg="blue", textvariable=time[stage]["End"]).grid(
                 row=i, column=3)
-            tk.Label(time_frame, text=" business day", font=self.conf["font"]).grid(row=i, column=4)
+            tk.Label(self.time_frame, text=" business day", font=self.conf["font"]).grid(row=i, column=4)
 
+    def stage_part(self):
+        stage_dict = dict()
+        self.data["Fee Proposal"]["Stage"] = stage_dict
+        self.data["Project Info"]["Project"]["Proposal Type"].trace("w", self._update_stage)
+        self.stage_frame = tk.LabelFrame(self.main_context_frame, text="Stage", font=self.conf["font"])
+
+        for i, stage in enumerate(self.conf["major_stage"]):
+            stage_dict[stage] = tk.BooleanVar(value=True)
+            tk.Checkbutton(self.stage_frame, variable=stage_dict[stage], text=stage, font=self.conf["font"]).grid(row=0, column=i)
+    def _update_stage(self, *args):
+        if self.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
+            self.stage_frame.grid_forget()
+            self.time_frame.grid(row=1, column=0, sticky="ew", padx=20)
+        else:
+            self.time_frame.grid_forget()
+            self.stage_frame.grid(row=1, column=0, sticky="ew", padx=20)
     def _reset_scope(self):
         service_list = self.conf["service_list"]
         extra_list = self.conf["extra_list"]
@@ -104,11 +121,9 @@ class FeeProposalPage(tk.Frame):
     def scope_part(self):
         self._reset_scope()
         self.scope_frame = tk.LabelFrame(self.main_context_frame, text="Scope of Work", font=self.conf["font"])
-        self.scope_frame.pack(fill=tk.BOTH, expand=1, padx=20)
+        self.scope_frame.grid(row=2, column=0, sticky="ew", padx=20)
         self.scope_frames = {}
         self.append_context = dict()
-
-
     def update_scope(self, var):
         scope = self.data["Fee Proposal"]["Scope"][self.data["Project Info"]["Project"]["Proposal Type"].get()]
         service = var["Service"].get()
@@ -142,7 +157,6 @@ class FeeProposalPage(tk.Frame):
                 tk.Button(append_frame, text="Submit", command=func(extra)).grid(row=0, column=2)
         else:
             self.scope_frames[service]["Main Frame"].destroy()
-
     def fee_part(self):
         invoices = {
             "Details": dict(),
@@ -194,7 +208,7 @@ class FeeProposalPage(tk.Frame):
         self.fee_dic = dict()
 
         self.fee_frame = tk.LabelFrame(self.main_context_frame, text="Fee Proposal Details", font=self.conf["font"])
-        self.fee_frame.pack(fill=tk.BOTH, expand=1, padx=20)
+        self.fee_frame.grid(row=3, column=0, sticky="ew", padx=20)
 
         top_frame = tk.LabelFrame(self.fee_frame)
         top_frame.pack(side=tk.TOP)
@@ -284,8 +298,6 @@ class FeeProposalPage(tk.Frame):
             # invoices_details[service]["Expand"].set(False)
             self.fee_frames[service].pack_forget()
             self.update_sum()
-
-
     def _append_value(self, service, extra):
         scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
         scope_type = self.data["Project Info"]["Project"]["Proposal Type"].get()
