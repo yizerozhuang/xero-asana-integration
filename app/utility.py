@@ -841,7 +841,7 @@ def _check_case(app):
     stage_3 = data["Fee Proposal"]["Stage"][stages[2]].get()
     stage_4 = data["Fee Proposal"]["Stage"][stages[3]].get()
 
-    if  stage_1 and stage_2 and stage_3 and stage_4:
+    if stage_1 and stage_2 and stage_3 and stage_4:
         return "case1"
     elif stage_1 and stage_2 and stage_3 and not stage_4:
         return "case2"
