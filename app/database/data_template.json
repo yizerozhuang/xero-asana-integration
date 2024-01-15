@@ -7,18 +7,18 @@
         "Fee Accepted": false,
         "Quote Unsuccessful": false
     },
-    "Email_Content": "",
-    "Address_to": "Client",
     "Email": {
         "Fee Proposal": "",
         "First Chase": "",
         "Second Chase": "",
         "Third Chase": ""
     },
+    "Email_Content": null,
+    "Address_to": "Client",
     "Project Info": {
         "Project": {
-            "Project Name":"",
-            "Quotation Number":"",
+            "Project Name": "",
+            "Quotation Number": "",
             "Project Number": "",
             "Shop Name": "",
             "Proposal Type": "Minor",
@@ -32,32 +32,32 @@
                     "Service": "CFD Service",
                     "Include": false
                 },
-                "Electrical Service":{
+                "Electrical Service": {
                     "Service": "Electrical Service",
                     "Include": false
                 },
-                "Hydraulic Service":{
+                "Hydraulic Service": {
                     "Service": "Hydraulic Service",
                     "Include": false
                 },
-                "Fire Service":{
+                "Fire Service": {
                     "Service": "Fire Service",
                     "Include": false
                 },
-                "Kitchen Ventilation":{
+                "Kitchen Ventilation": {
                     "Service": "Kitchen Ventilation",
                     "Include": false
                 },
-                "Mech Review":{
+                "Mech Review": {
                     "Service": "Mech Review",
+                    "Include": false
+                },
+                "Miscellaneous": {
+                    "Service": "Miscellaneous",
                     "Include": false
                 },
                 "Installation": {
                     "Service": "Installation",
-                    "Include": false
-                },
-                "Miscellaneous":{
-                    "Service": "Miscellaneous",
                     "Include": false
                 }
             }
@@ -278,7 +278,7 @@
                 ]
             },
             "Feature": "",
-            "Notes": ""
+            "Notes": null
         },
         "Drawing": [
             {
@@ -326,6 +326,12 @@
                 "Start": "1",
                 "End": "2"
             }
+        },
+        "Stage": {
+            "Design Application": true,
+            "Design Development": true,
+            "Construction Documentation": true,
+            "Construction Phase": true
         },
         "Scope": {
             "Minor": {
@@ -603,8 +609,8 @@
             "Variation": {
                 "Include": true,
                 "Service": "Variation",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": true,
                 "Number": "None",
                 "Content": [
@@ -635,9 +641,121 @@
                 ]
             }
         },
-        "Fee": "",
-        "in.GST": ""
+        "Fee": "0.0",
+        "in.GST": "0.0"
     },
+    "Invoices Number": [
+        {
+            "Number": "",
+            "Fee": "0",
+            "in.GST": "0.0",
+            "State": "Backlog",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "0",
+            "in.GST": "0.0",
+            "State": "Backlog",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "0",
+            "in.GST": "0.0",
+            "State": "Backlog",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "0",
+            "in.GST": "0.0",
+            "State": "Backlog",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "0",
+            "in.GST": "0.0",
+            "State": "Backlog",
+            "Asana_id": "",
+            "Xero_id": ""
+        },
+        {
+            "Number": "",
+            "Fee": "0",
+            "in.GST": "0.0",
+            "State": "Backlog",
+            "Asana_id": "",
+            "Xero_id": ""
+        }
+    ],
+    "Remittances": [
+        {
+            "Type": "",
+            "Full_Upload": false,
+            "Part1": "",
+            "Part1_Upload": false,
+            "Part2": "",
+            "Part2_Upload": false,
+            "Part3": "",
+            "Part3_Upload": false
+        },
+        {
+            "Type": "",
+            "Full_Upload": false,
+            "Part1": "",
+            "Part1_Upload": false,
+            "Part2": "",
+            "Part2_Upload": false,
+            "Part3": "",
+            "Part3_Upload": false
+        },
+        {
+            "Type": "",
+            "Full_Upload": false,
+            "Part1": "",
+            "Part1_Upload": false,
+            "Part2": "",
+            "Part2_Upload": false,
+            "Part3": "",
+            "Part3_Upload": false
+        },
+        {
+            "Type": "",
+            "Full_Upload": false,
+            "Part1": "",
+            "Part1_Upload": false,
+            "Part2": "",
+            "Part2_Upload": false,
+            "Part3": "",
+            "Part3_Upload": false
+        },
+        {
+            "Type": "",
+            "Full_Upload": false,
+            "Part1": "",
+            "Part1_Upload": false,
+            "Part2": "",
+            "Part2_Upload": false,
+            "Part3": "",
+            "Part3_Upload": false
+        },
+        {
+            "Type": "",
+            "Full_Upload": false,
+            "Part1": "",
+            "Part1_Upload": false,
+            "Part2": "",
+            "Part2_Upload": false,
+            "Part3": "",
+            "Part3_Upload": false
+        }
+    ],
     "Bills": {
         "Details": {
             "Mechanical Service": {
@@ -646,10 +764,15 @@
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
-                "Ori": "",
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
                 "V1": "",
+                "V1_Upload": false,
                 "V2": "",
+                "V2_Upload": false,
                 "V3": "",
+                "V3_Upload": false,
                 "Paid": "",
                 "Paid.GST": "",
                 "Content": [
@@ -660,6 +783,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -671,6 +795,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -682,6 +807,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -694,10 +820,15 @@
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
-                "Ori": "",
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
                 "V1": "",
+                "V1_Upload": false,
                 "V2": "",
+                "V2_Upload": false,
                 "V3": "",
+                "V3_Upload": false,
                 "Paid": "",
                 "Paid.GST": "",
                 "Content": [
@@ -708,6 +839,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -719,6 +851,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -730,6 +863,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -742,10 +876,15 @@
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
-                "Ori": "",
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
                 "V1": "",
+                "V1_Upload": false,
                 "V2": "",
+                "V2_Upload": false,
                 "V3": "",
+                "V3_Upload": false,
                 "Paid": "",
                 "Paid.GST": "",
                 "Content": [
@@ -756,6 +895,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -767,6 +907,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -778,6 +919,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -790,10 +932,15 @@
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
-                "Ori": "",
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
                 "V1": "",
+                "V1_Upload": false,
                 "V2": "",
+                "V2_Upload": false,
                 "V3": "",
+                "V3_Upload": false,
                 "Paid": "",
                 "Paid.GST": "",
                 "Content": [
@@ -804,6 +951,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -815,6 +963,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -826,6 +975,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -838,10 +988,15 @@
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
-                "Ori": "",
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
                 "V1": "",
+                "V1_Upload": false,
                 "V2": "",
+                "V2_Upload": false,
                 "V3": "",
+                "V3_Upload": false,
                 "Paid": "",
                 "Paid.GST": "",
                 "Content": [
@@ -852,6 +1007,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -863,6 +1019,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -874,6 +1031,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -886,10 +1044,15 @@
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
-                "Ori": "",
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
                 "V1": "",
+                "V1_Upload": false,
                 "V2": "",
+                "V2_Upload": false,
                 "V3": "",
+                "V3_Upload": false,
                 "Paid": "",
                 "Paid.GST": "",
                 "Content": [
@@ -900,6 +1063,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -911,6 +1075,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -922,6 +1087,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -934,10 +1100,15 @@
                 "Fee": "",
                 "in.GST": "",
                 "no.GST": false,
-                "Ori": "",
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
                 "V1": "",
+                "V1_Upload": false,
                 "V2": "",
+                "V2_Upload": false,
                 "V3": "",
+                "V3_Upload": false,
                 "Paid": "",
                 "Paid.GST": "",
                 "Content": [
@@ -948,6 +1119,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -959,6 +1131,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -970,6 +1143,7 @@
                         "no.GST": false,
                         "Description": "",
                         "State": "Draft",
+                        "Upload": false,
                         "Number": "",
                         "Asana_id": "",
                         "Xero_id": ""
@@ -1014,100 +1188,12 @@
             },
             "Variation": {
                 "Include": true,
-                "Fee": "",
-                "in.GST": ""
+                "Fee": "0",
+                "in.GST": "0"
             }
         },
-        "Fee": "",
-        "in.GST": ""
+        "Fee": "0.0",
+        "in.GST": "0.0"
     },
-    "Invoices Number": [
-        {
-            "Number": "",
-            "Fee": "",
-            "in.GST": "",
-            "State": "Backlog",
-            "Asana_id": "",
-            "Xero_id": ""
-        },
-        {
-            "Number": "",
-            "Fee": "",
-            "in.GST": "",
-            "State": "Backlog",
-            "Asana_id": "",
-            "Xero_id": ""
-        },
-        {
-            "Number": "",
-            "Fee": "",
-            "in.GST": "",
-            "State": "Backlog",
-            "Asana_id": "",
-            "Xero_id": ""
-        },
-        {
-            "Number": "",
-            "Fee": "",
-            "in.GST": "",
-            "State": "Backlog",
-            "Asana_id": "",
-            "Xero_id": ""
-        },
-        {
-            "Number": "",
-            "Fee": "",
-            "in.GST": "",
-            "State": "Backlog",
-            "Asana_id": "",
-            "Xero_id": ""
-        },
-        {
-            "Number": "",
-            "Fee": "",
-            "in.GST": "",
-            "State": "Backlog",
-            "Asana_id": "",
-            "Xero_id": ""
-        }
-    ],
-    "Remittances": [
-        {
-            "Type": "",
-            "Part1": "",
-            "Part2": "",
-            "Part3": ""
-        },
-        {
-            "Type": "",
-            "Part1": "",
-            "Part2": "",
-            "Part3": ""
-        },
-        {
-            "Type": "",
-            "Part1": "",
-            "Part2": "",
-            "Part3": ""
-        },
-        {
-            "Type": "",
-            "Part1": "",
-            "Part2": "",
-            "Part3": ""
-        },
-        {
-            "Type": "",
-            "Part1": "",
-            "Part2": "",
-            "Part3": ""
-        },
-        {
-            "Type": "",
-            "Part1": "",
-            "Part2": "",
-            "Part3": ""
-        }
-    ],
     "Verbal Acceptance Note": ""
 }

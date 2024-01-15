@@ -263,7 +263,7 @@ class ProjectInfoPage(tk.Frame):
 
         # tk.Radiobutton(build_feature_frame, text="Minor", variable=building_features["Type"], value="Minor", font=self.conf["font"]).grid(row=0, column=0, sticky="w")
         # tk.Radiobutton(build_feature_frame, text="Major", variable=building_features["Type"], value="Major", font=self.conf["font"]).grid(row=2, column=0, sticky="w")
-        self.minor_frame = tk.LabelFrame(build_feature_frame)
+        self.minor_frame = tk.Frame(build_feature_frame)
         tk.Label(self.minor_frame, text="Levels", font=self.conf["font"]).grid(row=0, column=0)
         tk.Label(self.minor_frame, text="Space/room Description", font=self.conf["font"]).grid(row=0, column=1)
         tk.Label(self.minor_frame, text="Area/m^2", font=self.conf["font"]).grid(row=0, column=2)
@@ -282,9 +282,9 @@ class ProjectInfoPage(tk.Frame):
         tk.Label(self.minor_frame, textvariable=building_features["Minor"]["Total Area"], font=self.conf["font"]).grid(row=n_building+1, column=2)
 
 
-        self.major_frame = tk.LabelFrame(build_feature_frame)
+        self.major_frame = tk.Frame(build_feature_frame)
 
-        car_park_frame = tk.LabelFrame(self.major_frame)
+        car_park_frame = tk.Frame(self.major_frame)
         car_park_frame.pack()
         tk.Label(car_park_frame, text="Level", font=self.conf["font"]).grid(row=0, column=0, rowspan=2)
         tk.Label(car_park_frame, text="Other type of room except \n car spots and storage cages",font=self.conf["font"]).grid(row=0, column=1, rowspan=2)
@@ -324,7 +324,7 @@ class ProjectInfoPage(tk.Frame):
         tk.Label(car_park_frame, textvariable=self.car_part_other_total, font=self.conf["font"]).grid(row=self.conf["n_major_building"]+3, column=8)
 
 
-        block_frame = tk.LabelFrame(self.major_frame)
+        block_frame = tk.Frame(self.major_frame)
         block_frame.pack()
         tk.Label(block_frame, text="Level", font=self.conf["font"]).grid(row=0, column=0, rowspan=2)
         tk.Label(block_frame, text="Other type of room \n except apartment", font=self.conf["font"]).grid(row=0, column=1, rowspan=2)
@@ -365,13 +365,11 @@ class ProjectInfoPage(tk.Frame):
 
         self.data["Project Info"]["Project"]["Proposal Type"].trace("w", self._update_building_frame)
 
+        tk.Label(build_feature_frame, text="Asana Notes: ", font=self.conf["font"]).grid(row=1, column=0, sticky="w", padx=(90, 0))
+        tk.Entry(build_feature_frame, width=80, font=self.conf["font"], fg="blue", textvariable=building_features["Feature"]).grid(row=2, column=0)
 
-        tk.Label(build_feature_frame, text="Feature/Notes: ", width=30, font=self.conf["font"]).grid(row=4, column=0, sticky="w")
-        tk.Entry(build_feature_frame, width=80, font=self.conf["font"], fg="blue", textvariable=building_features["Feature"]).grid(row=1, column=0)
-
-
-        tk.Label(build_feature_frame, text="Notes: ", font=self.conf["font"]).grid(row=2, column=0, sticky="w")
-        TextExtension(build_feature_frame, textvariable=building_features["Notes"], font=self.conf["font"], height=10, fg="blue").grid(row=3, column=0, columnspan=3)
+        tk.Label(build_feature_frame, text="Project Notes: ", font=self.conf["font"]).grid(row=3, column=0, sticky="w", padx=(90, 0))
+        TextExtension(build_feature_frame, textvariable=building_features["Notes"], font=self.conf["font"], height=10, fg="blue").grid(row=4, column=0)
 
 
     def drawing_number_part(self):

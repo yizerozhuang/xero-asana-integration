@@ -81,13 +81,12 @@ class App(tk.Tk):
         state_frame = tk.LabelFrame(self.utility_frame, font=self.conf["font"])
         state_frame.grid(row=0, column=1)
 
-        tk.Button(state_frame, text="Set Up", command=self._finish_setup, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=0)
-        tk.Button(state_frame, text="Preview Fee Proposal", bg="brown", command=self._preview_fee_proposal, fg="white",
+        tk.Button(state_frame, text="Set Up", command=self._finish_setup, bg="cyan", font=self.conf["font"]).grid(row=0, column=0)
+        tk.Button(state_frame, text="Preview Fee Proposal", bg="cyan", command=self._preview_fee_proposal,
                   font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(state_frame, text="Email To Client", command=self._email_fee_proposal, bg="brown", fg="white",
+        tk.Button(state_frame, text="Email To Client", command=self._email_fee_proposal, bg="cyan",
                   font=self.conf["font"]).grid(row=0, column=2)
-        tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="brown", fg="white",
+        tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="cyan",
                   font=self.conf["font"]).grid(row=0, column=3)
         
         function_frame = tk.LabelFrame(self.utility_frame, font=self.conf["font"])

@@ -243,12 +243,12 @@ class FinancialPanelPage(tk.Frame):
             self.invoice_label_list[i].append(tk.Label(invoice_function_frame, width=10, textvariable=self.data["Invoices Number"][i]["Number"], font=self.conf["font"]))
             self.invoice_label_list[i][3].grid(row=i, column=1)
             self.data["Invoices Number"][i]["State"].trace("w", self.invoice_color_code)
-            tk.Button(invoice_function_frame, text="Preview", font=self.conf["font"], bg="brown", fg="white",
+            tk.Button(invoice_function_frame, text="Preview", font=self.conf["font"], bg="cyan",
                       command=print_invoice_function(i)).grid(row=i, column=2)
-            tk.Button(invoice_function_frame, text="Email", font=self.conf["font"], bg="brown", fg="white",
+            tk.Button(invoice_function_frame, text="Email", font=self.conf["font"], bg="cyan",
                       command=email_invoice_function(i)).grid(row=i, column=3)
 
-            full_button = tk.Button(invoice_function_frame, text="REMIT FULL", font=self.conf["font"], bg="brown", fg="white",
+            full_button = tk.Button(invoice_function_frame, text="REMIT FULL", font=self.conf["font"], bg="cyan",
                                     command=upload_remittance_func("Full", i))
             full_button.grid(row=i, column=4)
 
@@ -256,7 +256,7 @@ class FinancialPanelPage(tk.Frame):
 
             tk.Entry(invoice_function_frame, width=10, font=self.conf["font"], fg="blue",
                      textvariable=remittance[i]["Part1"]).grid(row=i, column=5)
-            button1 = tk.Button(invoice_function_frame, text="REMIT P1", bg="brown", fg="white", font=self.conf["font"],
+            button1 = tk.Button(invoice_function_frame, text="REMIT P1", bg="cyan", font=self.conf["font"],
                                 command=upload_remittance_func("Part1", i))
             button1.grid(row=i, column=6)
 
@@ -264,7 +264,7 @@ class FinancialPanelPage(tk.Frame):
 
             tk.Entry(invoice_function_frame, width=10, font=self.conf["font"], fg="blue",
                      textvariable=remittance[i]["Part2"]).grid(row=i, column=7)
-            button2 = tk.Button(invoice_function_frame, text="REMIT P2", bg="brown", fg="white", font=self.conf["font"],
+            button2 = tk.Button(invoice_function_frame, text="REMIT P2", bg="cyan", font=self.conf["font"],
                                 command=upload_remittance_func("Part2", i))
             button2.grid(row=i, column=8)
 
@@ -272,7 +272,7 @@ class FinancialPanelPage(tk.Frame):
 
             tk.Entry(invoice_function_frame, width=10, font=self.conf["font"], fg="blue",
                      textvariable=remittance[i]["Part3"]).grid(row=i, column=9)
-            button3 = tk.Button(invoice_function_frame, text="REMIT P3", bg="brown", fg="white", font=self.conf["font"],
+            button3 = tk.Button(invoice_function_frame, text="REMIT P3", bg="cyan", font=self.conf["font"],
                                 command=upload_remittance_func("Part3", i))
             button3.grid(row=i, column=10)
             remittance[i]["Part3_Upload"].trace("w", button_config_func(remittance[i]["Part3_Upload"], button3))
@@ -418,28 +418,28 @@ class FinancialPanelPage(tk.Frame):
                                         textvariable=details[service]["Origin"], width=10, font=self.conf["font"], fg="blue"),
                         "Upload": tk.Button(self.bill_frames[service],
                                             command=lambda: self.upload_bills(service=service, bill_description=details[service]["Service"],
-                                                                              origin="Origin"), width=10, text="Upload", bg="brown", fg="white")
+                                                                              origin="Origin"), width=10, text="Upload", bg="cyan")
                     },
                     "V1": {
                         "Fee": tk.Entry(self.bill_frames[service],
                                         textvariable=details[service]["V1"], width=10, font=self.conf["font"], fg="blue"),
                         "Upload": tk.Button(self.bill_frames[service],
                                             command=lambda: self.upload_bills(service=service, bill_description=details[service]["Service"],
-                                                                              origin="V1"), width=10, text="Upload", bg="brown", fg="white")
+                                                                              origin="V1"), width=10, text="Upload", bg="cyan")
                     },
                     "V2": {
                         "Fee": tk.Entry(self.bill_frames[service],
                                         textvariable=details[service]["V2"], width=10, font=self.conf["font"], fg="blue"),
                         "Upload": tk.Button(self.bill_frames[service],
                                             command=lambda: self.upload_bills(service=service,bill_description=details[service]["Service"],
-                                                                              origin="V2"), width=10, text="Upload", bg="brown", fg="white")
+                                                                              origin="V2"), width=10, text="Upload", bg="cyan")
                     },
                     "V3": {
                         "Fee": tk.Entry(self.bill_frames[service],
                                         textvariable=details[service]["V3"], width=10, font=self.conf["font"], fg="blue"),
                         "Upload": tk.Button(self.bill_frames[service],
                                             command=lambda: self.upload_bills(service=service,bill_description=details[service]["Service"],
-                                                                              origin="V3"), width=10, text="Upload", bg="brown", fg="white")
+                                                                              origin="V3"), width=10, text="Upload", bg="cyan")
                     },
                     "Expand": [tk.LabelFrame(self.bill_frame) for _ in range(self.conf["n_items"])]
 
@@ -480,9 +480,7 @@ class FinancialPanelPage(tk.Frame):
                         "Upload": tk.Button(self.bill_dic[service]["Expand"][i],
                                             command=upload_file_func(i),
                                             width=8,
-                                            text="Upload",
-                                            bg="brown",
-                                            fg="white")
+                                            text="Upload", bg="cyan")
                     } for i in range(self.conf["n_bills"])
                 ]
 
