@@ -28,8 +28,10 @@ def email_server(app=None):
     smap_server = conf["smap_server"]
     smap_port = conf["smap_port"]
 
+
+
     from_addr = "bridge@pcen.com.au"
-    to_addr = "yeezhuang@gmail.com"
+    to_addr = "admin@pcen.com.au"
 
     log = AppLog()
 
@@ -244,8 +246,8 @@ def email_server(app=None):
                                     log.log_chase_client(From.split("<")[-1].split(">")[0], quotation_number)
 
                                 print("Chase Client")
-                            elif subject.startswith("Invoice"):
-                                inv_number = subject.split(" ")[1].split("-")[0]
+                            elif subject.startswith("PCE INV"):
+                                inv_number = subject.split(" ")[2].split("-")[0]
                                 online = False
                                 if not app is None:
                                     app_invoice = [value["Number"].get() for value in

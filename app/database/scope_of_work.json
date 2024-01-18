@@ -1,7 +1,7 @@
 {
     "Minor": {
         "Mechanical Service": {
-            "Extend": [
+            "Extent": [
                 "Map out existing mechanical components",
                 "Commercial kitchen exhaust and makeup air system design;",
                 "Charcoal exhaust design with spark arrestor",
@@ -27,7 +27,7 @@
             ]
         },
         "CFD Service": {
-            "Extend": [
+            "Extent": [
                 "Review of all drawings relevant to the car park design. ",
                 "Creation of a three-dimensional model for the car park suitable for the CFD simulations. ",
                 "CFD ventilation simulations to assess the performance of the proposed design. This will provide a basis on which to compare subsequent designs. ",
@@ -46,7 +46,7 @@
             ]
         },
         "Electrical Service": {
-            "Extend": [
+            "Extent": [
                 "Maximum demand calculation as per AS3000",
                 "Electrical single line diagram",
                 "Main switchboard and mains",
@@ -74,7 +74,7 @@
             ]
         },
         "Hydraulic Service": {
-            "Extend": [
+            "Extent": [
                 "Sanitary waste and drainage services",
                 "Trade waste service",
                 "Hot and cold water supply and distribution services",
@@ -97,18 +97,18 @@
             ]
         },
         "Fire Service": {
-            "Extend": [
+            "Extent": [
                 "The emergency lights, exit and directional signage",
-                "Automatic Detection and warning System",
+                "Automatic Detection and warning Systems",
                 "Portable Fire Extinguisher System",
                 "Sprinkler system",
                 "Liaise with relevant authorities and consultants",
+                "Section 74B certificate based on base building fire safety measures",
                 "1 off site visit"
             ],
             "Clarifications": [
                 "BCA DTS requirement compliance",
-                "Any applicable fire engineering report by C10 Fire Engineer",
-                "Section 74B certificate based on base building fire safety measures"
+                "Any applicable fire engineering report by C10 Fire Engineer"
             ],
             "Deliverables": [
                 "Full set of Fire Protection Service drawings in PDF format",
@@ -117,7 +117,7 @@
             ]
         },
         "Installation": {
-            "Extend": [
+            "Extent": [
                 "Demolish existing old cassette, condenser on roof and associated cable, wire and fittings.",
                 "Demolish existing intake plenum, rectify the kitchen supply air fan, install anti-vibration mounts, intake louvre, filter and plenum and  as shown on drawings;",
                 "Demolish existing ductwork and fan on roof, supply and install new kitchen exhaust fan and existing attenuators rectify the ductwork as per the drawings, including all supports and fittings;",
@@ -148,7 +148,7 @@
     },
     "Major": {
         "Mechanical Service": {
-            "Extend": [
+            "Extent": [
                 "Car park ventilation system.",
                 "Garbage exhaust.",
                 "Fire pump room ventilation.",
@@ -166,8 +166,7 @@
                 "Electrical services associated with mechanical plant and equipment.",
                 "Coordinate with architect, electrical, hydraulic fire service and other relevant parties.",
                 "D&BP Act class 2 building design declaration",
-                "D&BP Act class 3 building design declaration",
-                "new_per"
+                "D&BP Act class 3 building design declaration"
             ],
             "Clarifications": [
                 "Fire engineering;",
@@ -176,26 +175,10 @@
                 "Refrigeration systems to cool rooms and freezers;",
                 "Revit modelling and documentation."
             ],
-            "Deliverables": [
-                "Design Development",
-                "PDF spatial sketch as required",
-                "DWG drawings as required",
-                "8 coordination meetings",
-                "Construction Documents",
-                "PDF spatial sketch as required",
-                "Equipment specification",
-                "Full set of drawings in PDF and AutoCAD 2D",
-                "D&BP Act class 2 building design declaration",
-                "Construction Phase Service",
-                "Review contractor's shop drawings",
-                "Answer RFI and site related inquiries",
-                "Site inspection and defect report, 6 off",
-                "Comissioning witness inspection, 2 off",
-                "Provide Asbuilt drawings"
-            ]
+            "Deliverables": []
         },
         "CFD Service": {
-            "Extend": [
+            "Extent": [
                 "Review of all drawings relevant to the car park design. ",
                 "Creation of a three-dimensional model for the car park suitable for the CFD simulations. ",
                 "CFD ventilation simulations to assess the performance of the proposed design. This will provide a basis on which to compare subsequent designs. ",
@@ -214,7 +197,7 @@
             ]
         },
         "Electrical Service": {
-            "Extend": [
+            "Extent": [
                 "Electrical Maximum Demand calculation;",
                 "Existing Tenancy Distribution Board modification and electricity metering rearrangement;",
                 "General lighting including lighting lux level calculation;",
@@ -241,26 +224,10 @@
                 "Temporary work",
                 "Fire Protection Services"
             ],
-            "Deliverables": [
-                "Design Development",
-                "PDF spatial sketch as required",
-                "DWG drawings as required",
-                "8 coordination meetings",
-                "Construction Documents",
-                "PDF spatial sketch as required",
-                "Equipment specification",
-                "Full set of drawings in PDF and AutoCAD 2D",
-                "D&BP Act class 2 building design declaration",
-                "Construction Phase Service",
-                "Review contractor's shop drawings",
-                "Answer RFI and site related inquiries",
-                "Site inspection and defect report, 6 off",
-                "Comissioning witness inspection, 2 off",
-                "Provide Asbuilt drawings"
-            ]
+            "Deliverables": []
         },
         "Hydraulic Service": {
-            "Extend": [
+            "Extent": [
                 "Connection to authority services including sewer, water and gas.",
                 "Sanitary waste and drainage services incorporating: Gravity flow system connecting to authorities sewer main.",
                 "Trade waste incorporating Grease arrestor",
@@ -286,26 +253,10 @@
                 "Diversions, upgrades and/or extension of Authority infrastructure services.",
                 "Shop drawings and work shop drawings"
             ],
-            "Deliverables": [
-                "Design Development",
-                "PDF spatial sketch as required",
-                "DWG drawings as required",
-                "8 coordination meetings",
-                "Construction Documents",
-                "PDF spatial sketch as required",
-                "Equipment specification",
-                "Full set of drawings in PDF and AutoCAD 2D",
-                "D&BP Act class 2 building design declaration",
-                "Construction Phase Service",
-                "Review contractor's shop drawings",
-                "Answer RFI and site related inquiries",
-                "Site inspection and defect report, 6 off",
-                "Comissioning witness inspection, 2 off",
-                "Provide Asbuilt drawings"
-            ]
+            "Deliverables": []
         },
         "Fire Service": {
-            "Extend": [
+            "Extent": [
                 "Fire Hydrant System",
                 "Fire Detection system",
                 "Emergency Warning and Intercommunication System (EWIS).",
@@ -320,26 +271,10 @@
                 "Fire brigade consultant",
                 "Temporary work"
             ],
-            "Deliverables": [
-                "Design Development",
-                "PDF spatial sketch as required",
-                "DWG drawings as required",
-                "8 coordination meetings",
-                "Construction Documents",
-                "PDF spatial sketch as required",
-                "Equipment specification",
-                "Full set of drawings in PDF and AutoCAD 2D",
-                "D&BP Act class 2 building design declaration",
-                "Construction Phase Service",
-                "Review contractor's shop drawings",
-                "Answer RFI and site related inquiries",
-                "Site inspection and defect report, 6 off",
-                "Comissioning witness inspection, 2 off",
-                "Provide Asbuilt drawings"
-            ]
+            "Deliverables": []
         },
         "Installation": {
-            "Extend": [
+            "Extent": [
                 "Demolish existing old cassette, condenser on roof and associated cable, wire and fittings.",
                 "Demolish existing intake plenum, rectify the kitchen supply air fan, install anti-vibration mounts, intake louvre, filter and plenum and  as shown on drawings;",
                 "Demolish existing ductwork and fan on roof, supply and install new kitchen exhaust fan and existing attenuators rectify the ductwork as per the drawings, including all supports and fittings;",

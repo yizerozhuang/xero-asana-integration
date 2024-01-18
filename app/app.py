@@ -54,6 +54,7 @@ class App(tk.Tk):
 
         config_state(self)
         self.auto_check()
+
     def default_set_up(self):
         self.data["Asana_id"] = tk.StringVar()
         self.data["State"] = {
@@ -109,8 +110,8 @@ class App(tk.Tk):
         # tk.Button(function_frame, text="Open Asana", command=self._open_asana, bg="brown", fg="white",
         #           font=self.conf["font"]).grid(row=1, column=2)
 
-        # tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
-        #           font=self.conf["font"]).grid(row=0, column=3)
+        tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=1, column=3)
 
         tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
@@ -173,7 +174,7 @@ class App(tk.Tk):
 
         tk.Label(legend_frame, text="Sent", bg="red").grid(row=0, column=2, sticky="ew")
         tk.Label(legend_frame, text="Paid", bg="green").grid(row=0, column=4, sticky="ew")
-        tk.Label(legend_frame, text="Void", bg="purple").grid(row=0, column=5, sticky="ew")
+        tk.Label(legend_frame, text="Voided", bg="purple").grid(row=0, column=5, sticky="ew")
 
         tk.Label(legend_frame, text="Bill States: ").grid(row=1, column=0)
 
@@ -184,7 +185,7 @@ class App(tk.Tk):
         tk.Label(legend_frame, text="Awaiting approval", bg="red").grid(row=1, column=2, sticky="ew")
         tk.Label(legend_frame, text="Awaiting payment", bg="orange").grid(row=1, column=3, sticky="ew")
         tk.Label(legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
-        tk.Label(legend_frame, text="Void", bg="purple").grid(row=1, column=5, sticky="ew")
+        tk.Label(legend_frame, text="Voided", bg="purple").grid(row=1, column=5, sticky="ew")
 
     def main_context_part(self):
         # main frame page
@@ -423,6 +424,7 @@ class App(tk.Tk):
     def _update_asana(self):
         try:
             update_asana(self)
+            # update_app_invoices(app)
         except Exception as e:
             print(e)
             return
@@ -434,23 +436,24 @@ class App(tk.Tk):
     #         return
 
     def _update_xero(self):
+        address_to = self.data["Address_to"].get()
         if not self.data["State"]["Fee Accepted"].get():
             self.messagebox.show_error("Please upload a fee acceptance before you update xero")
             return
         elif len(self.data["Project Info"]["Project"]["Project Number"].get())==0:
             self.messagebox.show_error("Please Generate An Project Number Fist")
             return
-        if len(self.data["Project Info"]["Client"]["Full Name"].get()) == 0:
-            if len(self.data["Project Info"]["Client"]["Company"].get()) == 0:
-                self.messagebox.show_error("You should at least provide client name or client company")
+        if len(self.data["Project Info"][address_to]["Full Name"].get()) == 0:
+            if len(self.data["Project Info"][address_to]["Company"].get()) == 0:
+                self.messagebox.show_error(f"You should at least provide {address_to} name or {address_to} company")
                 return
             else:
-                contact = self.data["Project Info"]["Client"]["Company"].get()
+                contact = self.data["Project Info"][address_to]["Company"].get()
         else:
-            if len(self.data["Project Info"]["Client"]["Company"].get()) == 0:
-                contact = self.data["Project Info"]["Client"]["Full Name"].get()
+            if len(self.data["Project Info"][address_to]["Company"].get()) == 0:
+                contact = self.data["Project Info"][address_to]["Full Name"].get()
             else:
-                contact = self.data["Project Info"]["Client"]["Company"].get() + ", " + self.data["Project Info"]["Client"]["Full Name"].get()
+                contact = self.data["Project Info"][address_to]["Company"].get() + ", " + self.data["Project Info"][address_to]["Full Name"].get()
         true = False
         for i in range(10):
             try:

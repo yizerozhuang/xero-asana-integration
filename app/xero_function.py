@@ -31,7 +31,6 @@ flask_app.config["SESSION_TYPE"] = "filesystem"
 
 # configure flask app for local development
 flask_app.config["ENV"] = "development"
-# flask_app.config.from_pyfile("xero_config.py", silent=True)
 
 flask_app.config["CLIENT_ID"] = conf["xero_client_id"]
 flask_app.config["CLIENT_SECRET"] = conf["xero_client_secret"]
@@ -165,7 +164,6 @@ def invoice_number_invoice_id(api_list):
         res[item["invoice_number"]] = item["invoice_id"]
     return res
 def _process_invoices(inv_list):
-
     res = {
         "Invoices": {
             "DRAFT": {},
@@ -201,7 +199,7 @@ def _process_invoices(inv_list):
 def refresh_token():
     refresh_url = "https://identity.xero.com/connect/token"
 
-    old_refresh_token = open('xero_refresh_token.txt', 'r').read()
+    old_refresh_token = open("P:\\app\\xero_refresh_token.txt", 'r').read()
 
     tokenb4 = f"{conf['xero_client_id']}:{conf['xero_client_secret']}"
     basic_token = base64.urlsafe_b64encode(tokenb4.encode()).decode()
@@ -219,8 +217,8 @@ def refresh_token():
         response = requests.post(refresh_url, headers=headers, data=data)
 
         results = response.json()
-        open('xero_refresh_token.txt', 'w').write(results["refresh_token"])
-        open('xero_access_token.txt', 'w').write(results["access_token"])
+        open("P:\\app\\xero_refresh_token.txt", 'w').write(results["refresh_token"])
+        open("P:\\app\\xero_access_token.txt", 'w').write(results["access_token"])
         # store_xero_oauth2_token(response)
         store_xero_oauth2_token(
             {
@@ -297,8 +295,8 @@ def update_xero(app, contact_name):
                 LineItem(
                     description=item["Item"],
                     quantity=1,
-                    unit_amount=int(item["Fee"]),
-                    account_code="200"
+                    unit_amount=int(float(item["Fee"])),
+                    account_code="000"
                 )
             )
         invoices_list.append(
@@ -310,7 +308,7 @@ def update_xero(app, contact_name):
                 line_items=line_item_list,
                 invoice_number=data["Invoices Number"][i]["Number"].get(),
                 reference=data["Project Info"]["Project"]["Project Name"].get(),
-                status="AUTHORISED"
+                status="DRAFT"
             )
         )
 

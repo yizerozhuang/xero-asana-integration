@@ -896,6 +896,7 @@ class FinancialPanelPage(tk.Frame):
         try:
             filename = self.data["Project Info"]["Project"]["Project Number"].get()+ bill_number.get() + os.path.basename(file)
             folder_dir = os.path.join(database_dir, filename)
+            shutil.copy(file, folder_dir)
         except PermissionError:
             self.messagebox.show_error("Please Close the file before you upload it")
             return
@@ -903,6 +904,7 @@ class FinancialPanelPage(tk.Frame):
             print(e)
             self.messagebox.show_error("Some error occurs, please contact Administrator")
             return
+
         try:
             send_email_with_attachment(folder_dir)
         except Exception as e:

@@ -1,8 +1,6 @@
 from utility import convert_to_json
 
 import os
-import json
-import jsondiff
 from datetime import datetime
 from config import CONFIGURATION
 

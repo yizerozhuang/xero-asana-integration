@@ -320,7 +320,7 @@ def rename_project(app):
 
     for folder in dir_list:
         if folder[:5].isdigit():
-            quotation_number, project_name = folder.split("-", 1)
+            quotation_number = folder.split("-", 1)[0]
             if quotation_number == current_quotation:
                 old_dir = os.path.join(working_dir, folder)
                 new_dir = os.path.join(working_dir, current_quotation+"-"+data["Project Info"]["Project"]["Project Name"].get())
@@ -424,8 +424,8 @@ def separate_line(line):
 
 def minor_project_fee_proposal(app, *args):
     data = app.data
-    pdf_name = _get_proposal_name(app)
-    excel_name = f'Mechanical_Fee_Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
+    pdf_name = _get_proposal_name(app) + ".pdf"
+    excel_name = f'{data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
@@ -457,18 +457,19 @@ def minor_project_fee_proposal(app, *args):
     elif not page in [1, 2, 3]:
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
     pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
-                str(file).startswith("Mechanical Fee Proposal") and str(file).endswith(".pdf")]
+                "Fee Proposal" in str(file) and str(file).endswith(".pdf")]
 
     if len(pdf_list) != 0:
-        current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
+        current_pdf = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
+        current_revision = current_pdf.split(" ")[-1].split(".")[0]
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"]["Revision"].get() == str(int(current_revision) + 1):
-            old_pdf_path = os.path.join(database_dir, f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {current_revision}.pdf')
+            old_pdf_path = os.path.join(database_dir, current_pdf)
             # avDoc.open(old_pdf_path, old_pdf_path)
             def open_pdf():
                 subprocess.call([adobe_address, old_pdf_path])
             _thread.start_new_thread(open_pdf, ())
 
-            overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
+            overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to generate Revision {data['Fee Proposal']['Reference']['Revision'].get()}")
             if not overwrite:
                 return
             else:
@@ -509,9 +510,10 @@ def minor_project_fee_proposal(app, *args):
         work_sheets = work_book.Worksheets[0]
         address_to = data["Address_to"].get()
         work_sheets.Cells(1, 2).Value = data["Project Info"][address_to]["Full Name"].get()
+        work_sheets.Cells(2, 2).Value = data["Project Info"][address_to]["Company"].get()
+        work_sheets.Cells(3, 2).Value = data["Project Info"][address_to]["Address"].get()
         first_name = get_first_name(data["Project Info"][address_to]["Full Name"].get())
         work_sheets.Cells(5, 1).Value = f'Dear {first_name},'
-        work_sheets.Cells(2, 2).Value = data["Project Info"][address_to]["Company"].get()
         work_sheets.Cells(1, 8).Value = data["Project Info"]["Project"]["Quotation Number"].get()
         work_sheets.Cells(2, 8).Value = data["Fee Proposal"]["Reference"]["Date"].get()
         work_sheets.Cells(3, 8).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
@@ -601,8 +603,8 @@ def minor_project_fee_proposal(app, *args):
 
 def major_project_fee_proposal(app, *args):
     data = app.data
-    pdf_name = _get_proposal_name(app)
-    excel_name = f'Mechanical_Fee_Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
+    pdf_name = _get_proposal_name(app) + ".pdf"
+    excel_name = f'{data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
@@ -632,7 +634,7 @@ def major_project_fee_proposal(app, *args):
     elif not page in [1, 2, 3, 4, 5]:
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
     pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
-                str(file).startswith("Mechanical Fee Proposal") and str(file).endswith(".pdf")]
+                "Fee Proposal" in str(file) and str(file).endswith(".pdf")]
 
     case = _check_case(app)
     if case == "Error":
@@ -640,17 +642,17 @@ def major_project_fee_proposal(app, *args):
         return
 
     if len(pdf_list) != 0:
-        current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in pdf_list]))
+        current_pdf = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
+        current_revision = current_pdf.split(" ")[-1].split(".")[0]
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"][
             "Revision"].get() == str(int(current_revision) + 1):
-            old_pdf_path = os.path.join(database_dir,
-                                        f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {current_revision}.pdf')
+            old_pdf_path = os.path.join(database_dir, current_pdf)
             def open_pdf():
                 subprocess.call([adobe_address, old_pdf_path])
 
             _thread.start_new_thread(open_pdf, ())
 
-            overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to overwrite")
+            overwrite = messagebox.askyesno(f"Warming", f"Revision {current_revision} found, do you want to generate Revision {data['Fee Proposal']['Reference']['Revision'].get()}")
             if not overwrite:
                 return
             else:
@@ -711,7 +713,8 @@ def major_project_fee_proposal(app, *args):
 
         work_sheets.Cells(86, 2).Value = "We have prepared this submission in response to an invitation of " + data["Project Info"][address_to]["Full Name"].get() + " for the provision of our consulting services for " + data["Project Info"]["Project"]["Project Name"].get()
         work_sheets.Cells(97, 2).Value = "Email sent from " + data["Project Info"][address_to]["Full Name"].get() + " on " + data["Fee Proposal"]["Reference"]["Date"].get() + " with Architectural Plans"
-        cur_row = 99
+
+        cur_row = 97
         # for building in data["Project Info"]["Building Features"]["Details"]:
         #     if len(building["Space"].get())!=0:
         #         work_sheets.Cells(cur_row, 2).Value = building["Space"].get()
@@ -720,6 +723,23 @@ def major_project_fee_proposal(app, *args):
             for line in data["Project Info"]["Building Features"]["Notes"].get().split("\n"):
                 work_sheets.Cells(cur_row, 2).Value = line
                 cur_row+=1
+
+        cur_row = 108
+        n_stage = 0
+        for key, value in data["Fee Proposal"]["Stage"].items():
+            if not value["Include"].get():
+                continue
+            work_sheets.Cells(cur_row, 2).value = key
+            work_sheets.Cells(cur_row, 2).Font.Bold = True
+            cur_row+=1
+            n_stage+=1
+            for item in value["Items"]:
+                if item["Include"].get():
+                    work_sheets.Cells(cur_row, 1).value = "•"
+                    work_sheets.Cells(cur_row, 2).value = item["Item"].get()
+                    cur_row+=1
+
+
 
         cur_index = 3
         i = 0
@@ -739,16 +759,13 @@ def major_project_fee_proposal(app, *args):
                 work_sheets.Cells(cur_row, 2).Font.Bold = True
                 cur_row+=1
                 for scope in service[extra]:
+                    if len(service[extra]) == 0:
+                        continue
                     if scope["Include"].get():
-                        if scope["Item"].get() in conf["sub_title"]:
-                            work_sheets.Cells(cur_row, 2).Value = scope["Item"].get()
-                            work_sheets.Cells(cur_row, 2).Font.Bold = True
+                        work_sheets.Cells(cur_row, 1).Value = "•"
+                        for line in separate_line(scope["Item"].get()):
+                            work_sheets.Cells(cur_row, 2).Value = line
                             cur_row+=1
-                        else:
-                            work_sheets.Cells(cur_row, 1).Value = "•"
-                            for line in separate_line(scope["Item"].get()):
-                                work_sheets.Cells(cur_row, 2).Value = line
-                                cur_row+=1
                 cur_row += 1
                 cur_index += 1
             i += 1
@@ -761,40 +778,7 @@ def major_project_fee_proposal(app, *args):
             work_sheets.Cells(cur_row + i, 1).Value = "•"
             work_sheets.Cells(cur_row + i, 2).Value = project
 
-        cur_row = 182 + page * row_per_page
-        stage_total = [0]*4
-        total = 0
-        gst = 0
-        total_gst = 0
-
-        for service in conf["proposal_list"]:
-            if not data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
-                continue
-            total += float(data["Invoices"]["Details"][service]["Fee"].get())
-            gst += float(data["Invoices"]["Details"][service]["in.GST"].get()) - float(data["Invoices"]["Details"][service]["Fee"].get())
-            total_gst += float(data["Invoices"]["Details"][service]["in.GST"].get())
-
-            work_sheets.Cells(cur_row, 2).Value = service
-            if data["Invoices"]["Details"][service]["Expand"].get():
-                j = 0
-                for item in data["Invoices"]["Details"][service]["Content"]:
-                    item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
-                    work_sheets.Cells(cur_row, 4+j).Value = item_fee
-                    stage_total[j] += item_fee
-                    j+=1
-            work_sheets.Cells(cur_row, 8).Value = float(data["Invoices"]["Details"][service]["Fee"].get())
-            cur_row +=1
-        cur_row = 182 + (row_per_page+1)*page
-        work_sheets.Cells(cur_row, 4).Value = stage_total[0]
-        work_sheets.Cells(cur_row, 5).Value = stage_total[1]
-        work_sheets.Cells(cur_row, 6).Value = stage_total[2]
-        work_sheets.Cells(cur_row, 7).Value = stage_total[3]
-
-
-
-        work_sheets.Cells(cur_row, 8).Value = total
-        work_sheets.Cells(cur_row+1, 8).Value = gst
-        work_sheets.Cells(cur_row+2, 8).Value = total_gst
+        _major_project_fee_section(data, work_sheets, n_stage, page, row_per_page)
 
         cur_row = 200 + page * (row_per_page+1)
         work_sheets.Cells(cur_row, 2).Value = "Re: "+data["Project Info"]["Project"]["Project Name"].get()
@@ -829,17 +813,111 @@ def major_project_fee_proposal(app, *args):
     except Exception as e:
         print(e)
         pass
+
+def _major_project_fee_section(data, work_sheets, n_stage, page, row_per_page):
+
+    cur_row = 182 + page * row_per_page
+    stage_total = [0]*4
+    total = 0
+    gst = 0
+    total_gst = 0
+
+    for service in conf["proposal_list"]:
+        if not data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
+            continue
+        total += float(data["Invoices"]["Details"][service]["Fee"].get())
+        gst += float(data["Invoices"]["Details"][service]["in.GST"].get()) - float(data["Invoices"]["Details"][service]["Fee"].get())
+        total_gst += float(data["Invoices"]["Details"][service]["in.GST"].get())
+        work_sheets.Cells(cur_row, 2).Value = service
+
+        if n_stage in [1, 4]:
+            if data["Invoices"]["Details"][service]["Expand"].get():
+                for j in range(n_stage):
+                    item = data["Invoices"]["Details"][service]["Content"][j]
+                    item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
+                    work_sheets.Cells(cur_row, 4 + j).Value = item_fee
+                    stage_total[j] += item_fee
+            work_sheets.Cells(cur_row, 8).Value = float(data["Invoices"]["Details"][service]["Fee"].get())
+            cur_row +=1
+        elif n_stage == 2:
+            if data["Invoices"]["Details"][service]["Expand"].get():
+                for j in range(n_stage):
+                    item = data["Invoices"]["Details"][service]["Content"][j]
+                    item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
+                    work_sheets.Cells(cur_row, 4 + 2*j).Value = item_fee
+                    stage_total[j] += item_fee
+            work_sheets.Cells(cur_row, 8).Value = float(data["Invoices"]["Details"][service]["Fee"].get())
+            cur_row +=1
+        elif n_stage == 3:
+            if data["Invoices"]["Details"][service]["Expand"].get():
+                for j in range(n_stage):
+                    item = data["Invoices"]["Details"][service]["Content"][j]
+                    item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
+                    work_sheets.Cells(cur_row, 4 + j).Value = item_fee
+                    stage_total[j] += item_fee
+            work_sheets.Cells(cur_row, 7).Value = float(data["Invoices"]["Details"][service]["Fee"].get())
+            cur_row +=1
+    if n_stage == 1:
+        cur_row = 182 + (row_per_page+1)*page
+        work_sheets.Cells(cur_row, 4).Value = stage_total[0]
+        work_sheets.Cells(cur_row, 8).Value = total
+        work_sheets.Cells(cur_row + 1, 8).Value = gst
+        work_sheets.Cells(cur_row + 2, 8).Value = total_gst
+    elif n_stage == 2:
+        cur_row = 182 + (row_per_page+1)*page
+        work_sheets.Cells(cur_row, 4).Value = stage_total[0]
+        work_sheets.Cells(cur_row, 6).Value = stage_total[1]
+        work_sheets.Cells(cur_row, 8).Value = total
+        work_sheets.Cells(cur_row + 1, 8).Value = gst
+        work_sheets.Cells(cur_row + 2, 8).Value = total_gst
+    elif n_stage == 3:
+        cur_row = 182 + (row_per_page+1)*page
+        work_sheets.Cells(cur_row, 4).Value = stage_total[0]
+        work_sheets.Cells(cur_row, 5).Value = stage_total[1]
+        work_sheets.Cells(cur_row, 6).Value = stage_total[2]
+        work_sheets.Cells(cur_row, 7).Value = total
+        work_sheets.Cells(cur_row + 1, 7).Value = gst
+        work_sheets.Cells(cur_row + 2, 7).Value = total_gst
+    elif n_stage == 4:
+        cur_row = 182 + (row_per_page+1)*page
+        work_sheets.Cells(cur_row, 4).Value = stage_total[0]
+        work_sheets.Cells(cur_row, 5).Value = stage_total[1]
+        work_sheets.Cells(cur_row, 6).Value = stage_total[2]
+        work_sheets.Cells(cur_row, 7).Value = stage_total[3]
+        work_sheets.Cells(cur_row, 8).Value = total
+        work_sheets.Cells(cur_row + 1, 8).Value = gst
+        work_sheets.Cells(cur_row + 2, 8).Value = total_gst
+    # work_sheets.Cells(cur_row, 8).Value = total
+    # work_sheets.Cells(cur_row+1, 8).Value = gst
+    # work_sheets.Cells(cur_row+2, 8).Value = total_gst
+
 def _get_proposal_name(app):
     data = app.data
-    return f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
+    service_list = []
+    for service in app.conf["service_list"]:
+        if data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
+            service_list.append(service)
+    convert_map = {
+        ""
+    }
+
+    if len(service_list) == 1:
+        service_name = service_list[0].split(" ")[0]
+    elif len(service_list) == 2:
+        service_name = f'{service_list[0].split(" ")[0]} and {service_list[1].split(" ")[0]}'
+    elif len(service_list) == 3:
+        service_name = f'{service_list[0].split(" ")[0]}, {service_list[1].split(" ")[0]} and {service_list[2].split(" ")[0]}'
+    else:
+        service_name = "Multi Service"
+    return f'{service_name} Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}'
 
 def _check_case(app):
     data = app.data
     stages = app.conf["major_stage"]
-    stage_1 = data["Fee Proposal"]["Stage"][stages[0]].get()
-    stage_2 = data["Fee Proposal"]["Stage"][stages[1]].get()
-    stage_3 = data["Fee Proposal"]["Stage"][stages[2]].get()
-    stage_4 = data["Fee Proposal"]["Stage"][stages[3]].get()
+    stage_1 = data["Fee Proposal"]["Stage"][stages[0]]["Include"].get()
+    stage_2 = data["Fee Proposal"]["Stage"][stages[1]]["Include"].get()
+    stage_3 = data["Fee Proposal"]["Stage"][stages[2]]["Include"].get()
+    stage_4 = data["Fee Proposal"]["Stage"][stages[3]]["Include"].get()
 
     if stage_1 and stage_2 and stage_3 and stage_4:
         return "case1"
@@ -895,7 +973,7 @@ def excel_print_invoice(app, inv):
         try:
             work_sheets = work_book.Worksheets[0]
             address_to = data["Address_to"].get()
-            work_sheets.Cells(4, 1).Value = data["Project Info"][address_to]["Full Name"].get()
+            work_sheets.Cells(5, 1).Value = data["Project Info"][address_to]["Full Name"].get()
             work_sheets.Cells(6, 1).Value = data["Project Info"][address_to]["Company"].get()
             work_sheets.Cells(7, 1).Value = data["Project Info"][address_to]["Address"].get()
             work_sheets.Cells(4, 10).Value = datetime.today().strftime("%d-%b-%Y")
@@ -908,11 +986,10 @@ def excel_print_invoice(app, inv):
                 if not service["Include"].get() or service["Service"].get()=="Variation":
                     continue
                 if service["Expand"].get():
-                    work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
-                    work_sheets.Cells(cur_row+1, 2).Value = "Payment Instalments"
-                    work_sheets.Cells(cur_row+1, 7).Value = "Amount"
-                    work_sheets.Cells(cur_row+1, 8).Value = "This pay"
-                    cur_row += 2
+                    work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
+                    # work_sheets.Cells(cur_row, 7).Value = "Amount"
+                    # work_sheets.Cells(cur_row, 8).Value = "This pay"
+                    cur_row += 1
                     for item in service["Content"]:
                         if len(item["Fee"].get()) != 0:
                             work_sheets.Cells(cur_row, 1).Value = item["Service"].get()
@@ -924,20 +1001,25 @@ def excel_print_invoice(app, inv):
                                 total_fee += float(item["Fee"].get())
                                 total_inGST += float(item["in.GST"].get()) if len(item["in.GST"].get()) != 0 else 0
                             cur_row += 1
+                    work_sheets.Cells(cur_row, 6).Value = "Total: "
+                    work_sheets.Cells(cur_row, 6).Font.Bold = True
+                    work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
+                    work_sheets.Cells(cur_row, 7).Font.Bold = True
+                    cur_row += 2
                 else:
                     work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
-                    work_sheets.Cells(cur_row+1, 2).Value = "Payment Instalments"
-                    work_sheets.Cells(cur_row+1, 7).Value = "Amount"
-                    work_sheets.Cells(cur_row+1, 8).Value = "This pay"
-                    work_sheets.Cells(cur_row+2, 1).Value = "The Full amount for design and documentation"
-                    work_sheets.Cells(cur_row+2, 7).Value = service["Fee"].get()
+                    # work_sheets.Cells(cur_row+1, 2).Value = "Payment Instalments"
+                    # work_sheets.Cells(cur_row+1, 7).Value = "Amount"
+                    # work_sheets.Cells(cur_row+1, 8).Value = "This pay"
+                    # work_sheets.Cells(cur_row+2, 1).Value = "The Full amount for design and documentation"
+                    work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
                     if service["Number"].get() == f"INV{str(inv+1)}":
-                        work_sheets.Cells(cur_row+2, 8).Value = service["Fee"].get()
-                        work_sheets.Cells(cur_row+2, 9).Value = service["Fee"].get()
-                        work_sheets.Cells(cur_row+2, 10).Value = service["in.GST"].get()
+                        work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
+                        work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
+                        work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
                         total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
                         total_inGST += float(service["in.GST"].get()) if len(service["Fee"].get()) !=0 else 0
-                    cur_row+=3
+                    cur_row+=2
                 # cur_row+=1
             cur_row+=1
             for service in data["Invoices"]["Details"]["Variation"]["Content"]:
@@ -952,6 +1034,8 @@ def excel_print_invoice(app, inv):
                     total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
                     total_inGST += float(service["in.GST"].get()) if len(service["in.GST"].get()) !=0 else 0
                 cur_row += 1
+            work_sheets.Cells(44, 9).Value = data["Invoices Number"][0]["Number"].get()
+
             # for service in data["Variation"]:
             #     if len(service["Service"].get())==0 and len(service["Fee"].get())==0:
             #         continue
@@ -965,8 +1049,8 @@ def excel_print_invoice(app, inv):
             #         total_inGST += float(service["in.GST"].get())
             #     cur_row += 2
 
-            work_sheets.Cells(33, 9).Value = str(total_fee)
-            work_sheets.Cells(33, 10).Value = str(total_inGST)
+            work_sheets.Cells(39, 9).Value = str(total_fee)
+            work_sheets.Cells(39, 10).Value = str(total_inGST)
             work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, invoice_name))
             work_book.Close(True)
         except PermissionError:
@@ -998,7 +1082,10 @@ def excel_print_invoice(app, inv):
 def email_fee_proposal(app, *args):
     data = app.data
     database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
-    pdf_name = f'Mechanical Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}.pdf'
+    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
+                "Fee Proposal" in str(file) and str(file).endswith(".pdf")]
+
+    pdf_name = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
 
     if not data["State"]["Generate Proposal"].get():
         messagebox.showerror("Error", "Please Generate a pdf first")
@@ -1017,7 +1104,7 @@ def email_fee_proposal(app, *args):
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
     # newmail.From = user_email_dic[app.user]
-    newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-Mechanical Fee Proposal - {data["Project Info"]["Project"]["Project Name"].get()} Rev {data["Fee Proposal"]["Reference"]["Revision"].get()}'
+    newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-{_get_proposal_name(app)}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
     newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
@@ -1097,7 +1184,7 @@ def email_invoice(app, inv):
     ol = win32client.Dispatch("Outlook.Application")
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
-    newmail.Subject = f'Invoice {data["Invoices Number"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
+    newmail.Subject = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
     newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"

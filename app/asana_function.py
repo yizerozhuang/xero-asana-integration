@@ -2,7 +2,7 @@ import asana
 from utility import remove_none, config_log, get_invoice_item
 
 asana_configuration = asana.Configuration()
-asana_configuration.access_token = '1/1205463377927189:4825d7e7924a9dd8dd44a9c826e45455'
+asana_configuration.access_token = '2/1203283895754383/1206354773081941:c116d68430be7b2832bf5d7ea2a0a415'
 asana_api_client = asana.ApiClient(asana_configuration)
 
 project_api_instance = asana.ProjectsApi(asana_api_client)
@@ -10,7 +10,7 @@ task_api_instance = asana.TasksApi(asana_api_client)
 custom_fields_api_instance = asana.CustomFieldsApi(asana_api_client)
 custom_fields_setting_api_instance = asana.CustomFieldSettingsApi(asana_api_client)
 template_api_instance = asana.TaskTemplatesApi(asana_api_client)
-workspace_gid = '1205045058713243'
+workspace_gid = '1198726743417674'
 
 #
 
@@ -85,9 +85,9 @@ def update_asana(app, *args):
     contact_id_map = name_id_map(contact_field["enum_options"])
 
     if len(data["Project Info"]["Project"]["Project Number"].get()) != 0:
-        name = data["Project Info"]["Project"]["Project Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
+        name = "P:\\"+data["Project Info"]["Project"]["Project Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
     else:
-        name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
+        name = "P:\\"+data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
 
     if data["State"]["Quote Unsuccessful"].get():
         status = status_id_map["Quote Unsuccessful"]
@@ -122,9 +122,8 @@ def update_asana(app, *args):
                 custom_field_id_map["Apt/Room/Area"]: data["Project Info"]["Building Features"]["Minor"]["Total Area"].get() + "m2",
                 custom_field_id_map["Feature/Notes"]: data["Project Info"]["Building Features"]["Feature"].get(),
                 custom_field_id_map["Client"]: client_name,
-                custom_field_id_map["Main contact"]: main_contact_name,
-                custom_field_id_map["Contact Type"]: contact_id_map[
-                    data["Project Info"]["Main Contact"]["Contact Type"].get()]
+                custom_field_id_map["Main Contact"]: main_contact_name,
+                custom_field_id_map["Contact Type"]: contact_id_map[data["Project Info"]["Main Contact"]["Contact Type"].get()]
             }
         }
     )
@@ -196,7 +195,7 @@ def update_asana_invoices(app):
     custom_field_id_map = name_id_map(all_custom_fields)
 
     status_field = clearn_response(
-        custom_fields_api_instance.get_custom_field(custom_field_id_map["Invoice Status"]))
+        custom_fields_api_instance.get_custom_field(custom_field_id_map["Invoice status"]))
     status_id_map = name_id_map(status_field["enum_options"])
 
 
@@ -212,7 +211,7 @@ def update_asana_invoices(app):
         if len(data["Invoices Number"][i]["Asana_id"].get()) == 0:
             body = asana.TasksTaskGidBody(
                 {
-                    "name": f"INV 3xxxxx",
+                    "name": f"INV 4xxxxx",
                 }
             )
             response = template_api_instance.instantiate_task(task_template_gid=invoice_template_id,
@@ -234,7 +233,7 @@ def update_asana_invoices(app):
             {
                 "name": name,
                 "custom_fields": {
-                    custom_field_id_map["Invoice Status"]: status_id_map[data["Invoices Number"][i]["State"].get()],
+                    custom_field_id_map["Invoice status"]: status_id_map[data["Invoices Number"][i]["State"].get()],
                     custom_field_id_map["Net"]: str(sum([float(item["Fee"]) for item in invoice_item[i]])),
                     custom_field_id_map["Gross"]: str(sum([float(item["in.GST"]) for item in invoice_item[i]]))
                 }
@@ -271,7 +270,7 @@ def update_asana_invoices(app):
             body = asana.TasksTaskGidBody(
                 {
                     "custom_fields": {
-                        custom_field_id_map["Invoice Status"]: status_id_map[value["Content"][i]["State"].get()],
+                        custom_field_id_map["Invoice status"]: status_id_map[value["Content"][i]["State"].get()],
                         custom_field_id_map["Net"]: str(value["Fee"].get()) if len(str(value["Fee"].get()))!=0 else "0"
                     }
                 }

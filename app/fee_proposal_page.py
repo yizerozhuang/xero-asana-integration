@@ -84,9 +84,45 @@ class FeeProposalPage(tk.Frame):
         self.data["Project Info"]["Project"]["Proposal Type"].trace("w", self._update_stage)
         self.stage_frame = tk.LabelFrame(self.main_context_frame, text="Stage", font=self.conf["font"])
 
+        self.stage_frames = {}
+        self.append_stage = dict()
+
+        stage_dir = os.path.join(self.conf["database_dir"], "general_scope_of_staging.json")
+        stage_data = json.load(open(stage_dir))
         for i, stage in enumerate(self.conf["major_stage"]):
-            stage_dict[stage] = tk.BooleanVar(value=True)
-            tk.Checkbutton(self.stage_frame, variable=stage_dict[stage], text=stage, font=self.conf["font"]).grid(row=0, column=i)
+            stage_dict[stage] = {
+                "Include": tk.BooleanVar(value=True),
+                "Items": []
+            }
+            tk.Checkbutton(self.stage_frame, variable=stage_dict[stage]["Include"], text=stage, font=self.conf["font"]).pack(anchor="w")
+
+            extra_frame = tk.LabelFrame(self.stage_frame, font=self.conf["font"])
+            extra_frame.pack()
+            self.stage_frames[stage] = tk.Frame(extra_frame)
+            self.stage_frames[stage].pack()
+            color_list = ["white", "azure"]
+            for j, item in enumerate(stage_data[stage]):
+                content = {
+                    "Include": tk.BooleanVar(value=True),
+                    "Item": tk.StringVar(value=item)
+                }
+                stage_dict[stage]["Items"].append(content)
+
+                tk.Checkbutton(self.stage_frames[stage], variable=content["Include"]).grid(row=j, column=0)
+                tk.Entry(self.stage_frames[stage], width=100, textvariable=content["Item"], font=self.conf["font"], bg=color_list[j % 2]).grid(row=j, column=1)
+
+            self.append_stage[stage] = {
+                "Item": tk.StringVar(),
+                "Add": tk.BooleanVar()
+            }
+            append_frame = tk.Frame(extra_frame)
+            append_frame.pack()
+
+            tk.Entry(append_frame, width=95, textvariable=self.append_stage[stage]["Item"]).grid(row=0, column=0)
+            tk.Checkbutton(append_frame, variable=self.append_stage[stage]["Add"], text="Add to Database").grid(row=0, column=1)
+            func = lambda stage: lambda: self._append_stage(stage)
+            tk.Button(append_frame, text="Submit", command=func(stage)).grid(row=0, column=2)
+
     def _update_stage(self, *args):
         if self.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
             self.stage_frame.grid_forget()
@@ -116,14 +152,15 @@ class FeeProposalPage(tk.Frame):
                                 "Item": tk.StringVar(value=context)
                             }
                         )
-
         self.data["Fee Proposal"]["Scope"] = scope
+
     def scope_part(self):
         self._reset_scope()
         self.scope_frame = tk.LabelFrame(self.main_context_frame, text="Scope of Work", font=self.conf["font"])
         self.scope_frame.grid(row=2, column=0, sticky="ew", padx=20)
         self.scope_frames = {}
         self.append_context = dict()
+
     def update_scope(self, var):
         scope = self.data["Fee Proposal"]["Scope"][self.data["Project Info"]["Project"]["Proposal Type"].get()]
         service = var["Service"].get()
@@ -135,6 +172,8 @@ class FeeProposalPage(tk.Frame):
             self.scope_frames[service]["Main Frame"].pack()
             self.append_context[service] = dict()
             for i, extra in enumerate(extra_list):
+                if len(scope[service][extra]) == 0:
+                    continue
                 extra_frame = tk.LabelFrame(self.scope_frames[service]["Main Frame"], text=extra, font=self.conf["font"])
                 extra_frame.pack()
                 self.scope_frames[service][extra] = tk.Frame(extra_frame)
@@ -143,7 +182,7 @@ class FeeProposalPage(tk.Frame):
                 for j, context in enumerate(scope[service][extra]):
                     tk.Checkbutton(self.scope_frames[service][extra], variable=scope[service][extra][j]["Include"]).grid(row=j, column=0)
                     tk.Entry(self.scope_frames[service][extra], width=100, textvariable=scope[service][extra][j]["Item"],
-                             font=self.conf["font"], bg=color_list[j % 2]).grid(row=j, column=1)
+                             font=self.conf["font"], bg=color_list[j%2]).grid(row=j, column=1)
 
                 self.append_context[service][extra] = {
                     "Item": tk.StringVar(),
@@ -301,7 +340,7 @@ class FeeProposalPage(tk.Frame):
     def _append_value(self, service, extra):
         scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
         scope_type = self.data["Project Info"]["Project"]["Proposal Type"].get()
-        scope = self.app.data["Fee Proposal"]["Scope"][scope_type]
+        scope = self.data["Fee Proposal"]["Scope"][scope_type]
         item = self.append_context[service][extra]["Item"].get()
         if len(item.strip()) == 0:
             self.messagebox.show_error(title="Error", message="You need to enter some context")
@@ -327,6 +366,35 @@ class FeeProposalPage(tk.Frame):
                 f.write(json_object)
         self.append_context[service][extra]["Item"].set("")
         self.append_context[service][extra]["Add"].set(False)
+
+    def _append_stage(self, stage):
+        stage_dir = os.path.join(self.conf["database_dir"], "general_scope_of_staging.json")
+        app_stage = self.data["Fee Proposal"]["Stage"]
+        item = self.append_stage[stage]["Item"].get()
+        if len(item.strip()) == 0:
+            self.messagebox.show_error(title="Error", message="You need to enter some context")
+            return
+        app_stage[stage]["Items"].append(
+            {
+                "Include": tk.BooleanVar(value=True),
+                "Item": tk.StringVar(value=item)
+            }
+        )
+        tk.Entry(self.stage_frames[stage], width=100,
+                 textvariable=app_stage[stage]["Items"][-1]["Item"],
+                 font=self.conf["font"]).grid(row=len(app_stage[stage]["Items"]), column=1)
+
+        tk.Checkbutton(self.stage_frames[stage],
+                       variable=app_stage[stage]["Items"][-1]["Include"]).grid(row=len(app_stage[stage]["Items"]), column=0)
+
+        if self.append_stage[stage]["Add"].get():
+            stage_data = json.load(open(stage_dir))
+            stage_data[stage].append(item)
+            with open(stage_dir, "w") as f:
+                json_object = json.dumps(stage_data, indent=4)
+                f.write(json_object)
+        self.append_stage[stage]["Item"].set("")
+        self.append_stage[stage]["Add"].set(False)
 
     def reset_scrollregion(self, event):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))

@@ -7,8 +7,7 @@ CONFIGURATION = {
     "proposal_list": ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service"],
     "service_list":["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Installation"],
     "invoice_list": ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Installation", "Variation"],
-    "extra_list":["Extend", "Clarifications", "Deliverables"],
-    "sub_title": ["Design Development", "Construction Documents", "Construction Phase Service"],
+    "extra_list":["Extent", "Clarifications", "Deliverables"],
     "major_stage": ["Design Application", "Design Development", "Construction Documentation", "Construction Phase"],
     "tax rates": 1.1,
     "n_building": 5,
@@ -25,15 +24,18 @@ CONFIGURATION = {
     "imap_server": "mail.pcen.com.au",
     "smap_server": "mail.pcen.com.au",
     "smap_port": 587,
-    "xero_client_id": "876EFEC2F1AC4729812A3B39152A2DD3",
-    "xero_client_secret": "jtohs0Oqcoezje-bjYn8n9KaTa9hCm2taATzBIbS3RpaXmOl",
-    "xero_bill_email": "bills.of4xmk.wt2xjjy1w2n5vceb@xerofiles.com"
+    "xero_client_id": "92582E6BA77A41F0B5076D3E5B442A24",
+    "xero_client_secret": "YmhTPLEHqGhjYFOK0uPowcpVsgdLJ2ZKYD_PKq-rjGJVQIml",
+    "xero_bill_email": "bills.vwkv1.b68g90zti0h38qcd@xerofiles.com"
 }
 
 
 
 
 CONFIGURATION["working_dir"] = str(Path(os.getcwd()).parent)
-CONFIGURATION["database_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "database")
+# CONFIGURATION["database_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "database")
+CONFIGURATION["database_dir"] = "A:\\00-Bridge Database"
+CONFIGURATION["bills_address"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "bills")
+CONFIGURATION["remittances_address"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "remittances")
 CONFIGURATION["resource_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "resource")
 CONFIGURATION["recycle_bin_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "recycle_bin")
