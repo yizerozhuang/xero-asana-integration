@@ -1,6 +1,9 @@
 import asana
 from utility import remove_none, config_log, get_invoice_item
 
+import datetime
+from datetime import date
+
 asana_configuration = asana.Configuration()
 asana_configuration.access_token = '2/1203283895754383/1206354773081941:c116d68430be7b2832bf5d7ea2a0a415'
 asana_api_client = asana.ApiClient(asana_configuration)
@@ -11,7 +14,10 @@ custom_fields_api_instance = asana.CustomFieldsApi(asana_api_client)
 custom_fields_setting_api_instance = asana.CustomFieldSettingsApi(asana_api_client)
 template_api_instance = asana.TaskTemplatesApi(asana_api_client)
 workspace_gid = '1198726743417674'
-
+user_gid_map = {
+    "Admin": "1203283895754383",
+    "Felix": "1198835648677067"
+}
 #
 
 def clearn_response(response):
@@ -43,7 +49,7 @@ def update_asana(app, *args):
 
         body = asana.TaskGidAddProjectBody(
             {
-                    "project": projects_id_map["MP"]
+                "project": projects_id_map["MP"]
             }
         )
         task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
@@ -129,6 +135,31 @@ def update_asana(app, *args):
     )
     task_api_instance.update_task(task_gid=task_id, body=body)
     # messagebox.showinfo("Success", "Update/Create Asana Success")
+
+    sub_tasks = clearn_response(task_api_instance.get_subtasks_for_task(task_id))
+    if not data["State"]["Fee Accepted"].get():
+        body_dict = {}
+        first_task_gid = sub_tasks[0]["gid"]
+        first_task = clearn_response(task_api_instance.get_task(first_task_gid))
+
+        if not "assignee" in first_task.keys():
+            body_dict["assignee"] = user_gid_map[app.user]
+        if not "due_on" in first_task.keys():
+            body_dict["due_on"] = date.today().strftime("%Y-%m-%d")
+        body = asana.TasksTaskGidBody(body_dict)
+        task_api_instance.update_task(task_gid=first_task_gid, body=body)
+    else:
+        for i in range(1, 6):
+            body_dict = {}
+            task_gid = sub_tasks[i]["gid"]
+            task = clearn_response(task_api_instance.get_task(task_gid))
+            if not "assignee" in task.keys():
+                body_dict["assignee"] = user_gid_map[app.user]
+            if not "due_on" in task.keys():
+                body_dict["due_on"] = date.today().strftime("%Y-%m-%d")
+            body = asana.TasksTaskGidBody(body_dict)
+            task_api_instance.update_task(task_gid=task_gid, body=body)
+
     app.log.log_update_asana(app)
     config_log(app)
 
@@ -227,7 +258,7 @@ def update_asana_invoices(app):
             task_api_instance.set_parent_for_task(body=body, task_gid=new_inv_task_gid)
             data["Invoices Number"][i]["Asana_id"].set(new_inv_task_gid)
 
-        name = "INV " + data["Invoices Number"][i]["Number"].get() if len(data["Invoices Number"][i]["Number"].get())!= 0 else f"INV 3xxxxx"
+        name = "INV " + data["Invoices Number"][i]["Number"].get() if len(data["Invoices Number"][i]["Number"].get())!= 0 else f"INV 4xxxxx"
 
         body = asana.TasksTaskGidBody(
             {
@@ -240,6 +271,16 @@ def update_asana_invoices(app):
             }
         )
         task_api_instance.update_task(task_gid=data["Invoices Number"][i]["Asana_id"].get(), body=body)
+
+        if data["Invoices Number"][i]["State"].get() == "Sent":
+            invoice_task = clearn_response(task_api_instance.get_task(data["Invoices Number"][i]["Asana_id"].get()))
+            if not "due_on" in invoice_task.keys():
+                body = asana.TasksTaskGidBody(
+                    {
+                        "due_on": (date.today() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
+                    }
+                )
+                task_api_instance.update_task(task_gid=data["Invoices Number"][i]["Asana_id"].get(), body=body)
 
     bill_template_id = template_id_map["BIL Template"]
 

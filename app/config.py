@@ -4,9 +4,9 @@ from pathlib import Path
 
 CONFIGURATION = {
     "font": ["Calibri", 11],
-    "proposal_list": ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service"],
-    "service_list":["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Installation"],
-    "invoice_list": ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Installation", "Variation"],
+    "proposal_list": ["Mechanical Service", "Mechanical Review", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service"],
+    "service_list":["Mechanical Service", "Mechanical Review", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Installation"],
+    "invoice_list": ["Mechanical Service", "Mechanical Review", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Installation", "Variation"],
     "extra_list":["Extent", "Clarifications", "Deliverables"],
     "major_stage": ["Design Application", "Design Development", "Construction Documentation", "Construction Phase"],
     "tax rates": 1.1,
@@ -33,9 +33,12 @@ CONFIGURATION = {
 
 
 CONFIGURATION["working_dir"] = str(Path(os.getcwd()).parent)
-# CONFIGURATION["database_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "database")
 CONFIGURATION["database_dir"] = "A:\\00-Bridge Database"
-CONFIGURATION["bills_address"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "bills")
-CONFIGURATION["remittances_address"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "remittances")
-CONFIGURATION["resource_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "resource")
+# CONFIGURATION["database_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "database")
+# CONFIGURATION["bills_address"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "bills")
+# CONFIGURATION["remittances_address"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "remittances")
+CONFIGURATION["bills_address"] = "S:\\01.Expense invoice"
+CONFIGURATION["remittances_address"] = "S:\\01.Expense invoice"
+CONFIGURATION["resource_dir"] = "T:\\00-Template-Do Not Modify\\00-Bridge template"
+# CONFIGURATION["resource_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "resource")
 CONFIGURATION["recycle_bin_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "recycle_bin")

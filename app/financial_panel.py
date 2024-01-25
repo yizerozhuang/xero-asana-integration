@@ -1,4 +1,3 @@
-import shutil
 import tkinter as tk
 from tkinter import ttk, filedialog
 
@@ -8,6 +7,7 @@ from asana_function import update_asana, update_asana_invoices
 import os
 import json
 from datetime import date
+import shutil
 
 class FinancialPanelPage(tk.Frame):
     def __init__(self, parent, app):
@@ -221,6 +221,8 @@ class FinancialPanelPage(tk.Frame):
         remittance = [
             {
                 "Type": tk.StringVar(),
+                "Preview_Upload": tk.BooleanVar(),
+                "Email_Upload": tk.BooleanVar(),
                 "Full_Upload": tk.BooleanVar(),
                 "Part1": tk.StringVar(),
                 "Part1_Upload": tk.BooleanVar(),
@@ -234,19 +236,25 @@ class FinancialPanelPage(tk.Frame):
 
         invoice_function_frame = tk.LabelFrame(self.main_context_frame, text="Invoice Functions", font=self.conf["font"])
         invoice_function_frame.grid(row=1, column=0, sticky="ew")
-        print_invoice_function = lambda i: lambda: excel_print_invoice(self.app, i)
+        print_invoice_function = lambda i: lambda: self._excel_print_invoice(i)
         email_invoice_function = lambda i: lambda: self._email_invoice(i)
         upload_remittance_func = lambda part, i: lambda: self.upload_remittance(invoice_number=self.data["Invoices Number"][i]["Number"].get(), part=part, i=i)
         button_config_func = lambda var, button: lambda a,b,c: self.config_button(var, button)
+
         for i in range(6):
             tk.Label(invoice_function_frame, text="Invoice Number: ", font=self.conf["font"]).grid(row=i, column=0)
             self.invoice_label_list[i].append(tk.Label(invoice_function_frame, width=10, textvariable=self.data["Invoices Number"][i]["Number"], font=self.conf["font"]))
             self.invoice_label_list[i][3].grid(row=i, column=1)
             self.data["Invoices Number"][i]["State"].trace("w", self.invoice_color_code)
-            tk.Button(invoice_function_frame, text="Preview", font=self.conf["font"], bg="cyan",
-                      command=print_invoice_function(i)).grid(row=i, column=2)
-            tk.Button(invoice_function_frame, text="Email", font=self.conf["font"], bg="cyan",
-                      command=email_invoice_function(i)).grid(row=i, column=3)
+            preview_button = tk.Button(invoice_function_frame, text="Preview", font=self.conf["font"], bg="cyan",
+                                       command=print_invoice_function(i))
+            preview_button.grid(row=i, column=2)
+            remittance[i]["Preview_Upload"].trace("w", button_config_func(remittance[i]["Preview_Upload"], preview_button))
+
+            email_button = tk.Button(invoice_function_frame, text="Email", font=self.conf["font"], bg="cyan",
+                                     command=email_invoice_function(i))
+            email_button.grid(row=i, column=3)
+            remittance[i]["Email_Upload"].trace("w", button_config_func(remittance[i]["Email_Upload"], email_button))
 
             full_button = tk.Button(invoice_function_frame, text="REMIT FULL", font=self.conf["font"], bg="cyan",
                                     command=upload_remittance_func("Full", i))
@@ -529,7 +537,7 @@ class FinancialPanelPage(tk.Frame):
 
 
                 self.bill_dic[service]["Paid"].pack(side=tk.RIGHT)
-                config_button_func = lambda i : lambda: self.config_button(self.data["Bills"]["Details"][service]["Content"][i]["Upload"], self.bill_dic[service]["Content"][i]["Upload"])
+                config_button_func = lambda i : lambda a, b, c: self.config_button(self.data["Bills"]["Details"][service]["Content"][i]["Upload"], self.bill_dic[service]["Content"][i]["Upload"])
                 for i in range(self.conf["n_bills"]):
                     self.bill_dic[service]["Content"][i]["Number"].grid(row=0, column=0, padx=(0, 3))
                     self.bill_dic[service]["Content"][i]["Service"].grid(row=0, column=1)
@@ -680,15 +688,24 @@ class FinancialPanelPage(tk.Frame):
                 self.data["Profits"]["Fee"])
     def fee_acceptance_part(self):
         self.data["Verbal Acceptance Note"] = tk.StringVar()
+        self.data["Fee_Acceptance_Upload"] = tk.BooleanVar()
+        self.data["Verbal_Acceptance_Upload"] = tk.BooleanVar()
         fee_acceptance_frame = tk.LabelFrame(self.main_context_frame, text="Upload Fee Acceptance", font=self.conf["font"])
         fee_acceptance_frame.grid(row=1, column=1, sticky="news", columnspan=2)
+
         tk.Label(fee_acceptance_frame, text="Fee Acceptance", font=self.conf["font"]).grid(row=0, column=0)
-        # tk.Label(fee_acceptance_frame, text="Rev1", font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="brown", fg="white",
-                  command=lambda: self.upload_file(fee_acceptance="Fee Acceptance")).grid(row=0, column=1)
+        fee_upload_button =tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="cyan",
+                                     command=self.upload_fee_acceptance)
+        fee_upload_button.grid(row=0, column=1)
+        self.data["Fee_Acceptance_Upload"].trace("w", self.config_button(self.data["Fee_Acceptance_Upload"], fee_upload_button))
+
         tk.Label(fee_acceptance_frame, text="Verbal Acceptance", font=self.conf["font"]).grid(row=1, column=0)
-        tk.Button(fee_acceptance_frame, text="Confirm", font=self.conf["font"], bg="brown", fg="white",
-                  command=self.upload_verbal_acceptance).grid(row=1, column=1)
+        verbal_acceptance_button = tk.Button(fee_acceptance_frame, text="Confirm", font=self.conf["font"], bg="cyan",
+                                             command=self.upload_verbal_acceptance)
+        verbal_acceptance_button.grid(row=1, column=1)
+        self.data["Verbal_Acceptance_Upload"].trace("w", self.config_button(self.data["Verbal_Acceptance_Upload"], verbal_acceptance_button))
+
+
         tk.Label(fee_acceptance_frame, text="Note: ", font=self.conf["font"]).grid(row=1, column=2)
         tk.Entry(fee_acceptance_frame, width=50, textvariable=self.data["Verbal Acceptance Note"], font=self.conf["font"], fg="Blue").grid(row=1, column=3)
 
@@ -743,7 +760,12 @@ class FinancialPanelPage(tk.Frame):
         if update:
             unlock_invoice(self.app)
 
+    def _excel_print_invoice(self, i):
+        self.data["Remittances"][i]["Preview_Upload"].set(True)
+        excel_print_invoice(self.app, i)
+
     def _email_invoice(self, i):
+        self.data["Remittances"][i]["Email_Upload"].set(True)
         email_invoice(self.app, i)
         if i == 0 and len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
             number = self.data["Invoices Number"][0]["Number"].get()
@@ -756,21 +778,27 @@ class FinancialPanelPage(tk.Frame):
                 with open(project_quotation_dir, "w") as f:
                     json_object = json.dumps(project_quotation_json, indent=4)
                     f.write(json_object)
-                if len(self.data["Asana_id"].get()) != 0:
-                    update_asana(self.app)
-                    update_asana_invoices(self.app)
-                    self.messagebox.file_info("Folder and Asana Renamed", old_folder, new_folder)
-                    return
-                self.messagebox.file_info("Folder Renamed", old_folder, new_folder)
+                # if len(self.data["Asana_id"].get()) != 0:
+                update_asana(self.app)
+                update_asana_invoices(self.app)
+                # self.messagebox.file_info("Folder and Asana Renamed", old_folder, new_folder)
                 # yes_asana = self.messagebox.file_ask_yes_no("Rename", old_folder, new_folder, "Asana")
+                self.messagebox.file_info("Folder and Asana Renamed", old_folder, new_folder, "Please wait until the invoice turn red and Update Xero")
+                # if update_xero:
+                #     self.app._update_xero()
             else:
                 self.messagebox.show_error(
                     f"Fail to rename the folder from {old_folder} to {new_folder}, Please close all the file relate in the folder")
                 return
+        else:
+            update_asana(self.app)
+            update_asana_invoices(self.app)
+            update_xero = self.messagebox.ask_yes_no("The Invoices has upload to Asana, do you want to update Xero")
+            if update_xero:
+                self.app._update_xero()
 
         save(self.app)
         config_state(self.app)
-
 
     def _get_current_invoice_number(self):
         invoice_dir = os.path.join(self.conf["database_dir"], "invoices.json")
@@ -788,16 +816,17 @@ class FinancialPanelPage(tk.Frame):
         if var.get() == True:
             button.config(bg="grey")
         else:
-            button.config(bg="red")
+            button.config(bg="cyan")
 
 
     def upload_remittance(self, invoice_number, part, i):
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        remittance_dir = os.path.join(self.conf["remittances_address"], date.today().strftime("%Y%m"))
         if part == "Full":
             if self.data['Remittances'][i]["Type"].get() == "Part":
                 self.messagebox.show_error("This invoice already has partial amount remittance")
                 return
-            filename = f"Remittance {invoice_number} ${self.data['Invoices Number'][i]['in.GST'].get()}"
+            filename = f"{invoice_number}, ${self.data['Invoices Number'][i]['in.GST'].get()}-${self.data['Invoices Number'][i]['in.GST'].get()}"
         else:
             if self.data['Remittances'][i]["Type"].get() == "Full":
                 self.messagebox.show_error("This invoice already has full amount remittance")
@@ -826,7 +855,7 @@ class FinancialPanelPage(tk.Frame):
                 if fee != amount:
                     self.messagebox.show_error(f"The Amount does not match, input amount {amount}, invoice ingst {fee}")
                     return
-            filename = f"Remittances {invoice_number} ${amount}-${self.data['Invoices Number'][i]['in.GST'].get()}"
+            filename = f"{invoice_number}, ${amount}-${self.data['Invoices Number'][i]['in.GST'].get()}"
 
         if self.data["Remittances"][i][part+"_Upload"].get():
             rewrite = self.messagebox.ask_yes_no(f"Existing file found, Do you want to rewrite")
@@ -845,6 +874,20 @@ class FinancialPanelPage(tk.Frame):
             print(e)
             self.messagebox.show_error("Some error occurs, please contact Administrator")
             return
+
+        try:
+            if not os.path.exists(remittance_dir):
+                os.makedirs(remittance_dir)
+            file_path = os.path.join(remittance_dir, filename + os.path.splitext(file)[1])
+            shutil.copy(file, file_path)
+        except PermissionError:
+            self.messagebox.show_error("Please Close the file before you upload it")
+            return
+        except Exception as e:
+            print(e)
+            self.messagebox.show_error("Some error occurs, please contact Administrator")
+            return
+
         if part == "Full":
             self.data['Remittances'][i]['Type'].set("Full")
         else:
@@ -914,108 +957,38 @@ class FinancialPanelPage(tk.Frame):
         self.messagebox.file_info("Upload", file, folder_dir, "And the bill has been sent to Xero")
         self.data["Bills"]["Details"][service]["Content"][i]["Upload"].set(True)
 
-    def upload_file(self, **kwargs):
-        database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
-        for key, value in kwargs.items():
-            if len(value.strip()) == 0:
-                self.messagebox.show_error(f"You need to enter {key.replace('_', ' ')} before you upload the file")
-                return
-        if "remittance" in kwargs.keys():
-            number = kwargs['invoice']
-            i = int(kwargs['i'])
-            if kwargs["part"] == "Full Amount":
-                if self.data['Remittances'][i]["Type"].get() == "Part":
-                    self.messagebox.show_error("This invoice already has partial amount remittance")
-                    return
-                filename=f"Remittance {number} ${self.data['Invoices Number'][i]['in.GST'].get()}"
-            else:
-                part1_amount = self.data['Remittances'][i]['Part1'].get()
-                part2_amount = self.data['Remittances'][i]['Part2'].get()
-                part3_amount = self.data['Remittances'][i]['Part3'].get()
-                full_amount = self.data['Invoices Number'][i]['in.GST'].get()
-                if self.data['Remittances'][i]["Type"].get() == "Full":
-                    self.messagebox.show_error("This invoice already has full amount remittance")
-                    return
-                elif kwargs["part"] == "Part1":
-                    if not isfloat(part1_amount) or float(part1_amount) > float(full_amount):
-                        self.messagebox.show_error("The amount exceed the full amount")
-                        return
-                    filename=f"Remittance {number} ${self.data['Remittances'][i]['Part1'].get()}-${self.data['Invoices Number'][i]['in.GST'].get()}"
-                elif kwargs["part"] == "Part2":
-                    if not isfloat(part1_amount) or not isfloat(part2_amount) or float(part1_amount) + float(part2_amount) > float(full_amount):
-                        self.messagebox.show_error("The amount exceed the full amount")
-                        return
-                    part_1 = float(self.data['Remittances'][i]['Part1'].get()) if len(self.data['Remittances'][i]['Part1'].get()) != 0 else 0
-                    part_2 = float(self.data['Remittances'][i]['Part2'].get()) if len(self.data['Remittances'][i]['Part2'].get()) != 0 else 0
-                    amount = str(part_1 + part_2)
-                    filename = f"Remittances {number} ${amount}-${self.data['Invoices Number'][i]['in.GST'].get()}"
-                else:
-                    if not isfloat(part1_amount) or not isfloat(part2_amount) or not isfloat(part3_amount) or float(part1_amount) + float(part2_amount) +float(part3_amount) > float(full_amount):
-                        self.messagebox.show_error("The amount exceed the full amount")
-                        return
-                    part_1 = float(self.data['Remittances'][i]['Part1'].get()) if len(self.data['Remittances'][i]['Part1'].get()) !=0 else 0
-                    part_2 = float(self.data['Remittances'][i]['Part2'].get()) if len(self.data['Remittances'][i]['Part2'].get()) !=0 else 0
-                    part_3 = float(self.data['Remittances'][i]['Part3'].get()) if len(self.data['Remittances'][i]['Part3'].get()) !=0 else 0
-                    amount = str(part_1 + part_2 + part_3)
-                    fee = self.data['Invoices Number'][i]['in.GST'].get()
-                    if fee != amount:
-                        self.messagebox.show_error(f"The Amount does not match, input amount {amount}, invoice ingst {fee}")
-                        return
-                    filename = f"Remittances {number} ${amount}-${self.data['Invoices Number'][i]['in.GST'].get()}"
-        elif "bill_description" in kwargs.keys():
-            filename = f"{kwargs['bill_description']}-{kwargs['origin']}"
-        elif "bill_number" in kwargs.keys():
-            if len(self.data["Project Info"]["Project"]["Project Number"].get())==0:
-                self.messagebox.show_error("Please generate first invoice number before you upload bill file")
-                return
-            filename = f'{self.data["Project Info"]["Project"]["Project Number"].get()+kwargs["bill_number"]}-'
-        elif "fee_acceptance" in kwargs.keys():
-            if not self.data["State"]["Email to Client"].get():
-                self.messagebox.show_error("You need to send the Email to Client first")
-                return
-            elif self.data["State"]["Fee Accepted"].get():
-                update = self.messagebox.ask_yes_no("Fee Already Accepted, do you want to update again?")
-                if not update:
-                    return
-            acceptance_list = [file for file in os.listdir(os.path.join(database_dir)) if str(file).startswith("Fee Acceptance")]
+    def upload_fee_acceptance(self):
+        self.data["Fee_Acceptance_Upload"].set(True)
+        database_dir = os.path.join(self.conf["database_dir"],
+                                    self.data["Project Info"]["Project"]["Quotation Number"].get())
 
-            if len(acceptance_list) != 0:
-                current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in acceptance_list]))
-                overwrite = self.messagebox.ask_yes_no(f"Current Fee Acceptance {current_revision} found, do you want to Overwrite")
-                if overwrite:
-                    filename = kwargs["fee_acceptance"]+f" Rev {current_revision}"
-                else:
-                    filename = kwargs["fee_acceptance"] + f" Rev {str(int(current_revision)+1)}"
-            else:
-                filename = kwargs["fee_acceptance"]+" Rev 1"
-        else:
-            self.messagebox.show_error("Unable to Upload the file, Please contact Administer")
+        if not self.data["State"]["Email to Client"].get():
+            self.messagebox.show_error("You need to send the Email to Client first")
             return
-        # if "part" in kwargs.keys():
-        #     if kwargs["part"] == "Full Amount":
-        #         kwargs["part"] = "$" + self.data["Invoices Number"][f"INV{kwargs['index']+1}"]["Fee"].get()
-        #     kwargs.pop("index")
-            # elif kwargs["part"] == "Part 1":
-            #     kwargs["part"] = "$" + self.data["Invoices Number"][f"INV {kwargs['index']+1}"]["Fee"].get()
-            # else:
-            #     kwargs["part"] = self.data["Invoices Number"][f"INV {kwargs['index']+1}"]["Fee"]
+        elif self.data["State"]["Fee Accepted"].get():
+            update = self.messagebox.ask_yes_no("Fee Already Accepted, do you want to update again?")
+            if not update:
+                return
+
+        acceptance_list = [file for file in os.listdir(os.path.join(database_dir)) if
+                           str(file).startswith("Fee Acceptance")]
+
+        if len(acceptance_list) != 0:
+            current_revision = str(max([str(pdf).split(" ")[-1].split(".")[0] for pdf in acceptance_list]))
+            overwrite = self.messagebox.ask_yes_no(f"Current Fee Acceptance {current_revision} found, do you want to Overwrite")
+            if overwrite:
+                filename = f"Fee Acceptance Rev {current_revision}"
+            else:
+                filename = f"Fee Acceptance Rev {str(int(current_revision) + 1)}"
+        else:
+            filename = "Fee Acceptance Rev 1"
         rewrite = True
-        if not "fee_acceptance" in kwargs.keys():
-            for file in os.listdir(database_dir):
-                if os.path.splitext(file)[0] == filename:
-                    rewrite = self.messagebox.ask_yes_no(f"Existing file {file} found, Do you want to rewrite")
-                    if not rewrite:
-                        return
-                    break
         if rewrite:
             file = filedialog.askopenfilename()
             if file == "":
                 return
             try:
-                if "bill_number" in kwargs.keys():
-                    folder_dir = os.path.join(database_dir, filename + os.path.basename(file))
-                else:
-                    folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
+                folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
                 shutil.copy(file, folder_dir)
             except PermissionError:
                 self.messagebox.show_error("Please Close the file before you upload it")
@@ -1024,90 +997,20 @@ class FinancialPanelPage(tk.Frame):
                 print(e)
                 self.messagebox.show_error("Some error occurs, please contact Administrator")
                 return
+            self.data["State"]["Fee Accepted"].set(True)
+            self.app.log.log_fee_accept_file(self.app.user, self.data["Project Info"]["Project"]["Quotation Number"].get())
+            update = self.messagebox.file_ask_yes_no("Upload", file, folder_dir, "Asana")
+            if update:
+                update_asana(self.app)
+                update_asana_invoices(self.app)
+                self.messagebox.show_info("Success update Asana")
+            save(self.app)
+            config_state(self.app)
+            config_log(self.app)
 
-            if "fee_acceptance" in kwargs.keys():
-                self.data["State"]["Fee Accepted"].set(True)
-                self.app.log.log_fee_accept_file(self.app.user, self.data["Project Info"]["Project"]["Quotation Number"].get())
-                update = self.messagebox.file_ask_yes_no("Upload", file, folder_dir, "Asana")
-                if update:
-                    update_asana(self.app)
-                    update_asana_invoices(self.app)
-                    self.messagebox.show_info("Success update Asana")
-                save(self.app)
-                config_state(self.app)
-                config_log(self.app)
-                return
-            elif "bill_number" in kwargs.keys():
-                try:
-                    send_email_with_attachment(folder_dir)
-                except Exception as e:
-                    print(e)
-                    self.messagebox.show_error("Unable to upload the File to xero")
-                    return
-                # service = kwargs["service"]
-                # i = int(kwargs["i"])
-                # self.data["Bills"]["Details"][service]["Content"][i]["State"].set("Submitted")
-                self.messagebox.file_info("Upload", file, folder_dir, "And the bill has been sent to Xero")
-                return
-            elif "remittance" in kwargs.keys():
-                number = kwargs['invoice']
-                i = int(kwargs['i'])
-                if kwargs["part"] == "Full Amount":
-                    self.data['Remittances'][i]['Type'].set("Full")
-                else:
-                    self.data['Remittances'][i]['Type'].set("Part")
-            self.messagebox.file_info("Upload", file, folder_dir)
-
-
-    # def upload_remittance(self, invoice, part, i):
-    #     database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
-    #     if part == "Full Amount":
-    #         filename = f"Remittance {invoice} ${self.data['Invoices Number'][i]['in.GST'].get()}"
-    #     elif part == "Part1":
-    #         filename = f"Remittance {invoice} ${self.data['Remittances'][i]['Part1'].get()}-${self.data['Invoices Number'][i]['in.GST'].get()}"
-    #     elif part == "Part2":
-    #         part_1 = float(self.data['Remittances'][i]['Part1'].get()) if len(
-    #             self.data['Remittances'][i]['Part1'].get()) != 0 else 0
-    #         part_2 = float(self.data['Remittances'][i]['Part2'].get()) if len(
-    #             self.data['Remittances'][i]['Part2'].get()) != 0 else 0
-    #         amount = str(part_1 + part_2)
-    #         filename = f"Remittances {invoice} ${amount}-${self.data['Invoices Number'][i]['in.GST'].get()}"
-    #     else:
-    #         part_1 = float(self.data['Remittances'][i]['Part1'].get()) if len(
-    #             self.data['Remittances'][i]['Part1'].get()) != 0 else 0
-    #         part_2 = float(self.data['Remittances'][i]['Part2'].get()) if len(
-    #             self.data['Remittances'][i]['Part2'].get()) != 0 else 0
-    #         part_3 = float(self.data['Remittances'][i]['Part3'].get()) if len(
-    #             self.data['Remittances'][i]['Part3'].get()) != 0 else 0
-    #         amount = str(part_1 + part_2 + part_3)
-    #         fee = self.data['Invoices Number'][i]['in.GST'].get()
-    #         if fee != amount:
-    #             self.messagebox.show_error(f"The Amount does not match, input amount {amount}, invoice ingst {fee}")
-    #             return
-    #         filename = f"Remittances {invoice} ${amount}-${self.data['Invoices Number'][i]['in.GST'].get()}"
-    #     rewrite = True
-    #     for file in os.listdir(database_dir):
-    #         if os.path.splitext(file)[0] == filename:
-    #             rewrite = self.messagebox.ask_yes_no(f"Existing file {file} found, Do you want to rewrite")
-    #             if not rewrite:
-    #                 return
-    #             break
-    #     if rewrite:
-    #         file = filedialog.askopenfilename()
-    #         if file == "":
-    #             return
-    #         try:
-    #             folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
-    #             shutil.copy(file, folder_dir)
-    #         except PermissionError:
-    #             self.messagebox.show_error("Please Close the file before you upload it")
-    #             return
-    #         except Exception as e:
-    #             print(e)
-    #             self.messagebox.show_error("Some error occurs, please contact Administrator")
-    #             return
 
     def upload_verbal_acceptance(self):
+        self.data["Verbal_Acceptance_Upload"].set(True)
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         resource_dir = os.path.join(self.conf["resource_dir"], "txt", "Verbal Fee Acceptance.txt")
 
@@ -1174,6 +1077,7 @@ class FinancialPanelPage(tk.Frame):
                 if self.data["Invoices"]["Details"][service]["Content"][j]["Number"].get() == f"INV{str(i+1)}":
                     for inv in value["Content"][j]["Invoice"]:
                         inv.config(state=config)
+
     def bill_color_code(self, state, label, *args):
         state = state.get()
         if state=="Draft":

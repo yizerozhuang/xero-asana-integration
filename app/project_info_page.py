@@ -5,11 +5,7 @@ from utility import load_data, get_quotation_number, save, reset, delete_project
 from text_extension import TextExtension
 from asana_function import update_asana
 
-
 import os
-
-
-
 
 class ProjectInfoPage(tk.Frame):
     def __init__(self, parent, app):
@@ -55,7 +51,7 @@ class ProjectInfoPage(tk.Frame):
         # self.app.email_text = tk.Text(self.main_context_frame, font=self.conf["font"], height=68)
         # self.app.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
 
-        TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=68).grid(row=0, column=1, rowspan=6, sticky="n")
+        TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=85).grid(row=0, column=1, rowspan=6, sticky="n")
 
         tk.Label(self.main_context_frame, textvariable=self.app.log_text, font=self.conf["font"], justify=tk.LEFT).grid(row=0, column=2, rowspan=6, sticky="n")
 
@@ -130,7 +126,7 @@ class ProjectInfoPage(tk.Frame):
         project["Proposal Type"].trace("w", self._update_proposal)
 
         tk.Label(project_frame, text="Project Type", font=self.conf["font"]).grid(row=5, column=0)
-        project_types = ["Restaurant", "Office", "Commercial", "Group house", "Apartment", "Mixed-use complex",
+        project_types = ["Restaurant", "Office", "Commercial", "Group House", "Apartment", "Mixed-use complex",
                          "School", "Others"]
 
         project["Project Type"] = tk.StringVar(value="Restaurant")
@@ -141,7 +137,7 @@ class ProjectInfoPage(tk.Frame):
             button.grid(row=i//3+5, column=i%3+1, sticky="W")
 
         service_types = ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service",
-                         "Fire Service", "Kitchen Ventilation", "Mech Review", "Miscellaneous", "Installation"]
+                         "Fire Service", "Kitchen Ventilation", "Mechanical Review", "Miscellaneous", "Installation"]
 
         tk.Label(project_frame, width=30, text="Service Type", font=self.conf["font"]).grid(row=8, column=0)
 
@@ -194,8 +190,7 @@ class ProjectInfoPage(tk.Frame):
                                     font=self.conf["font"])
             button.grid(row=i//3 + 1, column=i%3 + 2, sticky="W")
 
-        client_info = ["Company", "Address", "ABN", "Contact Number",
-                       "Contact Email"]
+        client_info = ["Company", "Address", "ABN", "Contact Number", "Contact Email"]
         for i, info in enumerate(client_info):
             tk.Label(client_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
             client[info] = tk.StringVar()
@@ -370,6 +365,15 @@ class ProjectInfoPage(tk.Frame):
 
         tk.Label(build_feature_frame, text="Project Notes: ", font=self.conf["font"]).grid(row=3, column=0, sticky="w", padx=(90, 0))
         TextExtension(build_feature_frame, textvariable=building_features["Notes"], font=self.conf["font"], height=10, fg="blue").grid(row=4, column=0)
+        building_features["Notes"].set(
+            """
+                Email sent from ??? on ???, with architecture drawings.
+The project is a residential develop and consists of:
+-      ??? levels of Basement car park.
+-      Ground level with ??? business premises.
+-      Level ???-??? with Residential Apartments with approximately ??? Apartments.
+            """
+        )
 
 
     def drawing_number_part(self):

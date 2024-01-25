@@ -26,6 +26,36 @@
                 "Equipment selection"
             ]
         },
+        "Mechanical Review": {
+            "Extent": [
+                "Car park ventilation system.",
+                "Garbage exhaust.",
+                "Fire pump room ventilation.",
+                "Stair pressurization and relief systems.",
+                "Air conditioning system design to ensuites.",
+                "Air conditioning system design to other communal area as required.",
+                "Air conditioning system design to commercial tenancy, cold shell.",
+                "Air conditioning system design to commercial tenancy, warm shell.",
+                "Air conditioning system design to apartments.",
+                "Toilet and laundry ventilation to apartments.",
+                "Rangehood exhaust system to apartments.",
+                "Outside air system design for noise affected apartments.",
+                "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc.",
+                "Other ventilation to AS 1668.2.",
+                "Electrical services associated with mechanical plant and equipment.",
+                "Coordinate with architect, electrical, hydraulic fire service and other relevant parties.",
+                "D&BP Act class 2 building design declaration",
+                "D&BP Act class 3 building design declaration"
+            ],
+            "Clarifications": [
+                "Fire engineering;",
+                "Assessment of compliance with environmental noise regulations;",
+                "Preparation of Performance Solutions where Deemed to satisfy requirements of the BCA do not suit the project requirements;",
+                "Refrigeration systems to cool rooms and freezers;",
+                "Revit modelling and documentation."
+            ],
+            "Deliverables": []
+        },
         "CFD Service": {
             "Extent": [
                 "Review of all drawings relevant to the car park design. ",
@@ -148,6 +178,36 @@
     },
     "Major": {
         "Mechanical Service": {
+            "Extent": [
+                "Car park ventilation system.",
+                "Garbage exhaust.",
+                "Fire pump room ventilation.",
+                "Stair pressurization and relief systems.",
+                "Air conditioning system design to ensuites.",
+                "Air conditioning system design to other communal area as required.",
+                "Air conditioning system design to commercial tenancy, cold shell.",
+                "Air conditioning system design to commercial tenancy, warm shell.",
+                "Air conditioning system design to apartments.",
+                "Toilet and laundry ventilation to apartments.",
+                "Rangehood exhaust system to apartments.",
+                "Outside air system design for noise affected apartments.",
+                "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc.",
+                "Other ventilation to AS 1668.2.",
+                "Electrical services associated with mechanical plant and equipment.",
+                "Coordinate with architect, electrical, hydraulic fire service and other relevant parties.",
+                "D&BP Act class 2 building design declaration",
+                "D&BP Act class 3 building design declaration"
+            ],
+            "Clarifications": [
+                "Fire engineering;",
+                "Assessment of compliance with environmental noise regulations;",
+                "Preparation of Performance Solutions where Deemed to satisfy requirements of the BCA do not suit the project requirements;",
+                "Refrigeration systems to cool rooms and freezers;",
+                "Revit modelling and documentation."
+            ],
+            "Deliverables": []
+        },
+        "Mechanical Review": {
             "Extent": [
                 "Car park ventilation system.",
                 "Garbage exhaust.",

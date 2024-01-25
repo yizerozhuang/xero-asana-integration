@@ -48,8 +48,8 @@
                     "Service": "Kitchen Ventilation",
                     "Include": false
                 },
-                "Mech Review": {
-                    "Service": "Mech Review",
+                "Mechanical Review": {
+                    "Service": "Mechanical Review",
                     "Include": false
                 },
                 "Miscellaneous": {
@@ -328,7 +328,30 @@
             }
         },
         "Stage": {
-            "Design Application": {
+            "Stage1": {
+                "Service": "Design Application",
+                "Include": true,
+                "Items": [
+                    {
+                        "Include": true,
+                        "Item": "PDF spatial sketch as required"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "DWG drawings as required"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "8 coordination meetings"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "1 coordination meetings"
+                    }
+                ]
+            },
+            "Stage2": {
+                "Service": "Design Development",
                 "Include": true,
                 "Items": [
                     {
@@ -345,24 +368,8 @@
                     }
                 ]
             },
-            "Design Development": {
-                "Include": true,
-                "Items": [
-                    {
-                        "Include": true,
-                        "Item": "PDF spatial sketch as required"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "DWG drawings as required"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "8 coordination meetings"
-                    }
-                ]
-            },
-            "Construction Documentation": {
+            "Stage3": {
+                "Service": "Construction Documentation",
                 "Include": true,
                 "Items": [
                     {
@@ -387,7 +394,8 @@
                     }
                 ]
             },
-            "Construction Phase": {
+            "Stage4": {
+                "Service": "Construction Phase",
                 "Include": true,
                 "Items": [
                     {
@@ -494,6 +502,105 @@
                             "Item": "Equipment selection"
                         }
                     ]
+                },
+                "Mechanical Review": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Car park ventilation system."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Garbage exhaust."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Fire pump room ventilation."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Stair pressurization and relief systems."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to ensuites."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to other communal area as required."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to commercial tenancy, cold shell."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to commercial tenancy, warm shell."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Toilet and laundry ventilation to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Rangehood exhaust system to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Outside air system design for noise affected apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Fire engineering;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions where Deemed to satisfy requirements of the BCA do not suit the project requirements;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
+                        }
+                    ],
+                    "Deliverables": []
                 },
                 "CFD Service": {
                     "Extent": [
@@ -854,6 +961,105 @@
             },
             "Major": {
                 "Mechanical Service": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Car park ventilation system."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Garbage exhaust."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Fire pump room ventilation."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Stair pressurization and relief systems."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to ensuites."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to other communal area as required."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to commercial tenancy, cold shell."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to commercial tenancy, warm shell."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Toilet and laundry ventilation to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Rangehood exhaust system to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Outside air system design for noise affected apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Fire engineering;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions where Deemed to satisfy requirements of the BCA do not suit the project requirements;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
+                        }
+                    ],
+                    "Deliverables": []
+                },
+                "Mechanical Review": {
                     "Extent": [
                         {
                             "Include": true,
@@ -1641,6 +1847,8 @@
     "Remittances": [
         {
             "Type": "",
+            "Preview_Upload": false,
+            "Email_Upload": false,
             "Full_Upload": false,
             "Part1": "",
             "Part1_Upload": false,
@@ -1651,6 +1859,8 @@
         },
         {
             "Type": "",
+            "Preview_Upload": false,
+            "Email_Upload": false,
             "Full_Upload": false,
             "Part1": "",
             "Part1_Upload": false,
@@ -1661,6 +1871,8 @@
         },
         {
             "Type": "",
+            "Preview_Upload": false,
+            "Email_Upload": false,
             "Full_Upload": false,
             "Part1": "",
             "Part1_Upload": false,
@@ -1671,6 +1883,8 @@
         },
         {
             "Type": "",
+            "Preview_Upload": false,
+            "Email_Upload": false,
             "Full_Upload": false,
             "Part1": "",
             "Part1_Upload": false,
@@ -1681,6 +1895,8 @@
         },
         {
             "Type": "",
+            "Preview_Upload": false,
+            "Email_Upload": false,
             "Full_Upload": false,
             "Part1": "",
             "Part1_Upload": false,
@@ -1691,6 +1907,8 @@
         },
         {
             "Type": "",
+            "Preview_Upload": false,
+            "Email_Upload": false,
             "Full_Upload": false,
             "Part1": "",
             "Part1_Upload": false,
@@ -2139,5 +2357,7 @@
         "Fee": "0.0",
         "in.GST": "0.0"
     },
-    "Verbal Acceptance Note": ""
+    "Verbal Acceptance Note": "",
+    "Fee_Acceptance_Upload": false,
+    "Verbal_Acceptance_Upload": false
 }

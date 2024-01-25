@@ -174,7 +174,7 @@ class App(tk.Tk):
 
         tk.Label(legend_frame, text="Sent", bg="red").grid(row=0, column=2, sticky="ew")
         tk.Label(legend_frame, text="Paid", bg="green").grid(row=0, column=4, sticky="ew")
-        tk.Label(legend_frame, text="Voided", bg="purple").grid(row=0, column=5, sticky="ew")
+        tk.Label(legend_frame, text="Voided", bg="purple", fg="white").grid(row=0, column=5, sticky="ew")
 
         tk.Label(legend_frame, text="Bill States: ").grid(row=1, column=0)
 
@@ -185,7 +185,7 @@ class App(tk.Tk):
         tk.Label(legend_frame, text="Awaiting approval", bg="red").grid(row=1, column=2, sticky="ew")
         tk.Label(legend_frame, text="Awaiting payment", bg="orange").grid(row=1, column=3, sticky="ew")
         tk.Label(legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
-        tk.Label(legend_frame, text="Voided", bg="purple").grid(row=1, column=5, sticky="ew")
+        tk.Label(legend_frame, text="Voided", bg="purple", fg="white").grid(row=1, column=5, sticky="ew")
 
     def main_context_part(self):
         # main frame page
@@ -326,6 +326,10 @@ class App(tk.Tk):
         self.fee_proposal_page.pack_forget()
         # self.fee_accepted_page.pack_forget()
         self.financial_panel_page.pack_forget()
+
+        if type(page) == SearchBarPage:
+            self.search_bar_page.refresh()
+
         page.pack(fill=tk.BOTH, expand=1)
 
     def _finish_setup(self):

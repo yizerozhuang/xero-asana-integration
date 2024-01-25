@@ -1,36 +1,36 @@
 {
-    "Asana_id": "",
+    "Asana_id": "1206401769775654",
     "State": {
-        "Set Up": false,
-        "Generate Proposal": false,
-        "Email to Client": false,
+        "Set Up": true,
+        "Generate Proposal": true,
+        "Email to Client": true,
         "Fee Accepted": false,
         "Quote Unsuccessful": false
     },
     "Email": {
-        "Fee Proposal": "",
+        "Fee Proposal": "2024-01-22",
         "First Chase": "",
         "Second Chase": "",
         "Third Chase": ""
     },
-    "Email_Content": "Subject: Fwd: 12-14 Hill street Baulkham Hills\nFrom: Felix YE <felixyeqing@gmail.com>\nDate: Tue, 16 Jan 2024 17:25:29 +1100\nContent: \nHi Vince,\r\n\r\nEmail received.\r\n\r\nWill provide the fee proposal shortly.\r\n\r\nCheers,\r\n\r\n *Felix Ye*\r\n\r\nME | CPEng | NER | RPEQ\r\n\r\nDirector\r\n\r\n*Premium Consulting Engineers Pty Ltd*\r\n\r\n\r\n\r\n*M*: 0426 076 689\r\n\r\n*E *: felix@pcen.com.au\r\n\r\n*A *: Suite 802, 299 Sussex Street, Sydney, NSW 2000\r\n\r\n*W*: www.pcen.com.au\r\n\r\n\r\nThis email is confidential and may contain privileged information and/or\r\ncopyright material. If you are not the intended recipient, please notify\r\nthe sender immediately and delete all material pertaining to this message.\r\nAny unauthorised review, use, alteration, disclosure or distribution of\r\nthis email by an unintended recipient is prohibited.\r\n\r\n\r\n---------- Forwarded message ---------\r\nFrom: Vince Bilotta <Vince@zhinar.com.au>\r\nDate: Tue, Jan 9, 2024 at 8:30=E2=80=AFAM\r\nSubject: 12-14 Hill street Baulkham Hills\r\nTo: Scott Collis (scott@scottcollis.com.au) <scott@scottcollis.com.au>,\r\nFelix Mechanical <felixyeqing@gmail.com>, nicolas@nestcg.com.au <\r\nnicolas@nestcg.com.au>, Paul Scrivener <paul@scrivener-design.com>, Joseph\r\nRahme <joseph.rahme@joeliane.com>, e:f.hie@acouras.com.au <\r\nf.hie@acouras.com.au>, Steven Saad <steven@certified.net.au>, Kaycee La\r\nRosa <kaycee@certified.net.au>\r\n\r\n\r\nHi All\r\n\nHappy new year attached first new project for pricing for CC and CD.\r\n\r\nPlease forward your fee proposal to me this week please\r\n\nClient details\r\n\nCharlie Bazouni - *SABA**Constructions*\r\n\r\nB.Eng (Building) MIEAust, Dip. (Building & Construction)\r\n\r\n*m:* 0459291999 - *e:* *charlie@sabacon.com.au <charlie@sabacon.com.au>* -\r\n*w: *www.sabacon.com.au\r\n\nRegards,\r\n\r\n\r\n\r\n*Vince Bilotta*\r\n\r\nDirector\r\n\n*zhinar*chitects\r\n\n  Suite 1, Level 2\r\n\r\n  2 Rowe Street\r\n\r\n(*Entry from Ryedale Road*)\r\n\r\n  Eastwood NSW 2122\r\n\r\n\r\n\r\n*0421 076 179  *| m\r\n\r\n+61 2 *8893 8888  *|  p\r\n\r\n vince@zhinar.com.au  |  e\r\n\r\nwww.zhinar.com.au  | w\r\n\r\n\r\n\r\n<http://goo.gl/7aLWf8>\r\n\n*Zhinar Architects Pty Ltd*\r\n\nAndries Hermanus Mulder\r\n\r\nAnna Ho\r\n\r\nSubashini Kulothungan\r\n\r\n*ABN  28 495 869 790*\r\nNSW Reg No.: 6294\r\n\r\nNSW Reg No.: 10987\r\n\r\nNSW Reg No.: 11825\r\n\r\n\r\n\r\n*Confidentiality & Privilege:* This email is intended only to be read or\r\nused by the\r\n\r\naddressee. It is confidential and may contain legal privileged information.\r\nIf you are\r\n\r\nnot the intended recipient, any use, distribution disclosure or copying of\r\nany part\r\n\r\nof this email or attachment is prohibited. Confidentiality and legal\r\nprivilege\r\n\r\nattached to this communication are not waived or lost by reason of mistaken\r\n\r\ndelivery. If received in error, please delete and notify the sender by\r\nphone or reply\r\n\r\nemail. Zhinar Architects Pty Ltd employs virus scanning software, however\r\ncannot\r\n\r\nguarantee that this transmission is virus free. It remains the\r\nresponsibility of the\r\n\r\nrecipient to undertake virus scanning upon downloading this email.",
-    "Address_to": "Client",
+    "Email_Content": "From: Vince Bilotta <Vince@zhinar.com.au>\r\nDate: Tue, Jan 9, 2024 at 8:30=E2=80=AFAM\r\nSubject: 12-14 Hill street Baulkham Hills\r\nTo: Scott Collis (scott@scottcollis.com.au) <scott@scottcollis.com.au>,\r\nFelix Mechanical <felixyeqing@gmail.com>, nicolas@nestcg.com.au <\r\nnicolas@nestcg.com.au>, Paul Scrivener <paul@scrivener-design.com>, Joseph\r\nRahme <joseph.rahme@joeliane.com>, e:f.hie@acouras.com.au <\r\nf.hie@acouras.com.au>, Steven Saad <steven@certified.net.au>, Kaycee La\r\nRosa <kaycee@certified.net.au>\r\n\r\n\r\nHi All\r\n\nHappy new year attached first new project for pricing for CC and CD.\r\n\r\nPlease forward your fee proposal to me this week please\r\n\nClient details\r\n\nCharlie Bazouni - *SABA**Constructions*\r\n\r\nB.Eng (Building) MIEAust, Dip. (Building & Construction)\r\n\r\n*m:* 0459291999 - *e:* *charlie@sabacon.com.au <charlie@sabacon.com.au>* -\r\n*w: *www.sabacon.com.au\r\n\nRegards,\r\n\r\n\r\n\r\n*Vince Bilotta*\r\n\r\nDirector\r\n\n*zhinar*chitects\r\n\n  Suite 1, Level 2\r\n\r\n  2 Rowe Street\r\n\r\n(*Entry from Ryedale Road*)\r\n\r\n  Eastwood NSW 2122\r\n\r\n\r\n\r\n*0421 076 179  *| m\r\n\r\n+61 2 *8893 8888  *|  p\r\n\r\n vince@zhinar.com.au  |  e\r\n\r\nwww.zhinar.com.au  | w\r\n\r\n\r\n\r\n<http://goo.gl/7aLWf8>\r\n\n*Zhinar Architects Pty Ltd*\r\n\nAndries Hermanus Mulder\r\n\r\nAnna Ho\r\n\r\nSubashini Kulothungan\r\n\r\n*ABN  28 495 869 790*\r\nNSW Reg No.: 6294\r\n\r\nNSW Reg No.: 10987\r\n\r\nNSW Reg No.: 11825\r\n\r\n\r\n\r\n*Confidentiality & Privilege:* This email is intended only to be read or\r\nused by the\r\n\r\naddressee. It is confidential and may contain legal privileged information.\r\nIf you are\r\n\r\nnot the intended recipient, any use, distribution disclosure or copying of\r\nany part\r\n\r\nof this email or attachment is prohibited. Confidentiality and legal\r\nprivilege\r\n\r\nattached to this communication are not waived or lost by reason of mistaken\r\n\r\ndelivery. If received in error, please delete and notify the sender by\r\nphone or reply\r\n\r\nemail. Zhinar Architects Pty Ltd employs virus scanning software, however\r\ncannot\r\n\r\nguarantee that this transmission is virus free. It remains the\r\nresponsibility of the\r\n\r\nrecipient to undertake virus scanning upon downloading this email.",
+    "Address_to": "Main Contact",
     "Project Info": {
         "Project": {
-            "Project Name": "12-14 Hill street Baulkham Hills",
+            "Project Name": "12-14 Hill Street, Baulkham Hills",
             "Quotation Number": "401000AG",
             "Project Number": "",
             "Shop Name": "",
-            "Proposal Type": "Minor",
-            "Project Type": "Restaurant",
+            "Proposal Type": "Major",
+            "Project Type": "Apartment",
             "Service Type": {
                 "Mechanical Service": {
                     "Service": "Mechanical Service",
-                    "Include": false
+                    "Include": true
                 },
                 "CFD Service": {
                     "Service": "CFD Service",
-                    "Include": false
+                    "Include": true
                 },
                 "Electrical Service": {
                     "Service": "Electrical Service",
@@ -48,8 +48,8 @@
                     "Service": "Kitchen Ventilation",
                     "Include": false
                 },
-                "Mech Review": {
-                    "Service": "Mech Review",
+                "Mechanical Review": {
+                    "Service": "Mechanical Review",
                     "Include": false
                 },
                 "Miscellaneous": {
@@ -72,13 +72,13 @@
             "Contact Email": ""
         },
         "Main Contact": {
-            "Full Name": "",
+            "Full Name": "Vince Bilotta",
             "Contact Type": "Architect",
-            "Company": "",
+            "Company": "Zhinar Achitects\r",
             "Address": "",
             "ABN": "",
             "Contact Number": "",
-            "Contact Email": ""
+            "Contact Email": "vince@zhinar.com.au"
         },
         "Building Features": {
             "Minor": {
@@ -114,19 +114,9 @@
             "Major": {
                 "Car Park": [
                     [
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        ""
-                    ],
-                    [
-                        "",
-                        "",
-                        "",
+                        "B3",
+                        "Plant room",
+                        "28",
                         "",
                         "",
                         "",
@@ -144,9 +134,9 @@
                         ""
                     ],
                     [
+                        "B2",
                         "",
-                        "",
-                        "",
+                        "28",
                         "",
                         "",
                         "",
@@ -157,6 +147,16 @@
                         "",
                         "",
                         "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "B1",
+                        "Garbage room, loading dock",
+                        "18",
                         "",
                         "",
                         "",
@@ -196,20 +196,10 @@
                 ],
                 "Block": [
                     [
+                        "G",
+                        "Bussiness Premises",
                         "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        ""
-                    ],
-                    [
-                        "",
-                        "",
-                        "",
-                        "",
+                        "3",
                         "",
                         "",
                         "",
@@ -226,19 +216,9 @@
                         ""
                     ],
                     [
+                        "L1",
                         "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        ""
-                    ],
-                    [
-                        "",
-                        "",
-                        "",
+                        "7",
                         "",
                         "",
                         "",
@@ -246,9 +226,9 @@
                         ""
                     ],
                     [
+                        "L2",
                         "",
-                        "",
-                        "",
+                        "7",
                         "",
                         "",
                         "",
@@ -256,9 +236,29 @@
                         ""
                     ],
                     [
+                        "L3",
+                        "",
+                        "7",
                         "",
                         "",
                         "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "L4",
+                        "",
+                        "5",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "L5",
+                        "",
+                        "5",
                         "",
                         "",
                         "",
@@ -278,7 +278,7 @@
                 ]
             },
             "Feature": "",
-            "Notes": null
+            "Notes": "Email sent from Vince Bilotta on 9th January 2024, with architecture drawings.\nThe project is a residential develop and consists of:\n-3 levels of Basement car park.\n-Ground level with 3 business premises.\n-Level 1-5 with Residential Apartments with approximately 31 Apartments."
         },
         "Drawing": [
             {
@@ -310,7 +310,7 @@
     },
     "Fee Proposal": {
         "Reference": {
-            "Date": "16-Jan-2024",
+            "Date": "22-Jan-2024",
             "Revision": "1"
         },
         "Time": {
@@ -328,8 +328,9 @@
             }
         },
         "Stage": {
-            "Design Application": {
-                "Include": true,
+            "Stage1": {
+                "Service": "Design Application",
+                "Include": false,
                 "Items": [
                     {
                         "Include": true,
@@ -341,11 +342,16 @@
                     },
                     {
                         "Include": true,
-                        "Item": "9 coordination meetings"
+                        "Item": "8 coordination meetings"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "1 coordination meetings"
                     }
                 ]
             },
-            "Design Development": {
+            "Stage2": {
+                "Service": "Design Development",
                 "Include": true,
                 "Items": [
                     {
@@ -362,7 +368,8 @@
                     }
                 ]
             },
-            "Construction Documentation": {
+            "Stage3": {
+                "Service": "Construction Documentation",
                 "Include": true,
                 "Items": [
                     {
@@ -387,7 +394,8 @@
                     }
                 ]
             },
-            "Construction Phase": {
+            "Stage4": {
+                "Service": "Construction Phase",
                 "Include": false,
                 "Items": [
                     {
@@ -478,6 +486,118 @@
                         {
                             "Include": true,
                             "Item": "Odour management report, please liaise with us cost of the report from us"
+                        }
+                    ],
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "Full set of mechanical drawings in PDF format"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Mechanical design certificate"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Equipment selection"
+                        }
+                    ]
+                },
+                "Mechanical Review": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Map out existing mechanical components"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Commercial kitchen exhaust and makeup air system design;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Charcoal exhaust design with spark arrestor"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Performance based horizontal kitchen exhaust discharge"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Table top BBQ/Hot pot exhaust system"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning design to the tenancy area as required;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Grilles coordination with RCP"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Natural ventilation design"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation as required to AS 1668.2"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordination with stakeholder and other services"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Odour management report, please liaise with us cost of the report from us"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
                         }
                     ],
                     "Deliverables": [
@@ -732,6 +852,10 @@
                         {
                             "Include": true,
                             "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
                         }
                     ],
                     "Clarifications": [
@@ -872,15 +996,15 @@
                             "Item": "Fire pump room ventilation."
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "Stair pressurization and relief systems."
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "Air conditioning system design to ensuites."
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "Air conditioning system design to other communal area as required."
                         },
                         {
@@ -888,7 +1012,7 @@
                             "Item": "Air conditioning system design to commercial tenancy, cold shell."
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "Air conditioning system design to commercial tenancy, warm shell."
                         },
                         {
@@ -928,7 +1052,7 @@
                             "Item": "D&BP Act class 2 building design declaration"
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "D&BP Act class 3 building design declaration"
                         }
                     ],
@@ -955,6 +1079,118 @@
                         }
                     ],
                     "Deliverables": []
+                },
+                "Mechanical Review": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Car park ventilation system."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Garbage exhaust."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Fire pump room ventilation. "
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Toilet and laundry ventilation to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Rangehood exhaust system to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Outside air system design for noise affected apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation as required to AS 1668.2"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Odour management report, please liaise with us cost of the report from us"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
+                        }
+                    ],
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "Full set of mechanical drawings in PDF format"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Mechanical design certificate"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Equipment selection"
+                        }
+                    ]
                 },
                 "CFD Service": {
                     "Extent": [
@@ -1351,10 +1587,44 @@
     "Invoices": {
         "Details": {
             "Mechanical Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "Mechanical Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "16200.0",
+                "in.GST": "17820.0",
+                "Expand": true,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "Mechanical Service Design Development",
+                        "Fee": "8100",
+                        "in.GST": "8910.0",
+                        "Number": "INV1"
+                    },
+                    {
+                        "Service": "Mechanical Service Construction Documents",
+                        "Fee": "8100",
+                        "in.GST": "8910.0",
+                        "Number": "INV2"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Mechanical Review": {
+                "Include": false,
+                "Service": "Mechanical Review",
+                "Fee": "4200",
+                "in.GST": "4620.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1385,24 +1655,24 @@
                 ]
             },
             "CFD Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "CFD Service",
-                "Fee": "",
-                "in.GST": "",
-                "Expand": false,
+                "Fee": "9000.0",
+                "in.GST": "9900.0",
+                "Expand": true,
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
+                        "Service": "CFD Service Kickoff",
+                        "Fee": "4500",
+                        "in.GST": "4950.0",
+                        "Number": "INV1"
                     },
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
+                        "Service": "CFD Service Final",
+                        "Fee": "4500",
+                        "in.GST": "4950.0",
+                        "Number": "INV2"
                     },
                     {
                         "Service": "",
@@ -1421,8 +1691,8 @@
             "Electrical Service": {
                 "Include": false,
                 "Service": "Electrical Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1455,8 +1725,8 @@
             "Hydraulic Service": {
                 "Include": false,
                 "Service": "Hydraulic Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1489,8 +1759,8 @@
             "Fire Service": {
                 "Include": false,
                 "Service": "Fire Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1589,22 +1859,22 @@
                 ]
             }
         },
-        "Fee": "0.0",
-        "in.GST": "0.0"
+        "Fee": "25200.0",
+        "in.GST": "27720.0"
     },
     "Invoices Number": [
         {
             "Number": "",
-            "Fee": "0",
-            "in.GST": "0.0",
+            "Fee": "12600.0",
+            "in.GST": "13860.0",
             "State": "Backlog",
             "Asana_id": "",
             "Xero_id": ""
         },
         {
             "Number": "",
-            "Fee": "0",
-            "in.GST": "0.0",
+            "Fee": "12600.0",
+            "in.GST": "13860.0",
             "State": "Backlog",
             "Asana_id": "",
             "Xero_id": ""
@@ -1651,7 +1921,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1661,7 +1933,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1671,7 +1945,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1681,7 +1957,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1691,7 +1969,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1701,12 +1981,70 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         }
     ],
     "Bills": {
         "Details": {
             "Mechanical Service": {
+                "Include": true,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Mechanical Review": {
                 "Include": false,
                 "Service": "",
                 "Fee": "",
@@ -1763,7 +2101,7 @@
                 ]
             },
             "CFD Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -2105,14 +2443,19 @@
     "Profits": {
         "Details": {
             "Mechanical Service": {
+                "Include": true,
+                "Fee": "16200",
+                "in.GST": "17820"
+            },
+            "Mechanical Review": {
                 "Include": false,
-                "Fee": "",
-                "in.GST": ""
+                "Fee": "4200",
+                "in.GST": "4620"
             },
             "CFD Service": {
-                "Include": false,
-                "Fee": "",
-                "in.GST": ""
+                "Include": true,
+                "Fee": "9000",
+                "in.GST": "9900"
             },
             "Electrical Service": {
                 "Include": false,
@@ -2140,8 +2483,8 @@
                 "in.GST": "0"
             }
         },
-        "Fee": "0.0",
-        "in.GST": "0.0"
+        "Fee": "29400.0",
+        "in.GST": "27720.0"
     },
     "Verbal Acceptance Note": ""
 }

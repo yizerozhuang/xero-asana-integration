@@ -158,6 +158,9 @@ def email_server(app=None):
                                     data_json["Project Info"]["Project"]["Quotation Number"] = current_quotation
                                     data_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
                                     os.makedirs(database_dir)
+                                    # with open(os.path.join(database_dir, "data.json"), "w") as f:
+                                    #     json_object = json.dumps(data_json, indent=4)
+                                    #     f.write(json_object)
                                     log.log_create_folder(From.split("<")[-1].split(">")[0], current_quotation)
                                     for part in msg.walk():
                                         # extract content type of email
@@ -168,14 +171,16 @@ def email_server(app=None):
                                             email_content.append(part.get_payload().replace("=20", ""))
                                         elif "attachment" in content_disposition:
                                             # download attachment
-                                            filename = part.get_filename()
-                                            if filename:
-                                                folder_name = os.path.join(folder_path, "External")
-                                                filepath = os.path.join(folder_name, filename)
-                                                # download attachment and save it
-                                                open(filepath, "wb").write(part.get_payload(decode=True))
-
-                                    data_json["Email_Content"] = "\n".join(email_content)
+                                            try:
+                                                filename = part.get_filename()
+                                                if filename:
+                                                    folder_name = os.path.join(folder_path, "External")
+                                                    filepath = os.path.join(folder_name, filename)
+                                                    # download attachment and save it
+                                                    open(filepath, "wb").write(part.get_payload(decode=True))
+                                            except Exception as e:
+                                                print(e)
+                                    data_json["Email_Content"] = "".join(email_content)
 
                                     with open(os.path.join(database_dir, "data.json"), "w") as f:
                                         json_object = json.dumps(data_json, indent=4)

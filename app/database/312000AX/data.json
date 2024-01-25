@@ -3,23 +3,23 @@
     "State": {
         "Set Up": true,
         "Generate Proposal": true,
-        "Email to Client": false,
-        "Fee Accepted": false,
+        "Email to Client": true,
+        "Fee Accepted": true,
         "Quote Unsuccessful": false
     },
     "Email": {
-        "Fee Proposal": "",
+        "Fee Proposal": "2024-01-18",
         "First Chase": "",
         "Second Chase": "",
         "Third Chase": ""
     },
-    "Email_Content": null,
+    "Email_Content": "From: Anne Warren <annew@giantdesign.com> \nSent: Wednesday, December 13, 2023 10:56 AM\nTo: felix@pcen.com.au\nCc: Alysha Mornane <alysha@giantdesign.com>; Chris Wilks <chris@giantdesign.com>\nSubject: Request for Mech/Fire/Hyd Fee Proposal - Beachfit/Slow House Bondi\n\u00a0\nHi Felix,\n\u00a0\nHope you\u2019re well.\n\u00a0\nWe\u2019re working on a fitout for a gym, Beachfit, and a wellness centre, Slow House, for a client in Bondi and we need to engage a consultant for mechanical, fire and hydraulics.\n\u00a0\nBeachfit, the gym, is going into the\u00a0Pacific Building, level 1/180 Campbell Pde, Bond Beach,\u00a0NSW 2026\u00a0\u2013 it is currently a real estate agency office (the Agency). Lease plan attached. Also attached is the draft plan layout (SK02 NO EQUIPMENT) \u2013 equipment is to come based on the supplier\u2019s layout. We are attempting to retain as much of the existing fitout and services as possible however we do need to add 3 new showers to the rear area which will require mechanical extract and hydraulic work.\u00a0\n\u00a0\nSlow house\u00a0is a wellness centre going into the\u00a0Pacific Building,\u00a0level B1/180 Campbell Parade, Bondi Beach NSW 2026. The tenancy is currently Speedo Fitness Club. It currently has a 23m pool, treatment rooms, bathrooms and gym equipment. We plan to break the pool up into 3 smaller pools \u2013 a larger spa, a cold plunge and a salt pool. We are adding off the shelf infrared saunas with new showers, treatment rooms, a communal traditional sauna and steam room. Again where possible we are going to retain the existing services however we will need to re-rout ductwork and add extract from showers and potentially the traditional sauna?\u00a0\n\u00a0\u00a0\nWe want to have these drawings for our CDC in the first week of Feb. Can you provide a fee proposal for these 2 projects. Do you need any additional information to provide this quote?\u00a0\n\u00a0\nLet us know if you have any questions.\n\u00a0\nMany thanks,\nAnne",
     "Address_to": "Client",
     "Project Info": {
         "Project": {
             "Project Name": "Level 1, Pacific Building, 180 Campbell Parade, Bondi Beach",
             "Quotation Number": "312000AX",
-            "Project Number": "",
+            "Project Number": "401001",
             "Shop Name": "Beachfit",
             "Proposal Type": "Minor",
             "Project Type": "Commercial",
@@ -48,8 +48,8 @@
                     "Service": "Kitchen Ventilation",
                     "Include": false
                 },
-                "Mech Review": {
-                    "Service": "Mech Review",
+                "Mechanical Review": {
+                    "Service": "Mechanical Review",
                     "Include": false
                 },
                 "Miscellaneous": {
@@ -310,8 +310,8 @@
     },
     "Fee Proposal": {
         "Reference": {
-            "Date": "17-Jan-2024",
-            "Revision": "1"
+            "Date": "22-Dec-2023",
+            "Revision": "2"
         },
         "Time": {
             "Fee Proposal": {
@@ -328,7 +328,30 @@
             }
         },
         "Stage": {
-            "Design Application": {
+            "Stage1": {
+                "Service": "Design Application",
+                "Include": true,
+                "Items": [
+                    {
+                        "Include": true,
+                        "Item": "PDF spatial sketch as required"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "DWG drawings as required"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "8 coordination meetings"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "1 coordination meetings"
+                    }
+                ]
+            },
+            "Stage2": {
+                "Service": "Design Development",
                 "Include": true,
                 "Items": [
                     {
@@ -345,24 +368,8 @@
                     }
                 ]
             },
-            "Design Development": {
-                "Include": true,
-                "Items": [
-                    {
-                        "Include": true,
-                        "Item": "PDF spatial sketch as required"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "DWG drawings as required"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "8 coordination meetings"
-                    }
-                ]
-            },
-            "Construction Documentation": {
+            "Stage3": {
+                "Service": "Construction Documentation",
                 "Include": true,
                 "Items": [
                     {
@@ -387,7 +394,8 @@
                     }
                 ]
             },
-            "Construction Phase": {
+            "Stage4": {
+                "Service": "Construction Phase",
                 "Include": true,
                 "Items": [
                     {
@@ -416,6 +424,86 @@
         "Scope": {
             "Minor": {
                 "Mechanical Service": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Map out existing mechanical components"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Commercial kitchen exhaust and makeup air system design;"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Charcoal exhaust design with spark arrestor"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Performance based horizontal kitchen exhaust discharge"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Table top BBQ/Hot pot exhaust system"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning design to the tenancy area as required;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Grilles coordination with RCP"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Natural ventilation design"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation as required to AS 1668.2"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Coordination with stakeholder and other services"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Odour management report, please liaise with us cost of the report from us"
+                        }
+                    ],
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "Full set of mechanical drawings in PDF format"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Mechanical design certificate"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Equipment selection"
+                        }
+                    ]
+                },
+                "Mechanical Review": {
                     "Extent": [
                         {
                             "Include": true,
@@ -464,6 +552,30 @@
                         {
                             "Include": true,
                             "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 3 building design declaration"
                         }
                     ],
                     "Clarifications": [
@@ -478,6 +590,14 @@
                         {
                             "Include": true,
                             "Item": "Odour management report, please liaise with us cost of the report from us"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
                         }
                     ],
                     "Deliverables": [
@@ -646,7 +766,7 @@
                             "Item": "Sanitary waste and drainage services"
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "Trade waste service"
                         },
                         {
@@ -731,7 +851,7 @@
                         },
                         {
                             "Include": true,
-                            "Item": "1 off site visit"
+                            "Item": "Section 74B certificate based on base building fire safety measures"
                         },
                         {
                             "Include": true,
@@ -959,6 +1079,118 @@
                         }
                     ],
                     "Deliverables": []
+                },
+                "Mechanical Review": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Car park ventilation system."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Garbage exhaust."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Fire pump room ventilation. "
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Toilet and laundry ventilation to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Rangehood exhaust system to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Outside air system design for noise affected apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation as required to AS 1668.2"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Odour management report, please liaise with us cost of the report from us"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
+                        }
+                    ],
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "Full set of mechanical drawings in PDF format"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Mechanical design certificate"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Equipment selection"
+                        }
+                    ]
                 },
                 "CFD Service": {
                     "Extent": [
@@ -1357,8 +1589,42 @@
             "Mechanical Service": {
                 "Include": true,
                 "Service": "Mechanical Service",
-                "Fee": "3800",
+                "Fee": "3800.0",
                 "in.GST": "4180.0",
+                "Expand": true,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "Mechanical service Kick off",
+                        "Fee": "1900",
+                        "in.GST": "2090.0",
+                        "Number": "INV1"
+                    },
+                    {
+                        "Service": "Mechanical service Final Documentation",
+                        "Fee": "1900",
+                        "in.GST": "2090.0",
+                        "Number": "INV2"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Mechanical Review": {
+                "Include": false,
+                "Service": "Mechanical Review",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1425,8 +1691,8 @@
             "Electrical Service": {
                 "Include": false,
                 "Service": "Electrical Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1459,22 +1725,22 @@
             "Hydraulic Service": {
                 "Include": true,
                 "Service": "Hydraulic Service",
-                "Fee": "4200",
-                "in.GST": "4620.0",
-                "Expand": false,
+                "Fee": "2400.0",
+                "in.GST": "2640.0",
+                "Expand": true,
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
+                        "Service": "Hydraulic service Kick off",
+                        "Fee": "1200",
+                        "in.GST": "1320.0",
+                        "Number": "INV1"
                     },
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
+                        "Service": "Hydraulic service Final Documentation",
+                        "Fee": "1200",
+                        "in.GST": "1320.0",
+                        "Number": "INV2"
                     },
                     {
                         "Service": "",
@@ -1493,22 +1759,22 @@
             "Fire Service": {
                 "Include": true,
                 "Service": "Fire Service",
-                "Fee": "2400",
-                "in.GST": "2640.0",
-                "Expand": false,
+                "Fee": "4200.0",
+                "in.GST": "4620.0",
+                "Expand": true,
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
+                        "Service": "Fire Service Kick off",
+                        "Fee": "2100",
+                        "in.GST": "2310.0",
+                        "Number": "INV1"
                     },
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
+                        "Service": "Fire Service Final Documentation",
+                        "Fee": "2100",
+                        "in.GST": "2310.0",
+                        "Number": "INV2"
                     },
                     {
                         "Service": "",
@@ -1527,8 +1793,8 @@
             "Installation": {
                 "Include": false,
                 "Service": "Installation",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1598,19 +1864,19 @@
     },
     "Invoices Number": [
         {
-            "Number": "",
-            "Fee": "0",
-            "in.GST": "0.0",
-            "State": "Backlog",
-            "Asana_id": "",
+            "Number": "401001",
+            "Fee": "5200.0",
+            "in.GST": "5720.0",
+            "State": "Paid",
+            "Asana_id": "1206380906027526",
             "Xero_id": ""
         },
         {
             "Number": "",
-            "Fee": "0",
-            "in.GST": "0.0",
+            "Fee": "5200.0",
+            "in.GST": "5720.0",
             "State": "Backlog",
-            "Asana_id": "",
+            "Asana_id": "1206380843837729",
             "Xero_id": ""
         },
         {
@@ -1648,14 +1914,16 @@
     ],
     "Remittances": [
         {
-            "Type": "",
-            "Full_Upload": false,
+            "Type": "Full",
+            "Full_Upload": true,
             "Part1": "",
             "Part1_Upload": false,
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1665,7 +1933,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1675,7 +1945,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1685,7 +1957,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1695,7 +1969,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1705,7 +1981,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         }
     ],
     "Bills": {
@@ -1766,6 +2044,62 @@
                     }
                 ]
             },
+            "Mechanical Review": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
             "CFD Service": {
                 "Include": false,
                 "Service": "",
@@ -1880,12 +2214,12 @@
             },
             "Hydraulic Service": {
                 "Include": true,
-                "Service": "",
-                "Fee": "",
-                "in.GST": "",
-                "no.GST": false,
+                "Service": "Emily",
+                "Fee": "500.0",
+                "in.GST": "500.0",
+                "no.GST": true,
                 "Number": "",
-                "Origin": "",
+                "Origin": "500",
                 "Origin_Upload": false,
                 "V1": "",
                 "V1_Upload": false,
@@ -1936,12 +2270,12 @@
             },
             "Fire Service": {
                 "Include": true,
-                "Service": "",
-                "Fee": "",
-                "in.GST": "",
+                "Service": "Votex Fire Protection-Kirk Xiang",
+                "Fee": "2200.0",
+                "in.GST": "2420.0",
                 "no.GST": false,
                 "Number": "",
-                "Origin": "",
+                "Origin": "2200",
                 "Origin_Upload": false,
                 "V1": "",
                 "V1_Upload": false,
@@ -1953,7 +2287,7 @@
                 "Paid.GST": "",
                 "Content": [
                     {
-                        "Service": "",
+                        "Service": "Fire Design",
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
@@ -1965,7 +2299,7 @@
                         "Xero_id": ""
                     },
                     {
-                        "Service": "",
+                        "Service": "S74B Certificate",
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
@@ -2103,8 +2437,8 @@
                 ]
             }
         },
-        "Fee": "",
-        "in.GST": ""
+        "Fee": "2700.0",
+        "in.GST": "2920.0"
     },
     "Profits": {
         "Details": {
@@ -2112,6 +2446,11 @@
                 "Include": true,
                 "Fee": "3800",
                 "in.GST": "4180"
+            },
+            "Mechanical Review": {
+                "Include": false,
+                "Fee": "4200",
+                "in.GST": "4620"
             },
             "CFD Service": {
                 "Include": false,
@@ -2125,13 +2464,13 @@
             },
             "Hydraulic Service": {
                 "Include": true,
-                "Fee": "4200",
-                "in.GST": "4620"
+                "Fee": "1900",
+                "in.GST": "2140"
             },
             "Fire Service": {
                 "Include": true,
-                "Fee": "2400",
-                "in.GST": "2640"
+                "Fee": "2000",
+                "in.GST": "2200"
             },
             "Installation": {
                 "Include": false,
@@ -2144,8 +2483,8 @@
                 "in.GST": "0"
             }
         },
-        "Fee": "10400.0",
-        "in.GST": "11440.0"
+        "Fee": "11900.0",
+        "in.GST": "8520.0"
     },
     "Verbal Acceptance Note": ""
 }

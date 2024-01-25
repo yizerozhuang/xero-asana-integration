@@ -1,22 +1,23 @@
 {
-    "Design Application": [
+    "Stage1": [
+        "PDF spatial sketch as required",
+        "DWG drawings as required",
+        "8 coordination meetings",
+        "1 coordination meetings"
+    ],
+    "Stage2": [
         "PDF spatial sketch as required",
         "DWG drawings as required",
         "8 coordination meetings"
     ],
-    "Design Development": [
-        "PDF spatial sketch as required",
-        "DWG drawings as required",
-        "8 coordination meetings"
-    ],
-    "Construction Documentation": [
+    "Stage3": [
         "PDF spatial sketch as required",
         "Equipment specification",
         "Full set of drawings in PDF and AutoCAD 2D",
         "8 coordination meetings",
         "D&BP Act class 2 building design declaration"
     ],
-    "Construction Phase": [
+    "Stage4": [
         "Review contractor's shop drawings",
         "Answer RFI and site related inquiries",
         "Site inspection and defect report, 6 off",

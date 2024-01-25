@@ -1,23 +1,23 @@
 {
-    "Asana_id": "",
+    "Asana_id": "1206401784129545",
     "State": {
-        "Set Up": false,
-        "Generate Proposal": false,
-        "Email to Client": false,
+        "Set Up": true,
+        "Generate Proposal": true,
+        "Email to Client": true,
         "Fee Accepted": false,
         "Quote Unsuccessful": false
     },
     "Email": {
-        "Fee Proposal": "",
+        "Fee Proposal": "2024-01-22",
         "First Chase": "",
         "Second Chase": "",
         "Third Chase": ""
     },
-    "Email_Content": "Subject: FW: The Char Rotisserie-249 king street New Town-ISSUE-D\nFrom: <felix@pcen.com.au>\nDate: Wed, 17 Jan 2024 11:43:53 +1100\nContent: \nHi Bob,\r\n\r\n \r\n\r\nHappy New Year and Thx very much for the email.\r\n\r\n \r\n\r\nI will review docs and provide fee shortly.\r\n\r\n \r\n\r\nCheers,\r\n\r\n \r\n\r\nFelix Ye\r\n\r\nME | CPEng | NER | RPEQ\r\n\r\nDirector\r\n\r\nPremium Consulting Engineers Pty Ltd\r\n\r\n \r\n\r\nM: 0426 076 689\r\n\r\nE :  <mailto:felix@pcen.com.au> felix@pcen.com.au\r\n\r\nA : Suite 802, 299 Sussex Street, Sydney, NSW 2000\r\n\r\nW:  <http://www.pcen.com.au/> www.pcen.com.au\r\n\r\n\r\n\r\nThis email is confidential and may contain privileged information and/or\r\ncopyright material. If you are not the intended recipient, please notify the\r\nsender immediately and delete all material pertaining to this message. Any\r\nunauthorised review, use, alteration, disclosure or distribution of this\r\nemail by an unintended recipient is prohibited.\r\n\r\n \r\n\r\nFrom: bob.p@archizone.com.au <bob.p@archizone.com.au> \r\nSent: Wednesday, January 17, 2024 11:04 AM\r\nTo: 'Felix YE' <felixyeqing@gmail.com>; felix@pcen.com.au\r\nSubject: FW: The Char Rotisserie-249 king street New Town-ISSUE-D\r\n\r\n \r\n\r\nHi Felix, happy new year!\r\n\r\nPlease find attached new project for design quote\r\n\r\nExisting shop is book shop and to convert it to chicken shop. There is no\r\nexisting exhaust system but AC.\r\n\r\n \r\n\r\nShould you have any questions, please don't hesitate to contact us.\r\n\r\n \r\n\r\nMany Thanks\r\n\r\n \r\n\r\nBOB PAN\r\n\r\nARCHIZONE | design manager\r\n\r\np: 02 9428 2857     m: 0413 880 600\r\n\r\nsuite26, 105 longueville road, lane cove, nsw 2066\r\n\r\n \r\n\r\nFrom:  <mailto:bo.h@archizone.com.au> bo.h@archizone.com.au <\r\n<mailto:bo.h@archizone.com.au> bo.h@archizone.com.au> \r\nSent: Wednesday, 17 January 2024 10:54 AM\r\nTo:  <mailto:bob.p@archizone.com.au> bob.p@archizone.com.au\r\nSubject: The Char Rotisserie-249 king street New Town-ISSUE-D\r\n\r\n \r\n\r\n \r\n\r\nShould you have any questions, please don't hesitate to contact us.\r\n\r\n \r\n\r\nKind Regards\r\n\r\n \r\n\r\nBO HU  |  Senior Designer\r\n\r\nARCHIZONE\r\n\r\nP: 02 9428 2857     M: 0420 651 668\r\n\r\nA: Suite26, 105 Longueville Road, Lane Cove, NSW 2066",
-    "Address_to": "Client",
+    "Email_Content": "From: bob.p@archizone.com.au <bob.p@archizone.com.au> \r\nSent: Wednesday, January 17, 2024 11:04 AM\r\nTo: 'Felix YE' <felixyeqing@gmail.com>; felix@pcen.com.au\r\nSubject: FW: The Char Rotisserie-249 king street New Town-ISSUE-D\r\n\r\n \r\n\r\nHi Felix, happy new year!\r\n\r\nPlease find attached new project for design quote\r\n\r\nExisting shop is book shop and to convert it to chicken shop. There is no\r\nexisting exhaust system but AC.\r\n\r\n \r\n\r\nShould you have any questions, please don't hesitate to contact us.\r\n\r\n \r\n\r\nMany Thanks\r\n\r\n \r\n\r\nBOB PAN\r\n\r\nARCHIZONE | design manager\r\n\r\np: 02 9428 2857     m: 0413 880 600\r\n\r\nsuite26, 105 longueville road, lane cove, nsw 2066\r\n\r\n \r\n\r\nFrom:  <mailto:bo.h@archizone.com.au> bo.h@archizone.com.au <\r\n<mailto:bo.h@archizone.com.au> bo.h@archizone.com.au> \r\nSent: Wednesday, 17 January 2024 10:54 AM\r\nTo:  <mailto:bob.p@archizone.com.au> bob.p@archizone.com.au\r\nSubject: The Char Rotisserie-249 king street New Town-ISSUE-D\r\n\r\n \r\n\r\n \r\n\r\nShould you have any questions, please don't hesitate to contact us.\r\n\r\n \r\n\r\nKind Regards\r\n\r\n \r\n\r\nBO HU  |  Senior Designer\r\n\r\nARCHIZONE\r\n\r\nP: 02 9428 2857     M: 0420 651 668\r\n\r\nA: Suite26, 105 Longueville Road, Lane Cove, NSW 2066",
+    "Address_to": "Main Contact",
     "Project Info": {
         "Project": {
-            "Project Name": "The Char Rotisserie-249 king street New Town-ISSUE-D",
+            "Project Name": "The Char Rotisserie, 249 King Street, Newtown",
             "Quotation Number": "401000AH",
             "Project Number": "",
             "Shop Name": "",
@@ -26,7 +26,7 @@
             "Service Type": {
                 "Mechanical Service": {
                     "Service": "Mechanical Service",
-                    "Include": false
+                    "Include": true
                 },
                 "CFD Service": {
                     "Service": "CFD Service",
@@ -46,11 +46,7 @@
                 },
                 "Kitchen Ventilation": {
                     "Service": "Kitchen Ventilation",
-                    "Include": false
-                },
-                "Mech Review": {
-                    "Service": "Mech Review",
-                    "Include": false
+                    "Include": true
                 },
                 "Miscellaneous": {
                     "Service": "Miscellaneous",
@@ -58,6 +54,10 @@
                 },
                 "Installation": {
                     "Service": "Installation",
+                    "Include": false
+                },
+                "Mechanical Review": {
+                    "Service": "Mechanical Review",
                     "Include": false
                 }
             }
@@ -72,21 +72,21 @@
             "Contact Email": ""
         },
         "Main Contact": {
-            "Full Name": "",
+            "Full Name": "Bob Pan",
             "Contact Type": "Architect",
-            "Company": "",
-            "Address": "",
+            "Company": "Archizone",
+            "Address": "Suite26, 105 Longueville Road, Lane Cove, NSW 2066\r",
             "ABN": "",
-            "Contact Number": "",
-            "Contact Email": ""
+            "Contact Number": "0420 651 668\r",
+            "Contact Email": "bob.p@archizone.com.au"
         },
         "Building Features": {
             "Minor": {
                 "Details": [
                     {
-                        "Levels": "",
-                        "Space": "",
-                        "Area": ""
+                        "Levels": "Tenancy Level",
+                        "Space": "Dining, Kitchen",
+                        "Area": "160"
                     },
                     {
                         "Levels": "",
@@ -109,7 +109,7 @@
                         "Area": ""
                     }
                 ],
-                "Total Area": "0"
+                "Total Area": "160.0"
             },
             "Major": {
                 "Car Park": [
@@ -310,7 +310,7 @@
     },
     "Fee Proposal": {
         "Reference": {
-            "Date": "17-Jan-2024",
+            "Date": "22-Jan-2024",
             "Revision": "1"
         },
         "Time": {
@@ -319,8 +319,8 @@
                 "End": "2"
             },
             "Pre-design": {
-                "Start": "1",
-                "End": "2"
+                "Start": "2",
+                "End": "4"
             },
             "Documentation": {
                 "Start": "1",
@@ -328,7 +328,8 @@
             }
         },
         "Stage": {
-            "Design Application": {
+            "Stage1": {
+                "Service": "Design Application",
                 "Include": true,
                 "Items": [
                     {
@@ -341,11 +342,16 @@
                     },
                     {
                         "Include": true,
-                        "Item": "9 coordination meetings"
+                        "Item": "8 coordination meetings"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "1 coordination meetings"
                     }
                 ]
             },
-            "Design Development": {
+            "Stage2": {
+                "Service": "Design Development",
                 "Include": true,
                 "Items": [
                     {
@@ -362,7 +368,8 @@
                     }
                 ]
             },
-            "Construction Documentation": {
+            "Stage3": {
+                "Service": "Construction Documentation",
                 "Include": true,
                 "Items": [
                     {
@@ -387,8 +394,9 @@
                     }
                 ]
             },
-            "Construction Phase": {
-                "Include": false,
+            "Stage4": {
+                "Service": "Construction Phase",
+                "Include": true,
                 "Items": [
                     {
                         "Include": true,
@@ -426,15 +434,15 @@
                             "Item": "Commercial kitchen exhaust and makeup air system design;"
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "Charcoal exhaust design with spark arrestor"
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "Performance based horizontal kitchen exhaust discharge"
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "Table top BBQ/Hot pot exhaust system"
                         },
                         {
@@ -458,7 +466,7 @@
                             "Item": "Coordination with stakeholder and other services"
                         },
                         {
-                            "Include": true,
+                            "Include": false,
                             "Item": "D&BP Act class 2 building design declaration"
                         },
                         {
@@ -588,6 +596,10 @@
                         {
                             "Include": true,
                             "Item": "Exit signages and Emergency egress lighting as per AS2293-2005"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
                         }
                     ],
                     "Clarifications": [
@@ -728,6 +740,10 @@
                         {
                             "Include": true,
                             "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
                         }
                     ],
                     "Clarifications": [
@@ -848,6 +864,118 @@
                         {
                             "Include": true,
                             "Item": "Daikin VRV 4S system, CU 22.4kW cooling, 2 off FCUs are 11.2kW cooling each"
+                        }
+                    ]
+                },
+                "Mechanical Review": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Map out existing mechanical components"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Commercial kitchen exhaust and makeup air system design;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Charcoal exhaust design with spark arrestor"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Performance based horizontal kitchen exhaust discharge"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Table top BBQ/Hot pot exhaust system"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning design to the tenancy area as required;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Grilles coordination with RCP"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Natural ventilation design"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation as required to AS 1668.2"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordination with stakeholder and other services"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Odour management report, please liaise with us cost of the report from us"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
+                        }
+                    ],
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "Full set of mechanical drawings in PDF format"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Mechanical design certificate"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Equipment selection"
                         }
                     ]
                 }
@@ -1340,6 +1468,118 @@
                             "Item": "Daikin VRV 4S system, CU 22.4kW cooling, 2 off FCUs are 11.2kW cooling each"
                         }
                     ]
+                },
+                "Mechanical Review": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Car park ventilation system."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Garbage exhaust."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Fire pump room ventilation. "
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Toilet and laundry ventilation to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Rangehood exhaust system to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Outside air system design for noise affected apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation as required to AS 1668.2"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Odour management report, please liaise with us cost of the report from us"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
+                        }
+                    ],
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "Full set of mechanical drawings in PDF format"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Mechanical design certificate"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Equipment selection"
+                        }
+                    ]
                 }
             }
         }
@@ -1347,10 +1587,10 @@
     "Invoices": {
         "Details": {
             "Mechanical Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "Mechanical Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1383,8 +1623,8 @@
             "CFD Service": {
                 "Include": false,
                 "Service": "CFD Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1583,6 +1823,40 @@
                         "Number": "None"
                     }
                 ]
+            },
+            "Mechanical Review": {
+                "Include": false,
+                "Service": "Mechanical Review",
+                "Fee": "4200",
+                "in.GST": "4620.0",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
             }
         },
         "Fee": "0.0",
@@ -1647,7 +1921,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1657,7 +1933,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1667,7 +1945,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1677,7 +1957,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1687,7 +1969,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1697,13 +1981,15 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         }
     ],
     "Bills": {
         "Details": {
             "Mechanical Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -2040,6 +2326,62 @@
             },
             "Variation": {
                 "Include": true,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Mechanical Review": {
+                "Include": false,
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -2101,9 +2443,9 @@
     "Profits": {
         "Details": {
             "Mechanical Service": {
-                "Include": false,
-                "Fee": "",
-                "in.GST": ""
+                "Include": true,
+                "Fee": "2500",
+                "in.GST": "2750"
             },
             "CFD Service": {
                 "Include": false,
@@ -2134,10 +2476,15 @@
                 "Include": true,
                 "Fee": "0",
                 "in.GST": "0"
+            },
+            "Mechanical Review": {
+                "Include": false,
+                "Fee": "4200",
+                "in.GST": "4620"
             }
         },
-        "Fee": "0.0",
-        "in.GST": "0.0"
+        "Fee": "6700.0",
+        "in.GST": "2750.0"
     },
     "Verbal Acceptance Note": ""
 }

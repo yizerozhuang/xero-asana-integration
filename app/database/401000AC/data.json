@@ -1,28 +1,28 @@
 {
-    "Asana_id": "",
+    "Asana_id": "1206378284435729",
     "State": {
-        "Set Up": false,
-        "Generate Proposal": false,
-        "Email to Client": false,
+        "Set Up": true,
+        "Generate Proposal": true,
+        "Email to Client": true,
         "Fee Accepted": false,
         "Quote Unsuccessful": false
     },
     "Email": {
-        "Fee Proposal": "",
+        "Fee Proposal": "2024-01-25",
         "First Chase": "",
         "Second Chase": "",
         "Third Chase": ""
     },
-    "Email_Content": "Subject: Fwd: Q230496 - 34-50 Yarran St, Hanwood NSW 2680\nFrom: bridge@pcen.com.au\nDate: Tue, 16 Jan 2024 13:53:58 +1100\nContent: \n\r\n\r\n-------- Original Message --------\r\nSubject: RE: Q230496 - 34-50 Yarran St, Hanwood NSW 2680 - Request For \r\nFee\r\nDate: 2024-01-16 13:40\r\n From: <felix@pcen.com.au>\r\nTo: \"'Susheel Thota'\" <susheel.thota@neillydavies.com.au>, \r\n<admin@pcen.com.au>\r\nCc: \"'Bala Muhunthan'\" <bala.muhunthan@neillydavies.com.au>\r\n\r\nHi Susheel,\r\n\r\nI will review and provide fee shortly.\r\n\r\nCheers,\r\n\r\nFelix Ye\r\n\r\nME | CPEng | NER | RPEQ\r\n\r\nDirector\r\n\r\nPremium Consulting Engineers Pty Ltd\r\n\r\nM: 0426 076 689\r\n\r\nE : felix@pcen.com.au\r\n\r\nA : Suite 802, 299 Sussex Street, Sydney, NSW 2000\r\n\r\nW: www.pcen.com.au [1]\r\n\r\nThis email is confidential and may contain privileged information and/or\r\ncopyright material. If you are not the intended recipient, please notify\r\nthe sender immediately and delete all material pertaining to this\r\nmessage. Any unauthorised review, use, alteration, disclosure or\r\ndistribution of this email by an unintended recipient is prohibited.\r\n\r\n From: Susheel Thota <susheel.thota@neillydavies.com.au>\r\nSent: Monday, January 8, 2024 5:33 PM\r\nTo: felix@pcen.com.au; admin@pcen.com.au\r\nCc: Bala Muhunthan <bala.muhunthan@neillydavies.com.au>\r\nSubject: Q230496 - 34-50 Yarran St, Hanwood NSW 2680 - Request For Fee\r\n\r\nHi Felix\r\n\r\nThe proposed development is for an existing Oval amenity.\r\n\r\nThe whole of the roof is being captured to a rainwater tank and be\r\nreused for Toilet Flushing.\r\n\r\nThe ground floor layout has been indicated, for your quick reference.\r\n\r\nConsidering the reusage of the Rainwater Tank, can you please review and\r\nprovide your best offer in identifying the rainwater tank capacity.\r\n\r\nAppreciate receiving the fee proposal by tomorrow, COB.\r\n\r\nBriefing:\r\n\r\nCurrently marked as 7000lt. essentially, roof drainage is not run to\r\npublic stormwater and will be reused for building amenities such as\r\ntoilets.\r\n\r\nBest Regards\r\n\r\nSusheel Kumar Thota\r\nSenior Civil Engineer - Team Leader | Neilly Davies & Partners Pty Ltd\r\n\r\nT:   +61 2 9922 5501\r\n\r\nM: 0424 913 479\r\n\r\nA:  Level 1 80 Mount Street North Sydney 2060\r\n\r\nE:   susheel.thota@neillydavies.com.au\r\n\r\nW: neillydavies.com.au [2]\r\n\r\n  [3] [4]   [5]\r\n\r\nThis electronic mail transmission, including any attachments, contains\r\nconfidential information of Neilly Davies & Partners Pty. Ltd. (\"Neilly\r\nDavies\") and/or its clients. It is intended only for the person(s)\r\nnamed, and the information in such e-mail shall only be used by the\r\nperson(s) named for the purpose intended and for no other purpose. Any\r\nuse, distribution, copying or disclosure by any other persons, or by the\r\nperson(s) named but for purposes other than the intended purpose, is\r\nstrictly prohibited. If you received this transmission in error, please\r\nnotify the sender by reply e-mail and then destroy this e-mail.\r\nOpinions, conclusions and other information in this message that do not\r\nrelate to the official business of Neilly Davies shall be understood to\r\nbe neither given nor endorsed by Neilly Davies. When addressed to Neilly\r\nDavies clients, any information contained in this e-mail shall be\r\nsubject to the terms and conditions in the applicable client contract.\r\n\r\nP Please consider the environment before printing this email.\r\n\r\nLinks:\r\n------\r\n[1] http://www.pcen.com.au/\r\n[2] http://www.neillydavies.com.au/\r\n[3] https://www.facebook.com/neillydavies/\r\n[4] \r\nhttps://www.linkedin.com/company/neilly-davies-consulting-engineers/?originalSubdomain=au\r\n[5] \r\nfile:///C:/Users/Admin/AppData/Roaming/Microsoft/Signatures/neillydavies.com.au",
-    "Address_to": "Client",
+    "Email_Content": "From: Susheel Thota <susheel.thota@neillydavies.com.au>\r\nSent: Monday, January 8, 2024 5:33 PM\r\nTo: felix@pcen.com.au; admin@pcen.com.au\r\nCc: Bala Muhunthan <bala.muhunthan@neillydavies.com.au>\r\nSubject: Q230496 - 34-50 Yarran St, Hanwood NSW 2680 - Request For Fee\r\n\r\nHi Felix\r\n\r\nThe proposed development is for an existing Oval amenity.\r\n\r\nThe whole of the roof is being captured to a rainwater tank and be\r\nreused for Toilet Flushing.\r\n\r\nThe ground floor layout has been indicated, for your quick reference.\r\n\r\nConsidering the reusage of the Rainwater Tank, can you please review and\r\nprovide your best offer in identifying the rainwater tank capacity.\r\n\r\nAppreciate receiving the fee proposal by tomorrow, COB.\r\n\r\nBriefing:\r\n\r\nCurrently marked as 7000lt. essentially, roof drainage is not run to\r\npublic stormwater and will be reused for building amenities such as\r\ntoilets.\r\n\r\nBest Regards\r\n\r\nSusheel Kumar Thota\r\nSenior Civil Engineer - Team Leader | Neilly Davies & Partners Pty Ltd\r\n\r\nT:   +61 2 9922 5501\r\n\r\nM: 0424 913 479\r\n\r\nA:  Level 1 80 Mount Street North Sydney 2060\r\n\r\nE:   susheel.thota@neillydavies.com.au\r\n\r\nW: neillydavies.com.au [2]\r\n\r\n  [3] [4]   [5]\r\n\r\nThis electronic mail transmission, including any attachments, contains\r\nconfidential information of Neilly Davies & Partners Pty. Ltd. (\"Neilly\r\nDavies\") and/or its clients. It is intended only for the person(s)\r\nnamed, and the information in such e-mail shall only be used by the\r\nperson(s) named for the purpose intended and for no other purpose. Any\r\nuse, distribution, copying or disclosure by any other persons, or by the\r\nperson(s) named but for purposes other than the intended purpose, is\r\nstrictly prohibited. If you received this transmission in error, please\r\nnotify the sender by reply e-mail and then destroy this e-mail.\r\nOpinions, conclusions and other information in this message that do not\r\nrelate to the official business of Neilly Davies shall be understood to\r\nbe neither given nor endorsed by Neilly Davies. When addressed to Neilly\r\nDavies clients, any information contained in this e-mail shall be\r\nsubject to the terms and conditions in the applicable client contract.\r\n\r\nP Please consider the environment before printing this email.\r\n\r\nLinks:\r\n------\r\n[1] http://www.pcen.com.au/\r\n[2] http://www.neillydavies.com.au/\r\n[3] https://www.facebook.com/neillydavies/\r\n[4] \r\nhttps://www.linkedin.com/company/neilly-davies-consulting-engineers/?originalSubdomain=au\r\n[5] \r\nfile:///C:/Users/Admin/AppData/Roaming/Microsoft/Signatures/neillydavies.com.au",
+    "Address_to": "Main Contact",
     "Project Info": {
         "Project": {
-            "Project Name": "Q230496 - 34-50 Yarran St, Hanwood NSW 2680",
+            "Project Name": "34-50 Yarran Street, Hanwood",
             "Quotation Number": "401000AC",
             "Project Number": "",
             "Shop Name": "",
             "Proposal Type": "Minor",
-            "Project Type": "Restaurant",
+            "Project Type": "Others",
             "Service Type": {
                 "Mechanical Service": {
                     "Service": "Mechanical Service",
@@ -38,7 +38,7 @@
                 },
                 "Hydraulic Service": {
                     "Service": "Hydraulic Service",
-                    "Include": false
+                    "Include": true
                 },
                 "Fire Service": {
                     "Service": "Fire Service",
@@ -48,8 +48,8 @@
                     "Service": "Kitchen Ventilation",
                     "Include": false
                 },
-                "Mech Review": {
-                    "Service": "Mech Review",
+                "Mechanical Review": {
+                    "Service": "Mechanical Review",
                     "Include": false
                 },
                 "Miscellaneous": {
@@ -72,13 +72,13 @@
             "Contact Email": ""
         },
         "Main Contact": {
-            "Full Name": "",
-            "Contact Type": "Architect",
-            "Company": "",
+            "Full Name": "Susheel Kumar Thota\r",
+            "Contact Type": "Engineer",
+            "Company": "Neilly Davies & Partners Pty Ltd\r",
             "Address": "",
             "ABN": "",
             "Contact Number": "",
-            "Contact Email": ""
+            "Contact Email": "susheel.thota@neillydavies.com.au\r"
         },
         "Building Features": {
             "Minor": {
@@ -310,8 +310,8 @@
     },
     "Fee Proposal": {
         "Reference": {
-            "Date": "16-Jan-2024",
-            "Revision": "1"
+            "Date": "25-Jan-2024",
+            "Revision": "2"
         },
         "Time": {
             "Fee Proposal": {
@@ -319,16 +319,17 @@
                 "End": "2"
             },
             "Pre-design": {
-                "Start": "1",
-                "End": "2"
+                "Start": "2",
+                "End": "4"
             },
             "Documentation": {
-                "Start": "1",
-                "End": "2"
+                "Start": "2",
+                "End": "4"
             }
         },
         "Stage": {
-            "Design Application": {
+            "Stage1": {
+                "Service": "Design Application",
                 "Include": true,
                 "Items": [
                     {
@@ -341,11 +342,16 @@
                     },
                     {
                         "Include": true,
-                        "Item": "9 coordination meetings"
+                        "Item": "8 coordination meetings"
+                    },
+                    {
+                        "Include": true,
+                        "Item": "1 coordination meetings"
                     }
                 ]
             },
-            "Design Development": {
+            "Stage2": {
+                "Service": "Design Development",
                 "Include": true,
                 "Items": [
                     {
@@ -362,7 +368,8 @@
                     }
                 ]
             },
-            "Construction Documentation": {
+            "Stage3": {
+                "Service": "Construction Documentation",
                 "Include": true,
                 "Items": [
                     {
@@ -387,8 +394,9 @@
                     }
                 ]
             },
-            "Construction Phase": {
-                "Include": false,
+            "Stage4": {
+                "Service": "Construction Phase",
+                "Include": true,
                 "Items": [
                     {
                         "Include": true,
@@ -478,6 +486,118 @@
                         {
                             "Include": true,
                             "Item": "Odour management report, please liaise with us cost of the report from us"
+                        }
+                    ],
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "Full set of mechanical drawings in PDF format"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Mechanical design certificate"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Equipment selection"
+                        }
+                    ]
+                },
+                "Mechanical Review": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Map out existing mechanical components"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Commercial kitchen exhaust and makeup air system design;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Charcoal exhaust design with spark arrestor"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Performance based horizontal kitchen exhaust discharge"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Table top BBQ/Hot pot exhaust system"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning design to the tenancy area as required;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Grilles coordination with RCP"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Natural ventilation design"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation as required to AS 1668.2"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordination with stakeholder and other services"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Odour management report, please liaise with us cost of the report from us"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
                         }
                     ],
                     "Deliverables": [
@@ -588,6 +708,10 @@
                         {
                             "Include": true,
                             "Item": "Exit signages and Emergency egress lighting as per AS2293-2005"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
                         }
                     ],
                     "Clarifications": [
@@ -639,31 +763,31 @@
                     "Extent": [
                         {
                             "Include": true,
-                            "Item": "Sanitary waste and drainage services"
+                            "Item": "Map out existing hydraulic component."
                         },
                         {
                             "Include": true,
-                            "Item": "Trade waste service"
+                            "Item": "Hot and cold water supply and distribution services."
                         },
                         {
                             "Include": true,
-                            "Item": "Hot and cold water supply and distribution services"
+                            "Item": "Natural gas supply and distribution services."
                         },
                         {
                             "Include": true,
-                            "Item": "Natural gas supply and distribution services"
+                            "Item": "Rainwater tank sizing & reuse reticulation."
                         },
                         {
                             "Include": true,
-                            "Item": "Fire Hydrant and Hose Reel supply and distribution services"
+                            "Item": "Roof gutter & downpipe design."
                         },
                         {
                             "Include": true,
-                            "Item": "Mechanical plant condensate waste"
+                            "Item": "Coordination with stakeholder and other services."
                         },
                         {
                             "Include": true,
-                            "Item": "1 off site visit"
+                            "Item": "1 off site visit."
                         }
                     ],
                     "Clarifications": [
@@ -724,6 +848,10 @@
                         {
                             "Include": true,
                             "Item": "Liaise with relevant authorities and consultants"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit"
                         },
                         {
                             "Include": true,
@@ -951,6 +1079,118 @@
                         }
                     ],
                     "Deliverables": []
+                },
+                "Mechanical Review": {
+                    "Extent": [
+                        {
+                            "Include": true,
+                            "Item": "Car park ventilation system."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Garbage exhaust."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Fire pump room ventilation. "
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Air conditioning system design to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Toilet and laundry ventilation to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Rangehood exhaust system to apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Outside air system design for noise affected apartments."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation as required to AS 1668.2"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "1 off site visit"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Plant room ventilations, including storage rooms, main switch room, garbage rooms, etc."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Other ventilation to AS 1668.2."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Electrical services associated with mechanical plant and equipment."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 3 building design declaration"
+                        }
+                    ],
+                    "Clarifications": [
+                        {
+                            "Include": true,
+                            "Item": "Assessment of compliance with environmental noise regulations"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Preparation of Performance Solutions"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Odour management report, please liaise with us cost of the report from us"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Refrigeration systems to cool rooms and freezers;"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Revit modelling and documentation."
+                        }
+                    ],
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "Full set of mechanical drawings in PDF format"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Mechanical design certificate"
+                        },
+                        {
+                            "Include": true,
+                            "Item": "Equipment selection"
+                        }
+                    ]
                 },
                 "CFD Service": {
                     "Extent": [
@@ -1349,8 +1589,42 @@
             "Mechanical Service": {
                 "Include": false,
                 "Service": "Mechanical Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ]
+            },
+            "Mechanical Review": {
+                "Include": false,
+                "Service": "Mechanical Review",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1383,8 +1657,8 @@
             "CFD Service": {
                 "Include": false,
                 "Service": "CFD Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1417,8 +1691,8 @@
             "Electrical Service": {
                 "Include": false,
                 "Service": "Electrical Service",
-                "Fee": "",
-                "in.GST": "",
+                "Fee": "0",
+                "in.GST": "0.0",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1449,23 +1723,23 @@
                 ]
             },
             "Hydraulic Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "Hydraulic Service",
-                "Fee": "",
-                "in.GST": "",
-                "Expand": false,
+                "Fee": "5200.0",
+                "in.GST": "5720.0",
+                "Expand": true,
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
+                        "Service": "Initial Study",
+                        "Fee": "2600",
+                        "in.GST": "2860.0",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
+                        "Service": "Design and documentation",
+                        "Fee": "2600",
+                        "in.GST": "2860.0",
                         "Number": "None"
                     },
                     {
@@ -1585,8 +1859,8 @@
                 ]
             }
         },
-        "Fee": "0.0",
-        "in.GST": "0.0"
+        "Fee": "5200.0",
+        "in.GST": "5720.0"
     },
     "Invoices Number": [
         {
@@ -1647,7 +1921,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1657,7 +1933,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1667,7 +1945,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1677,7 +1957,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1687,7 +1969,9 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         },
         {
             "Type": "",
@@ -1697,12 +1981,70 @@
             "Part2": "",
             "Part2_Upload": false,
             "Part3": "",
-            "Part3_Upload": false
+            "Part3_Upload": false,
+            "Preview_Upload": false,
+            "Email_Upload": false
         }
     ],
     "Bills": {
         "Details": {
             "Mechanical Service": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Mechanical Review": {
                 "Include": false,
                 "Service": "",
                 "Fee": "",
@@ -1871,7 +2213,7 @@
                 ]
             },
             "Hydraulic Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -2105,6 +2447,11 @@
                 "Fee": "",
                 "in.GST": ""
             },
+            "Mechanical Review": {
+                "Include": false,
+                "Fee": "4200",
+                "in.GST": "4620"
+            },
             "CFD Service": {
                 "Include": false,
                 "Fee": "",
@@ -2116,9 +2463,9 @@
                 "in.GST": ""
             },
             "Hydraulic Service": {
-                "Include": false,
-                "Fee": "",
-                "in.GST": ""
+                "Include": true,
+                "Fee": "5200",
+                "in.GST": "5720"
             },
             "Fire Service": {
                 "Include": false,
@@ -2136,8 +2483,8 @@
                 "in.GST": "0"
             }
         },
-        "Fee": "0.0",
-        "in.GST": "0.0"
+        "Fee": "9400.0",
+        "in.GST": "10340.0"
     },
     "Verbal Acceptance Note": ""
 }

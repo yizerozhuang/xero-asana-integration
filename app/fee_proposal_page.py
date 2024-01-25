@@ -3,6 +3,7 @@ from tkinter import ttk
 from datetime import date
 import os
 import json
+from text_extension import TextExtension
 
 
 from scope_list import ScopeList
@@ -34,34 +35,60 @@ class FeeProposalPage(tk.Frame):
         # self.main_canvas.create_window((1500, 0), window=self.pdf_frame, anchor="e")
         # self.pdf_frame.bind("<Configure>", self.reset_scrollregion)
 
+
+        # self.email_part()
+
+        self.function_part()
+        self.calculation_part()
+
         self.reference_part()
         self.time_part()
         self.stage_part()
         self.scope_part()
         self.fee_part()
 
+    def email_part(self):
+        TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"],
+                      fg="blue", height=85).grid(row=0, column=1, rowspan=6, sticky="n")
+        # print()
+
+    def function_part(self):
+        function_frame = tk.LabelFrame(self.main_context_frame, text="Installation Function")
+        function_frame.grid(row=0, column=0, sticky="ew", padx=20)
+        tk.Button(function_frame, text="Preview Installation Proposal", bg="Brown", fg="white").grid(row=0, column=0)
+        tk.Button(function_frame, text="Email Installation Proposal", bg="Brown", fg="white").grid(row=0, column=1)
+
+    def calculation_part(self):
+        calculate_frame = tk.LabelFrame(self.main_context_frame)
+        calculate_frame.grid(row=0, column=1, rowspan=6, sticky="n")
+        tk.Label(calculate_frame, text="Hihihi").pack()
+
+
+
     def reference_part(self):
         reference = dict()
         self.data["Fee Proposal"]["Reference"] = reference
 
         reference_frame = tk.LabelFrame(self.main_context_frame, text="reference")
-        reference_frame.grid(row=0, column=0, sticky="ew", padx=20)
+        reference_frame.grid(row=1, column=0, sticky="ew", padx=20)
 
         reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
         tk.Label(reference_frame, width=30, text="Date", font=self.conf["font"]).grid(row=0, column=0, padx=(10, 0))
-        tk.Entry(reference_frame, width=70, textvariable=reference["Date"], fg="blue", font=self.conf["font"]).grid(
-            row=0, column=1, padx=(0, 10))
+        tk.Entry(reference_frame, width=44, textvariable=reference["Date"], fg="blue", font=self.conf["font"]).grid(
+            row=0, column=1)
+        tk.Button(reference_frame, width=20, text="Today", font=self.conf["font"], bg="Brown", fg="white", command=self.today
+                  ).grid(row=0, column=2)
         reference["Revision"] = tk.StringVar(value="1")
         tk.Label(reference_frame, width=30, text="Revision", font=self.conf["font"]).grid(row=1, column=0, padx=(10, 0))
         tk.Entry(reference_frame, width=70, textvariable=reference["Revision"], fg="blue", font=self.conf["font"]).grid(
-            row=1, column=1, padx=(0, 10))
+            row=1, column=1, padx=(0, 10), columnspan=2)
 
     def time_part(self):
         time = dict()
         self.data["Fee Proposal"]["Time"] = time
 
         self.time_frame = tk.LabelFrame(self.main_context_frame, text="Time Consuming", font=self.conf["font"])
-        self.time_frame.grid(row=1, column=0, sticky="ew", padx=20)
+        self.time_frame.grid(row=2, column=0, sticky="ew", padx=20)
 
         stages = ["Fee Proposal", "Pre-design", "Documentation"]
 
@@ -84,52 +111,58 @@ class FeeProposalPage(tk.Frame):
         self.data["Project Info"]["Project"]["Proposal Type"].trace("w", self._update_stage)
         self.stage_frame = tk.LabelFrame(self.main_context_frame, text="Stage", font=self.conf["font"])
 
-        self.stage_frames = {}
+        self.stage_frames = dict()
         self.append_stage = dict()
 
         stage_dir = os.path.join(self.conf["database_dir"], "general_scope_of_staging.json")
         stage_data = json.load(open(stage_dir))
         for i, stage in enumerate(self.conf["major_stage"]):
-            stage_dict[stage] = {
+            stage_dict[f"Stage{i+1}"]={
+                "Service": tk.StringVar(value=stage),
                 "Include": tk.BooleanVar(value=True),
                 "Items": []
             }
-            tk.Checkbutton(self.stage_frame, variable=stage_dict[stage]["Include"], text=stage, font=self.conf["font"]).pack(anchor="w")
+
+            include_frame = tk.Frame(self.stage_frame)
+            include_frame.pack(anchor="w")
+            tk.Checkbutton(include_frame, variable=stage_dict[f"Stage{i+1}"]["Include"], font=self.conf["font"]).grid(row=0, column=0)
+            tk.Entry(include_frame, textvariable=stage_dict[f"Stage{i+1}"]["Service"], font=self.conf["font"], fg="blue", width=30).grid(row=0, column=1)
+
 
             extra_frame = tk.LabelFrame(self.stage_frame, font=self.conf["font"])
             extra_frame.pack()
-            self.stage_frames[stage] = tk.Frame(extra_frame)
-            self.stage_frames[stage].pack()
+            self.stage_frames[f"Stage{i+1}"] = tk.Frame(extra_frame)
+            self.stage_frames[f"Stage{i+1}"].pack()
             color_list = ["white", "azure"]
-            for j, item in enumerate(stage_data[stage]):
+            for j, item in enumerate(stage_data[f"Stage{i+1}"]):
                 content = {
                     "Include": tk.BooleanVar(value=True),
                     "Item": tk.StringVar(value=item)
                 }
-                stage_dict[stage]["Items"].append(content)
+                stage_dict[f"Stage{i+1}"]["Items"].append(content)
 
-                tk.Checkbutton(self.stage_frames[stage], variable=content["Include"]).grid(row=j, column=0)
-                tk.Entry(self.stage_frames[stage], width=100, textvariable=content["Item"], font=self.conf["font"], bg=color_list[j % 2]).grid(row=j, column=1)
+                tk.Checkbutton(self.stage_frames[f"Stage{i+1}"], variable=content["Include"]).grid(row=j, column=0)
+                tk.Entry(self.stage_frames[f"Stage{i+1}"], width=100, textvariable=content["Item"], font=self.conf["font"], bg=color_list[j % 2]).grid(row=j, column=1)
 
-            self.append_stage[stage] = {
+            self.append_stage[f"Stage{i+1}"] = {
                 "Item": tk.StringVar(),
                 "Add": tk.BooleanVar()
             }
             append_frame = tk.Frame(extra_frame)
             append_frame.pack()
 
-            tk.Entry(append_frame, width=95, textvariable=self.append_stage[stage]["Item"]).grid(row=0, column=0)
-            tk.Checkbutton(append_frame, variable=self.append_stage[stage]["Add"], text="Add to Database").grid(row=0, column=1)
-            func = lambda stage: lambda: self._append_stage(stage)
-            tk.Button(append_frame, text="Submit", command=func(stage)).grid(row=0, column=2)
+            tk.Entry(append_frame, width=95, textvariable=self.append_stage[f"Stage{i+1}"]["Item"]).grid(row=0, column=0)
+            tk.Checkbutton(append_frame, variable=self.append_stage[f"Stage{i+1}"]["Add"], text="Add to Database").grid(row=0, column=1)
+            func = lambda i: lambda: self._append_stage(i)
+            tk.Button(append_frame, text="Submit", command=func(i)).grid(row=0, column=2)
 
     def _update_stage(self, *args):
         if self.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
             self.stage_frame.grid_forget()
-            self.time_frame.grid(row=1, column=0, sticky="ew", padx=20)
+            self.time_frame.grid(row=2, column=0, sticky="ew", padx=20)
         else:
             self.time_frame.grid_forget()
-            self.stage_frame.grid(row=1, column=0, sticky="ew", padx=20)
+            self.stage_frame.grid(row=2, column=0, sticky="ew", padx=20)
     def _reset_scope(self):
         service_list = self.conf["service_list"]
         extra_list = self.conf["extra_list"]
@@ -157,7 +190,7 @@ class FeeProposalPage(tk.Frame):
     def scope_part(self):
         self._reset_scope()
         self.scope_frame = tk.LabelFrame(self.main_context_frame, text="Scope of Work", font=self.conf["font"])
-        self.scope_frame.grid(row=2, column=0, sticky="ew", padx=20)
+        self.scope_frame.grid(row=3, column=0, sticky="ew", padx=20)
         self.scope_frames = {}
         self.append_context = dict()
 
@@ -197,6 +230,10 @@ class FeeProposalPage(tk.Frame):
         else:
             self.scope_frames[service]["Main Frame"].destroy()
     def fee_part(self):
+
+        self.fee_frame = tk.LabelFrame(self.main_context_frame, text="Fee Proposal Details", font=self.conf["font"])
+        self.fee_frame.grid(row=4, column=0, sticky="ew", padx=20)
+
         invoices = {
             "Details": dict(),
             "Fee": tk.StringVar(),
@@ -246,8 +283,6 @@ class FeeProposalPage(tk.Frame):
         self.fee_frames = dict()
         self.fee_dic = dict()
 
-        self.fee_frame = tk.LabelFrame(self.main_context_frame, text="Fee Proposal Details", font=self.conf["font"])
-        self.fee_frame.grid(row=3, column=0, sticky="ew", padx=20)
 
         top_frame = tk.LabelFrame(self.fee_frame)
         top_frame.pack(side=tk.TOP)
@@ -337,6 +372,10 @@ class FeeProposalPage(tk.Frame):
             # invoices_details[service]["Expand"].set(False)
             self.fee_frames[service].pack_forget()
             self.update_sum()
+
+    def today(self):
+        self.data["Fee Proposal"]["Reference"]["Date"].set(date.today().strftime("%d-%b-%Y"))
+
     def _append_value(self, service, extra):
         scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
         scope_type = self.data["Project Info"]["Project"]["Proposal Type"].get()
@@ -367,34 +406,34 @@ class FeeProposalPage(tk.Frame):
         self.append_context[service][extra]["Item"].set("")
         self.append_context[service][extra]["Add"].set(False)
 
-    def _append_stage(self, stage):
+    def _append_stage(self, i):
         stage_dir = os.path.join(self.conf["database_dir"], "general_scope_of_staging.json")
         app_stage = self.data["Fee Proposal"]["Stage"]
-        item = self.append_stage[stage]["Item"].get()
+        item = self.append_stage[f"Stage{i+1}"]["Item"].get()
         if len(item.strip()) == 0:
             self.messagebox.show_error(title="Error", message="You need to enter some context")
             return
-        app_stage[stage]["Items"].append(
+        app_stage[f"Stage{i+1}"]["Items"].append(
             {
                 "Include": tk.BooleanVar(value=True),
                 "Item": tk.StringVar(value=item)
             }
         )
-        tk.Entry(self.stage_frames[stage], width=100,
-                 textvariable=app_stage[stage]["Items"][-1]["Item"],
-                 font=self.conf["font"]).grid(row=len(app_stage[stage]["Items"]), column=1)
+        tk.Entry(self.stage_frames[f"Stage{i+1}"], width=100,
+                 textvariable=app_stage[f"Stage{i+1}"]["Items"][-1]["Item"],
+                 font=self.conf["font"]).grid(row=len(app_stage[f"Stage{i+1}"]["Items"]), column=1)
 
-        tk.Checkbutton(self.stage_frames[stage],
-                       variable=app_stage[stage]["Items"][-1]["Include"]).grid(row=len(app_stage[stage]["Items"]), column=0)
+        tk.Checkbutton(self.stage_frames[f"Stage{i+1}"],
+                       variable=app_stage[f"Stage{i+1}"]["Items"][-1]["Include"]).grid(row=len(app_stage[f"Stage{i+1}"]["Items"]), column=0)
 
-        if self.append_stage[stage]["Add"].get():
+        if self.append_stage[f"Stage{i+1}"]["Add"].get():
             stage_data = json.load(open(stage_dir))
-            stage_data[stage].append(item)
+            stage_data[f"Stage{i+1}"].append(item)
             with open(stage_dir, "w") as f:
                 json_object = json.dumps(stage_data, indent=4)
                 f.write(json_object)
-        self.append_stage[stage]["Item"].set("")
-        self.append_stage[stage]["Add"].set(False)
+        self.append_stage[f"Stage{i+1}"]["Item"].set("")
+        self.append_stage[f"Stage{i+1}"]["Add"].set(False)
 
     def reset_scrollregion(self, event):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))

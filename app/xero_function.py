@@ -6,7 +6,7 @@ from xero_python.identity import IdentityApi
 from flask import Flask, url_for, redirect
 from flask_oauthlib.contrib.client import OAuth, OAuth2Application
 from flask_session import Session
-
+import dateutil.parser
 
 from utility import remove_none, update_app_invoices, get_invoice_item
 from asana_function import update_asana_invoices
@@ -91,6 +91,18 @@ api_client = ApiClient(
     ),
     pool_threads=1,
 )
+
+project_type_account_code_map={
+    "Restaurant": "41000",
+    "Office": "42000",
+    "Commercial": "43000",
+    "Group House": "44000",
+    "Apartment": "45000",
+    "Mix-use complex": "46000",
+    "School": "47000",
+    "Others": "48000"
+}
+
 
 def login_xero():
     def thread_task():
@@ -296,7 +308,7 @@ def update_xero(app, contact_name):
                     description=item["Item"],
                     quantity=1,
                     unit_amount=int(float(item["Fee"])),
-                    account_code="000"
+                    account_code=project_type_account_code_map[data["Project Info"]["Project"]["Project Type"].get()]
                 )
             )
         invoices_list.append(
@@ -343,7 +355,8 @@ def update_xero(app, contact_name):
         print(e)
         print("No Data Processed")
 
-    all_invoices = _process_invoices(accounting_api.get_invoices(xero_tenant_id).to_dict()["invoices"])
+    if_modified_since = dateutil.parser.parse("2024-01-01")
+    all_invoices = _process_invoices(accounting_api.get_invoices(xero_tenant_id, if_modified_since=if_modified_since).to_dict()["invoices"])
     #
     update_app_invoices(app, all_invoices)
     #
