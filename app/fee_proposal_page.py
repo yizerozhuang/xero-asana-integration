@@ -243,8 +243,6 @@ class FeeProposalPage(tk.Frame):
             invoices["Details"][service] = {
                 "Include": tk.BooleanVar(),
                 "Service": tk.StringVar(value=service),
-                "Fee": tk.StringVar(),
-                "in.GST": tk.StringVar(),
                 "Expand": tk.BooleanVar(),
                 "Number": tk.StringVar(value="None"),
                 "Content": [
@@ -254,7 +252,9 @@ class FeeProposalPage(tk.Frame):
                         "in.GST": tk.StringVar(),
                         "Number": tk.StringVar(value="None")
                     } for _ in range(self.conf["n_items"])
-                ]
+                ],
+                "Fee": tk.StringVar(),
+                "in.GST": tk.StringVar()
             }
             expand_fun = lambda service : lambda a, b, c: self._expand(service)
             invoices["Details"][service]["Expand"].trace("w", expand_fun(service))

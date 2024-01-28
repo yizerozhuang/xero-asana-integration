@@ -1555,8 +1555,6 @@
             "Mechanical Service": {
                 "Include": false,
                 "Service": "Mechanical Service",
-                "Fee": "",
-                "in.GST": "",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1584,13 +1582,13 @@
                         "in.GST": "",
                         "Number": "None"
                     }
-                ]
+                ],
+                "Fee": "",
+                "in.GST": ""
             },
             "CFD Service": {
                 "Include": false,
                 "Service": "CFD Service",
-                "Fee": "",
-                "in.GST": "",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1618,13 +1616,13 @@
                         "in.GST": "",
                         "Number": "None"
                     }
-                ]
+                ],
+                "Fee": "",
+                "in.GST": ""
             },
             "Electrical Service": {
                 "Include": false,
                 "Service": "Electrical Service",
-                "Fee": "",
-                "in.GST": "",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1652,13 +1650,13 @@
                         "in.GST": "",
                         "Number": "None"
                     }
-                ]
+                ],
+                "Fee": "",
+                "in.GST": ""
             },
             "Hydraulic Service": {
                 "Include": false,
                 "Service": "Hydraulic Service",
-                "Fee": "",
-                "in.GST": "",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1686,13 +1684,13 @@
                         "in.GST": "",
                         "Number": "None"
                     }
-                ]
+                ],
+                "Fee": "",
+                "in.GST": ""
             },
             "Fire Service": {
                 "Include": false,
                 "Service": "Fire Service",
-                "Fee": "",
-                "in.GST": "",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1720,13 +1718,47 @@
                         "in.GST": "",
                         "Number": "None"
                     }
-                ]
+                ],
+                "Fee": "",
+                "in.GST": ""
+            },
+            "Mechanical Review": {
+                "Include": false,
+                "Service": "Mechanical Review",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ],
+                "Fee": "",
+                "in.GST": ""
             },
             "Installation": {
                 "Include": false,
                 "Service": "Installation",
-                "Fee": "",
-                "in.GST": "",
                 "Expand": false,
                 "Number": "None",
                 "Content": [
@@ -1754,13 +1786,13 @@
                         "in.GST": "",
                         "Number": "None"
                     }
-                ]
+                ],
+                "Fee": "",
+                "in.GST": ""
             },
             "Variation": {
                 "Include": true,
                 "Service": "Variation",
-                "Fee": "0",
-                "in.GST": "0.0",
                 "Expand": true,
                 "Number": "None",
                 "Content": [
@@ -1788,7 +1820,9 @@
                         "in.GST": "",
                         "Number": "None"
                     }
-                ]
+                ],
+                "Fee": "",
+                "in.GST": ""
             }
         },
         "Fee": "0.0",
@@ -2200,6 +2234,62 @@
                     }
                 ]
             },
+            "Mechanical Review": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
             "Installation": {
                 "Include": false,
                 "Service": "",
@@ -2344,6 +2434,11 @@
                 "in.GST": ""
             },
             "Installation": {
+                "Include": false,
+                "Fee": "",
+                "in.GST": ""
+            },
+            "Mechanical Review": {
                 "Include": false,
                 "Fee": "",
                 "in.GST": ""

@@ -15,13 +15,9 @@ for dir in os.listdir(database_dir):
         data_dir = os.path.join(database_dir, dir, "data.json")
         data_json = json.load(open(data_dir))
 
-
-        data_json["Fee_Acceptance_Upload"]: False
-        data_json["Verbal_Acceptance_Upload"]: False
-        for i in range(6):
-            data_json["Remittances"][i]["Preview_Upload"] = False
-            data_json["Remittances"][i]["Email_Upload"] = False
-
+        for service in data_json["Invoices"]["Details"].values():
+            service["Fee"] = service.pop("Fee")
+            service["in.GST"] = service.pop("in.GST")
 
         with open(data_dir, "w") as f:
             json_object = json.dumps(data_json, indent=4)

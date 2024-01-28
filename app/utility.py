@@ -40,7 +40,6 @@ def reset(app):
     database_dir = os.path.join(app.conf["database_dir"], "data_template.json")
     template_json = json.load(open(database_dir))
     template_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
-
     convert_to_data(template_json, app.data)
 
     app.fee_proposal_page._reset_scope()
@@ -78,6 +77,7 @@ def load_data(app):
         data["Project Info"]["Project"]["Quotation Number"].set(app.current_quotation.get())
         save(app)
         data["Project Info"]["Project"]["Quotation Number"].set(old_quotation)
+    # reset(app)
     load(app)
     # app.email_text.delete(1.0, tk.END)
     # app.email_text.insert(1.0, app.data["Email_Content"].get())
@@ -1361,7 +1361,7 @@ def send_email_with_attachment(filename):
     msg = MIMEMultipart()
     msg['From'] = conf["bridge_email"]
     msg['To'] = conf["xero_bill_email"]
-    msg['Subject'] = f"Bill Number: {filename.split('-')[0]}"
+    msg['Subject'] = f"Bill Upload By Bridge"
 
     part = MIMEBase("application", "octet-stream")
     with open(filename, "rb") as file:

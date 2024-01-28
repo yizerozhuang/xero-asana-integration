@@ -937,7 +937,7 @@ class FinancialPanelPage(tk.Frame):
         if file == "":
             return
         try:
-            filename = self.data["Project Info"]["Project"]["Project Number"].get()+ bill_number.get() + os.path.basename(file)
+            filename = self.data["Project Info"]["Project"]["Project Number"].get()+ bill_number.get() + "-" + os.path.basename(file)
             folder_dir = os.path.join(database_dir, filename)
             shutil.copy(file, folder_dir)
         except PermissionError:
