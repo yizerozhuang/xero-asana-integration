@@ -30,7 +30,7 @@ def show_status(data_json):
     elif state["Email to Client"]:
         return "Email to Client"
     elif state["Generate Proposal"]:
-        "Generate Proposal"
+        return "Generate Proposal"
     else:
         return "Set Up"
 
@@ -89,6 +89,9 @@ class SearchBarPage(tk.Frame):
             "Main Contact Name": lambda data_json: data_json["Project Info"]["Main Contact"]["Full Name"],
             "Main Contact Contact Type": lambda data_json: data_json["Project Info"]["Main Contact"]["Contact Type"],
             "Main Contact Company": lambda data_json: data_json["Project Info"]["Main Contact"]["Company"],
+            "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
+            "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
+            "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
             "Total Fee Amount exGST": lambda data_json: data_json["Invoices"]["Fee"],
             "Total Bill Amount exGST": lambda data_json: data_json["Bills"]["Fee"],
         }
@@ -148,9 +151,9 @@ class SearchBarPage(tk.Frame):
         for item in data:
             self.tree.insert('', 'end', values=item)
             # adjust column's width if necessary to fit each value
-            for ix, val in enumerate(item):
-                col_w = tkFont.Font().measure(val)
-                if self.tree.column(self.mp_header[ix], width=None)<col_w: self.tree.column(self.mp_header[ix], width=col_w)
+            # for ix, val in enumerate(item):
+                # col_w = tkFont.Font().measure(val)
+                # if self.tree.column(self.mp_header[ix], width=None)<col_w: self.tree.column(self.mp_header[ix], width=col_w)
     def load_project(self, event):
         self.tree.selection()
         selected = self.tree.focus()

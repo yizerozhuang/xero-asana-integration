@@ -1,5 +1,6 @@
 {
     "Asana_id": "",
+    "Asana_url": "",
     "State": {
         "Set Up": false,
         "Generate Proposal": false,
@@ -84,7 +85,7 @@
             "Minor": {
                 "Details": [
                     {
-                        "Levels": "",
+                        "Levels": "Tenancy Level",
                         "Space": "",
                         "Area": ""
                     },
@@ -274,11 +275,137 @@
                         "",
                         "",
                         ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    ],
+                    [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
                     ]
-                ]
+                ],
+                "Total Car spot":"0",
+                "Total Others":"0",
+                "Total Apt":"0",
+                "Total Commercial":"0"
             },
+            "Apt": "",
+            "Basement": "",
             "Feature": "",
-            "Notes": null
+            "Notes":"Email sent from ??? on ???, with architecture drawings.\nThe project is a residential develop and consists of:\n-      ??? levels of Basement car park, approximately ??? car spots.\n-      Ground level with a child care\n-      Building A ground to level ???, with Residential Apartments, approximately ??? apartments\n-      Building B ground to level ???, with Residential Apartments, approximately ??? apartments"
         },
         "Drawing": [
             {
@@ -305,6 +432,41 @@
                 "Drawing Number": "",
                 "Drawing Name": "",
                 "Revision": ""
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
+            },
+            {
+                "Drawing Number": "",
+                "Drawing Name": "",
+                "Revision": ""
             }
         ]
     },
@@ -312,6 +474,11 @@
         "Reference": {
             "Date": "",
             "Revision": "1"
+        },
+        "Installation Reference":{
+            "Date": "",
+            "Revision": "1",
+            "Program":null
         },
         "Time": {
             "Fee Proposal": {
@@ -395,7 +562,7 @@
                 ]
             },
             "Stage4": {
-                "Service": "Construction Phase",
+                "Service": "Construction Phase Service",
                 "Include": true,
                 "Items": [
                     {
@@ -1559,13 +1726,13 @@
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
+                        "Service": "Mechanical Service Kickoff",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
+                        "Service": "Mechanical Service Final Documentation",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
@@ -1593,13 +1760,13 @@
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
+                        "Service": "CFD Service Kickoff",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
+                        "Service": "CFD Service Final Documentation",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
@@ -1627,13 +1794,13 @@
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
+                        "Service": "Electrical Service Kickoff",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
+                        "Service": "Electrical Service Final Documentation",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
@@ -1661,13 +1828,13 @@
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
+                        "Service": "Hydraulic Service Kickoff",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
+                        "Service": "Hydraulic Service Final Documentation",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
@@ -1695,13 +1862,13 @@
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
+                        "Service": "Fire Service Kickoff",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
+                        "Service": "Fire Service Final Documentation",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
@@ -1729,13 +1896,13 @@
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
+                        "Service": "Mechanical Review Kickoff",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
+                        "Service": "Mechanical Review Final Documentation",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
@@ -1763,13 +1930,13 @@
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
+                        "Service": "Installation Kickoff",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
+                        "Service": "Installation Final Documentation",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"

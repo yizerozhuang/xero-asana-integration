@@ -22,18 +22,18 @@ class TextExtension( tkinter.Frame ):
         # self.YScrollbar.config( command = self.Text.yview )
         # self.YScrollbar.pack( side = tkinter.RIGHT, fill = tkinter.Y )
 
-        self.Text.pack( side = tkinter.LEFT, fill = tkinter.BOTH, expand = 1 )
+        self.Text.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
 
 
     def Clear( self ):
         self.Text.delete( 1.0, tkinter.END )
 
 
-    def GetText( self ):
-        text = self.Text.get( 1.0, tkinter.END )
-        if ( text is not None ):
+    def GetText(self):
+        text = self.Text.get(1.0, tkinter.END )
+        if (text is not None ):
             text = text.strip()
-        if ( text == "" ):
+        if (text == "" ):
             text = None
         return text
 

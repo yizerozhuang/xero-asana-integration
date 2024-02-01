@@ -18,6 +18,9 @@ class AppLog:
     def log_create_folder(self, user, quotation):
         self.log_to_file(self.format("Create project from email", user), quotation)
 
+    def log_sync_from_asana(self, user, quotation):
+        self.log_to_file(self.format("Sync from Asana", user), quotation)
+
     def log_rename_folder(self, app):
         self.log_to_file(self.format("Rename the Folder", app.user),
                          app.data["Project Info"]["Project"]["Quotation Number"].get())

@@ -148,23 +148,27 @@
         },
         "Installation": {
             "Extent": [
-                "Demolish existing old cassette, condenser on roof and associated cable, wire and fittings.",
-                "Demolish existing intake plenum, rectify the kitchen supply air fan, install anti-vibration mounts, intake louvre, filter and plenum and  as shown on drawings;",
-                "Demolish existing ductwork and fan on roof, supply and install new kitchen exhaust fan and existing attenuators rectify the ductwork as per the drawings, including all supports and fittings;",
-                "Supply and Install roof mounted kitchen exhaust fan, kitchen exhaust hood, kitchen exhaust ductwork as shown on drawings, including all access panel, supports and fittings;",
-                "Supply and Install kitchen makeup air system from facade louvre to the kitchen as shown on drawings, including kitchen makeup air fan, ductwork, flexible duct, all supports and fittings;",
+                "Supply and install 2 off general exhaust system from the ventilation of cool room condenser and ice maker, including ductwork, roof goose neck, supports and fittings.",
+                "Supply and install kitchen makeup air system from facade louvre to the kitchen as shown on drawings, including kitchen makeup air fan, ductwork, flexible duct, all supports and fittings.",
                 "Supply and install 1 off Dakin split cassette unit, model FCA100 (10.0 kW cooling capacity).",
                 "Supply and install refrigeration piping, wire and control to the unit.",
-                "Supply and Install 2 off kitchen exhaust hoods, kitchen exhaust ductwork from the connection of the hood to connection point under the roof as shown on drawings, including all supports and fittings.",
-                "Supply and Install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including, ductwork, flexible duct, all supports and fittings.",
-                "Supply and Install toilet exhaust system from connection point under the roof as shown on drawings to toilet, including toilet exhaust fan, ductwork, flexible duct, all supports and fittings.",
-                "supply, install 15 off 4-way blow supply air grille to suite the current layout from base building AC supply air duct, including all grilles, thermostats, control panels, dampers as required.",
+                "Supply and install 2 off kitchen exhaust hoods, kitchen exhaust ductwork from the connection of the hood to connection point under the roof as shown on drawings, including all supports and fittings.",
+                "Supply and install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install toilet exhaust system from connection point under the roof as shown on drawings to toilet, including toilet exhaust fan, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install 15 off 4-way blow supply air grille to suite the current layout from base building AC supply air duct, including all grilles, thermostats, control panels, dampers as required.",
                 "Balancing, testing and commissioning to all the system installed as per the above.",
                 "12 month defect liability period."
+
             ],
             "Clarifications": [
-                "Builder's works and penetration",
-                "Scissor lift hire"
+                "Provision of all external louvers.",
+                "Provision of access panels to roof and ceilings where required for mechanical equipment.",
+                "Mechanical plant platforms, walkways, restraint, and the like for safe access to services mechanical plant and equipment.",
+                "Painting of any exposed mechanical services with exception of standard paint finishes on equipment.",
+                "Three phase power supply, we have assumed tails are to be provided adjacent to MSSB by the electrical contractor.",
+                "Provision of tundishes for condensate from air conditioning units(we have assumed tundishes are within 3 metres of the units).",
+                "Fire trip wiring, FFCP and associated works.",
+                "Under flashing of penetrations through roof and external walls by others."
             ],
             "Deliverables": [
                 "Kitchen exhaust hood 1, 2000Wx1200D",
@@ -172,7 +176,8 @@
                 "Kitchen exhaust air fan 3300L/s@350Pa, Fantech Model PUD564DD or equivalent",
                 "Outside air fan 360L/s@240Pa, Fantech or equivalent",
                 "Daikin ducted split, 14.0kW cooling",
-                "Daikin VRV 4S system, CU 22.4kW cooling, 2 off FCUs are 11.2kW cooling each"
+                "Daikin VRV 4S system, CU 22.4kW cooling, 2 off FCUs are 11.2kW cooling each",
+                "Misting Box for kitchen exhaust hood 1, 2000L/S, AOM Misting Box 800 or equivalent"
             ]
         }
     },
@@ -335,23 +340,27 @@
         },
         "Installation": {
             "Extent": [
-                "Demolish existing old cassette, condenser on roof and associated cable, wire and fittings.",
-                "Demolish existing intake plenum, rectify the kitchen supply air fan, install anti-vibration mounts, intake louvre, filter and plenum and  as shown on drawings;",
-                "Demolish existing ductwork and fan on roof, supply and install new kitchen exhaust fan and existing attenuators rectify the ductwork as per the drawings, including all supports and fittings;",
-                "Supply and Install roof mounted kitchen exhaust fan, kitchen exhaust hood, kitchen exhaust ductwork as shown on drawings, including all access panel, supports and fittings;",
-                "Supply and Install kitchen makeup air system from facade louvre to the kitchen as shown on drawings, including kitchen makeup air fan, ductwork, flexible duct, all supports and fittings;",
+                "Supply and install 2 off general exhaust system from the ventilation of cool room condenser and ice maker, including ductwork, roof goose neck, supports and fittings.",
+                "Supply and install kitchen makeup air system from facade louvre to the kitchen as shown on drawings, including kitchen makeup air fan, ductwork, flexible duct, all supports and fittings.",
                 "Supply and install 1 off Dakin split cassette unit, model FCA100 (10.0 kW cooling capacity).",
                 "Supply and install refrigeration piping, wire and control to the unit.",
-                "Supply and Install 2 off kitchen exhaust hoods, kitchen exhaust ductwork from the connection of the hood to connection point under the roof as shown on drawings, including all supports and fittings.",
-                "Supply and Install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including, ductwork, flexible duct, all supports and fittings.",
-                "Supply and Install toilet exhaust system from connection point under the roof as shown on drawings to toilet, including toilet exhaust fan, ductwork, flexible duct, all supports and fittings.",
-                "supply, install 15 off 4-way blow supply air grille to suite the current layout from base building AC supply air duct, including all grilles, thermostats, control panels, dampers as required.",
+                "Supply and install 2 off kitchen exhaust hoods, kitchen exhaust ductwork from the connection of the hood to connection point under the roof as shown on drawings, including all supports and fittings.",
+                "Supply and install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install toilet exhaust system from connection point under the roof as shown on drawings to toilet, including toilet exhaust fan, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install 15 off 4-way blow supply air grille to suite the current layout from base building AC supply air duct, including all grilles, thermostats, control panels, dampers as required.",
                 "Balancing, testing and commissioning to all the system installed as per the above.",
                 "12 month defect liability period."
+
             ],
             "Clarifications": [
-                "Builder's works and penetration",
-                "Scissor lift hire"
+                "Provision of all external louvers.",
+                "Provision of access panels to roof and ceilings where required for mechanical equipment.",
+                "Mechanical plant platforms, walkways, restraint, and the like for safe access to services mechanical plant and equipment.",
+                "Painting of any exposed mechanical services with exception of standard paint finishes on equipment.",
+                "Three phase power supply, we have assumed tails are to be provided adjacent to MSSB by the electrical contractor.",
+                "Provision of tundishes for condensate from air conditioning units(we have assumed tundishes are within 3 metres of the units).",
+                "Fire trip wiring, FFCP and associated works.",
+                "Under flashing of penetrations through roof and external walls by others."
             ],
             "Deliverables": [
                 "Kitchen exhaust hood 1, 2000Wx1200D",
@@ -359,7 +368,8 @@
                 "Kitchen exhaust air fan 3300L/s@350Pa, Fantech Model PUD564DD or equivalent",
                 "Outside air fan 360L/s@240Pa, Fantech or equivalent",
                 "Daikin ducted split, 14.0kW cooling",
-                "Daikin VRV 4S system, CU 22.4kW cooling, 2 off FCUs are 11.2kW cooling each"
+                "Daikin VRV 4S system, CU 22.4kW cooling, 2 off FCUs are 11.2kW cooling each",
+                "Misting Box for kitchen exhaust hood 1, 2000L/S, AOM Misting Box 800 or equivalent"
             ]
         }
     }

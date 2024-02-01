@@ -6,10 +6,11 @@ from fee_proposal_page import FeeProposalPage
 from financial_panel import FinancialPanelPage
 from search_bar_page import SearchBarPage
 from utility import *
-from asana_function import update_asana
-from xero_function import login_xero, update_xero, refresh_token
+from asana_function import update_asana, update_asana_invoices
+from xero_function import update_xero, refresh_token
 from email_server import email_server
 from app_messagebox import AppMessagebox
+from text_extension import TextExtension
 
 from PIL import Image, ImageTk
 import _thread
@@ -57,6 +58,7 @@ class App(tk.Tk):
 
     def default_set_up(self):
         self.data["Asana_id"] = tk.StringVar()
+        self.data["Asana_url"] = tk.StringVar()
         self.data["State"] = {
             "Set Up": tk.BooleanVar(),
             "Generate Proposal": tk.BooleanVar(),
@@ -107,10 +109,10 @@ class App(tk.Tk):
         tk.Button(function_frame, text="Update Asana", command=self._update_asana, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
 
-        # tk.Button(function_frame, text="Open Asana", command=self._open_asana, bg="brown", fg="white",
-        #           font=self.conf["font"]).grid(row=1, column=2)
+        tk.Button(function_frame, text="Open Asana", command=self._open_asana, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=1, column=2)
 
-        tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
+        tk.Button(function_frame, text="Refresh Xero Token", command=refresh_token, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=1, column=3)
 
         tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
@@ -182,8 +184,8 @@ class App(tk.Tk):
         _.grid(row=1, column=1, sticky="ew")
         tk.Label(_, text="Draft").pack()
 
-        tk.Label(legend_frame, text="Awaiting approval", bg="red").grid(row=1, column=2, sticky="ew")
-        tk.Label(legend_frame, text="Awaiting payment", bg="orange").grid(row=1, column=3, sticky="ew")
+        tk.Label(legend_frame, text="Awaiting Approval", bg="red").grid(row=1, column=2, sticky="ew")
+        tk.Label(legend_frame, text="Awaiting Payment", bg="orange").grid(row=1, column=3, sticky="ew")
         tk.Label(legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
         tk.Label(legend_frame, text="Voided", bg="purple", fg="white").grid(row=1, column=5, sticky="ew")
 
@@ -213,8 +215,6 @@ class App(tk.Tk):
         tk.Button(change_page_frame, text="Financial Panel",
                   command=lambda: self.show_frame(self.financial_panel_page), bg="DarkOrange1", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
-
-
 
     def _update_variation(self):
         # variation = [
@@ -250,7 +250,7 @@ class App(tk.Tk):
         self.fee_proposal_page.update_fee(variation_var)
         self.fee_proposal_page.fee_dic["Variation"]["Expand"].grid_forget()
         tk.Label(self.fee_proposal_page.fee_frames["Variation"], text="", width=10).grid(row=0, column=0)
-        self.fee_proposal_page.fee_dic["Variation"]["Service"].config(text="Variation")
+        self.fee_proposal_page.fee_dic["Variation"]["Service"].config(text="Variation", bg="cyan")
         self.fee_proposal_page.fee_frames["Variation"].pack(side=tk.BOTTOM)
 
         self.financial_panel_page.update_invoice(variation_var)
@@ -428,12 +428,20 @@ class App(tk.Tk):
     def _update_asana(self):
         try:
             update_asana(self)
-            # update_app_invoices(app)
+            update_asana_invoices(self)
         except Exception as e:
             print(e)
             return
         self.messagebox.show_update("Successful Update Asana")
 
+    def _open_asana(self):
+        if len(self.data["Asana_id"].get()) == 0:
+            self.messagebox.show_error("You should update Asana first before you open asana")
+            return
+        elif len(self.data["Asana_url"].get()) == 0:
+            self.messagebox.show_error("Can not find the asana link, please contact Admin")
+            return
+        webbrowser.open(self.data["Asana_url"].get())
     # def _open_asana(self):
     #     if len(self.data["Asana_id"]) !=0:
     #         self.messagebox.show_error("Please Update Asana Before you Open")
@@ -459,11 +467,12 @@ class App(tk.Tk):
             else:
                 contact = self.data["Project Info"][address_to]["Company"].get() + ", " + self.data["Project Info"][address_to]["Full Name"].get()
         true = False
-        for i in range(10):
+        refresh_token()
+        for i in range(3):
             try:
                 true=update_xero(self, contact)
                 break
-            except RuntimeError:
+            except Exception as e:
                 refresh_token()
                 continue
                 # self.messagebox.show_error("You Haven't login xero yet")
@@ -493,16 +502,17 @@ class App(tk.Tk):
         config_state(self)
 
     def _email_fee_proposal(self):
-        email = False
         try:
-            email = email_fee_proposal(self)
-        except Exception as e:
-            self.messagebox.show_error("Unable to Create Email")
-            return
-        if email:
+            def email():
+                email_fee_proposal(self)
+            _thread.start_new_thread(email, ())
             update = self.messagebox.ask_yes_no("Do you want to update Asana?")
             if update:
                 update_asana(self)
+
+        except Exception as e:
+            self.messagebox.show_error("Unable to Create Email")
+            return
 
     def _update_project_state(self, *args):
         if self.data["State"]["Fee Accepted"].get():

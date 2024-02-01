@@ -51,7 +51,8 @@ class ProjectInfoPage(tk.Frame):
         # self.app.email_text = tk.Text(self.main_context_frame, font=self.conf["font"], height=68)
         # self.app.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
 
-        TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=85).grid(row=0, column=1, rowspan=6, sticky="n")
+        self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=85)
+        self.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
 
         tk.Label(self.main_context_frame, textvariable=self.app.log_text, font=self.conf["font"], justify=tk.LEFT).grid(row=0, column=2, rowspan=6, sticky="n")
 
@@ -192,7 +193,10 @@ class ProjectInfoPage(tk.Frame):
 
         client_info = ["Company", "Address", "ABN", "Contact Number", "Contact Email"]
         for i, info in enumerate(client_info):
-            tk.Label(client_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
+            if info == "ABN":
+                tk.Label(client_frame, width=20, text="ABN/ACN", font=self.conf["font"]).grid(row=i + 5, column=1)
+            else:
+                tk.Label(client_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
             client[info] = tk.StringVar()
             tk.Entry(client_frame, width=70, font=self.conf["font"], fg="blue", textvariable=client[info]).grid(
                 row=i + 5, column=2, columnspan=3)
@@ -226,7 +230,10 @@ class ProjectInfoPage(tk.Frame):
         contact_info = ["Company", "Address", "ABN",
                         "Contact Number", "Contact Email"]
         for i, info in enumerate(contact_info):
-            tk.Label(contact_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
+            if info=="ABN":
+                tk.Label(contact_frame, width=20, text="ABN/ACN", font=self.conf["font"]).grid(row=i + 5, column=1)
+            else:
+                tk.Label(contact_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
             main_contact[info] = tk.StringVar(name=info)
             tk.Entry(contact_frame, width=70, font=self.conf["font"], fg="blue", textvariable=main_contact[info]).grid(
                 row=i + 5, column=2, columnspan=3)
@@ -245,9 +252,15 @@ class ProjectInfoPage(tk.Frame):
                 "Total Area": tk.StringVar(value="0"),
             },
             "Major": {
-                "Car Park": [[tk.StringVar() for _ in range(8)] for _ in range(self.conf["n_major_building"])],
-                "Block": [[tk.StringVar() for _ in range(8)] for _ in range(self.conf["n_major_building"])]
+                "Car Park": [[tk.StringVar() for _ in range(8)] for _ in range(self.conf["n_car_park"])],
+                "Block": [[tk.StringVar() for _ in range(8)] for _ in range(self.conf["n_major_building"])],
+                "Total Car spot": tk.StringVar(value="0"),
+                "Total Others": tk.StringVar(value="0"),
+                "Total Apt": tk.StringVar(value="0"),
+                "Total Commercial": tk.StringVar(value="0")
             },
+            "Apt": tk.StringVar(),
+            "Basement": tk.StringVar(),
             "Feature": tk.StringVar(),
             "Notes": tk.StringVar()
         }
@@ -275,7 +288,7 @@ class ProjectInfoPage(tk.Frame):
 
         tk.Label(self.minor_frame, text="Total", font=self.conf["font"]).grid(row=n_building + 1, column=0)
         tk.Label(self.minor_frame, textvariable=building_features["Minor"]["Total Area"], font=self.conf["font"]).grid(row=n_building+1, column=2)
-
+        building_features["Minor"]["Details"][0]["Levels"].set("Tenancy Level")
 
         self.major_frame = tk.Frame(build_feature_frame)
 
@@ -295,7 +308,7 @@ class ProjectInfoPage(tk.Frame):
         tk.Label(car_park_frame, text="Total", font=self.conf["font"]).grid(row=0, column=8)
 
         for i in range(8):
-            for j in range(self.conf["n_major_building"]):
+            for j in range(self.conf["n_car_park"]):
                 entry = tk.Entry(car_park_frame, width=9, textvariable=building_features["Major"]["Car Park"][j][i], fg="blue", font=self.conf["font"])
                 entry.grid(row=j+2, column=i)
                 building_features["Major"]["Car Park"][j][i].trace("w", self._update_car_total)
@@ -303,20 +316,18 @@ class ProjectInfoPage(tk.Frame):
                     entry.config(width=10)
                 elif i ==1:
                     entry.config(width=30)
-        tk.Label(car_park_frame, text="Total Car spot", font=self.conf["font"]).grid(row=self.conf["n_major_building"]+2, column=0, columnspan=2)
-        tk.Label(car_park_frame, text="Total Others", font=self.conf["font"]).grid(row=self.conf["n_major_building"]+3, column=0, columnspan=2)
+        tk.Label(car_park_frame, text="Total Car spot", font=self.conf["font"]).grid(row=self.conf["n_car_park"]+2, column=0, columnspan=2)
+        tk.Label(car_park_frame, text="Total Others", font=self.conf["font"]).grid(row=self.conf["n_car_park"]+3, column=0, columnspan=2)
 
         self.car_part_row_total = [tk.StringVar(value="0") for _ in range(6)]
-        self.car_part_column_total = [tk.StringVar(value="0") for _ in range(self.conf["n_major_building"])]
-        self.car_part_spot_total = tk.StringVar(value="0")
-        self.car_part_other_total = tk.StringVar(value="0")
+        self.car_part_column_total = [tk.StringVar(value="0") for _ in range(self.conf["n_car_park"])]
 
         for i in range(6):
-            tk.Label(car_park_frame, textvariable=self.car_part_row_total[i], font=self.conf["font"]).grid(row=self.conf["n_major_building"]+2+i%2, column=i+2)
-        for i in range(self.conf["n_major_building"]):
+            tk.Label(car_park_frame, textvariable=self.car_part_row_total[i], font=self.conf["font"]).grid(row=self.conf["n_car_park"]+2+i%2, column=i+2)
+        for i in range(self.conf["n_car_park"]):
             tk.Label(car_park_frame, textvariable=self.car_part_column_total[i], font=self.conf["font"]).grid(row=i+2 , column=8)
-        tk.Label(car_park_frame, textvariable=self.car_part_spot_total, font=self.conf["font"]).grid(row=self.conf["n_major_building"]+2, column=8)
-        tk.Label(car_park_frame, textvariable=self.car_part_other_total, font=self.conf["font"]).grid(row=self.conf["n_major_building"]+3, column=8)
+        tk.Label(car_park_frame, textvariable=building_features["Major"]["Total Car spot"], font=self.conf["font"]).grid(row=self.conf["n_car_park"]+2, column=8)
+        tk.Label(car_park_frame, textvariable=building_features["Major"]["Total Others"], font=self.conf["font"]).grid(row=self.conf["n_car_park"]+3, column=8)
 
 
         block_frame = tk.Frame(self.major_frame)
@@ -348,30 +359,43 @@ class ProjectInfoPage(tk.Frame):
 
         self.block_row_total = [tk.StringVar(value="0") for _ in range(6)]
         self.block_column_total = [tk.StringVar(value="0") for _ in range(self.conf["n_major_building"])]
-        self.block_apt_total = tk.StringVar(value="0")
-        self.block_comm_total = tk.StringVar(value="0")
 
         for i in range(6):
             tk.Label(block_frame, textvariable=self.block_row_total[i], font=self.conf["font"]).grid(row=self.conf["n_major_building"]+2+i%2, column=i+2)
         for i in range(self.conf["n_major_building"]):
             tk.Label(block_frame, textvariable=self.block_column_total[i], font=self.conf["font"]).grid(row=i+2 , column=8)
-        tk.Label(block_frame, textvariable=self.block_apt_total, font=self.conf["font"]).grid(row=self.conf["n_major_building"]+2, column=8)
-        tk.Label(block_frame, textvariable=self.block_comm_total, font=self.conf["font"]).grid(row=self.conf["n_major_building"]+3, column=8)
+        tk.Label(block_frame, textvariable=building_features["Major"]["Total Apt"], font=self.conf["font"]).grid(row=self.conf["n_major_building"]+2, column=8)
+        tk.Label(block_frame, textvariable=building_features["Major"]["Total Commercial"], font=self.conf["font"]).grid(row=self.conf["n_major_building"]+3, column=8)
 
         self.data["Project Info"]["Project"]["Proposal Type"].trace("w", self._update_building_frame)
 
-        tk.Label(build_feature_frame, text="Asana Notes: ", font=self.conf["font"]).grid(row=1, column=0, sticky="w", padx=(90, 0))
-        tk.Entry(build_feature_frame, width=80, font=self.conf["font"], fg="blue", textvariable=building_features["Feature"]).grid(row=2, column=0)
+        tk.Label(build_feature_frame, text="Asana Apt/Room/Area ", font=self.conf["font"]).grid(row=1, column=0,
+                                                                                                 sticky="w",
+                                                                                                 padx=(90, 0))
+        tk.Entry(build_feature_frame, width=80, font=self.conf["font"], fg="blue",
+                 textvariable=building_features["Apt"]).grid(row=2, column=0)
 
-        tk.Label(build_feature_frame, text="Project Notes: ", font=self.conf["font"]).grid(row=3, column=0, sticky="w", padx=(90, 0))
-        TextExtension(build_feature_frame, textvariable=building_features["Notes"], font=self.conf["font"], height=10, fg="blue").grid(row=4, column=0)
+
+        tk.Label(build_feature_frame, text="Asana Basement/Car Park Spots ", font=self.conf["font"]).grid(row=3, column=0,
+                                                                                                 sticky="w",
+                                                                                                 padx=(90, 0))
+        tk.Entry(build_feature_frame, width=80, font=self.conf["font"], fg="blue",
+                 textvariable=building_features["Basement"]).grid(row=4, column=0)
+
+        tk.Label(build_feature_frame, text="Asana Feature/Notes: ", font=self.conf["font"]).grid(row=5, column=0, sticky="w", padx=(90, 0))
+        tk.Entry(build_feature_frame, width=80, font=self.conf["font"], fg="blue", textvariable=building_features["Feature"]).grid(row=6, column=0)
+
+
+        self.project_note_label = tk.Label(build_feature_frame, text="Project Notes: ", font=self.conf["font"])
+        self.project_note_entry = TextExtension(build_feature_frame, textvariable=building_features["Notes"], font=self.conf["font"], height=10, fg="blue")
         building_features["Notes"].set(
             """
                 Email sent from ??? on ???, with architecture drawings.
 The project is a residential develop and consists of:
--      ??? levels of Basement car park.
--      Ground level with ??? business premises.
--      Level ???-??? with Residential Apartments with approximately ??? Apartments.
+-      ??? levels of Basement car park, approximately ??? car spots.
+-      Ground level with a child care
+-      Building A ground to level ???, with Residential Apartments, approximately ??? apartments
+-      Building B ground to level ???, with Residential Apartments, approximately ??? apartments
             """
         )
 
@@ -524,11 +548,11 @@ The project is a residential develop and consists of:
     def _update_car_total(self, *args):
         car_park = self.data["Project Info"]["Building Features"]["Major"]["Car Park"]
         car_part_row_total = [0]*6
-        car_part_column_total = [0] * self.conf["n_major_building"]
+        car_part_column_total = [0] * self.conf["n_car_park"]
         car_part_spot_total = 0
         car_part_other_total = 0
         for i in range(6):
-            for j in range(self.conf["n_major_building"]):
+            for j in range(self.conf["n_car_park"]):
                 try:
                     car_part_row_total[i] += int(car_park[j][i+2].get())
                     car_part_column_total[j] += int(car_park[j][i+2].get())
@@ -540,10 +564,10 @@ The project is a residential develop and consists of:
                 car_part_spot_total += car_part_row_total[i]
             else:
                 car_part_other_total += car_part_row_total[i]
-        for i in range(self.conf["n_major_building"]):
+        for i in range(self.conf["n_car_park"]):
             self.car_part_column_total[i].set(str(car_part_column_total[i]))
-        self.car_part_spot_total.set(str(car_part_spot_total))
-        self.car_part_other_total.set(str(car_part_other_total))
+        self.data["Project Info"]["Building Features"]["Major"]["Total Car spot"].set(str(car_part_spot_total))
+        self.data["Project Info"]["Building Features"]["Major"]["Total Others"].set(str(car_part_other_total))
 
     def _update_block_total(self, *args):
         block = self.data["Project Info"]["Building Features"]["Major"]["Block"]
@@ -566,18 +590,21 @@ The project is a residential develop and consists of:
                 block_comm_total += block_row_total[i]
         for i in range(self.conf["n_major_building"]):
             self.block_column_total[i].set(str(block_column_total[i]))
-        self.block_apt_total.set(str(block_apt_total))
-        self.block_comm_total.set(str(block_comm_total))
+        self.data["Project Info"]["Building Features"]["Major"]["Total Apt"].set(str(block_apt_total))
+        self.data["Project Info"]["Building Features"]["Major"]["Total Commercial"].set(str(block_comm_total))
 
     def _update_building_frame(self, *args):
         type = self.data["Project Info"]["Project"]["Proposal Type"].get()
         if type == "Minor":
             self.major_frame.grid_forget()
             self.minor_frame.grid(row=0, column=0)
+            self.project_note_label.grid_forget()
+            self.project_note_entry.grid_forget()
         else:
             self.minor_frame.grid_forget()
             self.major_frame.grid(row=0, column=0)
-
+            self.project_note_label.grid(row=7, column=0, sticky="w", padx=(90, 0))
+            self.project_note_entry.grid(row=8, column=0)
     def _update_service(self, var, *args):
         self.app.fee_proposal_page.update_scope(var)
         self.app.fee_proposal_page.update_fee(var)

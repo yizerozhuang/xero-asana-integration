@@ -464,7 +464,7 @@ class FinancialPanelPage(tk.Frame):
                         "Service": tk.Entry(self.bill_dic[service]["Expand"][i],
                                             textvariable=details[service]["Content"][i]["Service"],
                                             font=self.conf["font"],
-                                            width=18,
+                                            width=27,
                                             fg="blue"),
                         "Fee": tk.Entry(self.bill_dic[service]["Expand"][i],
                                         width=10,
@@ -545,7 +545,7 @@ class FinancialPanelPage(tk.Frame):
                     self.bill_dic[service]["Content"][i]["in.GST"].grid(row=0, column=3)
                     self.bill_dic[service]["Content"][i]["no.GST"].grid(row=0, column=4)
                     self.bill_dic[service]["Content"][i]["Description"].grid(row=0, column=5)
-                    self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=6, padx=(250, 0))
+                    self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=6, padx=(200, 0))
                     self.data["Bills"]["Details"][service]["Content"][i]["Upload"].trace("w", config_button_func(i))
                     # self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=6, sticky="w")
             self.bill_frames[service].pack(fill=tk.X)
@@ -697,13 +697,13 @@ class FinancialPanelPage(tk.Frame):
         fee_upload_button =tk.Button(fee_acceptance_frame, text="Upload", font=self.conf["font"], bg="cyan",
                                      command=self.upload_fee_acceptance)
         fee_upload_button.grid(row=0, column=1)
-        self.data["Fee_Acceptance_Upload"].trace("w", self.config_button(self.data["Fee_Acceptance_Upload"], fee_upload_button))
+        self.data["Fee_Acceptance_Upload"].trace("w", lambda a,b,c: self.config_button(self.data["Fee_Acceptance_Upload"], fee_upload_button))
 
         tk.Label(fee_acceptance_frame, text="Verbal Acceptance", font=self.conf["font"]).grid(row=1, column=0)
         verbal_acceptance_button = tk.Button(fee_acceptance_frame, text="Confirm", font=self.conf["font"], bg="cyan",
                                              command=self.upload_verbal_acceptance)
         verbal_acceptance_button.grid(row=1, column=1)
-        self.data["Verbal_Acceptance_Upload"].trace("w", self.config_button(self.data["Verbal_Acceptance_Upload"], verbal_acceptance_button))
+        self.data["Verbal_Acceptance_Upload"].trace("w", lambda a,b,c:self.config_button(self.data["Verbal_Acceptance_Upload"], verbal_acceptance_button))
 
 
         tk.Label(fee_acceptance_frame, text="Note: ", font=self.conf["font"]).grid(row=1, column=2)
@@ -783,9 +783,9 @@ class FinancialPanelPage(tk.Frame):
                 update_asana_invoices(self.app)
                 # self.messagebox.file_info("Folder and Asana Renamed", old_folder, new_folder)
                 # yes_asana = self.messagebox.file_ask_yes_no("Rename", old_folder, new_folder, "Asana")
-                self.messagebox.file_info("Folder and Asana Renamed", old_folder, new_folder, "Please wait until the invoice turn red and Update Xero")
-                # if update_xero:
-                #     self.app._update_xero()
+                update_xero = self.messagebox.file_ask_yes_no("Folder and Asana Renamed", old_folder, new_folder, "Xero")
+                if update_xero:
+                    self.app._update_xero()
             else:
                 self.messagebox.show_error(
                     f"Fail to rename the folder from {old_folder} to {new_folder}, Please close all the file relate in the folder")
@@ -821,7 +821,7 @@ class FinancialPanelPage(tk.Frame):
 
     def upload_remittance(self, invoice_number, part, i):
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
-        remittance_dir = os.path.join(self.conf["remittances_address"], date.today().strftime("%Y%m"))
+        remittance_dir = os.path.join(self.conf["remittances_dir"], date.today().strftime("%Y%m"))
         if part == "Full":
             if self.data['Remittances'][i]["Type"].get() == "Part":
                 self.messagebox.show_error("This invoice already has partial amount remittance")
@@ -897,6 +897,7 @@ class FinancialPanelPage(tk.Frame):
 
     def upload_bills(self, service, bill_description, origin):
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        bills_dir = os.path.join(self.conf["bills_dir"], date.today().strftime("%Y%m"))
         if len(bill_description.get()) == 0:
             self.messagebox.show_error("You need to upload the description")
             return
@@ -923,6 +924,7 @@ class FinancialPanelPage(tk.Frame):
 
     def upload_sub_fee(self, service, bill_number, i):
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        bills_dir = os.path.join(self.conf["bills_dir"], date.today().strftime("%Y%m"))
         if len(bill_number.get()) == 0:
             self.messagebox.show_error("You need to enter a bill number")
             return
@@ -934,11 +936,24 @@ class FinancialPanelPage(tk.Frame):
             if not rewrite:
                 return
         file = filedialog.askopenfilename()
+        filename = self.data["Project Info"]["Project"]["Project Number"].get() + bill_number.get() + "-" + os.path.basename(file).replace(" ", "_")
         if file == "":
             return
         try:
-            filename = self.data["Project Info"]["Project"]["Project Number"].get()+ bill_number.get() + "-" + os.path.basename(file)
             folder_dir = os.path.join(database_dir, filename)
+            shutil.copy(file, folder_dir)
+        except PermissionError:
+            self.messagebox.show_error("Please Close the file before you upload it")
+            return
+        except Exception as e:
+            print(e)
+            self.messagebox.show_error("Some error occurs, please contact Administrator")
+            return
+
+        try:
+            if not os.path.exists(bills_dir):
+                os.makedirs(bills_dir)
+            folder_dir = os.path.join(bills_dir, filename)
             shutil.copy(file, folder_dir)
         except PermissionError:
             self.messagebox.show_error("Please Close the file before you upload it")
@@ -1057,7 +1072,7 @@ class FinancialPanelPage(tk.Frame):
                 for label in self.invoice_label_list[i]:
                     label.config(bg="green")
                 self._config_radiobutton(i, tk.DISABLED)
-            elif state=="Void":
+            elif state=="Voided":
                 for label in self.invoice_label_list[i]:
                     label.config(bg="purple")
                 self._config_radiobutton(i, tk.DISABLED)
@@ -1082,13 +1097,13 @@ class FinancialPanelPage(tk.Frame):
         state = state.get()
         if state=="Draft":
             label.config(bg=self.app.cget('bg'))
-        elif state=="Awaiting approval":
+        elif state=="Awaiting Approval":
             label.config(bg="red")
-        elif state=="Awaiting payment":
+        elif state=="Awaiting Payment":
             label.config(bg="orange")
         elif state=="Paid":
             label.config(bg="green")
-        elif state=="Void":
+        elif state=="Voided":
             label.config(bg="Purple")
         else:
             raise ValueError

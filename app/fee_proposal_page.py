@@ -5,6 +5,7 @@ import os
 import json
 from text_extension import TextExtension
 
+from utility import preview_installation_fee_proposal, email_installation_proposal
 
 from scope_list import ScopeList
 
@@ -36,11 +37,10 @@ class FeeProposalPage(tk.Frame):
         # self.pdf_frame.bind("<Configure>", self.reset_scrollregion)
 
 
-        # self.email_part()
+        self.email_part()
+        # self.calculation_part()
 
         self.function_part()
-        self.calculation_part()
-
         self.reference_part()
         self.time_part()
         self.stage_part()
@@ -48,28 +48,89 @@ class FeeProposalPage(tk.Frame):
         self.fee_part()
 
     def email_part(self):
-        TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"],
-                      fg="blue", height=85).grid(row=0, column=1, rowspan=6, sticky="n")
-        # print()
+        pass
 
     def function_part(self):
-        function_frame = tk.LabelFrame(self.main_context_frame, text="Installation Function")
-        function_frame.grid(row=0, column=0, sticky="ew", padx=20)
-        tk.Button(function_frame, text="Preview Installation Proposal", bg="Brown", fg="white").grid(row=0, column=0)
-        tk.Button(function_frame, text="Email Installation Proposal", bg="Brown", fg="white").grid(row=0, column=1)
+        reference = {
+            "Date": tk.StringVar(value=date.today().strftime("%d-%b-%Y")),
+            "Revision": tk.StringVar(value="1"),
+            "Program": tk.StringVar()
+        }
+        self.data["Fee Proposal"]["Installation Reference"] = reference
+        self.installation_frame = tk.LabelFrame(self.main_context_frame, text="Installation Function")
+        function_frame = tk.Frame(self.installation_frame)
+        function_frame.grid(row=0, column=0, columnspan=2)
+        tk.Button(function_frame, text="Preview Installation Proposal", command=lambda: preview_installation_fee_proposal(self.app),
+                  bg="Brown", fg="white", font=self.conf["font"]).grid(row=0, column=1)
+        tk.Button(function_frame, text="Email Installation Proposal", command=lambda: email_installation_proposal(self.app),
+                  bg="Brown", fg="white", font=self.conf["font"]).grid(row=0, column=2)
+        reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
+
+        tk.Label(self.installation_frame, width=30, text="Date", font=self.conf["font"]).grid(row=1, column=0, padx=(10, 0))
+        tk.Entry(self.installation_frame, width=44, textvariable=reference["Date"], fg="blue", font=self.conf["font"]).grid(
+            row=1, column=1)
+        tk.Button(self.installation_frame, width=20, text="Today", font=self.conf["font"], bg="Brown", fg="white", command=self.installation_today).grid(row=1, column=2)
+        reference["Revision"] = tk.StringVar(value="1")
+        tk.Label(self.installation_frame, width=30, text="Revision", font=self.conf["font"]).grid(row=2, column=0, padx=(10, 0))
+        tk.Entry(self.installation_frame, width=70, textvariable=reference["Revision"], fg="blue", font=self.conf["font"]).grid(
+            row=2, column=1, padx=(0, 10), columnspan=2)
+        tk.Label(self.installation_frame, text="Program", font=self.conf["font"]).grid(row=3, column=0)
+        TextExtension(self.installation_frame, textvariable=reference["Program"], font=self.conf["font"], height=4, fg="blue").grid(row=3, column=1, padx=(0, 10), columnspan=2)
+
+
+        self.data["Project Info"]["Project"]["Service Type"]["Installation"]["Include"].trace("w", self._update_frame)
 
     def calculation_part(self):
         calculate_frame = tk.LabelFrame(self.main_context_frame)
         calculate_frame.grid(row=0, column=1, rowspan=6, sticky="n")
-        tk.Label(calculate_frame, text="Hihihi").pack()
-
-
+        calculate = {
+            "Car Park":[
+                {
+                    "Project": tk.StringVar(),
+                    "Car park Level": tk.StringVar(),
+                    "Number of Carports": tk.StringVar()
+                } for _ in range(self.conf["car_park_row"])
+            ],
+            "Apt": tk.StringVar(),
+            "Area": tk.StringVar()
+        }
+        self.data["Fee Proposal"]["Calculation Part"] = calculate
+        car_park_frame = tk.Frame(calculate_frame)
+        car_park_frame.pack()
+        # for i in range(self.conf["car_park_row"]):
+        apt_frame = tk.Frame(calculate_frame)
+        apt_frame.pack()
+        tk.Label(apt_frame, text="Total Apts: ").grid(row=0, column=0)
+        tk.Entry(apt_frame, textvariable=calculate["Apt"], font=self.conf["font"], fg="blue").grid(row=0, column=1)
+        self.apt_entry = []
+        self.area_entry = []
+        calculation_function = lambda i, entry: lambda a,b,c: self.calculate_apt_price(i, entry)
+        num=0
+        for i in list(range(80, 130, 5)) + list(range(130, 630, 10)):
+            tk.Label(apt_frame, text=f"${i}").grid(row=num+1, column=0)
+            self.apt_entry.append(tk.Entry(apt_frame, font=self.conf["font"], fg="blue"))
+            self.apt_entry[num].grid(row=num + 1, column=1)
+            calculate["Apt"].trace("w", calculation_function(i, self.apt_entry[num]))
+            num+=1
+        num = 0
+        for i in list(range(1, 3)) + list(range(130, 630, 10)):
+            tk.Label(apt_frame, text=f"${i}").grid(row=num + 1, column=0)
+            self.apt_entry.append(tk.Entry(apt_frame, font=self.conf["font"], fg="blue"))
+            self.apt_entry[num].grid(row=num + 1, column=1)
+            calculate["Apt"].trace("w", calculation_function(i, self.apt_entry[num]))
+            num += 1
+        # for i in range(130, 630, 10):
+        #     tk.Label(apt_frame, text=f"${i}").grid(row=num + 1, column=0)
+        #     self.apt_entry.append(tk.Entry(apt_frame, font=self.conf["font"], fg="blue"))
+        #     self.apt_entry[num].grid(row=num + 1, column=1)
+        #     calculate["Apt"].trace("w", calculation_function(i, self.apt_entry[num]))
+        #     num += 1
 
     def reference_part(self):
         reference = dict()
         self.data["Fee Proposal"]["Reference"] = reference
 
-        reference_frame = tk.LabelFrame(self.main_context_frame, text="reference")
+        reference_frame = tk.LabelFrame(self.main_context_frame, text="Reference")
         reference_frame.grid(row=1, column=0, sticky="ew", padx=20)
 
         reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
@@ -134,6 +195,8 @@ class FeeProposalPage(tk.Frame):
             self.stage_frames[f"Stage{i+1}"] = tk.Frame(extra_frame)
             self.stage_frames[f"Stage{i+1}"].pack()
             color_list = ["white", "azure"]
+
+
             for j, item in enumerate(stage_data[f"Stage{i+1}"]):
                 content = {
                     "Include": tk.BooleanVar(value=True),
@@ -155,6 +218,8 @@ class FeeProposalPage(tk.Frame):
             tk.Checkbutton(append_frame, variable=self.append_stage[f"Stage{i+1}"]["Add"], text="Add to Database").grid(row=0, column=1)
             func = lambda i: lambda: self._append_stage(i)
             tk.Button(append_frame, text="Submit", command=func(i)).grid(row=0, column=2)
+
+    # def _update_stage(self):
 
     def _update_stage(self, *args):
         if self.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
@@ -256,6 +321,9 @@ class FeeProposalPage(tk.Frame):
                 "Fee": tk.StringVar(),
                 "in.GST": tk.StringVar()
             }
+            if service != "Variation":
+                invoices["Details"][service]["Content"][0]["Service"].set(service+" Kickoff")
+                invoices["Details"][service]["Content"][1]["Service"].set(service+" Final Documentation")
             expand_fun = lambda service : lambda a, b, c: self._expand(service)
             invoices["Details"][service]["Expand"].trace("w", expand_fun(service))
             invoices["Details"][service]["Expand"].trace("w", self.update_sum)
@@ -286,8 +354,9 @@ class FeeProposalPage(tk.Frame):
 
         top_frame = tk.LabelFrame(self.fee_frame)
         top_frame.pack(side=tk.TOP)
-        tk.Label(top_frame, text="", width=6, font=self.conf["font"]).grid(row=0, column=0)
-        tk.Label(top_frame, width=50, text="Services", font=self.conf["font"]).grid(row=0, column=1)
+        # tk.Label(top_frame, text="", width=6, font=self.conf["font"]).grid(row=0, column=0)
+        tk.Button(top_frame, width=20, text="Unlock", bg="Brown", fg="white", command=self.unlock, font=self.conf["font"]).grid(row=0, column=0)
+        tk.Label(top_frame, width=35, text="Services", font=self.conf["font"]).grid(row=0, column=1)
         tk.Label(top_frame, width=20, text="ex.GST", font=self.conf["font"]).grid(row=0, column=2)
         tk.Label(top_frame, width=20, text="in.GST", font=self.conf["font"]).grid(row=0, column=3)
 
@@ -298,6 +367,10 @@ class FeeProposalPage(tk.Frame):
 
         tk.Label(bottom_frame, width=20, textvariable=invoices["Fee"], font=self.conf["font"]).grid(row=0, column=2)
         tk.Label(bottom_frame, width=20, textvariable=invoices["in.GST"], font=self.conf["font"]).grid(row=0, column=3)
+
+        self.data["Project Info"]["Project"]["Quotation Number"].trace("w", self._config_entry)
+        self.data["State"]["Email to Client"].trace("w", self._config_entry)
+
     def update_fee(self, var):
         invoices_details = self.data["Invoices"]["Details"]
         # archive = self.data["Archive"]["Invoice"]
@@ -364,6 +437,7 @@ class FeeProposalPage(tk.Frame):
                 self.fee_dic[service]["Fee"].grid(row=0, column=2)
                 self.fee_dic[service]["in.GST"].grid(row=0, column=3)
 
+            self._config_entry()
             self.fee_frames[service].pack()
             self.update_sum()
         else:
@@ -375,6 +449,8 @@ class FeeProposalPage(tk.Frame):
 
     def today(self):
         self.data["Fee Proposal"]["Reference"]["Date"].set(date.today().strftime("%d-%b-%Y"))
+    def installation_today(self):
+        self.data["Fee Proposal"]["Installation Reference"]["Date"].set(date.today().strftime("%d-%b-%Y"))
 
     def _append_value(self, service, extra):
         scope_dir = os.path.join(self.conf["database_dir"], "scope_of_work.json")
@@ -494,3 +570,30 @@ class FeeProposalPage(tk.Frame):
                     return
         total.set(str(round(sum, 2)))
         total_ist.set(str(round(ist_sum, 2)))
+
+    def _update_frame(self, *args):
+        if self.data["Project Info"]["Project"]["Service Type"]["Installation"]["Include"].get():
+            self.installation_frame.grid(row=0, column=0, sticky="ew", padx=20)
+        else:
+            self.installation_frame.grid_forget()
+
+    def calculate_apt_price(self, i, entry, *args):
+        entry.delete(0, tk.END)
+        entry.insert(0, i*int(self.data["Fee Proposal"]["Calculation Part"]["Apt"].get()))
+
+    def _config_entry(self, *args):
+        if self.data["State"]["Email to Client"].get():
+            for service in self.fee_dic.values():
+                service["Fee"].config(state=tk.DISABLED)
+                for content in service["Content"]["Details"]:
+                    content["Fee"].config(state=tk.DISABLED)
+        else:
+            for service in self.fee_dic.values():
+                service["Fee"].config(state=tk.NORMAL)
+                for content in service["Content"]["Details"]:
+                    content["Fee"].config(state=tk.NORMAL)
+    def unlock(self):
+        for service in self.fee_dic.values():
+            service["Fee"].config(state=tk.NORMAL)
+            for content in service["Content"]["Details"]:
+                content["Fee"].config(state=tk.NORMAL)
