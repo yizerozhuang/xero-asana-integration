@@ -4,6 +4,7 @@ from app_log import AppLog
 
 import os
 import json
+import time
 
 
 asana_configuration = asana.Configuration()
@@ -31,6 +32,7 @@ off_set = None
 i = 0
 exist_task = 0
 unprocessed_task_list = {}
+start = time.time()
 while True:
     if off_set is None:
         ori_tasks = task_api_instance.get_tasks_for_project(project_gid=MP_project_gid, limit=100)
@@ -50,10 +52,13 @@ while True:
             for story in stories:
                 text = story["text"]
                 if "changed the name to" in text:
-                    quotation_number = text.split('"')[1].split("-")[0].split("P:\\")[-1]
+                    quotation_number = text.split('"')[1].split("-")[0].split("P:\\")[-1].strip()
                     break
-            if quotation_number.isdigit():
-                unprocessed_task_list[quotation_number] = task["gid"]
+            if quotation_number.isdigit() or i == 366:
+                unprocessed_task_list[task["gid"]] = {
+                    "Project Number": quotation_number,
+                    "Quotation NUmber": ""
+                }
                 print("Only Found Project Number")
                 continue
         else:
@@ -76,6 +81,10 @@ while True:
         for project in asana_task["projects"]:
             if project["name"] in project_types:
                 data_json["Project Info"]["Project"]["Project Type"] = project["name"]
+                if project["name"] in ["Group House", "Apartment", "Mixed-use complex"]:
+                    project["Project Info"]["Project"]["Proposal Type"] = "Major"
+                else:
+                    project["Project Info"]["Project"]["Proposal Type"] = "Minor"
                 break
         for custom_field in asana_task["custom_fields"]:
             if custom_field["name"] == "Status":
@@ -90,9 +99,10 @@ while True:
                     data_json["State"]["Email to Client"] = True
                     data_json["State"]["Fee Accepted"] = True
             elif custom_field["name"] == "Services":
-                include_services_list = custom_field["display_value"].split(", ")
-                for service in include_services_list:
-                    data_json["Project Info"]["Project"]["Service Type"][service]["Include"]=True
+                if not custom_field["display_value"] is None:
+                    include_services_list = custom_field["display_value"].split(", ")
+                    for service in include_services_list:
+                        data_json["Project Info"]["Project"]["Service Type"][service]["Include"]=True
             elif custom_field["name"] == "Shop Name":
                 if not custom_field["display_value"] is None:
                     data_json["Project Info"]["Project"]["Shop Name"]=custom_field["display_value"]
@@ -112,19 +122,28 @@ while True:
                 if not custom_field["display_value"] is None:
                     data_json["Project Info"]["Main Contact"]["Full Name"] = custom_field["display_value"]
             elif custom_field["name"] == "Contact Type":
-                data_json["Project Info"]["Main Contact"]["Contact Type"] = custom_field["display_value"]
+                if not custom_field["display_value"] is None:
+                    data_json["Project Info"]["Main Contact"]["Contact Type"] = custom_field["display_value"]
         num = 0
         for sub_task in sub_tasks:
             if sub_task["name"].startswith("INV"):
+                invoice_task = task_api_instance.get_task(sub_task["gid"]).to_dict()["data"]
                 if sub_task["name"][4:10].isdigit():
                     number = sub_task["name"][4:10]
                     data_json["Invoices Number"][num]["Number"] = number
-                    invoice_task = task_api_instance.get_task(sub_task["gid"]).to_dict()["data"]
                     state = invoice_task["custom_fields"][2]["display_value"]
                     data_json["Invoices Number"][num]["State"] = state
                     inv_json[number] = state
-                # data_json["Invoices Number"][num]["Asana_id"] = sub_task["gid"]
+                for custom_field in invoice_task["custom_fields"]:
+                    if custom_field["name"] == "Net" and not custom_field["display_value"] is None:
+                        data_json["Invoices Number"][num]["Fee"] = custom_field["display_value"]
+                    elif custom_field["name"] == "Gross" and not custom_field["display_value"] is None:
+                        data_json["Invoices Number"][num]["in.GST"] = custom_field["display_value"]
                 num+=1
+                if num == 6:
+                    print("Total Invoices Number Exceeding 6, Skip the remaining Invoices")
+                    break
+
 
         os.makedirs(os.path.join(database_dir, quotation_number))
         log.log_sync_from_asana("Admin", quotation_number)
@@ -144,7 +163,6 @@ while True:
 
 
     if ori_tasks.to_dict()["next_page"] is None:
-
         with open(os.path.join(database_dir, "invoices.json"), "w") as f:
             json_object = json.dumps(inv_json, indent=4)
             f.write(json_object)
@@ -153,6 +171,7 @@ while True:
             f.write(json_object)
         print(f"Exist Tasks: {exist_task} {exist_task/i}")
         print(f"Unprocessed Tasks: {len(unprocessed_task_list)} {len(unprocessed_task_list) / i}")
+        print(f"The Sync take {time.time()-start}s")
         print("Download Complete!!!")
         break
     off_set = ori_tasks.to_dict()["next_page"]["offset"]

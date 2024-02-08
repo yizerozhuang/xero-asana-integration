@@ -481,18 +481,9 @@
             "Program":null
         },
         "Time": {
-            "Fee Proposal": {
-                "Start": "1",
-                "End": "2"
-            },
-            "Pre-design": {
-                "Start": "1",
-                "End": "2"
-            },
-            "Documentation": {
-                "Start": "1",
-                "End": "2"
-            }
+            "Fee Proposal": "1-2",
+            "Pre-design": "1-2",
+            "Documentation": "1-2"
         },
         "Stage": {
             "Stage1": {

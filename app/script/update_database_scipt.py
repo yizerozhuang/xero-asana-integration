@@ -4,7 +4,7 @@ from asana_function import clean_response
 import asana
 import os
 import json
-
+import time
 
 asana_configuration = asana.Configuration()
 asana_configuration.access_token = '2/1203283895754383/1206354773081941:c116d68430be7b2832bf5d7ea2a0a415'
@@ -24,45 +24,55 @@ for dir in os.listdir(database_dir):
         data_dir = os.path.join(database_dir, dir, "data.json")
         data_json = json.load(open(data_dir))
 
-        if len(data_json["Asana_id"])!=0:
-            asana_task = clean_response(task_api_instance.get_task(data_json["Asana_id"]))
-            data_json["Asana_url"] = asana_task["permalink_url"]
-        else:
-            data_json["Asana_url"] = ""
-        if len(data_json["Project Info"]["Drawing"]) != 12:
-            for i in range(len(data_json["Project Info"]["Drawing"]), 12):
-                data_json["Project Info"]["Drawing"].append(
-                    {
-                        "Drawing Number": "",
-                        "Drawing Name": "",
-                        "Revision": ""
-                    }
-                )
+        # if len(data_json["Asana_id"])!=0:
+        #     asana_task = clean_response(task_api_instance.get_task(data_json["Asana_id"]))
+        #     data_json["Asana_url"] = asana_task["permalink_url"]
+        # else:
+        #     data_json["Asana_url"] = ""
+        # if len(data_json["Project Info"]["Drawing"]) != 12:
+        #     for i in range(len(data_json["Project Info"]["Drawing"]), 12):
+        #         data_json["Project Info"]["Drawing"].append(
+        #             {
+        #                 "Drawing Number": "",
+        #                 "Drawing Name": "",
+        #                 "Revision": ""
+        #             }
+        #         )
+        #
+        # data_json["Fee Proposal"]["Installation Reference"] = {
+        #     "Date": "",
+        #     "Revision": "1",
+        #     "Program":None
+        # }
+        # if len(data_json["Project Info"]["Building Features"]["Major"]["Block"]) != 20:
+        #     for i in range(len(data_json["Project Info"]["Building Features"]["Major"]["Block"]), 20):
+        #         data_json["Project Info"]["Building Features"]["Major"]["Block"].append([
+        #                 "",
+        #                 "",
+        #                 "",
+        #                 "",
+        #                 "",
+        #                 "",
+        #                 "",
+        #                 ""
+        #             ]
+        #         )
+        # data_json["Project Info"]["Building Features"]["Major"]["Total Car spot"] = "0"
+        # data_json["Project Info"]["Building Features"]["Major"]["Total Others"] = "0"
+        # data_json["Project Info"]["Building Features"]["Major"]["Total Apt"] = "0"
+        # data_json["Project Info"]["Building Features"]["Major"]["Total Commercial"] = "0"
+        # data_json["Project Info"]["Building Features"]["Apt"] = ""
+        # data_json["Project Info"]["Building Features"]["Basement"] = ""
 
-        data_json["Fee Proposal"]["Installation Reference"] = {
-            "Date": "",
-            "Revision": "1",
-            "Program":None
-        }
-        if len(data_json["Project Info"]["Building Features"]["Major"]["Block"]) != 20:
-            for i in range(len(data_json["Project Info"]["Building Features"]["Major"]["Block"]), 20):
-                data_json["Project Info"]["Building Features"]["Major"]["Block"].append([
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        ""
-                    ]
-                )
-        data_json["Project Info"]["Building Features"]["Major"]["Total Car spot"] = "0"
-        data_json["Project Info"]["Building Features"]["Major"]["Total Others"] = "0"
-        data_json["Project Info"]["Building Features"]["Major"]["Total Apt"] = "0"
-        data_json["Project Info"]["Building Features"]["Major"]["Total Commercial"] = "0"
-        data_json["Project Info"]["Building Features"]["Apt"] = ""
-        data_json["Project Info"]["Building Features"]["Basement"] = ""
+        for key, value in data_json["Fee Proposal"]["Time"].items():
+            if type(value) is dict:
+                new = value["Start"] + "-" + value["End"]
+                data_json["Fee Proposal"]["Time"][key]=new
+        if not "Program" in data_json["Fee Proposal"]["Installation Reference"]:
+            data_json["Fee Proposal"]["Installation Reference"]["Program"] = None
+        if not "Asana State" in data_json["State"]:
+            data_json["State"]["Asana State"] = ""
+
         print(count)
         count+=1
 

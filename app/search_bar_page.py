@@ -23,14 +23,18 @@ def sortby(tree, col, descending):
 
 def show_status(data_json):
     state = data_json["State"]
+    if state["Asana State"] in ["Pending", "DWG drawings", "Done", "Installation", "Construction Phase"]:
+        return state["Asana State"]
     if state["Quote Unsuccessful"]:
         return "Quote Unsuccessful"
     elif state["Fee Accepted"]:
         return "Fee Accepted"
     elif state["Email to Client"]:
-        return "Email to Client"
+        return "Chase Client"
     elif state["Generate Proposal"]:
-        return "Generate Proposal"
+        return "Email To Client"
+    elif state["Set Up"]:
+        return "Preview Fee Proposal"
     else:
         return "Set Up"
 
@@ -108,6 +112,7 @@ class SearchBarPage(tk.Frame):
                 res.append(
                     tuple([self.convert_map[title](data_json) for title in self.mp_header])
                 )
+        # res.sort(key=lambda e: e[0])
         self.master_project = res
 
     def search_bar(self):
@@ -169,14 +174,17 @@ class SearchBarPage(tk.Frame):
             data = []
             for item in self.master_project:
                 for title in item:
+                    if title is None:
+                        print()
                     if typed.lower() in title.lower():
                         data.append(item)
-        self.update_data(data)
+        self.update_data(set(data))
 
     def refresh(self):
         self.entry.delete(0, "end")
         self.generate_data()
         self.check("None")
+        sortby(self.tree, "Quotation Number", True)
 
     def reset_scrollregion(self, event):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))

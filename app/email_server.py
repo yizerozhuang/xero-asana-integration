@@ -1,4 +1,5 @@
 import email
+import tkinter.messagebox
 from email.header import decode_header
 import imaplib
 import smtplib
@@ -294,6 +295,10 @@ def email_server(app=None):
         except Exception as e:
             time.sleep(10)
             print(e)
+            if "socket" in e:
+                if not app is None:
+                    app.messagebox.show_error("Internet Error, Please close and restart python")
+                    return
             continue
     imap.close()
     imap.logout()

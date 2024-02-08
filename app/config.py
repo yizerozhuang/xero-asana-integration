@@ -35,6 +35,7 @@ CONFIGURATION = {
 
 
 
+
 CONFIGURATION["working_dir"] = str(Path(os.getcwd()).parent)
 # CONFIGURATION["database_dir"] = "A:\\00-Bridge Database"
 CONFIGURATION["database_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "database")

@@ -193,16 +193,32 @@ def convert_to_data(json, data):
 
 def finish_setup(app):
     data = app.data
-    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get().strip()
-    working_dir = os.path.join(app.conf["working_dir"], folder_name)
-
-    if not os.path.exists(working_dir):
+    working_dir = app.conf["working_dir"]
+    quotation_number = data["Project Info"]["Project"]["Quotation Number"].get()
+    folder_name = quotation_number + "-" + data["Project Info"]["Project"]["Project Name"].get()
+    # folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get().strip()
+    # working_dir = os.path.join(app.conf["working_dir"], folder_name)
+    found = False
+    current_folder_name = None
+    for dir in os.listdir(working_dir):
+        if os.path.isdir(os.path.join(working_dir, dir)) and dir.split("-")[0]==quotation_number:
+            found = True
+            current_folder_name = dir
+    if not found:
         create_folder = messagebox.askyesno("Folder not found",
-                                            f"Can not find the folder {folder_name}, do you want to create the folder")
+                                            f"Can not find the folder with quotation number {quotation_number}, do you want to create the folder")
         if create_folder:
             create_new_folder(folder_name, app.conf)
         else:
             return
+    else:
+        if current_folder_name != folder_name:
+            try:
+                shutil.move(os.path.join(working_dir, current_folder_name), os.path.join(working_dir, folder_name))
+            except Exception as e:
+                print(e)
+                tk.messagebox.showerror("Error", "Please Close the file relate to folder before rename")
+                return
     data["State"]["Set Up"].set(True)
     save(app)
     app.log.log_finish_set_up(app)
@@ -528,12 +544,9 @@ def minor_project_fee_proposal(app, *args):
         work_sheets.Cells(3, 8).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
         work_sheets.Cells(6, 1).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
         work_sheets.Cells(8, 1).Value = f"Thank you for giving us the opportunity to submit this fee proposal for our {', '.join([key for key, value in data['Project Info']['Project']['Service Type'].items() if value['Include'].get()])} for the above project."
-        work_sheets.Cells(16, 7).Value = data["Fee Proposal"]["Time"]["Fee Proposal"]["Start"].get() + "-" + \
-                                         data["Fee Proposal"]["Time"]["Fee Proposal"]["End"].get()
-        work_sheets.Cells(21, 7).Value = data["Fee Proposal"]["Time"]["Pre-design"]["Start"].get() + "-" + \
-                                         data["Fee Proposal"]["Time"]["Pre-design"]["End"].get()
-        work_sheets.Cells(26, 7).Value = data["Fee Proposal"]["Time"]["Documentation"]["Start"].get() + "-" + \
-                                         data["Fee Proposal"]["Time"]["Documentation"]["End"].get()
+        work_sheets.Cells(16, 7).Value = data["Fee Proposal"]["Time"]["Fee Proposal"].get()
+        work_sheets.Cells(21, 7).Value = data["Fee Proposal"]["Time"]["Pre-design"].get()
+        work_sheets.Cells(26, 7).Value = data["Fee Proposal"]["Time"]["Documentation"].get()
         cur_index = 1
         i = 0
         for key in app.conf["proposal_list"]:
@@ -981,7 +994,7 @@ def excel_print_invoice(app, inv):
         def open_pdf():
             subprocess.call([adobe_address, old_pdf_path])
         _thread.start_new_thread(open_pdf, ())
-        rewrite = messagebox.askyesno("Warming", f"Existing file PCE INV {invoice_name}.pdf do you want to rewrite?")
+        rewrite = messagebox.askyesno("Warming", f"Existing file PCE INV {invoice_name} do you want to rewrite?")
         if not rewrite:
             return
         else:
@@ -1207,12 +1220,19 @@ def preview_installation_fee_proposal(app):
                         cur_row += 1
             cur_row+=1
 
-        cur_row = 167
+        cur_row = 168
         project_type = data["Project Info"]["Project"]["Project Type"].get()
         past_projects = json.load(open(past_projects_dir, encoding="utf-8"))[project_type]
         for i, project in enumerate(past_projects):
             work_sheets.Cells(cur_row + i, 1).Value = "•"
             work_sheets.Cells(cur_row + i, 2).Value = project
+
+        cur_row = 181
+        if not data["Fee Proposal"]["Installation Reference"]["Program"].get() is None:
+            for line in data["Fee Proposal"]["Installation Reference"]["Program"].get().split("\n"):
+                work_sheets.Cells(cur_row, 1).Value = "•"
+                work_sheets.Cells(cur_row, 2).Value = line
+                cur_row+=1
 
         cur_row = 195
         for i, content in enumerate(data["Invoices"]["Details"]["Installation"]["Content"]):
@@ -1526,16 +1546,16 @@ def update_app_invoices(app, inv_list):
                 item["Fee"].set("")
             elif bill_number in inv_list["Bills"]["SUBMITTED"].keys():
                 item["State"].set("Awaiting Approval")
-                value = inv_list["Bills"]["SUBMITTED"][bill_number]
-                if value["line_amount_types"] == 'NoTax':
-                    item["no.GST"].set(True)
-                    item["Fee"].set(str(value["sub_total"]))
-                elif value["line_amount_types"] == 'Exclusive':
-                    item["no.GST"].set(False)
-                    item["Fee"].set(str(value["sub_total"]))
-                elif value["line_amount_types"] == 'Inclusive':
-                    item["no.GST"].set(False)
-                    item["Fee"].set(str(value["sub_total"]))
+                # value = inv_list["Bills"]["SUBMITTED"][bill_number]
+                # if value["line_amount_types"] == 'NoTax':
+                #     item["no.GST"].set(True)
+                #     item["Fee"].set(str(value["sub_total"]))
+                # elif value["line_amount_types"] == 'Exclusive':
+                #     item["no.GST"].set(False)
+                #     item["Fee"].set(str(value["sub_total"]))
+                # elif value["line_amount_types"] == 'Inclusive':
+                #     item["no.GST"].set(False)
+                #     item["Fee"].set(str(value["sub_total"]))
             elif bill_number in inv_list["Bills"]["AUTHORISED"].keys():
                 item["State"].set("Awaiting Payment")
             elif bill_number in inv_list["Bills"]["PAID"].keys():
@@ -1548,7 +1568,6 @@ def update_app_invoices(app, inv_list):
 
     with open(bills_dir, "w") as f:
         json.dump(bills_json, f, indent=4)
-
 
 
 def send_email_with_attachment(filename):

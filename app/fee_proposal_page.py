@@ -38,7 +38,7 @@ class FeeProposalPage(tk.Frame):
 
 
         self.email_part()
-        # self.calculation_part()
+        self.calculation_part()
 
         self.function_part()
         self.reference_part()
@@ -49,36 +49,6 @@ class FeeProposalPage(tk.Frame):
 
     def email_part(self):
         pass
-
-    def function_part(self):
-        reference = {
-            "Date": tk.StringVar(value=date.today().strftime("%d-%b-%Y")),
-            "Revision": tk.StringVar(value="1"),
-            "Program": tk.StringVar()
-        }
-        self.data["Fee Proposal"]["Installation Reference"] = reference
-        self.installation_frame = tk.LabelFrame(self.main_context_frame, text="Installation Function")
-        function_frame = tk.Frame(self.installation_frame)
-        function_frame.grid(row=0, column=0, columnspan=2)
-        tk.Button(function_frame, text="Preview Installation Proposal", command=lambda: preview_installation_fee_proposal(self.app),
-                  bg="Brown", fg="white", font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(function_frame, text="Email Installation Proposal", command=lambda: email_installation_proposal(self.app),
-                  bg="Brown", fg="white", font=self.conf["font"]).grid(row=0, column=2)
-        reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
-
-        tk.Label(self.installation_frame, width=30, text="Date", font=self.conf["font"]).grid(row=1, column=0, padx=(10, 0))
-        tk.Entry(self.installation_frame, width=44, textvariable=reference["Date"], fg="blue", font=self.conf["font"]).grid(
-            row=1, column=1)
-        tk.Button(self.installation_frame, width=20, text="Today", font=self.conf["font"], bg="Brown", fg="white", command=self.installation_today).grid(row=1, column=2)
-        reference["Revision"] = tk.StringVar(value="1")
-        tk.Label(self.installation_frame, width=30, text="Revision", font=self.conf["font"]).grid(row=2, column=0, padx=(10, 0))
-        tk.Entry(self.installation_frame, width=70, textvariable=reference["Revision"], fg="blue", font=self.conf["font"]).grid(
-            row=2, column=1, padx=(0, 10), columnspan=2)
-        tk.Label(self.installation_frame, text="Program", font=self.conf["font"]).grid(row=3, column=0)
-        TextExtension(self.installation_frame, textvariable=reference["Program"], font=self.conf["font"], height=4, fg="blue").grid(row=3, column=1, padx=(0, 10), columnspan=2)
-
-
-        self.data["Project Info"]["Project"]["Service Type"]["Installation"]["Include"].trace("w", self._update_frame)
 
     def calculation_part(self):
         calculate_frame = tk.LabelFrame(self.main_context_frame)
@@ -126,54 +96,100 @@ class FeeProposalPage(tk.Frame):
         #     calculate["Apt"].trace("w", calculation_function(i, self.apt_entry[num]))
         #     num += 1
 
+    def function_part(self):
+        reference = {
+            "Date": tk.StringVar(value=date.today().strftime("%d-%b-%Y")),
+            "Revision": tk.StringVar(value="1"),
+            "Program": tk.StringVar()
+        }
+        self.data["Fee Proposal"]["Installation Reference"] = reference
+        self.installation_frame = tk.LabelFrame(self.main_context_frame, text="Installation Function")
+        function_frame = tk.Frame(self.installation_frame)
+
+        self.installation_dic = {
+            "Date": tk.Entry(self.installation_frame, width=44, textvariable=reference["Date"], fg="blue", font=self.conf["font"]),
+            "Today": tk.Button(self.installation_frame, width=20, text="Today", font=self.conf["font"], bg="Brown",
+                               fg="white", command=self.installation_today),
+            "Revision": tk.Entry(self.installation_frame, width=70, textvariable=reference["Revision"], fg="blue", font=self.conf["font"]),
+            "Program": TextExtension(self.installation_frame, textvariable=reference["Program"], font=self.conf["font"], height=4, fg="blue")
+        }
+
+        function_frame.grid(row=0, column=0, columnspan=2)
+        tk.Button(function_frame, text="Preview Installation Proposal", command=lambda: preview_installation_fee_proposal(self.app),
+                  bg="Brown", fg="white", font=self.conf["font"]).grid(row=0, column=1)
+        tk.Button(function_frame, text="Email Installation Proposal", command=lambda: email_installation_proposal(self.app),
+                  bg="Brown", fg="white", font=self.conf["font"]).grid(row=0, column=2)
+        reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
+
+        tk.Label(self.installation_frame, width=30, text="Date", font=self.conf["font"]).grid(row=1, column=0, padx=(10, 0))
+        self.installation_dic["Date"].grid(row=1, column=1)
+        self.installation_dic["Today"].grid(row=1, column=2)
+        reference["Revision"] = tk.StringVar(value="1")
+        tk.Label(self.installation_frame, width=30, text="Revision", font=self.conf["font"]).grid(row=2, column=0, padx=(10, 0))
+        self.installation_dic["Revision"].grid(row=2, column=1, padx=(0, 10), columnspan=2)
+        tk.Label(self.installation_frame, text="Program", font=self.conf["font"]).grid(row=3, column=0)
+        self.installation_dic["Program"].grid(row=3, column=1, padx=(0, 10), columnspan=2)
+        reference["Program"].set(
+            """
+                Week 1: site induction, site inspection and site measure, coordination.
+Week 2-3: Order ductwork, VCDs, material and arrange labour.
+Week 4-5: Installation commissioning and testing to critical area.
+Week 6-8: Based on site condition, finalize all installation, provide installation certificate.
+            """
+        )
+
+        self.data["Project Info"]["Project"]["Service Type"]["Installation"]["Include"].trace("w", self._update_frame)
+
+
     def reference_part(self):
-        reference = dict()
+        reference = {
+            "Date": tk.StringVar(value=date.today().strftime("%d-%b-%Y")),
+            "Revision": tk.StringVar(value="1")
+        }
         self.data["Fee Proposal"]["Reference"] = reference
 
         reference_frame = tk.LabelFrame(self.main_context_frame, text="Reference")
         reference_frame.grid(row=1, column=0, sticky="ew", padx=20)
 
-        reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
+        self.reference_dic = {
+            "Date":tk.Entry(reference_frame, width=44, textvariable=reference["Date"], fg="blue", font=self.conf["font"]),
+            "Today":tk.Button(reference_frame, width=20, text="Today", font=self.conf["font"], bg="Brown", fg="white", command=self.today),
+            "Revision":tk.Entry(reference_frame, width=70, textvariable=reference["Revision"], fg="blue", font=self.conf["font"])
+        }
+
+
         tk.Label(reference_frame, width=30, text="Date", font=self.conf["font"]).grid(row=0, column=0, padx=(10, 0))
-        tk.Entry(reference_frame, width=44, textvariable=reference["Date"], fg="blue", font=self.conf["font"]).grid(
-            row=0, column=1)
-        tk.Button(reference_frame, width=20, text="Today", font=self.conf["font"], bg="Brown", fg="white", command=self.today
-                  ).grid(row=0, column=2)
-        reference["Revision"] = tk.StringVar(value="1")
+        self.reference_dic["Date"].grid(row=0, column=1)
+        self.reference_dic["Today"].grid(row=0, column=2)
         tk.Label(reference_frame, width=30, text="Revision", font=self.conf["font"]).grid(row=1, column=0, padx=(10, 0))
-        tk.Entry(reference_frame, width=70, textvariable=reference["Revision"], fg="blue", font=self.conf["font"]).grid(
-            row=1, column=1, padx=(0, 10), columnspan=2)
+        self.reference_dic["Revision"].grid(row=1, column=1, padx=(0, 10), columnspan=2)
 
     def time_part(self):
         time = dict()
         self.data["Fee Proposal"]["Time"] = time
 
-        self.time_frame = tk.LabelFrame(self.main_context_frame, text="Time Consuming", font=self.conf["font"])
+        self.time_dic = {}
+
+        self.time_frame = tk.LabelFrame(self.main_context_frame, text="Time Frame", font=self.conf["font"])
         self.time_frame.grid(row=2, column=0, sticky="ew", padx=20)
 
         stages = ["Fee Proposal", "Pre-design", "Documentation"]
 
         for i, stage in enumerate(stages):
             tk.Label(self.time_frame, width=30, text=stage, font=self.conf["font"]).grid(row=i, column=0)
-            time[stage] = {
-                "Start": tk.StringVar(value="1"),
-                "End": tk.StringVar(value="2")
-            }
-            tk.Entry(self.time_frame, width=20, font=self.conf["font"], fg="blue", textvariable=time[stage]["Start"]).grid(
-                row=i, column=1)
-            tk.Label(self.time_frame, text="-").grid(row=i, column=2)
-            tk.Entry(self.time_frame, width=20, font=self.conf["font"], fg="blue", textvariable=time[stage]["End"]).grid(
-                row=i, column=3)
-            tk.Label(self.time_frame, text=" business day", font=self.conf["font"]).grid(row=i, column=4)
+            time[stage] = tk.StringVar(value="1-2")
+            self.time_dic[stage] = tk.Entry(self.time_frame, width=20, font=self.conf["font"], fg="blue", textvariable=time[stage])
+            self.time_dic[stage].grid(row=i, column=1)
+            tk.Label(self.time_frame, text=" business days", font=self.conf["font"]).grid(row=i, column=4)
 
     def stage_part(self):
         stage_dict = dict()
         self.data["Fee Proposal"]["Stage"] = stage_dict
         self.data["Project Info"]["Project"]["Proposal Type"].trace("w", self._update_stage)
         self.stage_frame = tk.LabelFrame(self.main_context_frame, text="Stage", font=self.conf["font"])
-
         self.stage_frames = dict()
         self.append_stage = dict()
+        self.stage_dic = dict()
 
         stage_dir = os.path.join(self.conf["database_dir"], "general_scope_of_staging.json")
         stage_data = json.load(open(stage_dir))
@@ -186,9 +202,14 @@ class FeeProposalPage(tk.Frame):
 
             include_frame = tk.Frame(self.stage_frame)
             include_frame.pack(anchor="w")
-            tk.Checkbutton(include_frame, variable=stage_dict[f"Stage{i+1}"]["Include"], font=self.conf["font"]).grid(row=0, column=0)
-            tk.Entry(include_frame, textvariable=stage_dict[f"Stage{i+1}"]["Service"], font=self.conf["font"], fg="blue", width=30).grid(row=0, column=1)
 
+            self.stage_dic[f"Stage{i+1}"]={
+                "Service": tk.Entry(include_frame, textvariable=stage_dict[f"Stage{i+1}"]["Service"], font=self.conf["font"], fg="blue", width=30),
+                "Include": tk.Checkbutton(include_frame, variable=stage_dict[f"Stage{i+1}"]["Include"], font=self.conf["font"]),
+                "Items": []
+            }
+            self.stage_dic[f"Stage{i + 1}"]["Service"].grid(row=0, column=1)
+            self.stage_dic[f"Stage{i + 1}"]["Include"].grid(row=0, column=0)
 
             extra_frame = tk.LabelFrame(self.stage_frame, font=self.conf["font"])
             extra_frame.pack()
@@ -204,8 +225,14 @@ class FeeProposalPage(tk.Frame):
                 }
                 stage_dict[f"Stage{i+1}"]["Items"].append(content)
 
-                tk.Checkbutton(self.stage_frames[f"Stage{i+1}"], variable=content["Include"]).grid(row=j, column=0)
-                tk.Entry(self.stage_frames[f"Stage{i+1}"], width=100, textvariable=content["Item"], font=self.conf["font"], bg=color_list[j % 2]).grid(row=j, column=1)
+                self.stage_dic[f"Stage{i+1}"]["Items"].append(
+                    {
+                        "Include": tk.Checkbutton(self.stage_frames[f"Stage{i+1}"], variable=content["Include"]),
+                        "Item": tk.Entry(self.stage_frames[f"Stage{i+1}"], width=100, textvariable=content["Item"], font=self.conf["font"], bg=color_list[j % 2])
+                    }
+                )
+                self.stage_dic[f"Stage{i+1}"]["Items"][j]["Include"].grid(row=j, column=0)
+                self.stage_dic[f"Stage{i+1}"]["Items"][j]["Item"].grid(row=j, column=1)
 
             self.append_stage[f"Stage{i+1}"] = {
                 "Item": tk.StringVar(),
@@ -257,6 +284,7 @@ class FeeProposalPage(tk.Frame):
         self.scope_frame = tk.LabelFrame(self.main_context_frame, text="Scope of Work", font=self.conf["font"])
         self.scope_frame.grid(row=3, column=0, sticky="ew", padx=20)
         self.scope_frames = {}
+        self.scope_dic = {}
         self.append_context = dict()
 
     def update_scope(self, var):
@@ -266,6 +294,7 @@ class FeeProposalPage(tk.Frame):
         extra_list = self.conf["extra_list"]
         if include:
             self.scope_frames[service] = dict()
+            self.scope_dic[service] = dict()
             self.scope_frames[service]["Main Frame"] = tk.LabelFrame(self.scope_frame, text=service, font=self.conf["font"])
             self.scope_frames[service]["Main Frame"].pack()
             self.append_context[service] = dict()
@@ -275,12 +304,18 @@ class FeeProposalPage(tk.Frame):
                 extra_frame = tk.LabelFrame(self.scope_frames[service]["Main Frame"], text=extra, font=self.conf["font"])
                 extra_frame.pack()
                 self.scope_frames[service][extra] = tk.Frame(extra_frame)
+                self.scope_dic[service][extra] = []
                 self.scope_frames[service][extra].pack()
                 color_list = ["white", "azure"]
                 for j, context in enumerate(scope[service][extra]):
-                    tk.Checkbutton(self.scope_frames[service][extra], variable=scope[service][extra][j]["Include"]).grid(row=j, column=0)
-                    tk.Entry(self.scope_frames[service][extra], width=100, textvariable=scope[service][extra][j]["Item"],
-                             font=self.conf["font"], bg=color_list[j%2]).grid(row=j, column=1)
+                    self.scope_dic[service][extra].append(
+                        {
+                            "Checkbutton": tk.Checkbutton(self.scope_frames[service][extra], variable=scope[service][extra][j]["Include"])
+                        }
+                    )
+                    self.scope_dic[service][extra][j]["Checkbutton"].grid(row=j, column=0)
+                    self.scope_dic[service][extra][j]["Entry"] = tk.Entry(self.scope_frames[service][extra], width=100, textvariable=scope[service][extra][j]["Item"], font=self.conf["font"], bg=color_list[j%2])
+                    self.scope_dic[service][extra][j]["Entry"].grid(row=j, column=1)
 
                 self.append_context[service][extra] = {
                     "Item": tk.StringVar(),
@@ -355,7 +390,12 @@ class FeeProposalPage(tk.Frame):
         top_frame = tk.LabelFrame(self.fee_frame)
         top_frame.pack(side=tk.TOP)
         # tk.Label(top_frame, text="", width=6, font=self.conf["font"]).grid(row=0, column=0)
-        tk.Button(top_frame, width=20, text="Unlock", bg="Brown", fg="white", command=self.unlock, font=self.conf["font"]).grid(row=0, column=0)
+        self.proposal_lock=tk.Button(top_frame, width=20, text="Unlock", bg="Brown", fg="white", command=self.unlock, font=self.conf["font"])
+        self.proposal_lock.grid(row=0, column=0)
+        self.data["Lock"]["Proposal"].trace("w", self.config_lock_button)
+        self.data["Lock"]["Proposal"].trace("w", self._config_entry)
+        self.data["Lock"]["Proposal"].set(False)
+
         tk.Label(top_frame, width=35, text="Services", font=self.conf["font"]).grid(row=0, column=1)
         tk.Label(top_frame, width=20, text="ex.GST", font=self.conf["font"]).grid(row=0, column=2)
         tk.Label(top_frame, width=20, text="in.GST", font=self.conf["font"]).grid(row=0, column=3)
@@ -369,7 +409,7 @@ class FeeProposalPage(tk.Frame):
         tk.Label(bottom_frame, width=20, textvariable=invoices["in.GST"], font=self.conf["font"]).grid(row=0, column=3)
 
         self.data["Project Info"]["Project"]["Quotation Number"].trace("w", self._config_entry)
-        self.data["State"]["Email to Client"].trace("w", self._config_entry)
+        self.data["State"]["Email to Client"].trace("w", self.auto_lock)
 
     def update_fee(self, var):
         invoices_details = self.data["Invoices"]["Details"]
@@ -582,18 +622,75 @@ class FeeProposalPage(tk.Frame):
         entry.insert(0, i*int(self.data["Fee Proposal"]["Calculation Part"]["Apt"].get()))
 
     def _config_entry(self, *args):
-        if self.data["State"]["Email to Client"].get():
+        if self.data["Lock"]["Proposal"].get():
+            self.reference_dic["Date"].config(state=tk.DISABLED)
+            self.reference_dic["Today"].config(state=tk.DISABLED)
+            self.reference_dic["Revision"].config(state=tk.DISABLED)
+            self.installation_dic["Date"].config(state=tk.DISABLED)
+            self.installation_dic["Today"].config(state=tk.DISABLED)
+            self.installation_dic["Revision"].config(state=tk.DISABLED)
+            # self.installation_dic["Program"].config(state=tk.DISABLED)
+            self.time_dic["Fee Proposal"].config(state=tk.DISABLED)
+            self.time_dic["Pre-design"].config(state=tk.DISABLED)
+            self.time_dic["Documentation"].config(state=tk.DISABLED)
+            for stage in self.stage_dic.keys():
+                self.stage_dic[stage]["Include"].config(state=tk.DISABLED)
+                self.stage_dic[stage]["Service"].config(state=tk.DISABLED)
+                for item in self.stage_dic[stage]["Items"]:
+                    item["Include"].config(state=tk.DISABLED)
+                    item["Item"].config(state=tk.DISABLED)
             for service in self.fee_dic.values():
+                service["Service"].config(state=tk.DISABLED)
                 service["Fee"].config(state=tk.DISABLED)
+                service["Expand"].config(state=tk.DISABLED)
                 for content in service["Content"]["Details"]:
+                    content["Service"].config(state=tk.DISABLED)
                     content["Fee"].config(state=tk.DISABLED)
+            for service in self.scope_dic.keys():
+                for extra in self.scope_dic[service].keys():
+                    for item in self.scope_dic[service][extra]:
+                        item["Checkbutton"].config(state=tk.DISABLED)
+                        item["Entry"].config(state=tk.DISABLED)
         else:
+            self.reference_dic["Date"].config(state=tk.NORMAL)
+            self.reference_dic["Today"].config(state=tk.NORMAL)
+            self.reference_dic["Revision"].config(state=tk.NORMAL)
+            self.installation_dic["Date"].config(state=tk.NORMAL)
+            self.installation_dic["Today"].config(state=tk.NORMAL)
+            self.installation_dic["Revision"].config(state=tk.NORMAL)
+            # self.installation_dic["Program"].config(state=tk.NORMAL)
+            self.time_dic["Fee Proposal"].config(state=tk.NORMAL)
+            self.time_dic["Pre-design"].config(state=tk.NORMAL)
+            self.time_dic["Documentation"].config(state=tk.NORMAL)
+            for stage in self.stage_dic.keys():
+                self.stage_dic[stage]["Include"].config(state=tk.NORMAL)
+                self.stage_dic[stage]["Service"].config(state=tk.NORMAL)
+                for item in self.stage_dic[stage]["Items"]:
+                    item["Include"].config(state=tk.NORMAL)
+                    item["Item"].config(state=tk.NORMAL)
             for service in self.fee_dic.values():
+                service["Service"].config(state=tk.NORMAL)
                 service["Fee"].config(state=tk.NORMAL)
+                service["Expand"].config(state=tk.NORMAL)
                 for content in service["Content"]["Details"]:
+                    content["Service"].config(state=tk.NORMAL)
                     content["Fee"].config(state=tk.NORMAL)
+            for service in self.scope_dic.keys():
+                for extra in self.scope_dic[service].keys():
+                    for item in self.scope_dic[service][extra]:
+                        item["Checkbutton"].config(state=tk.NORMAL)
+                        item["Entry"].config(state=tk.NORMAL)
     def unlock(self):
-        for service in self.fee_dic.values():
-            service["Fee"].config(state=tk.NORMAL)
-            for content in service["Content"]["Details"]:
-                content["Fee"].config(state=tk.NORMAL)
+        self.data["Lock"]["Proposal"].set(not self.data["Lock"]["Proposal"].get())
+
+    def config_lock_button(self, *args):
+        if self.data["Lock"]["Proposal"].get():
+            self.proposal_lock.config(text="Unlock")
+        else:
+            self.proposal_lock.config(text="Lock")
+    def auto_lock(self, *args):
+        self.data["Lock"]["Proposal"].set(self.data["State"]["Email to Client"].get())
+        # for service in self.fee_dic.values():
+        #     service["Fee"].config(state=tk.NORMAL)
+        #     for content in service["Content"]["Details"]:
+        #         content["Fee"].config(state=tk.NORMAL)

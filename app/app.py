@@ -7,7 +7,7 @@ from financial_panel import FinancialPanelPage
 from search_bar_page import SearchBarPage
 from utility import *
 from asana_function import update_asana, update_asana_invoices
-from xero_function import update_xero, refresh_token
+from xero_function import update_xero, refresh_token, login_xero
 from email_server import email_server
 from app_messagebox import AppMessagebox
 from text_extension import TextExtension
@@ -64,13 +64,18 @@ class App(tk.Tk):
             "Generate Proposal": tk.BooleanVar(),
             "Email to Client": tk.BooleanVar(),
             "Fee Accepted": tk.BooleanVar(),
-            "Quote Unsuccessful": tk.BooleanVar()
+            "Quote Unsuccessful": tk.BooleanVar(),
+            "Asana State": tk.StringVar()
         }
         self.data["Email"] = {
             "Fee Proposal": tk.StringVar(),
             "First Chase": tk.StringVar(),
             "Second Chase": tk.StringVar(),
             "Third Chase": tk.StringVar()
+        }
+        self.data["Lock"] = {
+            "Proposal": tk.BooleanVar(),
+            "Invoices": tk.BooleanVar()
         }
         self.data["Email_Content"] = tk.StringVar()
         self.data["Address_to"] = tk.StringVar(value="Client")
@@ -114,6 +119,8 @@ class App(tk.Tk):
 
         tk.Button(function_frame, text="Refresh Xero Token", command=refresh_token, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=1, column=3)
+        tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=2, column=3)
 
         tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=3)
@@ -148,6 +155,7 @@ class App(tk.Tk):
         self.data["State"]["Generate Proposal"].trace("w", self._update_project_state)
         self.data["State"]["Email to Client"].trace("w", self._update_project_state)
         self.data["State"]["Fee Accepted"].trace("w", self._update_project_state)
+        self.data["State"]["Quote Unsuccessful"].trace("w", self._update_project_state)
 
         self.load_project_quotation = tk.StringVar()
         self.load_project_quotation.trace("w", self.load_project)
@@ -441,7 +449,12 @@ class App(tk.Tk):
         elif len(self.data["Asana_url"].get()) == 0:
             self.messagebox.show_error("Can not find the asana link, please contact Admin")
             return
-        webbrowser.open(self.data["Asana_url"].get())
+        edge_address = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+        def open_asana():
+            subprocess.call([edge_address, self.data["Asana_url"].get()])
+
+        _thread.start_new_thread(open_asana, ())
+        # webbrowser.open(self.data["Asana_url"].get())
     # def _open_asana(self):
     #     if len(self.data["Asana_id"]) !=0:
     #         self.messagebox.show_error("Please Update Asana Before you Open")
@@ -468,14 +481,8 @@ class App(tk.Tk):
                 contact = self.data["Project Info"][address_to]["Company"].get() + ", " + self.data["Project Info"][address_to]["Full Name"].get()
         true = False
         refresh_token()
-        for i in range(3):
-            try:
-                true=update_xero(self, contact)
-                break
-            except Exception as e:
-                refresh_token()
-                continue
-                # self.messagebox.show_error("You Haven't login xero yet")
+        true=update_xero(self, contact)
+        # self.messagebox.show_error("You Haven't login xero yet")
         if true:
             self.messagebox.show_update("Update Xero and Asana Successful")
         else:
@@ -515,7 +522,7 @@ class App(tk.Tk):
             return
 
     def _update_project_state(self, *args):
-        if self.data["State"]["Fee Accepted"].get():
+        if self.data["State"]["Fee Accepted"].get() or self.data["State"]["Quote Unsuccessful"].get():
             self._config_color_code(["green"]*4)
         elif self.data["State"]["Email to Client"].get():
             self._config_color_code(["green", "green", "green", "yellow"])

@@ -1,4 +1,4 @@
-from xero_python.accounting import AccountingApi, Contact, Contacts, LineItem, Invoice, Invoices
+from xero_python.accounting import AccountingApi, Contact, Contacts, LineItem, Invoice, Invoices, LineAmountTypes
 from xero_python.api_client import ApiClient
 from xero_python.api_client.configuration import Configuration
 from xero_python.api_client.oauth2 import OAuth2Token
@@ -19,6 +19,7 @@ from functools import wraps
 import os
 import base64
 import requests
+import json
 
 
 # configure main flask application
@@ -131,7 +132,9 @@ def oauth_callback():
         print(e)
         raise
     if response is None or response.get("access_token") is None:
-        return "Access denied: response=%s" % response
+        return f"Access denied: response={str(response)}"
+    open("P:\\app\\xero_refresh_token.txt", 'w').write(response["refresh_token"])
+    open("P:\\app\\xero_access_token.txt", 'w').write(response["access_token"])
     store_xero_oauth2_token(response)
     return "You are Successfully login, you can go back to the app right now"
 token_list = {}
@@ -198,13 +201,17 @@ def _process_invoices(inv_list):
     }
     for inv in inv_list:
         if inv["type"] == "ACCREC":
-            res["Invoices"][inv["status"]][inv["invoice_number"]] ={
+            res["Invoices"][inv["status"]][inv["invoice_number"]] = {
                 "sub_total": inv["sub_total"],
-                "line_amount_types": inv["line_amount_types"].value
+                "amount_paid": inv["amount_paid"],
+                "line_amount_types": inv["line_amount_types"].value,
+                "payment_amount": inv["amount_paid"],
+                "payment_date": None if len(inv["payments"]) == 0 else inv["payments"][-1]["date"],
             }
         elif inv["type"] == "ACCPAY":
             res["Bills"][inv["status"]][inv["invoice_number"]] = {
                 "sub_total": inv["sub_total"],
+                "amount_paid": inv["amount_paid"],
                 "line_amount_types": inv["line_amount_types"].value
             }
     return res
@@ -250,9 +257,7 @@ def update_xero(app, contact_name):
     data = app.data
     xero_tenant_id = get_xero_tenant_id()
     accounting_api = AccountingApi(api_client)
-    contacts = accounting_api.get_contacts(
-        xero_tenant_id
-    )
+    contacts = accounting_api.get_contacts(xero_tenant_id)
     contacts_list = remove_none(contacts.to_dict())["contacts"]
     # need to handle if it's not in the client
     contacts_name_map = contact_name_contact_id(contacts_list)
@@ -308,6 +313,7 @@ def update_xero(app, contact_name):
                     description=item["Item"],
                     quantity=1,
                     unit_amount=int(float(item["Fee"])),
+                    tax_type="OUTPUT",
                     account_code=project_type_account_code_map[data["Project Info"]["Project"]["Project Type"].get()]
                 )
             )
@@ -323,31 +329,6 @@ def update_xero(app, contact_name):
                 status="DRAFT"
             )
         )
-
-    # for bill in app.data["Bills"]["Details"].values():
-    #     for sub_bill in bill["Content"]:
-    #         bill_number = app.data["Project Info"]["Project"]["Quotation Number"].get() + sub_bill["Number"].get()
-    #         if len(sub_bill["Number"].get()) == 0:
-    #             continue
-    #         invoices_list.append(
-    #             Invoice(
-    #                 type="ACCPAY",
-    #                 contact=contact,
-    #                 date=datetime.today(),
-    #                 due_date=datetime.today(),
-    #                 line_items=[
-    #                     LineItem(
-    #                         description=sub_bill["Service"].get(),
-    #                         quantity=1,
-    #                         unit_amount=int(sub_bill["Fee"].get()),
-    #                         account_code="200"
-    #                     )
-    #                 ],
-    #                 invoice_number=bill_number,
-    #                 reference=data["Project Info"]["Project"]["Quotation Number"].get()+"-"+data["Project Info"]["Project"]["Project Name"].get(),
-    #                 status="AUTHORISED"
-    #             )
-    #         )
     invoices = Invoices(invoices=invoices_list)
     try:
         accounting_api.update_or_create_invoices(xero_tenant_id, invoices)
@@ -356,12 +337,15 @@ def update_xero(app, contact_name):
         print("No Data Processed")
 
     if_modified_since = dateutil.parser.parse("2024-01-01")
+    # all_inv = accounting_api.get_invoices(xero_tenant_id, if_modified_since=if_modified_since).to_dict()["invoices"]
+    # first_inv = accounting_api.get_invoice(xero_tenant_id, all_inv[-1]["invoice_id"])
+
     all_invoices = _process_invoices(accounting_api.get_invoices(xero_tenant_id, if_modified_since=if_modified_since).to_dict()["invoices"])
-    #
+
     update_app_invoices(app, all_invoices)
-    #
+
     if len(app.data["Asana_id"].get()) != 0:
-        update_asana_invoices(app)
+        update_asana_invoices(app, all_invoices)
     return True
     #
     # messagebox.showinfo("Update", "the invoices and bill is updated to xero")
@@ -409,6 +393,52 @@ def update_xero(app, contact_name):
     #     )
     #     json = serialize_model(created_batch_payments)
 @xero_token_required
+def upload_bill_to_xero(app, service, i, file, file_name):
+    data = app.data
+    xero_tenant_id = get_xero_tenant_id()
+    accounting_api = AccountingApi(api_client)
+
+    contacts = accounting_api.get_contacts(xero_tenant_id)
+    contacts_list = remove_none(contacts.to_dict())["contacts"]
+    # need to handle if it's not in the client
+    contacts_name_map = contact_name_contact_id(contacts_list)
+    contact_name = data["Bills"]["Details"][service]["Service"].get()
+    if contact_name in contacts_name_map.keys():
+        contact_id = contacts_name_map[contact_name]
+        contact = Contact(contact_id)
+    else:
+        contact = Contact(create_contact(app, contact_name))
+
+
+    bill = Invoice(
+        type="ACCPAY",
+        date=datetime.today(),
+        contact=contact,
+        due_date=datetime.today(),
+        line_items=[
+            LineItem(
+                description=data["Bills"]["Details"][service]["Content"][i]["Service"].get(),
+                quantity=1,
+                unit_amount=float(data["Bills"]["Details"][service]["Content"][i]["Fee"].get()) if len(data["Bills"]["Details"][service]["Content"][i]["Fee"].get()) != 0 else 0,
+                tax_type="OUTPUT"
+            )
+        ],
+        line_amount_types=LineAmountTypes.NOTAX if data["Bills"]["Details"][service]["Content"][i]["no.GST"].get() else LineAmountTypes.EXCLUSIVE,
+        invoice_number=file_name.split(".")[0],
+        reference=file_name.split(".")[0],
+        status="DRAFT"
+        )
+    invoices = Invoices(invoices=[bill])
+    try:
+        api_response = accounting_api.update_or_create_invoices(xero_tenant_id, invoices)
+        invoice_id = api_response.to_dict()["invoices"][0]["invoice_id"]
+        open_file = open(file, 'rb')
+        body = open_file.read()
+        api_response = accounting_api.create_invoice_attachment_by_file_name(xero_tenant_id, invoice_id, file_name, body)
+    except Exception as e:
+        print(e)
+        print("No Data Processed")
+@xero_token_required
 def create_contact(app, name):
     xero_tenant_id = get_xero_tenant_id()
     accounting_api = AccountingApi(api_client)
@@ -418,7 +448,9 @@ def create_contact(app, name):
     )
     contacts = Contacts(contacts=[new_contact])
 
-
-    api_response = accounting_api.create_contacts(xero_tenant_id, contacts)
+    try:
+        api_response = accounting_api.create_contacts(xero_tenant_id, contacts)
+    except Exception as e:
+        print(e)
     return api_response.to_dict()["contacts"][0]["contact_id"]
 

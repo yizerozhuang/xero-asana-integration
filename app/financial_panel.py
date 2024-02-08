@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog
 
 from utility import *
 from asana_function import update_asana, update_asana_invoices
+from xero_function import upload_bill_to_xero, refresh_token
 
 import os
 import json
@@ -61,7 +62,10 @@ class FinancialPanelPage(tk.Frame):
         tk.Label(invoice_number_frame, width=35, text="Invoice Number", font=self.conf["font"]).grid(row=0, column=0)
         _ = tk.Frame(invoice_number_frame, width=15)
         _.grid(row=0, column=1)
-        tk.Button(_, width=7, text="Unlock", command=self.unlock, bg="brown", fg="white", font=self.conf["font"]).grid(row=0, column=0)
+        self.invoice_lock=tk.Button(_, width=7, text="Unlock", command=self.unlock, bg="brown", fg="white", font=self.conf["font"])
+        self.invoice_lock.grid(row=0, column=0)
+
+
         tk.Button(_, width=7, text="Gen", command=self.generate_invoice_number, bg="brown", fg="white", font=self.conf["font"]).grid(row=0, column=1)
 
         for i in range(6):
@@ -79,6 +83,10 @@ class FinancialPanelPage(tk.Frame):
             self.invoice_label_list.append([])
             self.invoice_label_list[i].append(tk.Entry(invoice_number_frame, state=tk.DISABLED, textvariable=invoice[i]["Number"], width=8, font=self.conf["font"], fg="blue"))
             self.invoice_label_list[i][0].grid(row=0, column=i + 2, padx=(10, 0), sticky="ew")
+
+        self.data["Lock"]["Invoices"].trace("w", self.config_lock_button)
+        self.data["Lock"]["Invoices"].trace("w", self._config_entry)
+        self.data["Lock"]["Invoices"].set(False)
 
         total_frame = tk.LabelFrame(self.invoice_frame)
         total_frame.pack(side=tk.BOTTOM, fill=tk.X)
@@ -246,6 +254,7 @@ class FinancialPanelPage(tk.Frame):
             self.invoice_label_list[i].append(tk.Label(invoice_function_frame, width=10, textvariable=self.data["Invoices Number"][i]["Number"], font=self.conf["font"]))
             self.invoice_label_list[i][3].grid(row=i, column=1)
             self.data["Invoices Number"][i]["State"].trace("w", self.invoice_color_code)
+            self.data["Invoices Number"][i]["State"].trace("w", self.config_invoice_lock)
             preview_button = tk.Button(invoice_function_frame, text="Preview", font=self.conf["font"], bg="cyan",
                                        command=print_invoice_function(i))
             preview_button.grid(row=i, column=2)
@@ -393,7 +402,7 @@ class FinancialPanelPage(tk.Frame):
 
         total_frame = tk.LabelFrame(self.bill_frame)
         total_frame.pack(side=tk.BOTTOM, fill=tk.X)
-        tk.Label(total_frame, width=35, text="Bill Total", font=self.conf["font"]).grid(row=0, column=0)
+        tk.Label(total_frame, width=35, text="Subbie Quote", font=self.conf["font"]).grid(row=0, column=0)
         self.total_label = tk.Label(total_frame, width=15, textvariable=bills["Fee"], font=self.conf["font"])
         self.total_label.grid(row=0, column=1)
         self.total_ingst_label = tk.Label(total_frame, width=15, textvariable=bills["in.GST"], font=self.conf["font"])
@@ -464,14 +473,13 @@ class FinancialPanelPage(tk.Frame):
                         "Service": tk.Entry(self.bill_dic[service]["Expand"][i],
                                             textvariable=details[service]["Content"][i]["Service"],
                                             font=self.conf["font"],
-                                            width=27,
+                                            width=49,
                                             fg="blue"),
                         "Fee": tk.Entry(self.bill_dic[service]["Expand"][i],
                                         width=10,
                                         textvariable=details[service]["Content"][i]["Fee"],
                                         font=self.conf["font"],
-                                        fg="blue",
-                                        state=tk.DISABLED),
+                                        fg="blue"),
                         "in.GST": tk.Label(self.bill_dic[service]["Expand"][i],
                                            width=10,
                                            textvariable=details[service]["Content"][i]["in.GST"],
@@ -480,11 +488,11 @@ class FinancialPanelPage(tk.Frame):
                                                  variable=details[service]["Content"][i]["no.GST"],
                                                  width=6,
                                                  text="No GST"),
-                        "Description": tk.Entry(self.bill_dic[service]["Expand"][i],
-                                                width=30,
-                                                textvariable=details[service]["Content"][i]["Description"],
-                                                font=self.conf["font"],
-                                                fg="blue"),
+                        # "Description": tk.Entry(self.bill_dic[service]["Expand"][i],
+                        #                         width=30,
+                        #                         textvariable=details[service]["Content"][i]["Description"],
+                        #                         font=self.conf["font"],
+                        #                         fg="blue"),
                         "Upload": tk.Button(self.bill_dic[service]["Expand"][i],
                                             command=upload_file_func(i),
                                             width=8,
@@ -544,8 +552,8 @@ class FinancialPanelPage(tk.Frame):
                     self.bill_dic[service]["Content"][i]["Fee"].grid(row=0, column=2)
                     self.bill_dic[service]["Content"][i]["in.GST"].grid(row=0, column=3)
                     self.bill_dic[service]["Content"][i]["no.GST"].grid(row=0, column=4)
-                    self.bill_dic[service]["Content"][i]["Description"].grid(row=0, column=5)
-                    self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=6, padx=(200, 0))
+                    # self.bill_dic[service]["Content"][i]["Description"].grid(row=0, column=5)
+                    self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=6, padx=(160, 0))
                     self.data["Bills"]["Details"][service]["Content"][i]["Upload"].trace("w", config_button_func(i))
                     # self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=6, sticky="w")
             self.bill_frames[service].pack(fill=tk.X)
@@ -756,9 +764,13 @@ class FinancialPanelPage(tk.Frame):
             self.data["Invoices Number"][inv]["Number"].set(current_inv_number)
 
     def unlock(self):
-        update = self.messagebox.ask_yes_no("Do you want to unlock the all the invoice")
-        if update:
-            unlock_invoice(self.app)
+        if self.data["Lock"]["Invoices"].get():
+            self.data["Lock"]["Invoices"].set(False)
+        else:
+            self.data["Lock"]["Invoices"].set(True)
+        # update = self.messagebox.ask_yes_no("Do you want to unlock the all the invoice")
+        # if update:
+        #     unlock_invoice(self.app)
 
     def _excel_print_invoice(self, i):
         self.data["Remittances"][i]["Preview_Upload"].set(True)
@@ -804,13 +816,19 @@ class FinancialPanelPage(tk.Frame):
         invoice_dir = os.path.join(self.conf["database_dir"], "invoices.json")
         invoices = json.load(open(invoice_dir))
         current_inv_number = list(invoices)[-1]
-        today = date.today().strftime("%y%m")[1:]
-        res = str(int(current_inv_number)+1) if current_inv_number.startswith(today) else today + "001"
+        if current_inv_number.startswith(date.today().strftime("%y")[1]):
+            current_number = current_inv_number[3:6]
+            res = date.today().strftime("%y%m")[1:]+str(int(current_number)+1)
+        else:
+            res = date.today().strftime("%y%m")[1:]+"001"
         invoices[res] = "Backlog"
         with open(invoice_dir, "w", encoding='utf-8') as f:
             json.dump(invoices, f, ensure_ascii=False, indent=4)
         return res
 
+        # current_number = current_inv_number[3:6]
+        # today = date.today().strftime("%y%m")[1:]
+        # res = str(int(current_inv_number)+1) if current_inv_number.startswith(today) else today + "001"
 
     def config_button(self, var, button, *args):
         if var.get() == True:
@@ -861,25 +879,16 @@ class FinancialPanelPage(tk.Frame):
             rewrite = self.messagebox.ask_yes_no(f"Existing file found, Do you want to rewrite")
             if not rewrite:
                 return
-        file = filedialog.askopenfilename()
+        file = filedialog.askopenfilename(initialdir=os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get()))
         if file == "":
             return
         try:
-            folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
-            shutil.copy(file, folder_dir)
-        except PermissionError:
-            self.messagebox.show_error("Please Close the file before you upload it")
-            return
-        except Exception as e:
-            print(e)
-            self.messagebox.show_error("Some error occurs, please contact Administrator")
-            return
-
-        try:
+            folder_path = os.path.join(database_dir, filename + os.path.splitext(file)[1])
+            remittance_path = os.path.join(remittance_dir, filename + os.path.splitext(file)[1])
+            shutil.move(file, folder_path)
             if not os.path.exists(remittance_dir):
                 os.makedirs(remittance_dir)
-            file_path = os.path.join(remittance_dir, filename + os.path.splitext(file)[1])
-            shutil.copy(file, file_path)
+            shutil.copy(folder_path, remittance_path)
         except PermissionError:
             self.messagebox.show_error("Please Close the file before you upload it")
             return
@@ -893,25 +902,27 @@ class FinancialPanelPage(tk.Frame):
         else:
             self.data['Remittances'][i]['Type'].set("Part")
         self.data["Remittances"][i][part+"_Upload"].set(True)
-        self.messagebox.file_info("Upload", file, folder_dir)
+        self.messagebox.file_info("Upload", file, folder_path)
 
     def upload_bills(self, service, bill_description, origin):
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
-        bills_dir = os.path.join(self.conf["bills_dir"], date.today().strftime("%Y%m"))
         if len(bill_description.get()) == 0:
             self.messagebox.show_error("You need to upload the description")
             return
-        filename = f"{bill_description}-{origin}"
+        if not service == "Fire Service":
+            filename = f"{service.split(' ')[0]}-{bill_description.get()}-{origin}"
+        else:
+            filename = f"{service}-{bill_description.get()}-{origin}"
         if self.data["Bills"]["Details"][service][origin+"_Upload"].get():
             rewrite = self.messagebox.ask_yes_no(f"Existing file found, Do you want to rewrite")
             if not rewrite:
                 return
-        file = filedialog.askopenfilename()
+        file = filedialog.askopenfilename(initialdir=os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get()))
         if file == "":
             return
         try:
             folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
-            shutil.copy(file, folder_dir)
+            shutil.move(file, folder_dir)
         except PermissionError:
             self.messagebox.show_error("Please Close the file before you upload it")
             return
@@ -925,36 +936,31 @@ class FinancialPanelPage(tk.Frame):
     def upload_sub_fee(self, service, bill_number, i):
         database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         bills_dir = os.path.join(self.conf["bills_dir"], date.today().strftime("%Y%m"))
-        if len(bill_number.get()) == 0:
+        bill_number = bill_number.get()
+        if len(bill_number) == 0:
             self.messagebox.show_error("You need to enter a bill number")
             return
         elif len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
             self.messagebox.show_error("Please generate first invoice number before you upload bill file")
             return
+        elif float(self.data["Bills"]["Details"][service]["Paid"].get()) > float(self.data["Bills"]["Details"][service]["Fee"].get()):
+            self.messagebox.show_error("Bill Amount, exceed subbie quote amount")
+            return
         if self.data["Bills"]["Details"][service]["Content"][i]["Upload"].get():
             rewrite = self.messagebox.ask_yes_no(f"Existing file found, Do you want to rewrite")
             if not rewrite:
                 return
-        file = filedialog.askopenfilename()
-        filename = self.data["Project Info"]["Project"]["Project Number"].get() + bill_number.get() + "-" + os.path.basename(file).replace(" ", "_")
+        file = filedialog.askopenfilename(initialdir=os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get()))
+        filename = self.data["Project Info"]["Project"]["Project Number"].get() + bill_number + "-" + os.path.basename(file).replace(" ", "_")
         if file == "":
             return
         try:
-            folder_dir = os.path.join(database_dir, filename)
-            shutil.copy(file, folder_dir)
-        except PermissionError:
-            self.messagebox.show_error("Please Close the file before you upload it")
-            return
-        except Exception as e:
-            print(e)
-            self.messagebox.show_error("Some error occurs, please contact Administrator")
-            return
-
-        try:
+            folder_path = os.path.join(database_dir, filename)
+            bill_path = os.path.join(bills_dir, filename)
+            shutil.move(file, folder_path)
             if not os.path.exists(bills_dir):
                 os.makedirs(bills_dir)
-            folder_dir = os.path.join(bills_dir, filename)
-            shutil.copy(file, folder_dir)
+            shutil.copy(folder_path, bill_path)
         except PermissionError:
             self.messagebox.show_error("Please Close the file before you upload it")
             return
@@ -963,13 +969,20 @@ class FinancialPanelPage(tk.Frame):
             self.messagebox.show_error("Some error occurs, please contact Administrator")
             return
 
+        refresh_token()
         try:
-            send_email_with_attachment(folder_dir)
+            upload_bill_to_xero(self.app, service, i, file, filename)
         except Exception as e:
             print(e)
             self.messagebox.show_error("Unable to upload the File to xero")
             return
-        self.messagebox.file_info("Upload", file, folder_dir, "And the bill has been sent to Xero")
+        # try:
+        #     send_email_with_attachment(folder_dir)
+        # except Exception as e:
+        #     print(e)
+        #     self.messagebox.show_error("Unable to upload the File to xero")
+        #     return
+        self.messagebox.file_info("Upload", file, folder_path, "And the bill has been sent to Xero")
         self.data["Bills"]["Details"][service]["Content"][i]["Upload"].set(True)
 
     def upload_fee_acceptance(self):
@@ -999,12 +1012,12 @@ class FinancialPanelPage(tk.Frame):
             filename = "Fee Acceptance Rev 1"
         rewrite = True
         if rewrite:
-            file = filedialog.askopenfilename()
+            file = filedialog.askopenfilename(initialdir=os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get()))
             if file == "":
                 return
             try:
                 folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
-                shutil.copy(file, folder_dir)
+                shutil.move(file, folder_dir)
             except PermissionError:
                 self.messagebox.show_error("Please Close the file before you upload it")
                 return
@@ -1079,6 +1092,14 @@ class FinancialPanelPage(tk.Frame):
             else:
                 raise ValueError
 
+    def config_invoice_lock(self, *args):
+        for invoice in self.data["Invoices Number"]:
+            if not invoice["State"].get() in ["Backlog", "Void"]:
+                self.data["Lock"]["Invoices"].set(True)
+                return
+        self.data["Lock"]["Invoices"].set(False)
+        return
+
     def _config_radiobutton(self, i, config):
         for service, value in self.invoice_dic.items():
             value["Invoice"][i].config(state=config)
@@ -1108,6 +1129,28 @@ class FinancialPanelPage(tk.Frame):
         else:
             raise ValueError
 
+    def config_lock_button(self, *args):
+        if self.data["Lock"]["Invoices"].get():
+            self.invoice_lock.config(text="Unlock")
+        else:
+            self.invoice_lock.config(text="Lock")
+
+    def _config_entry(self, *args):
+        if self.data["Lock"]["Invoices"].get():
+            self.invoice_color_code()
+        else:
+            for service, value in self.invoice_dic.items():
+                for inv in value["Invoice"]:
+                    inv.config(state=tk.NORMAL)
+                for j, item in enumerate(value["Content"]):
+                    for inv in item["Invoice"]:
+                        inv.config(state=tk.NORMAL)
+            # for service, value in self.invoice_dic.items():
+            #     for inv in value["Invoice"]:
+            #         inv.config(state=tk.DISABLED)
+            #     for j, item in enumerate(value["Content"]):
+            #         for inv in item["Invoice"]:
+            #             inv.config(state=tk.DISABLED)
     # def no_gst_update(self,nogst, fee, ingst, *args):
     #     if nogst.get():
     #         fee.trace("w", lambda a, b, c: self.no_gst(fee, ingst))
