@@ -28,7 +28,7 @@ def show_status(data_json):
     if state["Quote Unsuccessful"]:
         return "Quote Unsuccessful"
     elif state["Fee Accepted"]:
-        return "Fee Accepted"
+        return "Design"
     elif state["Email to Client"]:
         return "Chase Client"
     elif state["Generate Proposal"]:
@@ -73,32 +73,65 @@ class SearchBarPage(tk.Frame):
 
 
     def generate_convert_map(self):
-        self.convert_map = {
-            "Quotation Number": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
-            "Project Number": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
-            "Project Name": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
-            "Shop Name": lambda data_json: data_json["Project Info"]["Project"]["Shop Name"],
-            "Proposal Type": lambda data_json: data_json["Project Info"]["Project"]["Proposal Type"],
-            "Project Type": lambda data_json: data_json["Project Info"]["Project"]["Project Type"],
-            "Project Status": show_status,
-            "Address To": lambda data_json: data_json["Address_to"],
-            "Building Feature": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
-            "Service": lambda data_json: ", ".join(
-                [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
-                 service["Include"]]),
-            "Fee Proposal Date": lambda data_json: data_json["Email"]["Fee Proposal"],
-            "Client Name": lambda data_json: data_json["Project Info"]["Client"]["Full Name"],
-            "Client Contact Type": lambda data_json: data_json["Project Info"]["Client"]["Contact Type"],
-            "Client Company": lambda data_json: data_json["Project Info"]["Client"]["Company"],
-            "Main Contact Name": lambda data_json: data_json["Project Info"]["Main Contact"]["Full Name"],
-            "Main Contact Contact Type": lambda data_json: data_json["Project Info"]["Main Contact"]["Contact Type"],
-            "Main Contact Company": lambda data_json: data_json["Project Info"]["Main Contact"]["Company"],
-            "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
-            "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
-            "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
-            "Total Fee Amount exGST": lambda data_json: data_json["Invoices"]["Fee"],
-            "Total Bill Amount exGST": lambda data_json: data_json["Bills"]["Fee"],
-        }
+        if self.app.user in self.conf["engineer_user_list"]:
+            self.convert_map = {
+                "Quotation Number": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
+                "Project Number": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
+                "Project Name": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
+                "Shop Name": lambda data_json: data_json["Project Info"]["Project"]["Shop Name"],
+                "Proposal Type": lambda data_json: data_json["Project Info"]["Project"]["Proposal Type"],
+                "Project Type": lambda data_json: data_json["Project Info"]["Project"]["Project Type"],
+                "Project Status": show_status,
+                "Address To": lambda data_json: data_json["Address_to"],
+                "Building Feature": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
+                "Service": lambda data_json: ", ".join(
+                    [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
+                     service["Include"]]),
+                "Fee Proposal Date": lambda data_json: data_json["Email"]["Fee Proposal"],
+                "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
+                "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
+                "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
+                "INV1": lambda data_json: data_json["Invoices Number"][0]["Number"],
+                "INV2": lambda data_json: data_json["Invoices Number"][1]["Number"],
+                "INV3": lambda data_json: data_json["Invoices Number"][2]["Number"],
+                "INV4": lambda data_json: data_json["Invoices Number"][3]["Number"],
+                "INV5": lambda data_json: data_json["Invoices Number"][4]["Number"],
+                "INV6": lambda data_json: data_json["Invoices Number"][5]["Number"]
+            }
+        else:
+            self.convert_map = {
+                "Quotation Number": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
+                "Project Number": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
+                "Project Name": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
+                "Shop Name": lambda data_json: data_json["Project Info"]["Project"]["Shop Name"],
+                "Proposal Type": lambda data_json: data_json["Project Info"]["Project"]["Proposal Type"],
+                "Project Type": lambda data_json: data_json["Project Info"]["Project"]["Project Type"],
+                "Project Status": show_status,
+                "Address To": lambda data_json: data_json["Address_to"],
+                "Building Feature": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
+                "Service": lambda data_json: ", ".join(
+                    [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
+                     service["Include"]]),
+                "Fee Proposal Date": lambda data_json: data_json["Email"]["Fee Proposal"],
+                "Client Name": lambda data_json: data_json["Project Info"]["Client"]["Full Name"],
+                "Client Contact Type": lambda data_json: data_json["Project Info"]["Client"]["Contact Type"],
+                "Client Company": lambda data_json: data_json["Project Info"]["Client"]["Company"],
+                "Main Contact Name": lambda data_json: data_json["Project Info"]["Main Contact"]["Full Name"],
+                "Main Contact Contact Type": lambda data_json: data_json["Project Info"]["Main Contact"]["Contact Type"],
+                "Main Contact Company": lambda data_json: data_json["Project Info"]["Main Contact"]["Company"],
+                "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
+                "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
+                "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
+                "INV1": lambda data_json: data_json["Invoices Number"][0]["Number"],
+                "INV2": lambda data_json: data_json["Invoices Number"][1]["Number"],
+                "INV3": lambda data_json: data_json["Invoices Number"][2]["Number"],
+                "INV4": lambda data_json: data_json["Invoices Number"][3]["Number"],
+                "INV5": lambda data_json: data_json["Invoices Number"][4]["Number"],
+                "INV6": lambda data_json: data_json["Invoices Number"][5]["Number"],
+                "Paid Amount": lambda data_json: data_json["Invoices"]["Paid Fee"],
+                "Total Fee Amount exGST": lambda data_json: data_json["Invoices"]["Fee"],
+                "Total Bill Amount exGST": lambda data_json: data_json["Bills"]["Fee"],
+            }
         self.mp_header = list(self.convert_map.keys())
 
 
@@ -164,8 +197,8 @@ class SearchBarPage(tk.Frame):
         selected = self.tree.focus()
         value = self.tree.item(selected, "values")
         self.entry.delete(0, tk.END)
-        self.app.data["Project Info"]["Project"]["Quotation Number"].set(value[0])
-        load_data(self.app)
+        # self.app.data["Project Info"]["Project"]["Quotation Number"].set(value[0])
+        load_data(self.app, value[0])
     def check(self, e):
         typed = self.entry.get()
         if typed == "":

@@ -50,8 +50,11 @@ class ProjectInfoPage(tk.Frame):
 
         # self.app.email_text = tk.Text(self.main_context_frame, font=self.conf["font"], height=68)
         # self.app.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
-
-        self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=85)
+        if self.app.user in self.conf["engineer_user_list"]:
+            self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=55)
+        else:
+            self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"],
+                                            font=self.conf["font"], fg="blue", height=85)
         self.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
 
         tk.Label(self.main_context_frame, textvariable=self.app.log_text, font=self.conf["font"], justify=tk.LEFT).grid(row=0, column=2, rowspan=6, sticky="n")
@@ -170,60 +173,60 @@ class ProjectInfoPage(tk.Frame):
         self.data["Project Info"]["Client"] = client
 
         # client frame
-        client_frame = tk.LabelFrame(self.main_context_frame, text="Client", font=self.conf["font"])
-        client_frame.grid(row=1, column=0)
+        self.client_frame = tk.LabelFrame(self.main_context_frame, text="Client", font=self.conf["font"])
+        self.client_frame.grid(row=1, column=0)
 
-        tk.Radiobutton(client_frame, value="Client", variable=self.data["Address_to"], width=7).grid(row=0, column=0)
+        tk.Radiobutton(self.client_frame, value="Client", variable=self.data["Address_to"], width=7).grid(row=0, column=0)
 
-        tk.Label(client_frame, width=20, text="Client Full Name", font=self.conf["font"]).grid(row=0, column=1)
+        tk.Label(self.client_frame, width=20, text="Client Full Name", font=self.conf["font"]).grid(row=0, column=1)
         client["Full Name"] = tk.StringVar()
-        tk.Entry(client_frame, width=70, font=self.conf["font"], fg="blue",
+        tk.Entry(self.client_frame, width=70, font=self.conf["font"], fg="blue",
                  textvariable=client["Full Name"]).grid(row=0, column=2, columnspan=3, padx=(0, 10))
 
-        tk.Label(client_frame, width=20, text="Client Contact Type", font=self.conf["font"]).grid(row=1, column=1)
+        tk.Label(self.client_frame, width=20, text="Client Contact Type", font=self.conf["font"]).grid(row=1, column=1)
 
         contact_type = ["Architect", "Builder", "Certifier", "Contractor", "Developer", "Engineer", "Government", "RDM",
                         "Strata", "Supplier", "Owner/Tenant", "Others"]
 
         client["Contact Type"] = tk.StringVar(value="Architect")
         for i, types in enumerate(contact_type):
-            button = tk.Radiobutton(client_frame, text=types, variable=client["Contact Type"], value=types,
+            button = tk.Radiobutton(self.client_frame, text=types, variable=client["Contact Type"], value=types,
                                     font=self.conf["font"])
             button.grid(row=i//3 + 1, column=i%3 + 2, sticky="W")
 
         client_info = ["Company", "Address", "ABN", "Contact Number", "Contact Email"]
         for i, info in enumerate(client_info):
             if info == "ABN":
-                tk.Label(client_frame, width=20, text="ABN/ACN", font=self.conf["font"]).grid(row=i + 5, column=1)
+                tk.Label(self.client_frame, width=20, text="ABN/ACN", font=self.conf["font"]).grid(row=i + 5, column=1)
             else:
-                tk.Label(client_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
+                tk.Label(self.client_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
             client[info] = tk.StringVar()
-            tk.Entry(client_frame, width=70, font=self.conf["font"], fg="blue", textvariable=client[info]).grid(
+            tk.Entry(self.client_frame, width=70, font=self.conf["font"], fg="blue", textvariable=client[info]).grid(
                 row=i + 5, column=2, columnspan=3)
 
     def main_contact_part(self):
         main_contact = dict()
         self.data["Project Info"]["Main Contact"] = main_contact
 
-        contact_frame = tk.LabelFrame(self.main_context_frame, text="Main Contact", font=self.conf["font"])
-        contact_frame.grid(row=2, column=0)
+        self.contact_frame = tk.LabelFrame(self.main_context_frame, text="Main Contact", font=self.conf["font"])
+        self.contact_frame.grid(row=2, column=0)
 
-        tk.Radiobutton(contact_frame, value="Main Contact", variable=self.data["Address_to"], width=7).grid(row=0, column=0)
+        tk.Radiobutton(self.contact_frame, value="Main Contact", variable=self.data["Address_to"], width=7).grid(row=0, column=0)
 
-        tk.Label(contact_frame, width=20, text="Main Contact Full Name", font=self.conf["font"]).grid(row=0, column=1)
+        tk.Label(self.contact_frame, width=20, text="Main Contact Full Name", font=self.conf["font"]).grid(row=0, column=1)
 
         main_contact["Full Name"] = tk.StringVar()
-        tk.Entry(contact_frame, width=70, font=self.conf["font"], fg="blue",
+        tk.Entry(self.contact_frame, width=70, font=self.conf["font"], fg="blue",
                  textvariable=main_contact["Full Name"]).grid(row=0, column=2, columnspan=3, padx=(0, 10))
 
-        tk.Label(contact_frame, text="Main Contact Contact Type", font=self.conf["font"]).grid(row=1, column=1)
+        tk.Label(self.contact_frame, text="Main Contact Contact Type", font=self.conf["font"]).grid(row=1, column=1)
 
         contact_type = ["Architect", "Builder", "Certifier", "Contractor", "Developer", "Engineer", "Government", "RDM",
                         "Strata", "Supplier", "Owner/Tenant", "Others"]
 
         main_contact["Contact Type"] = tk.StringVar(value="Architect")
         for i, types in enumerate(contact_type):
-            button = tk.Radiobutton(contact_frame, text=types, variable=main_contact["Contact Type"],
+            button = tk.Radiobutton(self.contact_frame, text=types, variable=main_contact["Contact Type"],
                                     value=types, font=self.conf["font"])
             button.grid(row=i//3+1, column=i%3+2, sticky="W")
 
@@ -231,11 +234,11 @@ class ProjectInfoPage(tk.Frame):
                         "Contact Number", "Contact Email"]
         for i, info in enumerate(contact_info):
             if info=="ABN":
-                tk.Label(contact_frame, width=20, text="ABN/ACN", font=self.conf["font"]).grid(row=i + 5, column=1)
+                tk.Label(self.contact_frame, width=20, text="ABN/ACN", font=self.conf["font"]).grid(row=i + 5, column=1)
             else:
-                tk.Label(contact_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
+                tk.Label(self.contact_frame, width=20, text=info, font=self.conf["font"]).grid(row=i + 5, column=1)
             main_contact[info] = tk.StringVar(name=info)
-            tk.Entry(contact_frame, width=70, font=self.conf["font"], fg="blue", textvariable=main_contact[info]).grid(
+            tk.Entry(self.contact_frame, width=70, font=self.conf["font"], fg="blue", textvariable=main_contact[info]).grid(
                 row=i + 5, column=2, columnspan=3)
 
     def building_features_part(self):
@@ -265,7 +268,12 @@ class ProjectInfoPage(tk.Frame):
             "Notes": tk.StringVar()
         }
         self.data["Project Info"]["Building Features"] = building_features
-
+        self.data["Project Info"]["Building Features"]["Minor"]["Total Area"].trace("w", self._update_apt_room_area)
+        self.data["Project Info"]["Building Features"]["Major"]["Total Apt"].trace("w", self._update_apt_room_area)
+        self.data["Project Info"]["Building Features"]["Major"]["Total Car spot"].trace("w", self._update_basement_car_park_spots)
+        for car_spot in building_features["Major"]["Car Park"]:
+            car_spot[0].trace("w", self._update_basement_car_park_spots)
+            car_spot[2].trace("w", self._update_basement_car_park_spots)
         build_feature_frame = tk.LabelFrame(self.main_context_frame, text="Building Features", font=self.conf["font"])
         build_feature_frame.grid(row=3, column=0)
 
@@ -296,13 +304,13 @@ class ProjectInfoPage(tk.Frame):
         car_park_frame.pack()
         tk.Label(car_park_frame, text="Level", font=self.conf["font"]).grid(row=0, column=0, rowspan=2)
         tk.Label(car_park_frame, text="Other type of room except \n car spots and storage cages",font=self.conf["font"]).grid(row=0, column=1, rowspan=2)
-        tk.Label(car_park_frame, text="Car Park A",font=self.conf["font"]).grid(row=0, column=2, columnspan=2)
+        tk.Label(car_park_frame, text="Car Park A", font=self.conf["font"]).grid(row=0, column=2, columnspan=2)
         tk.Label(car_park_frame, text="Car Spots", font=self.conf["font"]).grid(row=1, column=2)
         tk.Label(car_park_frame, text="Other", font=self.conf["font"]).grid(row=1, column=3)
-        tk.Label(car_park_frame, text="Car Park B",font=self.conf["font"]).grid(row=0, column=4, columnspan=2)
+        tk.Label(car_park_frame, text="Car Park B", font=self.conf["font"]).grid(row=0, column=4, columnspan=2)
         tk.Label(car_park_frame, text="Car Spots", font=self.conf["font"]).grid(row=1, column=4)
         tk.Label(car_park_frame, text="Other", font=self.conf["font"]).grid(row=1, column=5)
-        tk.Label(car_park_frame, text="Car Park C",font=self.conf["font"]).grid(row=0, column=6, columnspan=2)
+        tk.Label(car_park_frame, text="Car Park C", font=self.conf["font"]).grid(row=0, column=6, columnspan=2)
         tk.Label(car_park_frame, text="Car Spots", font=self.conf["font"]).grid(row=1, column=6)
         tk.Label(car_park_frame, text="Other", font=self.conf["font"]).grid(row=1, column=7)
         tk.Label(car_park_frame, text="Total", font=self.conf["font"]).grid(row=0, column=8)
@@ -369,11 +377,12 @@ class ProjectInfoPage(tk.Frame):
 
         self.data["Project Info"]["Project"]["Proposal Type"].trace("w", self._update_building_frame)
 
-        tk.Label(build_feature_frame, text="Asana Apt/Room/Area ", font=self.conf["font"]).grid(row=1, column=0,
+        tk.Label(build_feature_frame, text="Asana Apt/Room/Area", font=self.conf["font"]).grid(row=1, column=0,
                                                                                                  sticky="w",
                                                                                                  padx=(90, 0))
         tk.Entry(build_feature_frame, width=80, font=self.conf["font"], fg="blue",
                  textvariable=building_features["Apt"]).grid(row=2, column=0)
+
 
 
         tk.Label(build_feature_frame, text="Asana Basement/Car Park Spots ", font=self.conf["font"]).grid(row=3, column=0,
@@ -437,14 +446,14 @@ The project is a residential develop and consists of:
         drawing[2]["Revision"].set("A")
 
     def finish_part(self):
-        finish_frame = tk.LabelFrame(self.main_context_frame)
-        finish_frame.grid(row=5, column=0, sticky="e")
+        self.finish_frame = tk.LabelFrame(self.main_context_frame)
+        self.finish_frame.grid(row=5, column=0, sticky="e")
 
-        tk.Button(finish_frame, text="Delete Project", command=self._delete_project,
+        tk.Button(self.finish_frame, text="Delete Project", command=self._delete_project,
                   bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
 
         self.quote_text = tk.StringVar(value="Quote Unsuccessful")
-        tk.Button(finish_frame, textvariable=self.quote_text, command=self.quote_unsuccessful,
+        tk.Button(self.finish_frame, textvariable=self.quote_text, command=self.quote_unsuccessful,
                   bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
 
         self.data["State"]["Quote Unsuccessful"].trace("w", self._update_quote_button_text)
@@ -490,7 +499,7 @@ The project is a residential develop and consists of:
         if not os.path.exists(database_dir):
             self.messagebox.show_error(f"The quotation {quotation_number} number doesn't exist")
         else:
-            load_data(self.app)
+            load_data(self.app, quotation_number)
 
 
     def quote_unsuccessful(self):
@@ -508,9 +517,9 @@ The project is a residential develop and consists of:
                 config_log(self.app)
                 if len(self.data["Asana_id"].get()) != 0:
                     update_asana(self.app)
-                    self.messagebox.show_info("Quote Unsuccessful and Asana Updated")
+                    self.messagebox.show_info("Project Restore and Asana Updated")
                 else:
-                    self.messagebox.show_info("Quote Unsuccessful")
+                    self.messagebox.show_info("Project Restore")
         else:
             quote = self.messagebox.ask_yes_no("Are you sure you want to put this project into Quote Unsuccessful")
             if quote:
@@ -521,9 +530,9 @@ The project is a residential develop and consists of:
                 config_log(self.app)
                 if len(self.data["Asana_id"].get()) != 0:
                     update_asana(self.app)
-                    self.messagebox.show_info("Project Restore and Asana Updated")
+                    self.messagebox.show_info("Quote Unsuccessful and Asana Updated")
                 else:
-                    self.messagebox.show_info("Project Restore")
+                    self.messagebox.show_info("Quote Unsuccessful")
 
     def _update_quotation_number(self, *args):
         if self.data["Project Info"]["Project"]["Quotation Number"].get() != "":
@@ -568,6 +577,28 @@ The project is a residential develop and consists of:
             self.car_part_column_total[i].set(str(car_part_column_total[i]))
         self.data["Project Info"]["Building Features"]["Major"]["Total Car spot"].set(str(car_part_spot_total))
         self.data["Project Info"]["Building Features"]["Major"]["Total Others"].set(str(car_part_other_total))
+
+    def _update_apt_room_area(self, *args):
+        if self.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
+            if self.data["Project Info"]["Building Features"]["Minor"]["Total Area"].get() == "0":
+                self.data["Project Info"]["Building Features"]["Apt"].set("")
+            else:
+                self.data["Project Info"]["Building Features"]["Apt"].set(self.data["Project Info"]["Building Features"]["Minor"]["Total Area"].get()+" m2")
+        else:
+            if self.data["Project Info"]["Building Features"]["Major"]["Total Apt"].get() == "0":
+                self.data["Project Info"]["Building Features"]["Apt"].set("")
+            else:
+                self.data["Project Info"]["Building Features"]["Apt"].set(self.data["Project Info"]["Building Features"]["Major"]["Total Apt"].get()+" Units")
+
+    def _update_basement_car_park_spots(self, *args):
+        res_list = []
+        for car_spot in self.data["Project Info"]["Building Features"]["Major"]["Car Park"]:
+            if len(car_spot[0].get()) != 0:
+                res_list.append(car_spot[0].get())
+        if len(res_list) == 0:
+            self.data["Project Info"]["Building Features"]["Basement"].set("")
+        else:
+            self.data["Project Info"]["Building Features"]["Basement"].set(", ".join(res_list)+" "+self.data["Project Info"]["Building Features"]["Major"]["Total Car spot"].get()+" Car Spots")
 
     def _update_block_total(self, *args):
         block = self.data["Project Info"]["Building Features"]["Major"]["Block"]

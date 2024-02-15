@@ -34,8 +34,10 @@ def reset(app):
 
     if len(app.current_quotation.get()) != 0:
         data["Project Info"]["Project"]["Quotation Number"].set(app.current_quotation.get())
+        app.data["Login_user"].set("")
         save(app)
         app.current_quotation.set("")
+        app.data["Login_user"].set(app.user)
 
     database_dir = os.path.join(app.conf["database_dir"], "data_template.json")
     template_json = json.load(open(database_dir))
@@ -59,10 +61,13 @@ def save(app):
     data = app.data
     data_json = convert_to_json(data)
     database_dir = os.path.join(app.conf["database_dir"], data_json["Project Info"]["Project"]["Quotation Number"])
+    # accounting_dir = os.path.join(app.conf["accounting_dir"], data_json["Project Info"]["Project"]["Quotation Number"])
     # if len(data["Project Info"]["Project"]["Quotation Number"].get()) != 6 or len(data["Project Info"]["Project"]["Quotation Number"].get()) != 8:
     #     return
     if not os.path.exists(database_dir):
         os.mkdir(database_dir)
+    # if not os.path.exists(accounting_dir):
+    #     os.makedirs(accounting_dir)
     with open(os.path.join(database_dir, "data.json"), "w") as f:
         json_object = json.dumps(data_json, indent=4)
         f.write(json_object)
@@ -70,25 +75,38 @@ def save(app):
     # current_folder_name = [folder for folder in os.listdir(app.conf["working_dir"]) if folder.startswith(data["Project Info"]["Project"]["Quotation Number"])][0]
     # print(current_folder_name)
 
-def load_data(app):
+def load_data(app, quotation_number):
     data = app.data
+    database_dir = conf["database_dir"]
+    if not os.path.exists(os.path.join(database_dir, quotation_number)):
+        messagebox.showerror("Error", f"Can not find the folder {os.path.join(database_dir, quotation_number)}")
+        return
+    project_json = json.load(open(os.path.join(database_dir, quotation_number, "data.json")))
+    if len(project_json["Login_user"]) !=0:
+        messagebox.showerror("Error", f"{project_json['Login_user']} is Using this project right now")
+        return
+
     if len(app.current_quotation.get()) != 0:
         old_quotation = data["Project Info"]["Project"]["Quotation Number"].get()
         data["Project Info"]["Project"]["Quotation Number"].set(app.current_quotation.get())
+        app.data["Login_user"].set("")
         save(app)
         data["Project Info"]["Project"]["Quotation Number"].set(old_quotation)
+        app.data["Login_user"].set(app.user)
     # reset(app)
-    load(app)
+    load(app, quotation_number)
     # app.email_text.delete(1.0, tk.END)
     # app.email_text.insert(1.0, app.data["Email_Content"].get())
 
-def load(app):
+def load(app, quotation_number):
     data = app.data
-    quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
+    # quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
     database_dir = os.path.join(app.conf["database_dir"], quotation_number)
     data_json = json.load(open(os.path.join(database_dir, "data.json")))
     convert_to_data(data_json, data)
 
+    app.data["Login_user"].set(app.user)
+    save(app)
 
     for service in app.data["Project Info"]["Project"]["Service Type"].values():
         if service["Include"].get():
@@ -96,6 +114,7 @@ def load(app):
             service["Include"].set(True)
 
     app.current_quotation.set(quotation_number)
+    app.fee_proposal_page.auto_lock()
     unlock_invoice(app)
     load_invoice_state(app)
     config_state(app)
@@ -220,6 +239,7 @@ def finish_setup(app):
                 tk.messagebox.showerror("Error", "Please Close the file relate to folder before rename")
                 return
     data["State"]["Set Up"].set(True)
+    app.current_quotation.set(quotation_number)
     save(app)
     app.log.log_finish_set_up(app)
     config_state(app)
@@ -437,7 +457,15 @@ def _check_fee(app):
             return False
     return True
 
+def check_accounting_folder(app):
+    accounting_dir = os.path.join(conf["accounting_dir"], app.data["Project Info"]["Project"]["Quotation Number"].get())
+    if not os.path.exists(accounting_dir):
+        os.makedirs(accounting_dir)
+
+
+
 def preview_fee_proposal(app, *args):
+    check_accounting_folder(app)
     if app.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
         minor_project_fee_proposal(app)
     elif app.data["Project Info"]["Project"]["Proposal Type"].get() == "Major":
@@ -456,7 +484,8 @@ def minor_project_fee_proposal(app, *args):
     data = app.data
     pdf_name = _get_proposal_name(app) + ".pdf"
     excel_name = f'{data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    accounting_dir = os.path.join(app.conf["accounting_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
@@ -481,14 +510,14 @@ def minor_project_fee_proposal(app, *args):
         return
     elif not page in [1, 2, 3, 4, 5]:
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
-    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
+    pdf_list = [file for file in os.listdir(os.path.join(accounting_dir)) if
                 "Fee Proposal" in str(file) and str(file).endswith(".pdf") and not "Mechanical Installation Fee Proposal" in str(file)]
 
     if len(pdf_list) != 0:
         current_pdf = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
         current_revision = current_pdf.split(" ")[-1].split(".")[0]
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"]["Revision"].get() == str(int(current_revision) + 1):
-            old_pdf_path = os.path.join(database_dir, current_pdf)
+            old_pdf_path = os.path.join(accounting_dir, current_pdf)
             # avDoc.open(old_pdf_path, old_pdf_path)
             def open_pdf():
                 subprocess.call([adobe_address, old_pdf_path])
@@ -520,7 +549,7 @@ def minor_project_fee_proposal(app, *args):
             total_ist += float(value["in.GST"].get())
 
     shutil.copy(os.path.join(resource_dir, "xlsx", f"fee_proposal_template_{page}.xlsx"),
-                os.path.join(database_dir, excel_name))
+                os.path.join(accounting_dir, excel_name))
     excel = win32client.Dispatch("Excel.Application")
     try:
         excel.ScreenUpdating = False
@@ -529,7 +558,7 @@ def minor_project_fee_proposal(app, *args):
     except Exception as e:
         print(e)
         pass
-    work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
+    work_book = excel.Workbooks.Open(os.path.join(accounting_dir, excel_name))
         # messagebox.showerror("Error", e)
     try:
         work_sheets = work_book.Worksheets[0]
@@ -562,6 +591,8 @@ def minor_project_fee_proposal(app, *args):
                 cur_row = 84 + (i-1) * row_per_page
             extra_list = conf["extra_list"]
             for extra in extra_list:
+                if len([scope for scope in service[extra] if scope["Include"].get()]) == 0:
+                    continue
                 work_sheets.Cells(cur_row, 1).Value = "2." + str(cur_index)
                 work_sheets.Cells(cur_row, 2).Value = key + "-" + extra
                 work_sheets.Cells(cur_row, 1).Font.Bold = True
@@ -593,7 +624,7 @@ def minor_project_fee_proposal(app, *args):
             work_sheets.Cells(cur_row + page, 6).Value = total_fee
             work_sheets.Cells(cur_row + page, 7).Value = total_ist
         work_sheets.Cells(cur_row+13+page, 2).Value = "Re: " + data["Project Info"]["Project"]["Project Name"].get()
-        work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, pdf_name))
+        work_sheets.ExportAsFixedFormat(0, os.path.join(accounting_dir, pdf_name))
         work_book.Close(True)
     except PermissionError:
         print(e)
@@ -608,7 +639,7 @@ def minor_project_fee_proposal(app, *args):
         app.data["State"]["Generate Proposal"].set(True)
         # avDoc.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
         def open_pdf():
-            subprocess.call([adobe_address, os.path.join(database_dir, pdf_name)])
+            subprocess.call([adobe_address, os.path.join(accounting_dir, pdf_name)])
         _thread.start_new_thread(open_pdf, ())
         # webbrowser.open(os.path.join(database_dir, pdf_name))
         save(app)
@@ -629,7 +660,8 @@ def major_project_fee_proposal(app, *args):
     data = app.data
     pdf_name = _get_proposal_name(app) + ".pdf"
     excel_name = f'{data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    accounting_dir = os.path.join(app.conf["accounting_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
 
@@ -657,7 +689,7 @@ def major_project_fee_proposal(app, *args):
         return
     elif not page in [1, 2, 3, 4, 5]:
         messagebox.showerror("Error", "Excess the maximum value of service, please contact administrator")
-    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
+    pdf_list = [file for file in os.listdir(os.path.join(accounting_dir)) if
                 "Fee Proposal" in str(file) and str(file).endswith(".pdf") and not "Mechanical Installation Fee Proposal" in str(file)]
 
     # case = _check_case(app)
@@ -670,7 +702,7 @@ def major_project_fee_proposal(app, *args):
         current_revision = current_pdf.split(" ")[-1].split(".")[0]
         if data["Fee Proposal"]["Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Reference"][
             "Revision"].get() == str(int(current_revision) + 1):
-            old_pdf_path = os.path.join(database_dir, current_pdf)
+            old_pdf_path = os.path.join(accounting_dir, current_pdf)
             def open_pdf():
                 subprocess.call([adobe_address, old_pdf_path])
 
@@ -703,7 +735,7 @@ def major_project_fee_proposal(app, *args):
         messagebox.showerror("Error", "You need to select at least one stage")
         return
     shutil.copy(os.path.join(resource_dir, "xlsx", f"major_proposal_template_{page}_stage{stage}.xlsx"),
-                os.path.join(database_dir, excel_name))
+                os.path.join(accounting_dir, excel_name))
     excel = win32client.Dispatch("Excel.Application")
     try:
         excel.ScreenUpdating = False
@@ -712,7 +744,7 @@ def major_project_fee_proposal(app, *args):
     except Exception as e:
         print(e)
         pass
-    work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
+    work_book = excel.Workbooks.Open(os.path.join(accounting_dir, excel_name))
     # messagebox.showerror("Error", e)
     try:
         work_sheets = work_book.Worksheets[0]
@@ -783,7 +815,7 @@ def major_project_fee_proposal(app, *args):
             cur_row = 131 + i * row_per_page
             extra_list = conf["extra_list"]
             for extra in extra_list:
-                if len(service[extra]) == 0:
+                if len([scope for scope in service[extra] if scope["Include"].get()]) == 0:
                     continue
                 work_sheets.Cells(cur_row, 1).Value = "2." + str(cur_index)
                 work_sheets.Cells(cur_row, 2).Value = key + "-" + extra
@@ -791,8 +823,6 @@ def major_project_fee_proposal(app, *args):
                 work_sheets.Cells(cur_row, 2).Font.Bold = True
                 cur_row+=1
                 for scope in service[extra]:
-                    if len(service[extra]) == 0:
-                        continue
                     if scope["Include"].get():
                         work_sheets.Cells(cur_row, 1).Value = "•"
                         for line in separate_line(scope["Item"].get()):
@@ -814,7 +844,7 @@ def major_project_fee_proposal(app, *args):
 
         cur_row = 200 + page * (row_per_page+1)
         work_sheets.Cells(cur_row, 2).Value = "Re: "+data["Project Info"]["Project"]["Project Name"].get()
-        work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, pdf_name))
+        work_sheets.ExportAsFixedFormat(0, os.path.join(accounting_dir, pdf_name))
         work_book.Close(True)
     except PermissionError:
         messagebox.showerror("Error", "Please close the preview or file before you use it")
@@ -828,7 +858,7 @@ def major_project_fee_proposal(app, *args):
 
         # avDoc.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
         def open_pdf():
-            subprocess.call([adobe_address, os.path.join(database_dir, pdf_name)])
+            subprocess.call([adobe_address, os.path.join(accounting_dir, pdf_name)])
 
         _thread.start_new_thread(open_pdf, ())
         # webbrowser.open(os.path.join(database_dir, pdf_name))
@@ -974,9 +1004,11 @@ def _get_service_name(app):
     return service_name
 def excel_print_invoice(app, inv):
     data = app.data
+    check_accounting_folder(app)
     excel_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.xlsx'
     invoice_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.pdf'
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    accounting_dir = os.path.join(app.conf["accounting_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
     # win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
@@ -988,8 +1020,8 @@ def excel_print_invoice(app, inv):
         return
 
     rewrite = True
-    if os.path.exists(os.path.join(database_dir, invoice_name)):
-        old_pdf_path=os.path.join(database_dir, invoice_name)
+    if os.path.exists(os.path.join(accounting_dir, invoice_name)):
+        old_pdf_path=os.path.join(accounting_dir, invoice_name)
         # avDoc.open(old_pdf_path, old_pdf_path)
         def open_pdf():
             subprocess.call([adobe_address, old_pdf_path])
@@ -1003,12 +1035,12 @@ def excel_print_invoice(app, inv):
                     proc.kill()
     if rewrite:
         shutil.copy(os.path.join(resource_dir, "xlsx", f"invoice_template.xlsx"),
-                    os.path.join(database_dir, excel_name))
+                    os.path.join(accounting_dir, excel_name))
         excel = win32client.Dispatch("Excel.Application")
         excel.ScreenUpdating = False
         excel.DisplayAlerts = False
         excel.EnableEvents = False
-        work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
+        work_book = excel.Workbooks.Open(os.path.join(accounting_dir, excel_name))
         try:
             work_sheets = work_book.Worksheets[0]
             address_to = data["Address_to"].get()
@@ -1090,7 +1122,7 @@ def excel_print_invoice(app, inv):
 
             work_sheets.Cells(39, 9).Value = str(total_fee)
             work_sheets.Cells(39, 10).Value = str(total_inGST)
-            work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, invoice_name))
+            work_sheets.ExportAsFixedFormat(0, os.path.join(accounting_dir, invoice_name))
             work_book.Close(True)
         except PermissionError:
             messagebox.showerror("Error", "Please close the preview or file before you use it")
@@ -1098,7 +1130,7 @@ def excel_print_invoice(app, inv):
             messagebox.showerror("Error", "Please Close the pdf before you generate a new one")
             print(e)
         else:
-            invoice_path = os.path.join(database_dir, invoice_name)
+            invoice_path = os.path.join(accounting_dir, invoice_name)
 
             def open_pdf():
                 subprocess.call([adobe_address, invoice_path])
@@ -1120,9 +1152,11 @@ def excel_print_invoice(app, inv):
 
 def preview_installation_fee_proposal(app):
     data = app.data
+    check_accounting_folder(app)
     pdf_name = f"Mechanical Installation Fee Proposal for {data['Project Info']['Project']['Project Name'].get()} Rev {data['Fee Proposal']['Installation Reference']['Revision'].get()}.pdf"
     excel_name = f'Mechanical Installation {data["Project Info"]["Project"]["Project Name"].get()} Back Up.xlsx'
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    accounting_dir = os.path.join(app.conf["accounting_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     resource_dir = app.conf["resource_dir"]
     adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
     proposal_type = data["Project Info"]["Project"]["Proposal Type"].get()
@@ -1135,14 +1169,14 @@ def preview_installation_fee_proposal(app):
     #     messagebox.showerror(title="Error", message="There are error in the fee proposal section, please fix the fee section before generate the fee proposal")
     #     return
 
-    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
+    pdf_list = [file for file in os.listdir(os.path.join(accounting_dir)) if
                 str(file).endswith(".pdf") and "Mechanical Installation Fee Proposal" in str(file)]
 
     if len(pdf_list) != 0:
         current_pdf = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
         current_revision = current_pdf.split(" ")[-1].split(".")[0]
         if data["Fee Proposal"]["Installation Reference"]["Revision"].get() == current_revision or data["Fee Proposal"]["Installation Reference"]["Revision"].get() == str(int(current_revision) + 1):
-            old_pdf_path = os.path.join(database_dir, current_pdf)
+            old_pdf_path = os.path.join(accounting_dir, current_pdf)
             # avDoc.open(old_pdf_path, old_pdf_path)
             def open_pdf():
                 subprocess.call([adobe_address, old_pdf_path])
@@ -1167,7 +1201,7 @@ def preview_installation_fee_proposal(app):
 
 
     shutil.copy(os.path.join(resource_dir, "xlsx", f"installation_fee_proposal_template.xlsx"),
-                os.path.join(database_dir, excel_name))
+                os.path.join(accounting_dir, excel_name))
     excel = win32client.Dispatch("Excel.Application")
     try:
         excel.ScreenUpdating = False
@@ -1176,7 +1210,7 @@ def preview_installation_fee_proposal(app):
     except Exception as e:
         print(e)
         pass
-    work_book = excel.Workbooks.Open(os.path.join(database_dir, excel_name))
+    work_book = excel.Workbooks.Open(os.path.join(accounting_dir, excel_name))
         # messagebox.showerror("Error", e)
     try:
         work_sheets = work_book.Worksheets[0]
@@ -1246,7 +1280,7 @@ def preview_installation_fee_proposal(app):
 
         cur_row = 214
         work_sheets.Cells(cur_row, 2).Value = "Re: "+data["Project Info"]["Project"]["Project Name"].get()
-        work_sheets.ExportAsFixedFormat(0, os.path.join(database_dir, pdf_name))
+        work_sheets.ExportAsFixedFormat(0, os.path.join(accounting_dir, pdf_name))
         work_book.Close(True)
     except PermissionError:
         print(e)
@@ -1261,7 +1295,7 @@ def preview_installation_fee_proposal(app):
         app.data["State"]["Generate Proposal"].set(True)
         # avDoc.open(os.path.join(database_dir, pdf_name), os.path.join(database_dir, pdf_name))
         def open_pdf():
-            subprocess.call([adobe_address, os.path.join(database_dir, pdf_name)])
+            subprocess.call([adobe_address, os.path.join(accounting_dir, pdf_name)])
         _thread.start_new_thread(open_pdf, ())
         # webbrowser.open(os.path.join(database_dir, pdf_name))
         save(app)
@@ -1281,8 +1315,10 @@ def preview_installation_fee_proposal(app):
 
 def email_fee_proposal(app, *args):
     data = app.data
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
-    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
+    check_accounting_folder(app)
+    # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    accounting_dir = os.path.join(app.conf["accounting_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    pdf_list = [file for file in os.listdir(os.path.join(accounting_dir)) if
                 "Fee Proposal" in str(file) and str(file).endswith(".pdf") and not "Mechanical Installation Fee Proposal" in str(file)]
 
     pdf_name = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
@@ -1290,7 +1326,7 @@ def email_fee_proposal(app, *args):
     if not data["State"]["Generate Proposal"].get():
         messagebox.showerror("Error", "Please Generate a pdf first")
         return
-    elif not os.path.exists(os.path.join(database_dir, pdf_name)):
+    elif not os.path.exists(os.path.join(accounting_dir, pdf_name)):
         messagebox.showerror("Error",
                              f'Python cant found fee proposal for {data["Project Info"]["Project"]["Quotation Number"].get()} revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
         return
@@ -1327,13 +1363,19 @@ def email_fee_proposal(app, *args):
     Cheers,<br>
     """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
-    newmail.Attachments.Add(os.path.join(database_dir, pdf_name))
+    newmail.Attachments.Add(os.path.join(accounting_dir, pdf_name))
     newmail.Display()
     save(app)
     config_state(app)
     return True
 def chase(app, *args):
     data = app.data
+    # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    accounting_dir = os.path.join(app.conf["accounting_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    pdf_list = [file for file in os.listdir(os.path.join(accounting_dir)) if
+                "Fee Proposal" in str(file) and str(file).endswith(".pdf") and not "Mechanical Installation Fee Proposal" in str(file)]
+
+    pdf_name = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
     if not data["State"]["Email to Client"].get():
         messagebox.showerror("Error", "Please Sent the fee proposal to client first")
         return
@@ -1363,15 +1405,18 @@ def chase(app, *args):
     Cheers ,<br>
     """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
+    newmail.Attachments.Add(os.path.join(accounting_dir, pdf_name))
     newmail.Display()
     save(app)
     config_state(app)
 def email_invoice(app, inv):
     data = app.data
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    check_accounting_folder(app)
+    # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    accounting_dir = os.path.join(app.conf["accounting_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
     pdf_name = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}.pdf'
 
-    if not os.path.exists(os.path.join(database_dir, pdf_name)):
+    if not os.path.exists(os.path.join(accounting_dir, pdf_name)):
         messagebox.showerror("Error", f"Please generate the invoice before you send to client")
         return
     # if not data["State"]["Fee Accepted"].get():
@@ -1409,16 +1454,18 @@ def email_invoice(app, inv):
     """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
     newmail.Display()
-    newmail.Attachments.Add(os.path.join(database_dir, pdf_name))
+    newmail.Attachments.Add(os.path.join(accounting_dir, pdf_name))
 def email_installation_proposal(app):
     data = app.data
-    database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
-    pdf_list = [file for file in os.listdir(os.path.join(database_dir)) if
+    check_accounting_folder(app)
+    # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    accounting_dir = os.path.join(app.conf["accounting_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
+    pdf_list = [file for file in os.listdir(os.path.join(accounting_dir)) if
                 "Mechanical Installation Fee Proposal" in str(file) and str(file).endswith(".pdf")]
 
     pdf_name = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
 
-    if not os.path.exists(os.path.join(database_dir, pdf_name)):
+    if not os.path.exists(os.path.join(accounting_dir, pdf_name)):
         messagebox.showerror("Error",
                              f'Python cant found fee proposal for {data["Project Info"]["Project"]["Quotation Number"].get()} revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
         return
@@ -1455,7 +1502,7 @@ def email_installation_proposal(app):
         Cheers,<br>
         """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
-    newmail.Attachments.Add(os.path.join(database_dir, pdf_name))
+    newmail.Attachments.Add(os.path.join(accounting_dir, pdf_name))
     newmail.Display()
     save(app)
     config_state(app)

@@ -154,11 +154,13 @@ def email_server(app=None):
                                 create_new_folder(folder_name, conf)
 
                                 database_dir = os.path.join(conf["database_dir"], current_quotation)
+                                accounting_dir = os.path.join(conf["accounting_dir"], current_quotation)
                                 data_json = json.load(open(os.path.join(conf["database_dir"], "data_template.json")))
                                 data_json["Project Info"]["Project"]["Project Name"] = project_name
                                 data_json["Project Info"]["Project"]["Quotation Number"] = current_quotation
                                 data_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
                                 os.makedirs(database_dir)
+                                os.makedirs(accounting_dir)
                                 # with open(os.path.join(database_dir, "data.json"), "w") as f:
                                 #     json_object = json.dumps(data_json, indent=4)
                                 #     f.write(json_object)
@@ -295,7 +297,7 @@ def email_server(app=None):
         except Exception as e:
             time.sleep(10)
             print(e)
-            if "socket" in e:
+            if "socket" in str(e):
                 if not app is None:
                     app.messagebox.show_error("Internet Error, Please close and restart python")
                     return

@@ -64,15 +64,28 @@ for dir in os.listdir(database_dir):
         # data_json["Project Info"]["Building Features"]["Apt"] = ""
         # data_json["Project Info"]["Building Features"]["Basement"] = ""
 
-        for key, value in data_json["Fee Proposal"]["Time"].items():
-            if type(value) is dict:
-                new = value["Start"] + "-" + value["End"]
-                data_json["Fee Proposal"]["Time"][key]=new
-        if not "Program" in data_json["Fee Proposal"]["Installation Reference"]:
-            data_json["Fee Proposal"]["Installation Reference"]["Program"] = None
-        if not "Asana State" in data_json["State"]:
-            data_json["State"]["Asana State"] = ""
-
+        # for key, value in data_json["Fee Proposal"]["Time"].items():
+        #     if type(value) is dict:
+        #         new = value["Start"] + "-" + value["End"]
+        #         data_json["Fee Proposal"]["Time"][key]=new
+        # if not "Program" in data_json["Fee Proposal"]["Installation Reference"]:
+        #     data_json["Fee Proposal"]["Installation Reference"]["Program"] = None
+        # if not "Asana State" in data_json["State"]:
+        #     data_json["State"]["Asana State"] = ""
+        # data_json["Lock"] = {
+        #     "Proposal": False,
+        #     "Invoices": False
+        # }
+        # for service in data_json["Bills"]["Details"].values():
+        #     for content in service["Content"]:
+        #         if "Description" in content.keys():
+        #             content.pop("Description")
+        # # print(list(data_json.keys()))
+        # design_order_list = ['Asana_id', 'Asana_url', 'Lock', 'State', 'Email', 'Email_Content', 'Address_to', 'Project Info', 'Fee Proposal', 'Invoices', 'Invoices Number', 'Remittances', 'Bills', 'Profits', 'Verbal Acceptance Note', 'Fee_Acceptance_Upload', 'Verbal_Acceptance_Upload']
+        # new_dic = {k: data_json[k] for k in design_order_list}
+        # data_json = new_dic
+        # data_json["Invoices"]["Paid Fee"] = ""
+        data_json["Login_user"] = ""
         print(count)
         count+=1
 

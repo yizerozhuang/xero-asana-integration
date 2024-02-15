@@ -1,6 +1,8 @@
 import asana
 from utility import remove_none, config_log, get_invoice_item
 
+from tkinter import messagebox
+
 import datetime
 from datetime import date
 
@@ -86,23 +88,25 @@ def update_asana(app, *args):
     try:
         project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
     except Exception as e:
-        all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
-        projects_id_map = name_id_map(all_projects)
-        current_project_template = clean_response(template_api_instance.get_task_templates(
-            project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
-
-        template_id_map = name_id_map(current_project_template)
-        api_respond = clean_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
-        new_task_gid = api_respond["new_task"]["gid"]
-        body = asana.TaskGidAddProjectBody(
-            {
-                "project": projects_id_map["MP"]
-            }
-        )
-        task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
-        data["Asana_id"].set(new_task_gid)
-        project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
-        data["Asana_url"].set(project_task["permalink_url"])
+        messagebox.showerror("Error", f"Cannot find asana id {data['Asana_id'].get()}")
+        return
+        # all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
+        # projects_id_map = name_id_map(all_projects)
+        # current_project_template = clean_response(template_api_instance.get_task_templates(
+        #     project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
+        #
+        # template_id_map = name_id_map(current_project_template)
+        # api_respond = clean_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
+        # new_task_gid = api_respond["new_task"]["gid"]
+        # body = asana.TaskGidAddProjectBody(
+        #     {
+        #         "project": projects_id_map["MP"]
+        #     }
+        # )
+        # task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
+        # data["Asana_id"].set(new_task_gid)
+        # project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
+        # data["Asana_url"].set(project_task["permalink_url"])
 
     task_id = data["Asana_id"].get()
 
@@ -153,20 +157,22 @@ def update_asana(app, *args):
 
 
     asana_update_body = {
-            "name": name,
-            "custom_fields": {
-                custom_field_id_map["Status"]: status_id_map[status],
-                custom_field_id_map["Services"]: [service_id_map[key] for key, value in
-                                                  data["Project Info"]["Project"]["Service Type"].items() if value["Include"].get()],
-                custom_field_id_map["Shop name"]: data["Project Info"]["Project"]["Shop Name"].get(),
-                custom_field_id_map["Apt/Room/Area"]: data["Project Info"]["Building Features"]["Apt"].get(),
-                custom_field_id_map["Basement/Car Spots"]: data["Project Info"]["Building Features"]["Basement"].get(),
-                custom_field_id_map["Feature/Notes"]: data["Project Info"]["Building Features"]["Feature"].get(),
-                custom_field_id_map["Client"]: client_name,
-                custom_field_id_map["Main Contact"]: main_contact_name,
-                custom_field_id_map["Contact Type"]: contact_id_map[data["Project Info"]["Main Contact"]["Contact Type"].get()]
-            }
+        "name": name,
+        "custom_fields": {
+            custom_field_id_map["Status"]: status_id_map[status],
+            custom_field_id_map["Services"]: [service_id_map[key] for key, value in
+                                              data["Project Info"]["Project"]["Service Type"].items() if value["Include"].get()],
+            custom_field_id_map["Shop name"]: data["Project Info"]["Project"]["Shop Name"].get(),
+            custom_field_id_map["Apt/Room/Area"]: data["Project Info"]["Building Features"]["Apt"].get(),
+            custom_field_id_map["Basement/Car Spots"]: data["Project Info"]["Building Features"]["Basement"].get(),
+            custom_field_id_map["Feature/Notes"]: data["Project Info"]["Building Features"]["Feature"].get(),
+            custom_field_id_map["Client"]: client_name,
+            custom_field_id_map["Main Contact"]: main_contact_name,
+            custom_field_id_map["Contact Type"]: contact_id_map[data["Project Info"]["Main Contact"]["Contact Type"].get()],
+            custom_field_id_map["Fee ExGST"]: data["Invoices"]["Fee"].get(),
+            custom_field_id_map["Total Paid ExGST"]: data["Invoices"]["Paid Fee"].get()
         }
+    }
     # messagebox.showinfo("Success", "Update/Create Asana Success")
 
     sub_tasks = clean_response(task_api_instance.get_subtasks_for_task(task_id))
@@ -262,28 +268,32 @@ def update_asana_invoices(app, inv_list=None):
             task_api_instance.set_parent_for_task(body=body, task_gid=new_inv_task_gid)
             data["Invoices Number"][i]["Asana_id"].set(new_inv_task_gid)
         else:
+
             try:
                 task_api_instance.get_task(data["Invoices Number"][i]["Asana_id"].get())
             except Exception as e:
-                print(f'Can not found Asana Invoice Task {data["Invoices Number"][i]["Asana_id"].get()} Creating New Invoice Task')
-
-                body = asana.TasksTaskGidBody(
-                    {
-                        "name": f"INV 4xxxxx",
-                    }
-                )
-                response = template_api_instance.instantiate_task(task_template_gid=invoice_template_id,
-                                                                  body=body).to_dict()
-                new_inv_task_gid = response["data"]['new_task']["gid"]
-
-                body = asana.TasksTaskGidBody(
-                    {
-                        "parent": task_id,
-                        "insert_before": None
-                    }
-                )
-                task_api_instance.set_parent_for_task(body=body, task_gid=new_inv_task_gid)
-                data["Invoices Number"][i]["Asana_id"].set(new_inv_task_gid)
+                print(e)
+                messagebox.showerror("Error", f'Can not find the invoice with id{data["Invoices Number"][i]["Asana_id"].get()}')
+                return
+            #     print(f'Can not found Asana Invoice Task {data["Invoices Number"][i]["Asana_id"].get()} Creating New Invoice Task')
+            #
+            #     body = asana.TasksTaskGidBody(
+            #         {
+            #             "name": f"INV 4xxxxx",
+            #         }
+            #     )
+            #     response = template_api_instance.instantiate_task(task_template_gid=invoice_template_id,
+            #                                                       body=body).to_dict()
+            #     new_inv_task_gid = response["data"]['new_task']["gid"]
+            #
+            #     body = asana.TasksTaskGidBody(
+            #         {
+            #             "parent": task_id,
+            #             "insert_before": None
+            #         }
+            #     )
+            #     task_api_instance.set_parent_for_task(body=body, task_gid=new_inv_task_gid)
+            #     data["Invoices Number"][i]["Asana_id"].set(new_inv_task_gid)
 
         name = "INV " + data["Invoices Number"][i]["Number"].get() if len(data["Invoices Number"][i]["Number"].get())!= 0 else f"INV 4xxxxx"
 

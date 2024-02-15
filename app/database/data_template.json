@@ -1,12 +1,17 @@
 {
     "Asana_id": "",
     "Asana_url": "",
+    "Lock": {
+        "Proposal": false,
+        "Invoices": false
+    },
     "State": {
         "Set Up": false,
         "Generate Proposal": false,
         "Email to Client": false,
         "Fee Accepted": false,
-        "Quote Unsuccessful": false
+        "Quote Unsuccessful": false,
+        "Asana State": ""
     },
     "Email": {
         "Fee Proposal": "",
@@ -1914,6 +1919,40 @@
                 "Fee": "",
                 "in.GST": ""
             },
+            "Miscellaneous": {
+                "Include": false,
+                "Service": "Miscellaneous",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "Miscellaneous Kickoff",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "Miscellaneous Final Documentation",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ],
+                "Fee": "",
+                "in.GST": ""
+            },
             "Installation": {
                 "Include": false,
                 "Service": "Installation",
@@ -2135,7 +2174,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2147,7 +2185,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2159,7 +2196,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2191,7 +2227,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2203,7 +2238,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2215,7 +2249,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2247,7 +2280,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2259,7 +2291,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2271,7 +2302,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2303,7 +2333,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2315,7 +2344,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2327,7 +2355,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2359,7 +2386,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2371,7 +2397,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2383,7 +2408,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2415,7 +2439,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2427,7 +2450,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2439,7 +2461,59 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Miscellaneous": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2471,7 +2545,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2483,7 +2556,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2495,7 +2567,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2527,7 +2598,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2539,7 +2609,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2551,7 +2620,6 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2597,6 +2665,11 @@
                 "in.GST": ""
             },
             "Mechanical Review": {
+                "Include": false,
+                "Fee": "",
+                "in.GST": ""
+            },
+            "Miscellaneous": {
                 "Include": false,
                 "Fee": "",
                 "in.GST": ""

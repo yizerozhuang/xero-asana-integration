@@ -133,8 +133,8 @@ def oauth_callback():
         raise
     if response is None or response.get("access_token") is None:
         return f"Access denied: response={str(response)}"
-    open("P:\\app\\xero_refresh_token.txt", 'w').write(response["refresh_token"])
-    open("P:\\app\\xero_access_token.txt", 'w').write(response["access_token"])
+    open(conf["xero_access_token_dir"], 'w').write(response["access_token"])
+    open(conf["xero_refresh_token_dir"], 'w').write(response["refresh_token"])
     store_xero_oauth2_token(response)
     return "You are Successfully login, you can go back to the app right now"
 token_list = {}
@@ -218,7 +218,7 @@ def _process_invoices(inv_list):
 def refresh_token():
     refresh_url = "https://identity.xero.com/connect/token"
 
-    old_refresh_token = open("P:\\app\\xero_refresh_token.txt", 'r').read()
+    old_refresh_token = open(conf["xero_refresh_token_dir"], 'r').read()
 
     tokenb4 = f"{conf['xero_client_id']}:{conf['xero_client_secret']}"
     basic_token = base64.urlsafe_b64encode(tokenb4.encode()).decode()
@@ -236,8 +236,8 @@ def refresh_token():
         response = requests.post(refresh_url, headers=headers, data=data)
 
         results = response.json()
-        open("P:\\app\\xero_refresh_token.txt", 'w').write(results["refresh_token"])
-        open("P:\\app\\xero_access_token.txt", 'w').write(results["access_token"])
+        open(conf["xero_access_token_dir"], 'w').write(results["access_token"])
+        open(conf["xero_refresh_token_dir"], 'w').write(results["refresh_token"])
         # store_xero_oauth2_token(response)
         store_xero_oauth2_token(
             {

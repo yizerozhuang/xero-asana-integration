@@ -51,14 +51,22 @@ class App(tk.Tk):
 
         self.show_frame(self.current_page)
 
+        self.role_check()
+
         self.protocol("WM_DELETE_WINDOW", self.confirm)
 
         config_state(self)
-        self.auto_check()
+        if not self.user in self.conf["engineer_user_list"]:
+            self.auto_check()
 
     def default_set_up(self):
+        self.data["Login_user"] = tk.StringVar(value=self.user)
         self.data["Asana_id"] = tk.StringVar()
         self.data["Asana_url"] = tk.StringVar()
+        self.data["Lock"] = {
+            "Proposal": tk.BooleanVar(),
+            "Invoices": tk.BooleanVar()
+        }
         self.data["State"] = {
             "Set Up": tk.BooleanVar(),
             "Generate Proposal": tk.BooleanVar(),
@@ -73,10 +81,6 @@ class App(tk.Tk):
             "Second Chase": tk.StringVar(),
             "Third Chase": tk.StringVar()
         }
-        self.data["Lock"] = {
-            "Proposal": tk.BooleanVar(),
-            "Invoices": tk.BooleanVar()
-        }
         self.data["Email_Content"] = tk.StringVar()
         self.data["Address_to"] = tk.StringVar(value="Client")
 
@@ -90,12 +94,15 @@ class App(tk.Tk):
         state_frame.grid(row=0, column=1)
 
         tk.Button(state_frame, text="Set Up", command=self._finish_setup, bg="cyan", font=self.conf["font"]).grid(row=0, column=0)
-        tk.Button(state_frame, text="Preview Fee Proposal", bg="cyan", command=self._preview_fee_proposal,
-                  font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(state_frame, text="Email To Client", command=self._email_fee_proposal, bg="cyan",
-                  font=self.conf["font"]).grid(row=0, column=2)
-        tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="cyan",
-                  font=self.conf["font"]).grid(row=0, column=3)
+        self.preview_fee_proposal_button = tk.Button(state_frame, text="Preview Fee Proposal", bg="cyan", command=self._preview_fee_proposal,
+                                                     font=self.conf["font"])
+        self.preview_fee_proposal_button.grid(row=0, column=1)
+        self.email_to_client_button = tk.Button(state_frame, text="Email To Client", command=self._email_fee_proposal, bg="cyan",
+                                                font=self.conf["font"])
+        self.email_to_client_button.grid(row=0, column=2)
+        self.chase_client_button = tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="cyan",
+                                             font=self.conf["font"])
+        self.chase_client_button.grid(row=0, column=3)
         
         function_frame = tk.LabelFrame(self.utility_frame, font=self.conf["font"])
         function_frame.grid(row=0, column=2, sticky="ns")
@@ -104,9 +111,11 @@ class App(tk.Tk):
                   fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
 
-        tk.Button(function_frame, width=10, text="Open Database", command=self.open_database, bg="brown",
-                  fg="white",
-                  font=self.conf["font"]).grid(row=1, column=0)
+        self.open_database_button = tk.Button(function_frame, width=10, text="Open Database",
+                                              command=self.open_database, bg="brown",
+                                              fg="white",
+                                              font=self.conf["font"])
+        self.open_database_button.grid(row=1, column=0)
 
         tk.Button(function_frame, text="Rename Project", command=self._rename_project, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
@@ -117,13 +126,17 @@ class App(tk.Tk):
         tk.Button(function_frame, text="Open Asana", command=self._open_asana, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=1, column=2)
 
-        tk.Button(function_frame, text="Refresh Xero Token", command=refresh_token, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=1, column=3)
-        tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=2, column=3)
+        self.update_xero_button = tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
+                                            font=self.conf["font"])
+        self.update_xero_button.grid(row=0, column=3)
 
-        tk.Button(function_frame, text="Update Xero", command=self._update_xero, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=3)
+        self.refresh_xero_button = tk.Button(function_frame, text="Refresh Xero Token", command=refresh_token, bg="brown", fg="white",
+                                             font=self.conf["font"])
+        self.refresh_xero_button.grid(row=1, column=3)
+
+        self.login_xero_button = tk.Button(function_frame, text="Login Xero", command=login_xero, bg="brown", fg="white",
+                                           font=self.conf["font"])
+        self.login_xero_button.grid(row=2, column=3)
 
         # tk.Button(function_frame, text="Refresh Token", command=refresh_token, bg="brown", fg="white",
         #           font=self.conf["font"]).grid(row=2, column=3)
@@ -173,29 +186,29 @@ class App(tk.Tk):
         self.state_dict["Fee Accepted"].grid(row=3, column=3)
 
 
-        legend_frame = tk.LabelFrame(self.utility_frame)
-        legend_frame.grid(row=0, column=3)
+        self.legend_frame = tk.LabelFrame(self.utility_frame)
+        self.legend_frame.grid(row=0, column=3)
 
-        tk.Label(legend_frame, text="Invoice States: ").grid(row=0, column=0)
+        tk.Label(self.legend_frame, text="Invoice States: ").grid(row=0, column=0)
 
-        _ = tk.LabelFrame(legend_frame)
+        _ = tk.LabelFrame(self.legend_frame)
         _.grid(row=0, column=1, sticky="ew")
         tk.Label(_, text="Backlog").pack()
 
-        tk.Label(legend_frame, text="Sent", bg="red").grid(row=0, column=2, sticky="ew")
-        tk.Label(legend_frame, text="Paid", bg="green").grid(row=0, column=4, sticky="ew")
-        tk.Label(legend_frame, text="Voided", bg="purple", fg="white").grid(row=0, column=5, sticky="ew")
+        tk.Label(self.legend_frame, text="Sent", bg="red").grid(row=0, column=2, sticky="ew")
+        tk.Label(self.legend_frame, text="Paid", bg="green").grid(row=0, column=4, sticky="ew")
+        tk.Label(self.legend_frame, text="Voided", bg="purple", fg="white").grid(row=0, column=5, sticky="ew")
 
-        tk.Label(legend_frame, text="Bill States: ").grid(row=1, column=0)
+        tk.Label(self.legend_frame, text="Bill States: ").grid(row=1, column=0)
 
-        _ = tk.LabelFrame(legend_frame)
+        _ = tk.LabelFrame(self.legend_frame)
         _.grid(row=1, column=1, sticky="ew")
         tk.Label(_, text="Draft").pack()
 
-        tk.Label(legend_frame, text="Awaiting Approval", bg="red").grid(row=1, column=2, sticky="ew")
-        tk.Label(legend_frame, text="Awaiting Payment", bg="orange").grid(row=1, column=3, sticky="ew")
-        tk.Label(legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
-        tk.Label(legend_frame, text="Voided", bg="purple", fg="white").grid(row=1, column=5, sticky="ew")
+        tk.Label(self.legend_frame, text="Awaiting Approval", bg="red").grid(row=1, column=2, sticky="ew")
+        tk.Label(self.legend_frame, text="Awaiting Payment", bg="orange").grid(row=1, column=3, sticky="ew")
+        tk.Label(self.legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
+        tk.Label(self.legend_frame, text="Voided", bg="purple", fg="white").grid(row=1, column=5, sticky="ew")
 
     def main_context_part(self):
         # main frame page
@@ -220,9 +233,12 @@ class App(tk.Tk):
         tk.Button(change_page_frame, text="Fee Details",
                   command=lambda: self.show_frame(self.fee_proposal_page), bg="DarkOrange1", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
-        tk.Button(change_page_frame, text="Financial Panel",
-                  command=lambda: self.show_frame(self.financial_panel_page), bg="DarkOrange1", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=3)
+        self.finacial_panel_button = tk.Button(change_page_frame, text="Financial Panel",
+                                               command=lambda: self.show_frame(self.financial_panel_page),
+                                               bg="DarkOrange1",
+                                               fg="white",
+                                               font=self.conf["font"])
+        self.finacial_panel_button.grid(row=0, column=3)
 
     def _update_variation(self):
         # variation = [
@@ -322,6 +338,25 @@ class App(tk.Tk):
         #
         # tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=1, column=1)
 
+    def role_check(self):
+        if self.user in conf["engineer_user_list"]:
+            # self.project_info_page.client_frame.grid_forget()
+            self.project_info_page.contact_frame.grid_forget()
+            self.project_info_page.finish_frame.grid_forget()
+            self.fee_proposal_page.preview_installation_proposal_button.grid_forget()
+            self.fee_proposal_page.email_installation_proposal_buttion.grid_forget()
+            self.fee_proposal_page.fee_frame.grid_forget()
+            self.finacial_panel_button.grid_forget()
+            self.preview_fee_proposal_button.grid_forget()
+            self.email_to_client_button.grid_forget()
+            self.chase_client_button.grid_forget()
+            self.open_database_button.grid_forget()
+            self.update_xero_button.grid_forget()
+            self.refresh_xero_button.grid_forget()
+            self.login_xero_button.grid_forget()
+            self.legend_frame.grid_forget()
+
+
     # def _update_quotation_number_label(self, *args):
     #     if len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
     #         self.quotation_number_label.config(text=self.data["Project Info"]["Project"]["Quotation Number"].get())
@@ -392,9 +427,9 @@ class App(tk.Tk):
 
         # load(self, self.load_project_quotation.get().split("-")[0])
         load_quotation = self.load_project_quotation.get().split("-")[0]
-        self.data["Project Info"]["Project"]["Quotation Number"].set(load_quotation)
+        # self.data["Project Info"]["Project"]["Quotation Number"].set(load_quotation)
 
-        load_data(self)
+        load_data(self, load_quotation)
 
         self.load_project_quotation.set("")
 
@@ -427,6 +462,7 @@ class App(tk.Tk):
             try:
                 if len(self.current_quotation.get())!=0:
                     self.data["Project Info"]["Project"]["Quotation Number"].set(self.current_quotation.get())
+                self.data["Login_user"].set("")
                 save(self)
             except Exception as e:
                 print(e)
@@ -559,10 +595,11 @@ class App(tk.Tk):
 
     def open_database(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
-        database_path = os.path.join(self.conf["database_dir"], quotation_number)
+        # database_path = os.path.join(self.conf["database_dir"], quotation_number)
+        accounting_dir = os.path.join(self.conf["accounting_dir"], quotation_number)
         if len(quotation_number) == 0:
             self.messagebox.show_error("Please enter a Quotation Number before you load")
-        elif not os.path.exists(database_path):
-            self.messagebox.show_error(f"Python cannot find the folder {database_path}")
+        elif not os.path.exists(accounting_dir):
+            self.messagebox.show_error(f"Python cannot find the folder {accounting_dir}")
         else:
-            webbrowser.open(database_path)
+            webbrowser.open(accounting_dir)

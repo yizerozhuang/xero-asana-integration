@@ -2,6 +2,7 @@ import asana
 from config import CONFIGURATION as conf
 from app_log import AppLog
 
+from win32com import client as win32client
 import os
 import json
 import time
@@ -23,6 +24,7 @@ log=AppLog()
 
 MP_project_gid = "1203405141297991"
 project_types = ["Restaurant", "Office", "Commercial", "Group House", "Apartment", "Mixed-use complex", "School", "Others"]
+excel = win32client.Dispatch("Excel.Application")
 
 
 def check_if_quotation_exist(quotation_number):
@@ -31,7 +33,9 @@ def check_if_quotation_exist(quotation_number):
 off_set = None
 i = 0
 exist_task = 0
-unprocessed_task_list = {}
+unprocessed_task_list = []
+quotation_number_not_accepted_list = []
+task_with_more_than_6_invoice_list = []
 start = time.time()
 while True:
     if off_set is None:
@@ -54,13 +58,47 @@ while True:
                 if "changed the name to" in text:
                     quotation_number = text.split('"')[1].split("-")[0].split("P:\\")[-1].strip()
                     break
+            if quotation_number is None or type(quotation_number) == float:
+                quotation_number = project_number
             if quotation_number.isdigit() or i == 366:
-                unprocessed_task_list[task["gid"]] = {
-                    "Project Number": quotation_number,
-                    "Quotation NUmber": ""
-                }
-                print("Only Found Project Number")
-                continue
+                folder_dir = task["name"]
+                excel_dir = None
+                for root, dirs, files in os.walk(folder_dir):
+                    for file in files:
+                        if "Fee Proposal" in str(file) and file.endswith(".xlsx"):
+                            excel_dir = os.path.join(root, file)
+                            break
+                if not excel_dir is None:
+                    work_book = excel.Workbooks.Open(excel_dir)
+                    work_sheets = work_book.Worksheets[0]
+                    quotation_number = work_sheets.Cells(3, 2).Value
+                    work_book.Close(False)
+                    print(f"Found Quotation Number in {excel_dir} with quotation number {quotation_number}")
+                    if quotation_number is None or str(quotation_number).isdigit() or type(quotation_number)==float:
+                        quotation_number_not_accepted_list.append(
+                            {
+                                "Asana id": task["gid"],
+                                "Asana Name": task["name"],
+                                "Excel path": excel_dir,
+                                "Project Number": task["name"].split("-")[0].split("\\")[-1],
+                                "Quotation Number": quotation_number
+                            }
+                        )
+
+                        print("Unaccepted Quotation")
+                        continue
+                else:
+                    unprocessed_task_list.append(
+                        {
+                            "Asana id": task["gid"],
+                            "Asana Name": task["name"],
+                            "Project Number": task["name"].split("-")[0].split("\\")[-1],
+                            "Quotation Number": ""
+                        }
+                    )
+
+                    print("Only Found Project Number")
+                    continue
         else:
             quotation_number = task["name"].split("-")[0][3:]
 
@@ -82,9 +120,9 @@ while True:
             if project["name"] in project_types:
                 data_json["Project Info"]["Project"]["Project Type"] = project["name"]
                 if project["name"] in ["Group House", "Apartment", "Mixed-use complex"]:
-                    project["Project Info"]["Project"]["Proposal Type"] = "Major"
+                    data_json["Project Info"]["Project"]["Proposal Type"] = "Major"
                 else:
-                    project["Project Info"]["Project"]["Proposal Type"] = "Minor"
+                    data_json["Project Info"]["Project"]["Proposal Type"] = "Minor"
                 break
         for custom_field in asana_task["custom_fields"]:
             if custom_field["name"] == "Status":
@@ -98,6 +136,7 @@ while True:
                     data_json["State"]["Generate Proposal"] = True
                     data_json["State"]["Email to Client"] = True
                     data_json["State"]["Fee Accepted"] = True
+                data_json["State"]["Asana State"] = custom_field["display_value"]
             elif custom_field["name"] == "Services":
                 if not custom_field["display_value"] is None:
                     include_services_list = custom_field["display_value"].split(", ")
@@ -125,6 +164,7 @@ while True:
                 if not custom_field["display_value"] is None:
                     data_json["Project Info"]["Main Contact"]["Contact Type"] = custom_field["display_value"]
         num = 0
+        paid_amount = 0
         for sub_task in sub_tasks:
             if sub_task["name"].startswith("INV"):
                 invoice_task = task_api_instance.get_task(sub_task["gid"]).to_dict()["data"]
@@ -141,8 +181,16 @@ while True:
                         data_json["Invoices Number"][num]["in.GST"] = custom_field["display_value"]
                 num+=1
                 if num == 6:
+                    task_with_more_than_6_invoice_list.append(
+                        {
+                            "Asana id": task["gid"],
+                            "Asana Name": task["name"],
+                            "Project Number": task["name"].split("-")[0].split("\\")[-1]
+                        }
+                    )
                     print("Total Invoices Number Exceeding 6, Skip the remaining Invoices")
                     break
+
 
 
         os.makedirs(os.path.join(database_dir, quotation_number))
@@ -158,6 +206,14 @@ while True:
             f.write(json_object)
         with open(os.path.join(database_dir, "unprocessed_tasks.json"), "w") as f:
             json_object = json.dumps(unprocessed_task_list, indent=4)
+            f.write(json_object)
+
+        with open(os.path.join(database_dir, "quotation_number_not_accepted.json"), "w") as f:
+            json_object = json.dumps(quotation_number_not_accepted_list, indent=4)
+            f.write(json_object)
+
+        with open(os.path.join(database_dir, "project_with_more_than_6_invoices.json"), "w") as f:
+            json_object = json.dumps(task_with_more_than_6_invoice_list, indent=4)
             f.write(json_object)
 
 

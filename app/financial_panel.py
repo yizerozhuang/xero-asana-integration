@@ -79,6 +79,8 @@ class FinancialPanelPage(tk.Frame):
                     "Xero_id": tk.StringVar()
                 }
             )
+            invoice[i]["State"].trace("w", self._update_paid_fee)
+            invoice[i]["Fee"].trace("w", self._update_paid_fee)
             tk.Label(title_frame, width=8, text="INV"+str(i+1), font=self.conf["font"]).grid(row=0, column=i+2, sticky="ew", padx=(2,0))
             self.invoice_label_list.append([])
             self.invoice_label_list[i].append(tk.Entry(invoice_number_frame, state=tk.DISABLED, textvariable=invoice[i]["Number"], width=8, font=self.conf["font"], fg="blue"))
@@ -818,7 +820,7 @@ class FinancialPanelPage(tk.Frame):
         current_inv_number = list(invoices)[-1]
         if current_inv_number.startswith(date.today().strftime("%y")[1]):
             current_number = current_inv_number[3:6]
-            res = date.today().strftime("%y%m")[1:]+str(int(current_number)+1)
+            res = date.today().strftime("%y%m")[1:]+str(int(current_number)+1).zfill(3)
         else:
             res = date.today().strftime("%y%m")[1:]+"001"
         invoices[res] = "Backlog"
@@ -838,7 +840,8 @@ class FinancialPanelPage(tk.Frame):
 
 
     def upload_remittance(self, invoice_number, part, i):
-        database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         remittance_dir = os.path.join(self.conf["remittances_dir"], date.today().strftime("%Y%m"))
         if part == "Full":
             if self.data['Remittances'][i]["Type"].get() == "Part":
@@ -879,11 +882,11 @@ class FinancialPanelPage(tk.Frame):
             rewrite = self.messagebox.ask_yes_no(f"Existing file found, Do you want to rewrite")
             if not rewrite:
                 return
-        file = filedialog.askopenfilename(initialdir=os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get()))
+        file = filedialog.askopenfilename(initialdir=accounting_dir)
         if file == "":
             return
         try:
-            folder_path = os.path.join(database_dir, filename + os.path.splitext(file)[1])
+            folder_path = os.path.join(accounting_dir, filename + os.path.splitext(file)[1])
             remittance_path = os.path.join(remittance_dir, filename + os.path.splitext(file)[1])
             shutil.move(file, folder_path)
             if not os.path.exists(remittance_dir):
@@ -905,7 +908,8 @@ class FinancialPanelPage(tk.Frame):
         self.messagebox.file_info("Upload", file, folder_path)
 
     def upload_bills(self, service, bill_description, origin):
-        database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         if len(bill_description.get()) == 0:
             self.messagebox.show_error("You need to upload the description")
             return
@@ -917,11 +921,11 @@ class FinancialPanelPage(tk.Frame):
             rewrite = self.messagebox.ask_yes_no(f"Existing file found, Do you want to rewrite")
             if not rewrite:
                 return
-        file = filedialog.askopenfilename(initialdir=os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get()))
+        file = filedialog.askopenfilename(initialdir=accounting_dir)
         if file == "":
             return
         try:
-            folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
+            folder_dir = os.path.join(accounting_dir, filename + os.path.splitext(file)[1])
             shutil.move(file, folder_dir)
         except PermissionError:
             self.messagebox.show_error("Please Close the file before you upload it")
@@ -934,7 +938,8 @@ class FinancialPanelPage(tk.Frame):
         self.messagebox.file_info("Upload", file, folder_dir)
 
     def upload_sub_fee(self, service, bill_number, i):
-        database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         bills_dir = os.path.join(self.conf["bills_dir"], date.today().strftime("%Y%m"))
         bill_number = bill_number.get()
         if len(bill_number) == 0:
@@ -950,12 +955,12 @@ class FinancialPanelPage(tk.Frame):
             rewrite = self.messagebox.ask_yes_no(f"Existing file found, Do you want to rewrite")
             if not rewrite:
                 return
-        file = filedialog.askopenfilename(initialdir=os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get()))
+        file = filedialog.askopenfilename(initialdir=accounting_dir)
         filename = self.data["Project Info"]["Project"]["Project Number"].get() + bill_number + "-" + os.path.basename(file).replace(" ", "_")
         if file == "":
             return
         try:
-            folder_path = os.path.join(database_dir, filename)
+            folder_path = os.path.join(accounting_dir, filename)
             bill_path = os.path.join(bills_dir, filename)
             shutil.move(file, folder_path)
             if not os.path.exists(bills_dir):
@@ -987,9 +992,8 @@ class FinancialPanelPage(tk.Frame):
 
     def upload_fee_acceptance(self):
         self.data["Fee_Acceptance_Upload"].set(True)
-        database_dir = os.path.join(self.conf["database_dir"],
-                                    self.data["Project Info"]["Project"]["Quotation Number"].get())
-
+        # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         if not self.data["State"]["Email to Client"].get():
             self.messagebox.show_error("You need to send the Email to Client first")
             return
@@ -998,7 +1002,7 @@ class FinancialPanelPage(tk.Frame):
             if not update:
                 return
 
-        acceptance_list = [file for file in os.listdir(os.path.join(database_dir)) if
+        acceptance_list = [file for file in os.listdir(os.path.join(accounting_dir)) if
                            str(file).startswith("Fee Acceptance")]
 
         if len(acceptance_list) != 0:
@@ -1012,11 +1016,11 @@ class FinancialPanelPage(tk.Frame):
             filename = "Fee Acceptance Rev 1"
         rewrite = True
         if rewrite:
-            file = filedialog.askopenfilename(initialdir=os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get()))
+            file = filedialog.askopenfilename(initialdir=accounting_dir)
             if file == "":
                 return
             try:
-                folder_dir = os.path.join(database_dir, filename + os.path.splitext(file)[1])
+                folder_dir = os.path.join(accounting_dir, filename + os.path.splitext(file)[1])
                 shutil.move(file, folder_dir)
             except PermissionError:
                 self.messagebox.show_error("Please Close the file before you upload it")
@@ -1039,7 +1043,8 @@ class FinancialPanelPage(tk.Frame):
 
     def upload_verbal_acceptance(self):
         self.data["Verbal_Acceptance_Upload"].set(True)
-        database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
+        accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         resource_dir = os.path.join(self.conf["resource_dir"], "txt", "Verbal Fee Acceptance.txt")
 
         if not self.data["State"]["Email to Client"].get():
@@ -1053,8 +1058,8 @@ class FinancialPanelPage(tk.Frame):
         update = self.messagebox.ask_yes_no("Do you want to verbal confirm and update Asana ?")
         if update:
             self.data["State"]["Fee Accepted"].set(True)
-            shutil.copy(resource_dir, database_dir)
-            with open(os.path.join(database_dir, "Verbal Fee Acceptance.txt"), "w") as f:
+            shutil.copy(resource_dir, accounting_dir)
+            with open(os.path.join(accounting_dir, "Verbal Fee Acceptance.txt"), "w") as f:
                 f.write(self.data["Verbal Acceptance Note"].get())
             f.close()
             update_asana(self.app)
@@ -1064,6 +1069,16 @@ class FinancialPanelPage(tk.Frame):
             config_state(self.app)
             config_log(self.app)
             self.messagebox.show_info("Verbal Fee Acceptance logged and asana updated.")
+
+    def _update_paid_fee(self, *args):
+        amount = 0
+        for invoice in self.data["Invoices Number"]:
+            if invoice["State"].get() == "Paid":
+                if not isfloat(invoice["Fee"].get()):
+                    self.data["Invoices"]["Paid Fee"].set("Error")
+                    return
+                amount += float(invoice["Fee"].get())
+        self.data["Invoices"]["Paid Fee"].set(amount)
 
     def _update_bill_number(self, i, service, *args):
         number = self.data["Bills"]["Details"][service]["Content"][i]["Number"].get()

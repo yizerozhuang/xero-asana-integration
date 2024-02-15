@@ -5,7 +5,7 @@ import os
 import json
 from text_extension import TextExtension
 
-from utility import preview_installation_fee_proposal, email_installation_proposal
+from utility import preview_installation_fee_proposal, email_installation_proposal, isfloat
 
 from scope_list import ScopeList
 
@@ -51,6 +51,8 @@ class FeeProposalPage(tk.Frame):
         pass
 
     def calculation_part(self):
+        max_row = 12
+
         calculate_frame = tk.LabelFrame(self.main_context_frame)
         calculate_frame.grid(row=0, column=1, rowspan=6, sticky="n")
         calculate = {
@@ -58,43 +60,98 @@ class FeeProposalPage(tk.Frame):
                 {
                     "Project": tk.StringVar(),
                     "Car park Level": tk.StringVar(),
-                    "Number of Carports": tk.StringVar()
+                    "Number of Carports": tk.StringVar(),
+                    "Level Factor": tk.StringVar(value="0"),
+                    "Carport Factor": tk.StringVar(value="0"),
+                    "Complex Factor": tk.StringVar(value="0"),
+                    "CFD Cost": tk.StringVar(value="0")
                 } for _ in range(self.conf["car_park_row"])
             ],
             "Apt": tk.StringVar(),
-            "Area": tk.StringVar()
+            "Custom Apt": tk.StringVar(),
+            "Area": tk.StringVar(),
+            "Custom Area": tk.StringVar()
         }
         self.data["Fee Proposal"]["Calculation Part"] = calculate
-        car_park_frame = tk.Frame(calculate_frame)
-        car_park_frame.pack()
-        # for i in range(self.conf["car_park_row"]):
+
+        self.data["Project Info"]["Building Features"]["Minor"]["Total Area"].trace("w", lambda a, b, c: self.set_variable(calculate["Area"], self.data["Project Info"]["Building Features"]["Minor"]["Total Area"]))
+        self.data["Project Info"]["Building Features"]["Major"]["Total Apt"].trace("w", lambda a, b, c: self.set_variable(calculate["Apt"], self.data["Project Info"]["Building Features"]["Major"]["Total Apt"]))
+
+        area_frame = tk.Frame(calculate_frame)
+        area_frame.pack()
+
+        tk.Label(area_frame, text="Total Areas: ").grid(row=0, column=0)
+        tk.Entry(area_frame, textvariable=calculate["Area"], font=self.conf["font"], fg="blue").grid(row=0, column=1)
+        tk.Label(area_frame, text="Custom Area: ").grid(row=0, column=2)
+        tk.Entry(area_frame, textvariable=calculate["Custom Area"], font=self.conf["font"], fg="blue").grid(row=0,
+                                                                                                            column=3)
+        tk.Label(area_frame, text="Price: ").grid(row=0, column=4)
+        self.cus_area_entry = tk.Entry(area_frame, font=self.conf["font"])
+        self.cus_area_entry.grid(row=0, column=5)
+        calculate["Area"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Area"].get(),
+                                                                              self.cus_area_entry, "Area"))
+        calculate["Custom Area"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Area"].get(),
+                                                                                     self.cus_area_entry, "Area"))
+        calculation_function = lambda i, entry, type: lambda a,b,c: self.calculate_apt_price(i, entry, type)
+        self.area_entry = []
+        num = 0
+        for i in list(range(100, 300, 50)) + [300, 325] + list(range(375, 1500, 25)) + list(range(1500, 1950, 50)):
+            # i = float("{0:.2f}".format(float(i)/100))
+            i = float(i) / 100
+            tk.Label(area_frame, text=f"${i}").grid(row=num % max_row + 1, column=(num // max_row) * 2)
+            self.area_entry.append(tk.Entry(area_frame, font=self.conf["font"]))
+            self.area_entry[num].grid(row=num % max_row + 1, column=(num // max_row) * 2 + 1)
+            calculate["Area"].trace("w", calculation_function(i, self.area_entry[num], "Area"))
+            num += 1
+
         apt_frame = tk.Frame(calculate_frame)
         apt_frame.pack()
         tk.Label(apt_frame, text="Total Apts: ").grid(row=0, column=0)
         tk.Entry(apt_frame, textvariable=calculate["Apt"], font=self.conf["font"], fg="blue").grid(row=0, column=1)
+        tk.Label(apt_frame, text="Custom Apt: ").grid(row=0, column=2)
+        tk.Entry(apt_frame, textvariable=calculate["Custom Apt"], font=self.conf["font"], fg="blue").grid(row=0, column=3)
+        tk.Label(apt_frame, text="Price: ").grid(row=0, column=4)
+        self.cus_apt_entry = tk.Entry(apt_frame, font=self.conf["font"])
+        self.cus_apt_entry.grid(row=0, column=5)
+        calculate["Apt"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Apt"].get(), self.cus_apt_entry, "Apt"))
+        calculate["Custom Apt"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Apt"].get(), self.cus_apt_entry, "Apt"))
         self.apt_entry = []
-        self.area_entry = []
-        calculation_function = lambda i, entry: lambda a,b,c: self.calculate_apt_price(i, entry)
         num=0
         for i in list(range(80, 130, 5)) + list(range(130, 630, 10)):
-            tk.Label(apt_frame, text=f"${i}").grid(row=num+1, column=0)
-            self.apt_entry.append(tk.Entry(apt_frame, font=self.conf["font"], fg="blue"))
-            self.apt_entry[num].grid(row=num + 1, column=1)
-            calculate["Apt"].trace("w", calculation_function(i, self.apt_entry[num]))
+            tk.Label(apt_frame, text=f"${i}").grid(row=num%max_row+1, column=(num//max_row)*2)
+            self.apt_entry.append(tk.Entry(apt_frame, font=self.conf["font"]))
+            self.apt_entry[num].grid(row=num%max_row+1, column=(num//max_row)*2+1)
+            calculate["Apt"].trace("w", calculation_function(i, self.apt_entry[num], "Apt"))
             num+=1
-        num = 0
-        for i in list(range(1, 3)) + list(range(130, 630, 10)):
-            tk.Label(apt_frame, text=f"${i}").grid(row=num + 1, column=0)
-            self.apt_entry.append(tk.Entry(apt_frame, font=self.conf["font"], fg="blue"))
-            self.apt_entry[num].grid(row=num + 1, column=1)
-            calculate["Apt"].trace("w", calculation_function(i, self.apt_entry[num]))
-            num += 1
-        # for i in range(130, 630, 10):
-        #     tk.Label(apt_frame, text=f"${i}").grid(row=num + 1, column=0)
-        #     self.apt_entry.append(tk.Entry(apt_frame, font=self.conf["font"], fg="blue"))
-        #     self.apt_entry[num].grid(row=num + 1, column=1)
-        #     calculate["Apt"].trace("w", calculation_function(i, self.apt_entry[num]))
-        #     num += 1
+
+
+        car_park_frame = tk.Frame(calculate_frame)
+        car_park_frame.pack()
+        tk.Label(car_park_frame, text="Project").grid(row=0, column=0)
+        tk.Label(car_park_frame, text="CFD Calc Level").grid(row=0, column=1)
+        tk.Label(car_park_frame, text="No of Carports").grid(row=0, column=2)
+        tk.Label(car_park_frame, text="Level Factor").grid(row=0, column=3)
+        tk.Label(car_park_frame, text="Carport Factor").grid(row=0, column=4)
+        tk.Label(car_park_frame, text="Complex Factor").grid(row=0, column=5)
+        tk.Label(car_park_frame, text="CFD Cost").grid(row=0, column=6)
+
+        level_factor_function = lambda i: lambda a,b,c: self.level_factor_calculation(calculate["Car Park"][i]["Car park Level"], calculate["Car Park"][i]["Level Factor"])
+        carport_factor_function = lambda i: lambda a,b,c: self.carport_factor_calculation(calculate["Car Park"][i]["Number of Carports"], calculate["Car Park"][i]["Carport Factor"])
+        complex_factor_function = lambda i:lambda a,b,c: self.complex_factor_calculation(calculate["Car Park"][i]["Level Factor"], calculate["Car Park"][i]["Carport Factor"], calculate["Car Park"][i]["Complex Factor"])
+        cfd_cost_function = lambda i:lambda a,b,c: self.cfd_cost_calculation(calculate["Car Park"][i]["Complex Factor"], calculate["Car Park"][i]["CFD Cost"])
+        for i in range(self.conf["car_park_row"]):
+            calculate["Car Park"][i]["Car park Level"].trace("w", level_factor_function(i))
+            calculate["Car Park"][i]["Number of Carports"].trace("w", carport_factor_function(i))
+            calculate["Car Park"][i]["Level Factor"].trace("w", complex_factor_function(i))
+            calculate["Car Park"][i]["Carport Factor"].trace("w", complex_factor_function(i))
+            calculate["Car Park"][i]["Complex Factor"].trace("w", cfd_cost_function(i))
+            tk.Entry(car_park_frame, textvariable=calculate["Car Park"][i]["Project"], font=self.conf["font"], fg="blue").grid(row=1+i, column=0)
+            tk.Entry(car_park_frame, textvariable=calculate["Car Park"][i]["Car park Level"], font=self.conf["font"], fg="blue").grid(row=1+i, column=1)
+            tk.Entry(car_park_frame, textvariable=calculate["Car Park"][i]["Number of Carports"], font=self.conf["font"], fg="blue").grid(row=1+i, column=2)
+            tk.Label(car_park_frame, textvariable=calculate["Car Park"][i]["Level Factor"], font=self.conf["font"]).grid(row=1 + i, column=3)
+            tk.Label(car_park_frame, textvariable=calculate["Car Park"][i]["Carport Factor"], font=self.conf["font"]).grid(row=1 + i, column=4)
+            tk.Label(car_park_frame, textvariable=calculate["Car Park"][i]["Complex Factor"], font=self.conf["font"]).grid(row=1 + i, column=5)
+            tk.Label(car_park_frame, textvariable=calculate["Car Park"][i]["CFD Cost"], font=self.conf["font"]).grid(row=1 + i, column=6)
 
     def function_part(self):
         reference = {
@@ -115,10 +172,12 @@ class FeeProposalPage(tk.Frame):
         }
 
         function_frame.grid(row=0, column=0, columnspan=2)
-        tk.Button(function_frame, text="Preview Installation Proposal", command=lambda: preview_installation_fee_proposal(self.app),
-                  bg="Brown", fg="white", font=self.conf["font"]).grid(row=0, column=1)
-        tk.Button(function_frame, text="Email Installation Proposal", command=lambda: email_installation_proposal(self.app),
-                  bg="Brown", fg="white", font=self.conf["font"]).grid(row=0, column=2)
+        self.preview_installation_proposal_button = tk.Button(function_frame, text="Preview Installation Proposal", command=lambda: preview_installation_fee_proposal(self.app),
+                                                              bg="Brown", fg="white", font=self.conf["font"])
+        self.preview_installation_proposal_button.grid(row=0, column=1)
+        self.email_installation_proposal_buttion = tk.Button(function_frame, text="Email Installation Proposal", command=lambda: email_installation_proposal(self.app),
+                                                             bg="Brown", fg="white", font=self.conf["font"])
+        self.email_installation_proposal_buttion.grid(row=0, column=2)
         reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
 
         tk.Label(self.installation_frame, width=30, text="Date", font=self.conf["font"]).grid(row=1, column=0, padx=(10, 0))
@@ -299,8 +358,8 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             self.scope_frames[service]["Main Frame"].pack()
             self.append_context[service] = dict()
             for i, extra in enumerate(extra_list):
-                if len(scope[service][extra]) == 0:
-                    continue
+                # if len(scope[service][extra]) == 0:
+                #     continue
                 extra_frame = tk.LabelFrame(self.scope_frames[service]["Main Frame"], text=extra, font=self.conf["font"])
                 extra_frame.pack()
                 self.scope_frames[service][extra] = tk.Frame(extra_frame)
@@ -337,7 +396,8 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
         invoices = {
             "Details": dict(),
             "Fee": tk.StringVar(),
-            "in.GST": tk.StringVar()
+            "in.GST": tk.StringVar(),
+            "Paid Fee":tk.StringVar()
         }
         for service in self.conf["invoice_list"]:
             invoices["Details"][service] = {
@@ -385,7 +445,6 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
 
         self.fee_frames = dict()
         self.fee_dic = dict()
-
 
         top_frame = tk.LabelFrame(self.fee_frame)
         top_frame.pack(side=tk.TOP)
@@ -617,10 +676,61 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
         else:
             self.installation_frame.grid_forget()
 
-    def calculate_apt_price(self, i, entry, *args):
+    def calculate_apt_price(self, i, entry, type, *args):
         entry.delete(0, tk.END)
-        entry.insert(0, i*int(self.data["Fee Proposal"]["Calculation Part"]["Apt"].get()))
+        if len(self.data["Fee Proposal"]["Calculation Part"][type].get()) == 0 or len(str(i)) == 0:
+            entry.insert(0, "")
+        elif not isfloat(self.data["Fee Proposal"]["Calculation Part"][type].get()) or not isfloat(str(i)):
+            entry.insert(0, "Error")
+        else:
+            i = float(i)
+            entry.insert(0, round(i*float(self.data["Fee Proposal"]["Calculation Part"][type].get()), 2))
 
+    def level_factor_calculation(self, car_park_level, level_factor, *args):
+        car_park_level = car_park_level.get()
+        if len(car_park_level) == 0:
+            level_factor.set("0")
+        elif not car_park_level.isdigit():
+            level_factor.set("Error")
+        else:
+            level_factor.set(1+(float(car_park_level)-1)*0.25 if float(car_park_level)>0 else 0)
+    def carport_factor_calculation(self, number_of_carports, carport_factor, *args):
+        number_of_carports = number_of_carports.get()
+        if len(number_of_carports) == 0:
+            carport_factor.set("0")
+        elif not number_of_carports.isdigit():
+            carport_factor.set("Error")
+        else:
+            carport_factor.set(round(float(number_of_carports)/90, 2))
+
+    def complex_factor_calculation(self, level_factor, carport_factor, complex_factor, *args):
+        level_factor = level_factor.get()
+        carport_factor = carport_factor.get()
+        if level_factor == "Error" or carport_factor == "Error":
+            complex_factor.set("Error")
+        else:
+            complex_factor.set(round((float(level_factor)*float(carport_factor)), 2))
+
+    def cfd_cost_calculation(self, complex_factor, cfd_cost,*args):
+        complex_factor = complex_factor.get()
+        if complex_factor == "Error":
+            cfd_cost.set("Error")
+        else:
+            complex_factor = float(complex_factor)
+            if complex_factor<=0:
+                cfd_cost.set("0")
+            elif complex_factor>0 and complex_factor<=0.5:
+                cfd_cost.set("1000")
+            elif complex_factor>0.5 and complex_factor<=1:
+                cfd_cost.set("2000")
+            elif complex_factor>1 and complex_factor<=5:
+                cfd_cost.set("3000")
+            elif complex_factor>5 and complex_factor<=10:
+                cfd_cost.set("4000")
+            elif complex_factor>10 and complex_factor<=15:
+                cfd_cost.set("5000")
+            else:
+                cfd_cost.set("6000")
     def _config_entry(self, *args):
         if self.data["Lock"]["Proposal"].get():
             self.reference_dic["Date"].config(state=tk.DISABLED)
@@ -646,11 +756,11 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
                 for content in service["Content"]["Details"]:
                     content["Service"].config(state=tk.DISABLED)
                     content["Fee"].config(state=tk.DISABLED)
-            for service in self.scope_dic.keys():
-                for extra in self.scope_dic[service].keys():
-                    for item in self.scope_dic[service][extra]:
-                        item["Checkbutton"].config(state=tk.DISABLED)
-                        item["Entry"].config(state=tk.DISABLED)
+            # for service in self.scope_dic.keys():
+            #     for extra in self.scope_dic[service].keys():
+            #         for item in self.scope_dic[service][extra]:
+            #             item["Checkbutton"].config(state=tk.DISABLED)
+            #             item["Entry"].config(state=tk.DISABLED)
         else:
             self.reference_dic["Date"].config(state=tk.NORMAL)
             self.reference_dic["Today"].config(state=tk.NORMAL)
@@ -675,11 +785,11 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
                 for content in service["Content"]["Details"]:
                     content["Service"].config(state=tk.NORMAL)
                     content["Fee"].config(state=tk.NORMAL)
-            for service in self.scope_dic.keys():
-                for extra in self.scope_dic[service].keys():
-                    for item in self.scope_dic[service][extra]:
-                        item["Checkbutton"].config(state=tk.NORMAL)
-                        item["Entry"].config(state=tk.NORMAL)
+            # for service in self.scope_dic.keys():
+            #     for extra in self.scope_dic[service].keys():
+            #         for item in self.scope_dic[service][extra]:
+            #             item["Entry"].config(state=tk.NORMAL)
+            #             item["Checkbutton"].config(state=tk.NORMAL)
     def unlock(self):
         self.data["Lock"]["Proposal"].set(not self.data["Lock"]["Proposal"].get())
 
@@ -690,6 +800,9 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             self.proposal_lock.config(text="Lock")
     def auto_lock(self, *args):
         self.data["Lock"]["Proposal"].set(self.data["State"]["Email to Client"].get())
+
+    def set_variable(self,var1, var2, *args):
+        var1.set(var2.get())
         # for service in self.fee_dic.values():
         #     service["Fee"].config(state=tk.NORMAL)
         #     for content in service["Content"]["Details"]:

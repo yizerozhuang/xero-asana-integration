@@ -19,7 +19,7 @@ invoice_json = json.load(open(invoice_dir))
 bill_dir = os.path.join(database_dir, "bills.json")
 bill_json = json.load(open(bill_dir))
 
-generate_management_report = False
+# generate_management_report = False
 
 if_modified_since = dateutil.parser.parse("2024-01-01")
 
@@ -93,7 +93,7 @@ def _process_invoice(invoices):
             return
     return res
 @xero_token_required
-def update_xero_and_asana_daily_script(generate_management_report):
+def update_xero_and_asana_daily_script():
     start = time.time()
     xero_tenant_id = get_xero_tenant_id()
     accounting_api = AccountingApi(api_client)
@@ -118,15 +118,15 @@ def update_xero_and_asana_daily_script(generate_management_report):
     status_id_map = name_id_map(status_field["enum_options"])
 
 
-    if generate_management_report:
-        resource_dir = conf["resource_dir"]
-        management_report_template = os.path.join(resource_dir, "xlsx", "management_report_template.xlsx")
-        management_report = os.path.join(conf["database_dir"], f"Management Report {str(date.today().strftime('%Y%m%d'))}.xlsx")
-        shutil.copy(management_report_template, management_report)
-        excel = win32client.Dispatch("Excel.Application")
-        work_book = excel.Workbooks.Open(management_report)
-        work_sheets = work_book.Worksheets[1]
-        cur_row = 8
+    # if generate_management_report:
+    #     resource_dir = conf["resource_dir"]
+    #     management_report_template = os.path.join(resource_dir, "xlsx", "management_report_template.xlsx")
+    #     management_report = os.path.join(conf["database_dir"], f"Management Report {str(date.today().strftime('%Y%m%d'))}.xlsx")
+    #     shutil.copy(management_report_template, management_report)
+    #     excel = win32client.Dispatch("Excel.Application")
+    #     work_book = excel.Workbooks.Open(management_report)
+    #     work_sheets = work_book.Worksheets[1]
+    #     cur_row = 8
     while True:
         if off_set is None:
             ori_tasks = task_api_instance.get_tasks_for_project(project_gid=invoice_status_asana_gid, opt_fields=opt_field, limit=100).to_dict()
@@ -184,9 +184,9 @@ def update_xero_and_asana_daily_script(generate_management_report):
                             task_api_instance.update_task(task_gid=task["gid"], body=body)
                             print(f"Process {task['name'][4:10]}")
                         #     custom_field_body[custom_field_id_map["Invoice status"]]: status_id_map[invoices_states]
-                    if generate_management_report:
-                        work_sheets.Cells(cur_row, 1).Value = inv["reference"]
-                        work_sheets.Cells(cur_row, 2).Value = task["name"][4:10]
+                    # if generate_management_report:
+                    #     work_sheets.Cells(cur_row, 1).Value = inv["reference"]
+                    #     work_sheets.Cells(cur_row, 2).Value = task["name"][4:10]
 
                         # work_sheets.Cells(cur_row, 1).Value = inv["reference"]
                         # work_sheets.Cells(cur_row, 1).Value = inv["reference"]
@@ -213,4 +213,4 @@ def update_xero_and_asana_daily_script(generate_management_report):
 
 if __name__ == '__main__':
     refresh_token()
-    update_xero_and_asana_daily_script(generate_management_report)
+    update_xero_and_asana_daily_script()
