@@ -6,7 +6,7 @@ import smtplib
 
 from config import CONFIGURATION as conf
 
-from utility import get_quotation_number, create_new_folder, save, config_state, config_log
+from utility import get_quotation_number, create_new_folder, save, config_state, config_log, save_to_mp
 from app_log import AppLog
 
 import os
@@ -189,9 +189,11 @@ def email_server(app=None):
                                 with open(os.path.join(database_dir, "data.json"), "w") as f:
                                     json_object = json.dumps(data_json, indent=4)
                                     f.write(json_object)
+
                                 if not app is None:
                                     config_state(app)
                                     config_log(app)
+                                    save_to_mp(app, data_json)
                                 f = open(os.path.join(folder_path, "External", "email.eml"), "wb")
                                 f.write(response[1])
                                 f.close()
@@ -272,12 +274,11 @@ def email_server(app=None):
                                         if value["Number"].get() == inv_number:
                                             value["State"].set("Sent")
                                             break
-                                else:
-                                    database_dir = os.path.join(conf["database_dir"], "invoices.json")
-                                    data_json = json.load(open(database_dir))
-                                    data_json[inv_number] = "Sent"
-                                    with open(database_dir, "w") as f:
-                                        json.dump(data_json, f, indent=4)
+                                database_dir = os.path.join(conf["database_dir"], "invoices.json")
+                                data_json = json.load(open(database_dir))
+                                data_json[inv_number] = "Sent"
+                                with open(database_dir, "w") as f:
+                                    json.dump(data_json, f, indent=4)
                                 print("Invoice Sent")
                             else:
                                 message = email.message_from_bytes(msg_data[0][1])

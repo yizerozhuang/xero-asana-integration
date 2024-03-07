@@ -19,6 +19,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 
+import pythoncom
+# pythoncom.CoInitialize()
+
 def isfloat(string):
     try:
         float(string)
@@ -27,6 +30,17 @@ def isfloat(string):
         return False
     except TypeError:
         return False
+
+def increment_excel_column(cur_col):
+    #only accept at most two digits of column
+    assert len(cur_col) <= 2
+    if len(cur_col) == 1:
+        return chr(ord(cur_col[-1])+1) if cur_col!="Z" else "AA"
+    else:
+        if cur_col[-1]=="Z":
+            return chr(ord(cur_col[0])+1)+"A"
+        else:
+            return cur_col[0] + chr(ord(cur_col[-1])+1)
 
 def reset(app):
     data = app.data
@@ -51,11 +65,28 @@ def reset(app):
             service["Include"].set(False)
             service["Include"].set(True)
 
-
-
     app.log_text.set("")
 
     # app.email_text.delete(1.0, tk.END)
+
+# def _scopt_reset(app):
+#     data = app.data
+#     for service in conf["service_list"]:
+#         if data["Invoices"]["Details"][service]["Include"].get():
+
+def save_to_mp(app, data_json):
+    database_dir = app.conf["database_dir"]
+    quotation = data_json["Project Info"]["Project"]["Quotation Number"]
+    mp_dir = os.path.join(database_dir, "mp.json")
+    mp_json = json.load(open(mp_dir))
+    mp_convert_map = app.search_bar_page.mp_convert_map
+
+    mp_json[quotation] = {k:v(data_json) for k, v in mp_convert_map.items()}
+
+    with open(mp_dir, "w") as f:
+        json_object = json.dumps(mp_json, indent=4)
+        f.write(json_object)
+
 
 def save(app):
     data = app.data
@@ -71,7 +102,8 @@ def save(app):
     with open(os.path.join(database_dir, "data.json"), "w") as f:
         json_object = json.dumps(data_json, indent=4)
         f.write(json_object)
-    save_invoice_state(app)
+    save_to_mp(app, data_json)
+    # save_invoice_state(app)
     # current_folder_name = [folder for folder in os.listdir(app.conf["working_dir"]) if folder.startswith(data["Project Info"]["Project"]["Quotation Number"])][0]
     # print(current_folder_name)
 
@@ -82,7 +114,7 @@ def load_data(app, quotation_number):
         messagebox.showerror("Error", f"Can not find the folder {os.path.join(database_dir, quotation_number)}")
         return
     project_json = json.load(open(os.path.join(database_dir, quotation_number, "data.json")))
-    if len(project_json["Login_user"]) !=0:
+    if len(project_json["Login_user"]) !=0 and project_json["Login_user"] != app.user:
         messagebox.showerror("Error", f"{project_json['Login_user']} is Using this project right now")
         return
 
@@ -115,6 +147,7 @@ def load(app, quotation_number):
 
     app.current_quotation.set(quotation_number)
     app.fee_proposal_page.auto_lock()
+    # app.fee_proposal_page.reset_stage()
     unlock_invoice(app)
     load_invoice_state(app)
     config_state(app)
@@ -191,7 +224,7 @@ def convert_to_data(json, data):
                     )
                     convert_to_data(json[i], data[i])
                 except Exception as e:
-                    print()
+                    print(e)
         elif len(json) < len(data):
             data = data[0: len(json)]
             for i in range(len(data)):
@@ -209,6 +242,19 @@ def convert_to_data(json, data):
                 print(json)
                 print(e)
 
+
+def generate_all_project(database_dir):
+    res = {}
+    for dir in os.listdir(database_dir):
+        if os.path.isdir(os.path.join(database_dir, dir)):
+            data_json = json.load(open(os.path.join(database_dir, dir, "data.json")))
+            if data_json["Asana_id"] != "":
+                res[data_json["Asana_id"]]={
+                    "Asana_url": data_json["Asana_url"],
+                    "Quotation Number": data_json["Project Info"]["Project"]["Quotation Number"],
+                    "Project Number": data_json["Project Info"]["Project"]["Project Number"],
+                }
+    return res
 
 def finish_setup(app):
     data = app.data
@@ -248,6 +294,7 @@ def finish_setup(app):
                         f"Project {data['Project Info']['Project']['Quotation Number'].get()} set up successful")
 
 def config_state(app):
+    return
     database_dir = app.conf["database_dir"]
     res = {
         "Set Up": [],
@@ -281,6 +328,8 @@ def _classify_state(data, res):
             data["Project Info"]["Project"]["Quotation Number"]+"-"+data["Project Info"]["Project"]["Project Name"])
 
 def _classify_fee(res, data):
+    # if not "-" in data["Email"]["Fee Proposal"]:
+    #     data["Email"]["Fee Proposal"] = datetime.today().strftime("%Y-%m-%d")
     append_list = [str((datetime.today() - datetime.strptime(data["Email"]["Fee Proposal"], "%Y-%m-%d")).days)]
     if len(data["Email"]["First Chase"]) != 0:
         append_list.append(
@@ -344,8 +393,7 @@ def get_quotation_number():
         current_quotation = date.today().strftime("%y%m000")[1:] + "AA"
     else:
         current_quotation = current_quotation_list[-1]
-        quotation_letter = current_quotation[6:8][0] + chr(ord(current_quotation[6:8][1]) + 1) if \
-            current_quotation[6:8][1] != "Z" else chr(ord(current_quotation[6:8][0]) + 1) + "A"
+        quotation_letter = current_quotation[6:8][0] + chr(ord(current_quotation[6:8][1]) + 1) if current_quotation[6:8][1] != "Z" else chr(ord(current_quotation[6:8][0]) + 1) + "A"
         current_quotation = current_quotation[:6] + quotation_letter
     return current_quotation
 
@@ -427,8 +475,8 @@ def rename_new_folder(app):
             os.mkdir(os.path.join(folder_path, "Photos"), mode)
             os.mkdir(os.path.join(folder_path, "Plot"), mode)
             os.mkdir(os.path.join(folder_path, "SS"), mode)
-            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Preliminary Calculation v2.5.xlsx"),
-                            os.path.join(folder_path, "Preliminary Calculation v2.5.xlsx"))
+            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Preliminary Calculation v2.6.xlsx"),
+                            os.path.join(folder_path, "Preliminary Calculation v2.6.xlsx"))
             messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {rename_list[0]} to {folder_name}")
         else:
             FileSelectDialog(app, rename_list, "Multiple new folders found, please select one")
@@ -447,15 +495,20 @@ def create_new_folder(folder_name, conf):
     os.mkdir(os.path.join(folder_path, "Photos"))
     os.mkdir(os.path.join(folder_path, "Plot"))
     os.mkdir(os.path.join(folder_path, "SS"))
-    shutil.copyfile(os.path.join(conf["resource_dir"], "xlsx", "Preliminary Calculation v2.5.xlsx"),
-                    os.path.join(folder_path, "Preliminary Calculation v2.5.xlsx"))
+    shutil.copyfile(os.path.join(conf["resource_dir"], "xlsx", "Preliminary Calculation v2.6.xlsx"),
+                    os.path.join(folder_path, "Preliminary Calculation v2.6.xlsx"))
 
 def _check_fee(app):
     data = app.data
-    for service_fee in data["Invoices"]["Details"].values():
-        if len(service_fee["Fee"].get()) == 0 and service_fee["Service"].get() != "Variation" and service_fee["Include"].get():
+    for service in conf["service_list"]:
+        fee = data["Invoices"]["Details"][service]
+        if len(fee["Fee"].get()) == 0 and fee["Include"].get():
             return False
     return True
+    # for service_fee in data["Invoices"]["Details"].values():
+    #     if len(service_fee["Fee"].get()) == 0 and service_fee["Service"].get() != "Variation" and service_fee["Include"].get():
+    #         return False
+    # return True
 
 def check_accounting_folder(app):
     accounting_dir = os.path.join(conf["accounting_dir"], app.data["Project Info"]["Project"]["Quotation Number"].get())
@@ -491,7 +544,7 @@ def minor_project_fee_proposal(app, *args):
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
     services = []
     for service in app.conf["proposal_list"]:
-        if data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
+        if data["Invoices"]["Details"][service]["Include"].get():
             services.append(service)
     page = len(services)
     row_per_page = 46
@@ -579,7 +632,7 @@ def minor_project_fee_proposal(app, *args):
         cur_index = 1
         i = 0
         for key in app.conf["proposal_list"]:
-            if not data["Project Info"]["Project"]["Service Type"][key]["Include"].get():
+            if not data["Invoices"]["Details"][key]["Include"].get():
                 continue
 
             service = data["Fee Proposal"]["Scope"]["Minor"][key]
@@ -668,7 +721,7 @@ def major_project_fee_proposal(app, *args):
     past_projects_dir = os.path.join(app.conf["database_dir"], "past_projects.json")
     services = []
     for service in app.conf["proposal_list"]:
-        if data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
+        if data["Invoices"]["Details"][service]["Include"].get():
             services.append(service)
     page = len(services)
 
@@ -808,7 +861,7 @@ def major_project_fee_proposal(app, *args):
         cur_index = 3
         i = 0
         for key in app.conf["proposal_list"]:
-            if not data["Project Info"]["Project"]["Service Type"][key]["Include"].get():
+            if not data["Invoices"]["Details"][key]["Include"].get():
                 continue
             service = data["Fee Proposal"]["Scope"]["Major"][key]
 
@@ -904,7 +957,7 @@ def _major_project_fee_section(data, work_sheets, n_stage, page, row_per_page):
     cur_row+=2
 
     for service in conf["proposal_list"]:
-        if not data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
+        if not data["Invoices"]["Details"][service]["Include"].get():
             continue
         total += float(data["Invoices"]["Details"][service]["Fee"].get())
         gst += float(data["Invoices"]["Details"][service]["in.GST"].get()) - float(data["Invoices"]["Details"][service]["Fee"].get())
@@ -990,7 +1043,7 @@ def _get_service_name(app):
     data = app.data
     service_list = []
     for service in app.conf["proposal_list"]:
-        if data["Project Info"]["Project"]["Service Type"][service]["Include"].get():
+        if data["Invoices"]["Details"][service]["Include"].get():
             service_list.append(service)
 
     if len(service_list) == 1:
@@ -1335,8 +1388,9 @@ def email_fee_proposal(app, *args):
         os.startfile("outlook")
 
     # user_email_dic = json.load(open(os.path.join(app.conf["database_dir"], "user_email.json")))
+    # pythoncom.pythoncom.CoInitialize()
 
-    ol = win32client.Dispatch("Outlook.Application")
+    ol = win32client.Dispatch("Outlook.Application", pythoncom.CoInitialize())
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
     # newmail.From = user_email_dic[app.user]
@@ -1382,7 +1436,7 @@ def chase(app, *args):
 
     if not "OUTLOOK.EXE" in (p.name() for p in psutil.process_iter()):
         os.startfile("outlook")
-    ol = win32client.Dispatch("Outlook.Application")
+    ol = win32client.Dispatch("Outlook.Application", pythoncom.CoInitialize())
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'Re: {data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
@@ -1426,7 +1480,7 @@ def email_invoice(app, inv):
 
     if not "OUTLOOK.EXE" in (p.name() for p in psutil.process_iter()):
         os.startfile("outlook")
-    ol = win32client.Dispatch("Outlook.Application")
+    ol = win32client.Dispatch("Outlook.Application", pythoncom.CoInitialize())
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
@@ -1475,7 +1529,7 @@ def email_installation_proposal(app):
 
     # user_email_dic = json.load(open(os.path.join(app.conf["database_dir"], "user_email.json")))
 
-    ol = win32client.Dispatch("Outlook.Application")
+    ol = win32client.Dispatch("Outlook.Application", pythoncom.CoInitialize())
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)
     # newmail.From = user_email_dic[app.user]

@@ -99,7 +99,7 @@ project_type_account_code_map={
     "Commercial": "43000",
     "Group House": "44000",
     "Apartment": "45000",
-    "Mix-use complex": "46000",
+    "Mixed-use Complex": "46000",
     "School": "47000",
     "Others": "48000"
 }

@@ -37,8 +37,8 @@ class FileSelectDialog(simpledialog.Dialog):
         os.mkdir(os.path.join(folder_path, "Plot"), mode)
         os.mkdir(os.path.join(folder_path, "SS"), mode)
 
-        shutil.copyfile("resource\\xlsx\\Preliminary Calculation v2.5.xlsx",
-                        folder_path+"\\Preliminary Calculation v2.5.xlsx")
+        shutil.copyfile("resource\\xlsx\\Preliminary Calculation v2.6.xlsx",
+                        folder_path+"\\Preliminary Calculation v2.6.xlsx")
         self.app.data["State"]["Folder Renamed"].set(True)
         self.destroy()
         messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {self.rename_dir.get()} to {folder_path}")

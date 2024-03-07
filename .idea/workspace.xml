@@ -5,16 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8ef28d62-7810-41ce-8c7f-93ca3161891e" name="Changes" comment="v2">
+      <change afterPath="$PROJECT_DIR$/app/script/convert_csv_to_json.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/script/convert_excel_to_json.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/script/xero_asana_bridge_invoice_comparision.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app_dialog.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/asana_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/asana_function.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/asana_xero_daily_update_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/asana_xero_daily_update_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/bills.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/bills.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/database/data_template.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/data_template.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/general_scope_of_staging.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/general_scope_of_staging.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/database/invoices.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/invoices.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/login.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/login.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/scope_of_work.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/scope_of_work.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/net_gross_different.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/net_gross_different.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/project_with_more_than_6_invoices.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/project_with_more_than_6_invoices.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/quotation_number_not_accepted.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/quotation_number_not_accepted.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/database/unprocessed_tasks.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/unprocessed_tasks.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/email_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/email_server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/fee_proposal_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/fee_proposal_page.py" afterDir="false" />
@@ -25,6 +30,8 @@
       <change beforePath="$PROJECT_DIR$/app/search_bar_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/search_bar_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/utility.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utility.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/xero_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/xero_function.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.spec" beforeDir="false" afterPath="$PROJECT_DIR$/main.spec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,6 +81,9 @@
       </UrlAndAccount>
     </option>
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/app/utility.py" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -86,30 +96,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/engineer3/xero-asana-integration/app/database&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.app.executor": "Run",
+    "Python.asana_download_script.executor": "Debug",
+    "Python.asana_moving_script.executor": "Debug",
+    "Python.convert_csv_to_json.executor": "Debug",
+    "Python.convert_excel_to_json.executor": "Debug",
+    "Python.daily_asana_xero_update.executor": "Debug",
+    "Python.update_database_sciprt.executor": "Debug",
+    "Python.xero_asana_bridge_invoice_comparision.py.executor": "Debug",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Admin/Documents/GitHub/xero-asana-integration/app",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app\database" />
       <recent name="C:\Users\engineer3\xero-asana-integration\app\database" />
       <recent name="C:\Users\engineer3\xero-asana-integration\app\resource\xlsx" />
       <recent name="P:\3rd software testing enviroment\app" />
       <recent name="P:\3rd software testing enviroment\app\database" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app\database\401000AT" />
+      <recent name="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app\database" />
       <recent name="C:\Users\engineer3\xero-asana-integration\app" />
       <recent name="C:\Users\engineer3\xero-asana-integration\app\script" />
       <recent name="C:\Users\engineer3\xero-asana-integration\app\database" />
@@ -118,6 +139,7 @@
   <component name="RunManager" selected="Python.app">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python">
       <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -125,7 +147,7 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="xero-asana-integration" />
-      <option name="WORKING_DIRECTORY" value="C:\Users\engineer3\xero-asana-integration\app" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -141,6 +163,7 @@
     </configuration>
     <configuration name="asana_download_script" type="PythonConfigurationType" factoryName="Python">
       <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -148,7 +171,7 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="xero-asana-integration" />
-      <option name="WORKING_DIRECTORY" value="C:\Users\engineer3\xero-asana-integration\app" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -164,6 +187,7 @@
     </configuration>
     <configuration name="asana_moving_script" type="PythonConfigurationType" factoryName="Python">
       <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -171,7 +195,7 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="xero-asana-integration" />
-      <option name="WORKING_DIRECTORY" value="C:\Users\engineer3\xero-asana-integration\app" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -185,8 +209,9 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="daily_asana_xero_update" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="convert_csv_to_json" type="PythonConfigurationType" factoryName="Python">
       <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -194,7 +219,55 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="xero-asana-integration" />
-      <option name="WORKING_DIRECTORY" value="C:\Users\engineer3\xero-asana-integration\app" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app/script/convert_csv_to_json.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="convert_excel_to_json" type="PythonConfigurationType" factoryName="Python">
+      <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="xero-asana-integration" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app/script/convert_excel_to_json.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="daily_asana_xero_update" type="PythonConfigurationType" factoryName="Python">
+      <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="xero-asana-integration" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -210,13 +283,13 @@
     </configuration>
     <configuration name="email_server" type="PythonConfigurationType" factoryName="Python">
       <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="xero-asana-integration" />
       <option name="WORKING_DIRECTORY" value="P:/3rd software testing environment/app" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -233,6 +306,7 @@
     </configuration>
     <configuration name="update_database_sciprt" type="PythonConfigurationType" factoryName="Python">
       <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -240,7 +314,7 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="xero-asana-integration" />
-      <option name="WORKING_DIRECTORY" value="C:\Users\engineer3\xero-asana-integration\app" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -254,7 +328,34 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="xero_asana_bridge_invoice_comparision.py" type="PythonConfigurationType" factoryName="Python">
+      <module name="xero-asana-integration" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="xero-asana-integration" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app/script/xero_asana_bridge_invoice_comparision.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
+      <item itemvalue="Python.xero_asana_bridge_invoice_comparision.py" />
+      <item itemvalue="Python.convert_csv_to_json" />
+      <item itemvalue="Python.convert_excel_to_json" />
       <item itemvalue="Python.asana_download_script" />
       <item itemvalue="Python.daily_asana_xero_update" />
       <item itemvalue="Python.update_database_sciprt" />
@@ -262,6 +363,13 @@
       <item itemvalue="Python.app" />
       <item itemvalue="Python.email_server" />
     </list>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-5a2391486177-2887949eec09-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.13763.11" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -299,6 +407,11 @@
       <workItem from="1706133939905" duration="253488000" />
       <workItem from="1707706253529" duration="61782000" />
       <workItem from="1707951252825" duration="17951000" />
+      <workItem from="1708302442855" duration="1724000" />
+      <workItem from="1708304192176" duration="28328000" />
+      <workItem from="1708410711591" duration="5715000" />
+      <workItem from="1708474581789" duration="144357000" />
+      <workItem from="1709507754647" duration="58578000" />
     </task>
     <task id="LOCAL-00001" summary="v2">
       <option name="closed" value="true" />
@@ -360,48 +473,63 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/financial_panel.py</url>
-          <line>825</line>
+          <line>822</line>
           <option name="timeStamp" value="367" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/asana_function.py</url>
-          <line>272</line>
+          <line>280</line>
           <option name="timeStamp" value="368" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/asana_function.py</url>
-          <line>89</line>
-          <option name="timeStamp" value="370" />
+          <url>file://$USER_HOME$/miniconda3/envs/xero-asana-integration/Lib/site-packages/win32/lib/pywintypes.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="385" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/asana_function.py</url>
-          <line>88</line>
-          <option name="timeStamp" value="371" />
+          <url>file://$PROJECT_DIR$/app/utility.py</url>
+          <line>226</line>
+          <option name="timeStamp" value="405" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/app/script/xero_asana_bridge_invoice_comparision.py</url>
+          <line>81</line>
+          <option name="timeStamp" value="455" />
         </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="ori_tasks.data[19]" />
+        <watch expression="invoices.invoices[0].invoice_id" />
       </configuration>
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_download_script.coverage" NAME="asana_download_script Coverage Results" MODIFIED="1707891085755" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\engineer3\xero-asana-integration\app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$update_database_sciprt.coverage" NAME="update_database_sciprt Coverage Results" MODIFIED="1707983622522" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\engineer3\xero-asana-integration\app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$financial_panel.coverage" NAME="financial_panel Coverage Results" MODIFIED="1706504683879" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$project_info_page.coverage" NAME="project_info_page Coverage Results" MODIFIED="1706569345477" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$fee_accpeted_page.coverage" NAME="fee_accpeted_page Coverage Results" MODIFIED="1699339911464" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_xero_daily_update_script.coverage" NAME="asana_xero_daily_update_script Coverage Results" MODIFIED="1707180917695" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_moving_script.coverage" NAME="asana_moving_script Coverage Results" MODIFIED="1707972863079" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\engineer3\xero-asana-integration\app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$utility.coverage" NAME="utility Coverage Results" MODIFIED="1706505654956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$app.coverage" NAME="app Coverage Results" MODIFIED="1707984355931" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\engineer3\xero-asana-integration\app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_function.coverage" NAME="asana_function Coverage Results" MODIFIED="1706139767527" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$fee_proposal_page.coverage" NAME="fee_proposal_page Coverage Results" MODIFIED="1706140057348" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$daily_asana_xero_update.coverage" NAME="daily_asana_xero_update Coverage Results" MODIFIED="1707290104484" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\engineer3\xero-asana-integration\app" />
     <SUITE FILE_PATH="coverage/xero_asana_integration$config.coverage" NAME="config Coverage Results" MODIFIED="1706576399631" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$email_server.coverage" NAME="email_server Coverage Results" MODIFIED="1700113159029" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="P:/3rd software testing environment/app" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_move_script.coverage" NAME="asana_move_script Coverage Results" MODIFIED="1706599129440" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$fee_accpeted_page.coverage" NAME="fee_accpeted_page Coverage Results" MODIFIED="1699339911464" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$utility.coverage" NAME="utility Coverage Results" MODIFIED="1706505654956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$app.coverage" NAME="app Coverage Results" MODIFIED="1709790108865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$convert_csv_to_json.coverage" NAME="convert_csv_to_json Coverage Results" MODIFIED="1709102343001" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
     <SUITE FILE_PATH="coverage/xero_asana_integration$update_database_scipt.coverage" NAME="update_database_scipt Coverage Results" MODIFIED="1706480013883" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$xero_asana_bridge_invoice_comparision_py.coverage" NAME="xero_asana_bridge_invoice_comparision.py Coverage Results" MODIFIED="1709710194205" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$update_database_sciprt.coverage" NAME="update_database_sciprt Coverage Results" MODIFIED="1709600649513" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$daily_asana_xero_update.coverage" NAME="daily_asana_xero_update Coverage Results" MODIFIED="1709104291909" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$financial_panel.coverage" NAME="financial_panel Coverage Results" MODIFIED="1706504683879" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_download_script.coverage" NAME="asana_download_script Coverage Results" MODIFIED="1709604014843" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_xero_daily_update_script.coverage" NAME="asana_xero_daily_update_script Coverage Results" MODIFIED="1707180917695" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_function.coverage" NAME="asana_function Coverage Results" MODIFIED="1706139767527" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$convert_excel_to_json.coverage" NAME="convert_excel_to_json Coverage Results" MODIFIED="1709617336899" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$project_info_page.coverage" NAME="project_info_page Coverage Results" MODIFIED="1706569345477" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$email_server.coverage" NAME="email_server Coverage Results" MODIFIED="1700113159029" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="P:/3rd software testing environment/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_moving_script.coverage" NAME="asana_moving_script Coverage Results" MODIFIED="1709684487015" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$fee_proposal_page.coverage" NAME="fee_proposal_page Coverage Results" MODIFIED="1706140057348" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$asana_move_script.coverage" NAME="asana_move_script Coverage Results" MODIFIED="1706599129440" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>
 </project>

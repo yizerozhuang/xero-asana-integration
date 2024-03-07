@@ -1,5 +1,5 @@
 import asana
-from utility import remove_none, config_log, get_invoice_item
+from utility import remove_none, config_log, get_invoice_item, isfloat
 
 from tkinter import messagebox
 
@@ -18,7 +18,8 @@ template_api_instance = asana.TaskTemplatesApi(asana_api_client)
 workspace_gid = '1198726743417674'
 user_gid_map = {
     "Admin": "1203283895754383",
-    "Felix": "1198835648677067"
+    "Felix": "1198835648677067",
+    "Engineer1": "1203396624150040"
 }
 #
 
@@ -37,34 +38,44 @@ def flatter(inv_list):
     res = {**inv_list["Invoices"]["AUTHORISED"], **inv_list["Invoices"]["PAID"]}
     return res
 
+def flatter_custom_fields(asana_task):
+    if not "custom_fields" in asana_task.keys():
+        return asana_task
+    for field in asana_task["custom_fields"]:
+        assert not field["name"] in asana_task.keys()
+        asana_task[field["name"]] = field["display_value"]
+    return asana_task
+
+
 # def convert_email_content(email):
 #     if email is None or len(email)==0:
 #         return "<body> </body>"
 #     return "<body>" + email.replace("<", "").replace(">", "") + "</body>"
 def update_asana(app, *args):
     data = app.data
-    # if len(app.data["Asana_id"].get()) == 0:
-    #     all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
-    #     projects_id_map = name_id_map(all_projects)
-    #     current_project_template = clean_response(template_api_instance.get_task_templates(
-    #         project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
-    #
-    #     template_id_map = name_id_map(current_project_template)
-    #     api_respond = clean_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
-    #     new_task_gid = api_respond["new_task"]["gid"]
-    #
-    #     body = asana.TaskGidAddProjectBody(
-    #         {
-    #             "project": projects_id_map["MP"]
-    #         }
-    #     )
-    #     task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
-    #     data["Asana_id"].set(new_task_gid)
-    #     asana_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
-    #     data["Asana_url"].set(asana_task["permalink_url"])
-    # else:
+    if len(app.data["Asana_id"].get()) == 0:
+        all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
+        projects_id_map = name_id_map(all_projects)
+        current_project_template = clean_response(template_api_instance.get_task_templates(
+            project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
+
+        template_id_map = name_id_map(current_project_template)
+        api_respond = clean_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
+        new_task_gid = api_respond["new_task"]["gid"]
+
+        body = asana.TaskGidAddProjectBody(
+            {
+                "project": projects_id_map["MP"]
+            }
+        )
+        task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
+        data["Asana_id"].set(new_task_gid)
+        asana_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
+        data["Asana_url"].set(asana_task["permalink_url"])
+        project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
+    else:
     #     try:
-    #         task_api_instance.get_task(data["Asana_id"].get())
+        project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
     #     except Exception as e:
     #         print(f"Unable to Found Project Asana id {data['Asana_id'].get()}, Creating New Asana Project")
     #         all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
@@ -84,12 +95,7 @@ def update_asana(app, *args):
     #         data["Asana_id"].set(new_task_gid)
     #         asana_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
     #         data["Asana_url"].set(asana_task["permalink_url"])
-    # if len(app.data["Asana_id"].get()) != 0:
-    try:
-        project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
-    except Exception as e:
-        messagebox.showerror("Error", f"Cannot find asana id {data['Asana_id'].get()}")
-        return
+    #     project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
         # all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
         # projects_id_map = name_id_map(all_projects)
         # current_project_template = clean_response(template_api_instance.get_task_templates(
@@ -169,8 +175,10 @@ def update_asana(app, *args):
             custom_field_id_map["Client"]: client_name,
             custom_field_id_map["Main Contact"]: main_contact_name,
             custom_field_id_map["Contact Type"]: contact_id_map[data["Project Info"]["Main Contact"]["Contact Type"].get()],
-            custom_field_id_map["Fee ExGST"]: data["Invoices"]["Fee"].get(),
-            custom_field_id_map["Total Paid ExGST"]: data["Invoices"]["Paid Fee"].get()
+            custom_field_id_map["Fee ExGST"]:float(data["Invoices"]["Fee"].get()) if isfloat(data["Invoices"]["Fee"].get()) and len(data["Invoices"]["Fee"].get())!=0 else 0,
+            custom_field_id_map["Total Paid ExGST"]: float(data["Invoices"]["Paid Fee"].get())if isfloat(data["Invoices"]["Paid Fee"].get()) and len(data["Invoices"]["Paid Fee"].get())!=0 else 0,
+            custom_field_id_map["Overdue Amount"]: float(data["Invoices"]["Over Due Fee"].get()) if isfloat(
+                data["Invoices"]["Over Due Fee"].get()) and len(data["Invoices"]["Over Due Fee"].get()) != 0 else 0
         }
     }
     # messagebox.showinfo("Success", "Update/Create Asana Success")

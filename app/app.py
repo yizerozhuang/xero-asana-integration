@@ -266,22 +266,22 @@ class App(tk.Tk):
         #     tk.Label(variation_frame, width=20, textvariable=variation[i]["in.GST"], font=self.conf["font"]).grid(row=0,
         #                                                                                                           column=3)
 
-        variation_var = {
-            "Service": tk.StringVar(value="Variation"),
-            "Include": tk.BooleanVar(value=True)
-        }
+        # variation_var = {
+        #     "Service": tk.StringVar(value="Variation"),
+        #     "Include": tk.BooleanVar(value=True)
+        # }
 
-        self.fee_proposal_page.update_fee(variation_var)
+        self.fee_proposal_page.update_fee("Variation", True)
         self.fee_proposal_page.fee_dic["Variation"]["Expand"].grid_forget()
         tk.Label(self.fee_proposal_page.fee_frames["Variation"], text="", width=10).grid(row=0, column=0)
         self.fee_proposal_page.fee_dic["Variation"]["Service"].config(text="Variation", bg="cyan")
         self.fee_proposal_page.fee_frames["Variation"].pack(side=tk.BOTTOM)
 
-        self.financial_panel_page.update_invoice(variation_var)
+        self.financial_panel_page.update_invoice("Variation", True)
         self.financial_panel_page.invoice_dic["Variation"]["Service"].config(text="Variation")
 
-        self.financial_panel_page.update_bill(variation_var)
-        self.financial_panel_page.update_profit(variation_var)
+        self.financial_panel_page.update_bill("Variation", True)
+        self.financial_panel_page.update_profit("Variation", True)
 
         self.data["Invoices"]["Details"]["Variation"]["Expand"].set(True)
 
@@ -341,7 +341,7 @@ class App(tk.Tk):
     def role_check(self):
         if self.user in conf["engineer_user_list"]:
             # self.project_info_page.client_frame.grid_forget()
-            self.project_info_page.contact_frame.grid_forget()
+            # self.project_info_page.contact_frame.grid_forget()
             self.project_info_page.finish_frame.grid_forget()
             self.fee_proposal_page.preview_installation_proposal_button.grid_forget()
             self.fee_proposal_page.email_installation_proposal_buttion.grid_forget()
@@ -475,6 +475,7 @@ class App(tk.Tk):
             update_asana_invoices(self)
         except Exception as e:
             print(e)
+            self.messagebox.show_error("Can not find Asana id")
             return
         self.messagebox.show_update("Successful Update Asana")
 
@@ -502,7 +503,7 @@ class App(tk.Tk):
             self.messagebox.show_error("Please upload a fee acceptance before you update xero")
             return
         elif len(self.data["Project Info"]["Project"]["Project Number"].get())==0:
-            self.messagebox.show_error("Please Generate An Project Number Fist")
+            self.messagebox.show_error("Cant Find the Project Number, Please sent first invoice to the client.")
             return
         if len(self.data["Project Info"][address_to]["Full Name"].get()) == 0:
             if len(self.data["Project Info"][address_to]["Company"].get()) == 0:

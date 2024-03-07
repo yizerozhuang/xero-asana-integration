@@ -130,7 +130,7 @@ class ProjectInfoPage(tk.Frame):
         project["Proposal Type"].trace("w", self._update_proposal)
 
         tk.Label(project_frame, text="Project Type", font=self.conf["font"]).grid(row=5, column=0)
-        project_types = ["Restaurant", "Office", "Commercial", "Group House", "Apartment", "Mixed-use complex",
+        project_types = ["Restaurant", "Office", "Commercial", "Group House", "Apartment", "Mixed-use Complex",
                          "School", "Others"]
 
         project["Project Type"] = tk.StringVar(value="Restaurant")
@@ -156,8 +156,14 @@ class ProjectInfoPage(tk.Frame):
             button.grid(row=i//3+8, column=i%3+1, sticky="W")
 
         update_service_fuc = lambda s : lambda a, b, c: self._update_service(project["Service Type"][s])
-        for service in self.conf["service_list"]:
+
+        # for service in self.conf["service_list"]:
+        #     project["Service Type"][service]["Include"].trace("w", update_service_fuc(service))
+
+        for service in service_types:
             project["Service Type"][service]["Include"].trace("w", update_service_fuc(service))
+
+
         # project["Service Type"]["Variation"] = {
         #         "Service": tk.StringVar(value="Variation"),
         #         "Include": tk.BooleanVar(value=True)
@@ -637,11 +643,26 @@ The project is a residential develop and consists of:
             self.project_note_label.grid(row=7, column=0, sticky="w", padx=(90, 0))
             self.project_note_entry.grid(row=8, column=0)
     def _update_service(self, var, *args):
-        self.app.fee_proposal_page.update_scope(var)
-        self.app.fee_proposal_page.update_fee(var)
-        self.app.financial_panel_page.update_invoice(var)
-        self.app.financial_panel_page.update_bill(var)
-        self.app.financial_panel_page.update_profit(var)
+        service = var["Service"].get()
+        include = var["Include"].get()
+        if service == "Mechanical Service" or service == "Kitchen Ventilation":
+            if self.data["Project Info"]["Project"]["Service Type"]["Mechanical Service"]["Include"].get() or self.data["Project Info"]["Project"]["Service Type"]["Kitchen Ventilation"]["Include"].get():
+                if self.data["Invoices"]["Details"]["Mechanical Service"]["Include"].get():
+                    return
+                else:
+                    service = "Mechanical Service"
+                    include = True
+            else:
+                if self.data["Invoices"]["Details"]["Mechanical Service"]["Include"].get():
+                    service = "Mechanical Service"
+                    include = False
+                else:
+                    return
+        self.app.fee_proposal_page.update_scope(service, include)
+        self.app.fee_proposal_page.update_fee(service, include)
+        self.app.financial_panel_page.update_invoice(service, include)
+        self.app.financial_panel_page.update_bill(service, include)
+        self.app.financial_panel_page.update_profit(service, include)
 
     def _update_proposal(self, *args):
         for service in self.data["Project Info"]["Project"]["Service Type"].values():

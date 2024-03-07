@@ -77,17 +77,17 @@ class FeeProposalPage(tk.Frame):
         self.data["Project Info"]["Building Features"]["Minor"]["Total Area"].trace("w", lambda a, b, c: self.set_variable(calculate["Area"], self.data["Project Info"]["Building Features"]["Minor"]["Total Area"]))
         self.data["Project Info"]["Building Features"]["Major"]["Total Apt"].trace("w", lambda a, b, c: self.set_variable(calculate["Apt"], self.data["Project Info"]["Building Features"]["Major"]["Total Apt"]))
 
-        area_frame = tk.Frame(calculate_frame)
-        area_frame.pack()
+        area_frame = tk.LabelFrame(calculate_frame)
+        area_frame.pack(pady=10)
 
         tk.Label(area_frame, text="Total Areas: ").grid(row=0, column=0)
         tk.Entry(area_frame, textvariable=calculate["Area"], font=self.conf["font"], fg="blue").grid(row=0, column=1)
-        tk.Label(area_frame, text="Custom Area: ").grid(row=0, column=2)
-        tk.Entry(area_frame, textvariable=calculate["Custom Area"], font=self.conf["font"], fg="blue").grid(row=0,
-                                                                                                            column=3)
-        tk.Label(area_frame, text="Price: ").grid(row=0, column=4)
+        custom_area_frame = tk.Frame(area_frame)
+        custom_area_frame.grid(row=0, column=2)
+        tk.Label(custom_area_frame, text="$").grid(row=0, column=0)
+        tk.Entry(custom_area_frame, textvariable=calculate["Custom Area"], width=5, fg="blue").grid(row=0, column=1)
         self.cus_area_entry = tk.Entry(area_frame, font=self.conf["font"])
-        self.cus_area_entry.grid(row=0, column=5)
+        self.cus_area_entry.grid(row=0, column=3)
         calculate["Area"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Area"].get(),
                                                                               self.cus_area_entry, "Area"))
         calculate["Custom Area"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Area"].get(),
@@ -104,15 +104,16 @@ class FeeProposalPage(tk.Frame):
             calculate["Area"].trace("w", calculation_function(i, self.area_entry[num], "Area"))
             num += 1
 
-        apt_frame = tk.Frame(calculate_frame)
-        apt_frame.pack()
+        apt_frame = tk.LabelFrame(calculate_frame)
+        apt_frame.pack(pady=10)
         tk.Label(apt_frame, text="Total Apts: ").grid(row=0, column=0)
         tk.Entry(apt_frame, textvariable=calculate["Apt"], font=self.conf["font"], fg="blue").grid(row=0, column=1)
-        tk.Label(apt_frame, text="Custom Apt: ").grid(row=0, column=2)
-        tk.Entry(apt_frame, textvariable=calculate["Custom Apt"], font=self.conf["font"], fg="blue").grid(row=0, column=3)
-        tk.Label(apt_frame, text="Price: ").grid(row=0, column=4)
+        custom_area_frame = tk.Frame(apt_frame)
+        custom_area_frame.grid(row=0, column=2)
+        tk.Label(custom_area_frame, text="$").grid(row=0, column=0)
+        tk.Entry(custom_area_frame, textvariable=calculate["Custom Apt"], width=5, fg="blue").grid(row=0, column=1)
         self.cus_apt_entry = tk.Entry(apt_frame, font=self.conf["font"])
-        self.cus_apt_entry.grid(row=0, column=5)
+        self.cus_apt_entry.grid(row=0, column=3)
         calculate["Apt"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Apt"].get(), self.cus_apt_entry, "Apt"))
         calculate["Custom Apt"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Apt"].get(), self.cus_apt_entry, "Apt"))
         self.apt_entry = []
@@ -125,8 +126,8 @@ class FeeProposalPage(tk.Frame):
             num+=1
 
 
-        car_park_frame = tk.Frame(calculate_frame)
-        car_park_frame.pack()
+        car_park_frame = tk.LabelFrame(calculate_frame)
+        car_park_frame.pack(pady=10)
         tk.Label(car_park_frame, text="Project").grid(row=0, column=0)
         tk.Label(car_park_frame, text="CFD Calc Level").grid(row=0, column=1)
         tk.Label(car_park_frame, text="No of Carports").grid(row=0, column=2)
@@ -305,6 +306,57 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             func = lambda i: lambda: self._append_stage(i)
             tk.Button(append_frame, text="Submit", command=func(i)).grid(row=0, column=2)
 
+    def reset_stage(self):
+        stage_data = self.data["Fee Proposal"]["Stage"]
+        self.stage_frame.destroy()
+        self.stage_frame = tk.LabelFrame(self.main_context_frame, text="Stage", font=self.conf["font"])
+        self._update_stage()
+        # for stage in self.stage_frames.values():
+        #     stage.pack_forget()
+        for i, stage in enumerate(self.conf["major_stage"]):
+            include_frame = tk.Frame(self.stage_frame)
+            include_frame.pack(anchor="w")
+
+            self.stage_dic[f"Stage{i+1}"]={
+                "Service": tk.Entry(include_frame, textvariable=stage_data[f"Stage{i+1}"]["Service"], font=self.conf["font"], fg="blue", width=30),
+                "Include": tk.Checkbutton(include_frame, variable=stage_data[f"Stage{i+1}"]["Include"], font=self.conf["font"]),
+                "Items": []
+            }
+            self.stage_dic[f"Stage{i + 1}"]["Service"].grid(row=0, column=1)
+            self.stage_dic[f"Stage{i + 1}"]["Include"].grid(row=0, column=0)
+
+            extra_frame = tk.LabelFrame(self.stage_frame, font=self.conf["font"])
+            extra_frame.pack()
+            self.stage_frames[f"Stage{i+1}"] = tk.Frame(extra_frame)
+            self.stage_frames[f"Stage{i+1}"].pack()
+            color_list = ["white", "azure"]
+
+
+            for j, item in enumerate(stage_data[f"Stage{i+1}"]["Items"]):
+                self.stage_dic[f"Stage{i+1}"]["Items"].append(
+                    {
+                        "Include": tk.Checkbutton(self.stage_frames[f"Stage{i+1}"], variable=item["Include"]),
+                        "Item": tk.Entry(self.stage_frames[f"Stage{i+1}"], width=100, textvariable=item["Item"], font=self.conf["font"], bg=color_list[j % 2])
+                    }
+                )
+                self.stage_dic[f"Stage{i+1}"]["Items"][j]["Include"].grid(row=j, column=0)
+                self.stage_dic[f"Stage{i+1}"]["Items"][j]["Item"].grid(row=j, column=1)
+
+            self.append_stage[f"Stage{i+1}"] = {
+                "Item": tk.StringVar(),
+                "Add": tk.BooleanVar()
+            }
+            append_frame = tk.Frame(extra_frame)
+            append_frame.pack()
+
+            tk.Entry(append_frame, width=95, textvariable=self.append_stage[f"Stage{i+1}"]["Item"]).grid(row=0, column=0)
+            tk.Checkbutton(append_frame, variable=self.append_stage[f"Stage{i+1}"]["Add"], text="Add to Database").grid(row=0, column=1)
+            func = lambda i: lambda: self._append_stage(i)
+            tk.Button(append_frame, text="Submit", command=func(i)).grid(row=0, column=2)
+
+
+
+
     # def _update_stage(self):
 
     def _update_stage(self, *args):
@@ -346,10 +398,10 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
         self.scope_dic = {}
         self.append_context = dict()
 
-    def update_scope(self, var):
+    def update_scope(self, service, include):
         scope = self.data["Fee Proposal"]["Scope"][self.data["Project Info"]["Project"]["Proposal Type"].get()]
-        service = var["Service"].get()
-        include = var["Include"].get()
+        # service = var["Service"].get()
+        # include = var["Include"].get()
         extra_list = self.conf["extra_list"]
         if include:
             self.scope_frames[service] = dict()
@@ -395,9 +447,10 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
 
         invoices = {
             "Details": dict(),
-            "Fee": tk.StringVar(),
-            "in.GST": tk.StringVar(),
-            "Paid Fee":tk.StringVar()
+            "Fee": tk.StringVar(value="0"),
+            "in.GST": tk.StringVar(value="0"),
+            "Paid Fee": tk.StringVar(value="0"),
+            "Over Due Fee": tk.StringVar(value="0")
         }
         for service in self.conf["invoice_list"]:
             invoices["Details"][service] = {
@@ -470,11 +523,11 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
         self.data["Project Info"]["Project"]["Quotation Number"].trace("w", self._config_entry)
         self.data["State"]["Email to Client"].trace("w", self.auto_lock)
 
-    def update_fee(self, var):
+    def update_fee(self, service, include):
         invoices_details = self.data["Invoices"]["Details"]
         # archive = self.data["Archive"]["Invoice"]
-        service = var["Service"].get()
-        include = var["Include"].get()
+        # service = var["Service"].get()
+        # include = var["Include"].get()
 
         if include:
             invoices_details[service]["Include"].set(True)
@@ -659,9 +712,9 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
         for fee in details.values():
             if len(fee["Fee"].get().strip()) != 0 and fee["Include"].get():
                 try:
-                    sum += float(fee["Fee"].get())
+                    sum += 0 if len(fee["Fee"].get()) == 0 else float(fee["Fee"].get())
                     # ist_sum += float(fee["Fee"].get()) * self.conf["tax rates"]
-                    ist_sum += float(fee["in.GST"].get())
+                    ist_sum += 0 if len(fee["in.GST"].get()) == 0 else float(fee["in.GST"].get())
                 except ValueError as e:
                     total.set("Error")
                     total_ist.set("Error")
@@ -731,6 +784,17 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
                 cfd_cost.set("5000")
             else:
                 cfd_cost.set("6000")
+
+    def _config_frame(self,tk_object, state):
+        if type(tk_object)==tk.Frame or type(tk_object)==tk.LabelFrame:
+            for child in tk_object.winfo_children():
+                self._config_frame(child, state)
+        else:
+            try:
+                tk_object.config(state=state)
+            except Exception as e:
+                print()
+
     def _config_entry(self, *args):
         if self.data["Lock"]["Proposal"].get():
             self.reference_dic["Date"].config(state=tk.DISABLED)
@@ -743,12 +807,13 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             self.time_dic["Fee Proposal"].config(state=tk.DISABLED)
             self.time_dic["Pre-design"].config(state=tk.DISABLED)
             self.time_dic["Documentation"].config(state=tk.DISABLED)
-            for stage in self.stage_dic.keys():
-                self.stage_dic[stage]["Include"].config(state=tk.DISABLED)
-                self.stage_dic[stage]["Service"].config(state=tk.DISABLED)
-                for item in self.stage_dic[stage]["Items"]:
-                    item["Include"].config(state=tk.DISABLED)
-                    item["Item"].config(state=tk.DISABLED)
+            self._config_frame(self.scope_frame, state=tk.DISABLED)
+            # for stage in self.stage_dic.keys():
+            #     self.stage_dic[stage]["Include"].config(state=tk.DISABLED)
+            #     self.stage_dic[stage]["Service"].config(state=tk.DISABLED)
+            #     for item in self.stage_dic[stage]["Items"]:
+            #         item["Include"].config(state=tk.DISABLED)
+            #         item["Item"].config(state=tk.DISABLED)
             for service in self.fee_dic.values():
                 service["Service"].config(state=tk.DISABLED)
                 service["Fee"].config(state=tk.DISABLED)
@@ -772,12 +837,17 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             self.time_dic["Fee Proposal"].config(state=tk.NORMAL)
             self.time_dic["Pre-design"].config(state=tk.NORMAL)
             self.time_dic["Documentation"].config(state=tk.NORMAL)
-            for stage in self.stage_dic.keys():
-                self.stage_dic[stage]["Include"].config(state=tk.NORMAL)
-                self.stage_dic[stage]["Service"].config(state=tk.NORMAL)
-                for item in self.stage_dic[stage]["Items"]:
-                    item["Include"].config(state=tk.NORMAL)
-                    item["Item"].config(state=tk.NORMAL)
+            # for stage in self.stage_dic.keys():
+            #     self.stage_dic[stage]["Include"].config(state=tk.NORMAL)
+            #     self.stage_dic[stage]["Service"].config(state=tk.NORMAL)
+            #     for item in self.stage_dic[stage]["Items"]:
+            #         item["Include"].config(state=tk.NORMAL)
+            #         item["Item"].config(state=tk.NORMAL)
+            for child in self.scope_frame.winfo_children():
+                try:
+                    child.configure(state=tk.NORMAL)
+                except:
+                    continue
             for service in self.fee_dic.values():
                 service["Service"].config(state=tk.NORMAL)
                 service["Fee"].config(state=tk.NORMAL)

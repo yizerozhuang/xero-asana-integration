@@ -1,6 +1,6 @@
 {
     "8091": "Awaiting Payment",
-    "401001A": "Draft",
+    "401001A": "Awaiting Approval",
     "401001A-Invoice_INV-3772": "Draft",
     "202109": "Awaiting Payment",
     "": "Awaiting Payment",
@@ -23,5 +23,6 @@
     "The Entourage": "Paid",
     "HYDD22013": "Paid",
     "401002A": "Draft",
-    "401002B": "Draft"
+    "401002B": "Draft",
+    "401001A-Invoice_INV-3794": "Awaiting Approval"
 }

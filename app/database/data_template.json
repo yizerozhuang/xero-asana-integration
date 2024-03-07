@@ -1,4 +1,5 @@
 {
+    "Login_user": "",
     "Asana_id": "",
     "Asana_url": "",
     "Lock": {
@@ -476,14 +477,76 @@
         ]
     },
     "Fee Proposal": {
-        "Reference": {
-            "Date": "",
-            "Revision": "1"
-        },
         "Installation Reference":{
             "Date": "",
             "Revision": "1",
             "Program":null
+        },
+        "Reference": {
+            "Date": "",
+            "Revision": "1"
+        },
+        "Calculation Part": {
+            "Car Park":[
+                {
+                    "Project": "",
+                    "Car park Level": "",
+                    "Number of Carports": "",
+                    "Level Factor": "0",
+                    "Carport Factor": "0",
+                    "Complex Factor": "0",
+                    "CFD Cost": "0"
+                },
+                {
+                    "Project": "",
+                    "Car park Level": "",
+                    "Number of Carports": "",
+                    "Level Factor": "0",
+                    "Carport Factor": "0",
+                    "Complex Factor": "0",
+                    "CFD Cost": "0"
+                },
+                {
+                    "Project": "",
+                    "Car park Level": "",
+                    "Number of Carports": "",
+                    "Level Factor": "0",
+                    "Carport Factor": "0",
+                    "Complex Factor": "0",
+                    "CFD Cost": "0"
+                },
+                {
+                    "Project": "",
+                    "Car park Level": "",
+                    "Number of Carports": "",
+                    "Level Factor": "0",
+                    "Carport Factor": "0",
+                    "Complex Factor": "0",
+                    "CFD Cost": "0"
+                },
+                {
+                    "Project": "",
+                    "Car park Level": "",
+                    "Number of Carports": "",
+                    "Level Factor": "0",
+                    "Carport Factor": "0",
+                    "Complex Factor": "0",
+                    "CFD Cost": "0"
+                },
+                {
+                    "Project": "",
+                    "Car park Level": "",
+                    "Number of Carports": "",
+                    "Level Factor": "0",
+                    "Carport Factor": "0",
+                    "Complex Factor": "0",
+                    "CFD Cost": "0"
+                }
+            ],
+            "Apt": "",
+            "Custom Apt": "",
+            "Area": "",
+            "Custom Area": ""
         },
         "Time": {
             "Fee Proposal": "1-2",
@@ -506,10 +569,6 @@
                     {
                         "Include": true,
                         "Item": "8 coordination meetings"
-                    },
-                    {
-                        "Include": true,
-                        "Item": "1 coordination meetings"
                     }
                 ]
             },
@@ -2022,8 +2081,10 @@
                 "in.GST": ""
             }
         },
-        "Fee": "0.0",
-        "in.GST": "0.0"
+        "Paid Fee": "0",
+        "Over Due Fee": "0",
+        "Fee": "0",
+        "in.GST": "0"
     },
     "Invoices Number": [
         {

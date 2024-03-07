@@ -123,11 +123,11 @@ class FinancialPanelPage(tk.Frame):
         #         tk.Radiobutton(variation_frame, width=6, variable=self.data["Variation"][i]["Number"], value="INV" + str(j + 1)).grid(row=0, column=j+2, padx=(2,0))
         #     self.data["Variation"][i]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
         #     self.data["Variation"][i]["Number"].trace("w", lambda a, b, c: self.update_invoice_sum(details, invoice_details))
-    def update_invoice(self, var):
+    def update_invoice(self, service, include):
         details = self.data["Invoices"]["Details"]
         invoice_details = self.data["Invoices Number"]
-        service = var["Service"].get()
-        include = var["Include"].get()
+        # service = var["Service"].get()
+        # include = var["Include"].get()
         if include:
             if not service in self.invoice_frames:
             # if not service in self.invoice_dic:
@@ -409,10 +409,10 @@ class FinancialPanelPage(tk.Frame):
         self.total_label.grid(row=0, column=1)
         self.total_ingst_label = tk.Label(total_frame, width=15, textvariable=bills["in.GST"], font=self.conf["font"])
         self.total_ingst_label.grid(row=1, column=1)
-    def update_bill(self, var):
+    def update_bill(self, service, include):
         details = self.data["Bills"]["Details"]
-        service = var["Service"].get()
-        include = var["Include"].get()
+        # service = var["Service"].get()
+        # include = var["Include"].get()
         if include:
             details[service]["Include"].set(True)
             if not service in self.bill_frames:
@@ -561,7 +561,6 @@ class FinancialPanelPage(tk.Frame):
             self.bill_frames[service].pack(fill=tk.X)
             for i in range(self.conf["n_items"]):
                 self.bill_dic[service]["Expand"][i].pack(fill=tk.X)
-
         else:
             details[service]["Include"].set(False)
             self.bill_frames[service].pack_forget()
@@ -642,10 +641,10 @@ class FinancialPanelPage(tk.Frame):
         tk.Label(total_frame, width=10, textvariable=profits["in.GST"], font=self.conf["font"]).grid(row=1, column=0)
 
         total_frame.pack(side=tk.BOTTOM)
-    def update_profit(self, var):
+    def update_profit(self, service, include):
         profits_details = self.data["Profits"]["Details"]
-        service = var["Service"].get()
-        include = var["Include"].get()
+        # service = var["Service"].get()
+        # include = var["Include"].get()
         if include:
             # if service in archive:
             #     profits_details[service] = archive.pop(service)
@@ -687,7 +686,6 @@ class FinancialPanelPage(tk.Frame):
                 [service["Fee"] for service in profits_details.values()],
                 self.data["Profits"]["Fee"])
             # self.profit_dic[service]["in.GST"].grid(row=1, column=0)
-
         else:
             profits_details[service]["Include"].set(False)
             self.profit_frames[service].pack_forget()
@@ -779,7 +777,6 @@ class FinancialPanelPage(tk.Frame):
         excel_print_invoice(self.app, i)
 
     def _email_invoice(self, i):
-        self.data["Remittances"][i]["Email_Upload"].set(True)
         email_invoice(self.app, i)
         if i == 0 and len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
             number = self.data["Invoices Number"][0]["Number"].get()
@@ -810,7 +807,7 @@ class FinancialPanelPage(tk.Frame):
             update_xero = self.messagebox.ask_yes_no("The Invoices has upload to Asana, do you want to update Xero")
             if update_xero:
                 self.app._update_xero()
-
+        self.data["Remittances"][i]["Email_Upload"].set(True)
         save(self.app)
         config_state(self.app)
 
@@ -1114,6 +1111,11 @@ class FinancialPanelPage(tk.Frame):
                 return
         self.data["Lock"]["Invoices"].set(False)
         return
+
+    # def lock_invoice_page(self, *args):
+    #     for service, value in self.invoice_dic.items():
+    #
+
 
     def _config_radiobutton(self, i, config):
         for service, value in self.invoice_dic.items():

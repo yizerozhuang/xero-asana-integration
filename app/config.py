@@ -38,14 +38,26 @@ CONFIGURATION = {
 
 
 CONFIGURATION["working_dir"] = str(Path(os.getcwd()).parent)
-# CONFIGURATION["database_dir"] = "A:\\00-Bridge Database"
+
+# CONFIGURATION["database_dir"] = "P:\\app\\database"
+# CONFIGURATION["accounting_dir"] = "A:\\00-Bridge Database"
+# CONFIGURATION["report_dir"] = "A:\\01-Bridge Management Report"
+
 CONFIGURATION["database_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "database")
 CONFIGURATION["accounting_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "accounting")
 
-CONFIGURATION["bills_dir"] = "S:\\01.Expense invoice"
-CONFIGURATION["remittances_dir"] = "S:\\01.Expense invoice"
-CONFIGURATION["resource_dir"] = "T:\\00-Template-Do Not Modify\\00-Bridge template"
-# CONFIGURATION["resource_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "resource")
+
+# CONFIGURATION["bills_dir"] = "S:\\01.Expense invoice"
+# CONFIGURATION["remittances_dir"] = "S:\\01.Expense invoice"
+# CONFIGURATION["resource_dir"] = "T:\\00-Template-Do Not Modify\\00-Bridge template"
+
+CONFIGURATION["bills_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "bills")
+CONFIGURATION["remittances_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "remittances")
+CONFIGURATION["resource_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "resource")
+
+
+
+
 CONFIGURATION["xero_access_token_dir"] = os.path.join(CONFIGURATION["resource_dir"], "txt", "xero_access_token.txt")
 CONFIGURATION["xero_refresh_token_dir"] = os.path.join(CONFIGURATION["resource_dir"], "txt", "xero_refresh_token.txt")
 CONFIGURATION["recycle_bin_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "recycle_bin")
