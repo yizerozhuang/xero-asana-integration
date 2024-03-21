@@ -2,6 +2,7 @@
     "Login_user": "Admin",
     "Asana_id": "1206650126484467",
     "Asana_url": "https://app.asana.com/0/1203405141297991/1206650126484467",
+    "Current_folder_address": "402035-Shop 23, 23 Challis Street, Dickson, ACT",
     "Lock": {
         "Proposal": true,
         "Invoices": true
@@ -870,6 +871,10 @@
                         {
                             "Include": true,
                             "Item": "Preparation of a Technical Report detailing the results and recommendations."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit/Meeting"
                         }
                     ],
                     "Clarifications": [
@@ -2232,7 +2237,7 @@
             "Number": "402035",
             "Fee": "4000.0",
             "in.GST": "4400.0",
-            "State": "Sent",
+            "State": "Paid",
             "Asana_id": "1206650445247676",
             "Xero_id": ""
         },

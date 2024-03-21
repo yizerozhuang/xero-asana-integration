@@ -28,7 +28,7 @@
             "Quotation Number": "401000AV",
             "Project Number": "401015",
             "Shop Name": "",
-            "Proposal Type": "Minor",
+            "Proposal Type": "Major",
             "Project Type": "Office",
             "Service Type": {
                 "Mechanical Service": {
@@ -870,6 +870,10 @@
                         {
                             "Include": true,
                             "Item": "Preparation of a Technical Report detailing the results and recommendations."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit/Meeting"
                         }
                     ],
                     "Clarifications": [
@@ -2914,5 +2918,6 @@
     },
     "Verbal Acceptance Note": "",
     "Fee_Acceptance_Upload": true,
-    "Verbal_Acceptance_Upload": false
+    "Verbal_Acceptance_Upload": false,
+    "Current_folder_address": "401015-T1A.34, Tallawong Village, 2-12 Conferta Avenue, Tallawong"
 }

@@ -1267,97 +1267,97 @@
                 "Mechanical Service": {
                     "Extent": [
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Car park ventilation system."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Garbage exhaust."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Fire pump room ventilation."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Stair pressurization and relief systems."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Air conditioning system design to ensuites."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Air conditioning system design to other communal area as required."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Air conditioning system design to commercial tenancy, cold shell."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Air conditioning system design to commercial tenancy, warm shell."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Air conditioning system design to apartments."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Toilet and laundry ventilation to apartments."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Rangehood exhaust system to apartments."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Outside air system design for noise affected apartments."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Other ventilation to AS 1668.2."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Electrical services associated with mechanical plant and equipment."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Coordinate with architect, electrical, hydraulic fire service and other relevant parties."
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "D&BP Act class 2 building design declaration"
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "D&BP Act class 3 building design declaration"
                         }
                     ],
                     "Clarifications": [
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Fire engineering;"
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Assessment of compliance with environmental noise regulations;"
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Preparation of Performance Solutions where Deemed to satisfy requirements of the BCA do not suit the project requirements;"
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Refrigeration systems to cool rooms and freezers;"
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Revit modelling and documentation."
                         }
                     ],
@@ -1367,15 +1367,15 @@
                             "Item": "PDF spatial sketch as required"
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Equipment specification"
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "Full set of drawings in PDF and AutoCAD 2D"
                         },
                         {
-                            "Include": false,
+                            "Include": true,
                             "Item": "D&BP Act class 2 building design declaration"
                         }
                     ]
@@ -2918,5 +2918,6 @@
     },
     "Verbal Acceptance Note": "",
     "Fee_Acceptance_Upload": false,
-    "Verbal_Acceptance_Upload": true
+    "Verbal_Acceptance_Upload": true,
+    "Current_folder_address": "402000AW-61-63 Lawrence Street, Peakhurst"
 }

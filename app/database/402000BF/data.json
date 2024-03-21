@@ -1,10 +1,11 @@
 {
-    "Login_user": "Felix",
+    "Login_user": "",
     "Asana_id": "1206711052503987",
     "Asana_url": "https://app.asana.com/0/1203405141297991/1206711052503987",
+    "Current_folder_address": "403042-Suite 1002, 180-186 burwood road, Burwood",
     "Lock": {
-        "Proposal": true,
-        "Invoices": true
+        "Proposal": false,
+        "Invoices": false
     },
     "State": {
         "Set Up": true,
@@ -37,7 +38,7 @@
                 },
                 "CFD Service": {
                     "Service": "CFD Service",
-                    "Include": false
+                    "Include": true
                 },
                 "Electrical Service": {
                     "Service": "Electrical Service",
@@ -1988,21 +1989,21 @@
                 "in.GST": ""
             },
             "CFD Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "CFD Service",
-                "Expand": false,
+                "Expand": true,
                 "Number": "None",
                 "Content": [
                     {
                         "Service": "CFD Service Kickoff",
-                        "Fee": "",
-                        "in.GST": "",
+                        "Fee": "1000",
+                        "in.GST": "1100.0",
                         "Number": "None"
                     },
                     {
                         "Service": "CFD Service Final Documentation",
-                        "Fee": "",
-                        "in.GST": "",
+                        "Fee": "2000",
+                        "in.GST": "2200.0",
                         "Number": "None"
                     },
                     {
@@ -2018,8 +2019,8 @@
                         "Number": "None"
                     }
                 ],
-                "Fee": "",
-                "in.GST": ""
+                "Fee": "3000.0",
+                "in.GST": "3300.0"
             },
             "Electrical Service": {
                 "Include": false,
@@ -2226,8 +2227,8 @@
                 "in.GST": ""
             }
         },
-        "Fee": "1800.0",
-        "in.GST": "1980.0",
+        "Fee": "4800.0",
+        "in.GST": "5280.0",
         "Paid Fee": "0",
         "Over Due Fee": "0"
     },
@@ -2241,7 +2242,7 @@
             "Xero_id": ""
         },
         {
-            "Number": "",
+            "Number": "403068",
             "Fee": "0",
             "in.GST": "0.0",
             "State": "Backlog",
@@ -2249,7 +2250,7 @@
             "Xero_id": ""
         },
         {
-            "Number": "",
+            "Number": "403069",
             "Fee": "0",
             "in.GST": "0.0",
             "State": "Backlog",
@@ -2470,7 +2471,7 @@
                 ]
             },
             "CFD Service": {
-                "Include": false,
+                "Include": true,
                 "Service": "",
                 "Fee": "",
                 "in.GST": "",
@@ -2878,9 +2879,9 @@
                 "in.GST": ""
             },
             "CFD Service": {
-                "Include": false,
-                "Fee": "",
-                "in.GST": ""
+                "Include": true,
+                "Fee": "3000",
+                "in.GST": "3300"
             },
             "Electrical Service": {
                 "Include": false,
@@ -2913,8 +2914,8 @@
                 "in.GST": "0"
             }
         },
-        "Fee": "1800.0",
-        "in.GST": "1980.0"
+        "Fee": "4800.0",
+        "in.GST": "5280.0"
     },
     "Verbal Acceptance Note": "",
     "Fee_Acceptance_Upload": true,

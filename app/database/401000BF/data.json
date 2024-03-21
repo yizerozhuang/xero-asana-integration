@@ -1,8 +1,9 @@
 {
+    "Login_user": "Admin",
     "Asana_id": "1206481119104766",
     "Asana_url": "https://app.asana.com/0/1203405141297991/1206481119104766",
     "Lock": {
-        "Proposal": false,
+        "Proposal": true,
         "Invoices": true
     },
     "State": {
@@ -429,14 +430,14 @@
                 "Revision": "A"
             },
             {
-                "Drawing Number": "",
-                "Drawing Name": "",
-                "Revision": ""
+                "Drawing Number": "M-003",
+                "Drawing Name": "a23",
+                "Revision": "B"
             },
             {
-                "Drawing Number": "",
-                "Drawing Name": "",
-                "Revision": ""
+                "Drawing Number": "M-004",
+                "Drawing Name": "123",
+                "Revision": "C"
             },
             {
                 "Drawing Number": "",
@@ -869,6 +870,10 @@
                         {
                             "Include": true,
                             "Item": "Preparation of a Technical Report detailing the results and recommendations."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit/Meeting"
                         }
                     ],
                     "Clarifications": [
@@ -1356,7 +1361,24 @@
                             "Item": "Revit modelling and documentation."
                         }
                     ],
-                    "Deliverables": []
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "PDF spatial sketch as required"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Equipment specification"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Full set of drawings in PDF and AutoCAD 2D"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        }
+                    ]
                 },
                 "Mechanical Review": {
                     "Extent": [
@@ -2206,7 +2228,7 @@
         },
         "Fee": "2500.0",
         "in.GST": "2750.0",
-        "Paid Fee": "",
+        "Paid Fee": "2500.0",
         "Over Due Fee": "0"
     },
     "Invoices Number": [
@@ -2897,5 +2919,5 @@
     "Verbal Acceptance Note": "",
     "Fee_Acceptance_Upload": true,
     "Verbal_Acceptance_Upload": false,
-    "Login_user": ""
+    "Current_folder_address": "401016-Shop 2A, 39 Kent Street, Mascot"
 }

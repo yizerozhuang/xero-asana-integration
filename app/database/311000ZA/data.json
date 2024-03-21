@@ -3,7 +3,7 @@
     "Asana_id": "1205935395308789",
     "Asana_url": "https://app.asana.com/0/1203405141297991/1205935395308789",
     "Lock": {
-        "Proposal": false,
+        "Proposal": true,
         "Invoices": false
     },
     "State": {
@@ -20,7 +20,7 @@
         "Second Chase": "",
         "Third Chase": ""
     },
-    "Email_Content": "---------- Forwarded message ---------\nFrom: Maher Chamsine <mchamsine@cbsengineers.com.au>\nDate: Tue, Nov 14, 2023 at 3:33\u202fPM\nSubject: SY23153 - 18-24 Kerr Parade Auburn NSW 2144 - Services Spatial Requirements\nTo: <felixyeqing@gmail.com>\n\u00a0\nHi Felix,\n\u00a0\nPlease provide the mechanical services spatial requirements.\n\u00a0\nNote: No need to do the SOU ventilation or A/C system.\n\u00a0\nDue Date: Thursday COB 16/11/23\n\nIf you wish to discuss further please do not hesitate to contact the undersigned.\n\u00a0\nRegards\n\u00a0\nMaher Chamsine\nDirector\n\u00a0\nT (02) 9788 6446\nF (02) 8764 0803\nM 0414 454 555\nm.chamsine@cbsengineers.com.au\n\u00a0\n\nhttps://app.asana.com/app/asana/-/get_asset?asset_id=1205935395308798\n\n\n",
+    "Email_Content": "---------- Forwarded message ---------\nFrom: Maher Chamsine <mchamsine@cbsengineers.com.au>\nDate: Tue, Nov 14, 2023 at 3:33\u202fPM\nSubject: SY23153 - 18-24 Kerr Parade Auburn NSW 2144 - Services Spatial Requirements\nTo: <felixyeqing@gmail.com>\n\u00a0\nHi Felix,\n\u00a0\nPlease provide the mechanical services spatial requirements.\n\u00a0\nNote: No need to do the SOU ventilation or A/C system.\n\u00a0\nDue Date: Thursday COB 16/11/23\n\nIf you wish to discuss further please do not hesitate to contact the undersigned.\n\u00a0\nRegards\n\u00a0\nMaher Chamsine\nDirector\n\u00a0\nT (02) 9788 6446\nF (02) 8764 0803\nM 0414 454 555\nm.chamsine@cbsengineers.com.au\n\u00a0\n\nhttps://app.asana.com/app/asana/-/get_asset?asset_id=1205935395308798",
     "Address_to": "Main Contact",
     "Project Info": {
         "Project": {
@@ -477,15 +477,6 @@
         ]
     },
     "Fee Proposal": {
-        "Installation Reference": {
-            "Date": "",
-            "Revision": "",
-            "Program": null
-        },
-        "Reference": {
-            "Date": "",
-            "Revision": ""
-        },
         "Calculation Part": {
             "Car Park": [
                 {
@@ -547,6 +538,15 @@
             "Custom Apt": "",
             "Area": "",
             "Custom Area": ""
+        },
+        "Installation Reference": {
+            "Date": "",
+            "Revision": "",
+            "Program": null
+        },
+        "Reference": {
+            "Date": "",
+            "Revision": ""
         },
         "Time": {
             "Fee Proposal": "",
@@ -1850,6 +1850,40 @@
                 "Fee": "",
                 "in.GST": ""
             },
+            "Mechanical Review": {
+                "Include": false,
+                "Service": "Mechanical Review",
+                "Expand": false,
+                "Number": "None",
+                "Content": [
+                    {
+                        "Service": "Mechanical Review Kickoff",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "Mechanical Review Final Documentation",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "Number": "None"
+                    }
+                ],
+                "Fee": "",
+                "in.GST": ""
+            },
             "CFD Service": {
                 "Include": false,
                 "Service": "CFD Service",
@@ -1986,40 +2020,6 @@
                 "Fee": "",
                 "in.GST": ""
             },
-            "Mechanical Review": {
-                "Include": false,
-                "Service": "Mechanical Review",
-                "Expand": false,
-                "Number": "None",
-                "Content": [
-                    {
-                        "Service": "Mechanical Review Kickoff",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
-                    },
-                    {
-                        "Service": "Mechanical Review Final Documentation",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "Number": "None"
-                    }
-                ],
-                "Fee": "",
-                "in.GST": ""
-            },
             "Miscellaneous": {
                 "Include": false,
                 "Service": "Miscellaneous",
@@ -2123,10 +2123,10 @@
                 "in.GST": ""
             }
         },
-        "Paid Fee": "0.00",
-        "Over Due Fee": "0.00",
-        "Fee": "1980.00",
-        "in.GST": "2178.0"
+        "Fee": "0",
+        "in.GST": "0",
+        "Paid Fee": "0",
+        "Over Due Fee": "0.00"
     },
     "Invoices Number": [
         {
@@ -2277,6 +2277,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2288,6 +2289,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2299,218 +2301,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    }
-                ]
-            },
-            "CFD Service": {
-                "Include": false,
-                "Service": "",
-                "Fee": "",
-                "in.GST": "",
-                "no.GST": false,
-                "Number": "",
-                "Origin": "",
-                "Origin_Upload": false,
-                "V1": "",
-                "V1_Upload": false,
-                "V2": "",
-                "V2_Upload": false,
-                "V3": "",
-                "V3_Upload": false,
-                "Paid": "",
-                "Paid.GST": "",
-                "Content": [
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    }
-                ]
-            },
-            "Electrical Service": {
-                "Include": false,
-                "Service": "",
-                "Fee": "",
-                "in.GST": "",
-                "no.GST": false,
-                "Number": "",
-                "Origin": "",
-                "Origin_Upload": false,
-                "V1": "",
-                "V1_Upload": false,
-                "V2": "",
-                "V2_Upload": false,
-                "V3": "",
-                "V3_Upload": false,
-                "Paid": "",
-                "Paid.GST": "",
-                "Content": [
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    }
-                ]
-            },
-            "Hydraulic Service": {
-                "Include": false,
-                "Service": "",
-                "Fee": "",
-                "in.GST": "",
-                "no.GST": false,
-                "Number": "",
-                "Origin": "",
-                "Origin_Upload": false,
-                "V1": "",
-                "V1_Upload": false,
-                "V2": "",
-                "V2_Upload": false,
-                "V3": "",
-                "V3_Upload": false,
-                "Paid": "",
-                "Paid.GST": "",
-                "Content": [
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    }
-                ]
-            },
-            "Fire Service": {
-                "Include": false,
-                "Service": "",
-                "Fee": "",
-                "in.GST": "",
-                "no.GST": false,
-                "Number": "",
-                "Origin": "",
-                "Origin_Upload": false,
-                "V1": "",
-                "V1_Upload": false,
-                "V2": "",
-                "V2_Upload": false,
-                "V3": "",
-                "V3_Upload": false,
-                "Paid": "",
-                "Paid.GST": "",
-                "Content": [
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
-                        "State": "Draft",
-                        "Upload": false,
-                        "Number": "",
-                        "Asana_id": "",
-                        "Xero_id": ""
-                    },
-                    {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
-                        "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2542,6 +2333,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2553,6 +2345,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2564,6 +2357,231 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "CFD Service": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Electrical Service": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Hydraulic Service": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    }
+                ]
+            },
+            "Fire Service": {
+                "Include": false,
+                "Service": "",
+                "Fee": "",
+                "in.GST": "",
+                "no.GST": false,
+                "Number": "",
+                "Origin": "",
+                "Origin_Upload": false,
+                "V1": "",
+                "V1_Upload": false,
+                "V2": "",
+                "V2_Upload": false,
+                "V3": "",
+                "V3_Upload": false,
+                "Paid": "",
+                "Paid.GST": "",
+                "Content": [
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
+                        "State": "Draft",
+                        "Upload": false,
+                        "Number": "",
+                        "Asana_id": "",
+                        "Xero_id": ""
+                    },
+                    {
+                        "Service": "",
+                        "Fee": "",
+                        "in.GST": "",
+                        "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2595,6 +2613,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2606,6 +2625,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2617,6 +2637,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2648,6 +2669,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2659,6 +2681,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2670,6 +2693,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2701,6 +2725,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2712,6 +2737,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2723,6 +2749,7 @@
                         "Fee": "",
                         "in.GST": "",
                         "no.GST": false,
+                        "Description": "",
                         "State": "Draft",
                         "Upload": false,
                         "Number": "",
@@ -2742,6 +2769,11 @@
                 "Fee": "",
                 "in.GST": ""
             },
+            "Mechanical Review": {
+                "Include": false,
+                "Fee": "",
+                "in.GST": ""
+            },
             "CFD Service": {
                 "Include": false,
                 "Fee": "",
@@ -2762,17 +2794,12 @@
                 "Fee": "",
                 "in.GST": ""
             },
-            "Installation": {
-                "Include": false,
-                "Fee": "",
-                "in.GST": ""
-            },
-            "Mechanical Review": {
-                "Include": false,
-                "Fee": "",
-                "in.GST": ""
-            },
             "Miscellaneous": {
+                "Include": false,
+                "Fee": "",
+                "in.GST": ""
+            },
+            "Installation": {
                 "Include": false,
                 "Fee": "",
                 "in.GST": ""
@@ -2788,5 +2815,6 @@
     },
     "Verbal Acceptance Note": "",
     "Fee_Acceptance_Upload": false,
-    "Verbal_Acceptance_Upload": false
+    "Verbal_Acceptance_Upload": false,
+    "Current_folder_address": "311000ZA-18-24 Kerr Parade, Auburn"
 }

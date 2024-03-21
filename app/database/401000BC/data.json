@@ -1,4 +1,5 @@
 {
+    "Login_user": "",
     "Asana_id": "1206461462112856",
     "Asana_url": "https://app.asana.com/0/1203405141297991/1206461462112856",
     "Lock": {
@@ -27,7 +28,7 @@
             "Quotation Number": "401000BC",
             "Project Number": "401013",
             "Shop Name": "Kaminari",
-            "Proposal Type": "Minor",
+            "Proposal Type": "Major",
             "Project Type": "Restaurant",
             "Service Type": {
                 "Mechanical Service": {
@@ -869,6 +870,10 @@
                         {
                             "Include": true,
                             "Item": "Preparation of a Technical Report detailing the results and recommendations."
+                        },
+                        {
+                            "Include": true,
+                            "Item": "1 off site visit/Meeting"
                         }
                     ],
                     "Clarifications": [
@@ -1356,7 +1361,24 @@
                             "Item": "Revit modelling and documentation."
                         }
                     ],
-                    "Deliverables": []
+                    "Deliverables": [
+                        {
+                            "Include": true,
+                            "Item": "PDF spatial sketch as required"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Equipment specification"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "Full set of drawings in PDF and AutoCAD 2D"
+                        },
+                        {
+                            "Include": false,
+                            "Item": "D&BP Act class 2 building design declaration"
+                        }
+                    ]
                 },
                 "Mechanical Review": {
                     "Extent": [
@@ -2206,7 +2228,7 @@
         },
         "Fee": "5100.0",
         "in.GST": "5610.0",
-        "Paid Fee": "",
+        "Paid Fee": "5100.0",
         "Over Due Fee": "0"
     },
     "Invoices Number": [
@@ -2897,5 +2919,5 @@
     "Verbal Acceptance Note": "",
     "Fee_Acceptance_Upload": true,
     "Verbal_Acceptance_Upload": false,
-    "Login_user": ""
+    "Current_folder_address": "401013-Tenancy A, GF, WSU Bankstown City Campus, 74 Rickard Road, Bankstown"
 }

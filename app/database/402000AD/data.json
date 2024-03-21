@@ -3,7 +3,7 @@
     "Asana_id": "1206561311695350",
     "Asana_url": "https://app.asana.com/0/1203405141297991/1206561311695350",
     "Lock": {
-        "Proposal": true,
+        "Proposal": false,
         "Invoices": true
     },
     "State": {
@@ -2198,9 +2198,9 @@
                 "Number": "None",
                 "Content": [
                     {
-                        "Service": "",
-                        "Fee": "",
-                        "in.GST": "",
+                        "Service": "V1",
+                        "Fee": "100",
+                        "in.GST": "110.0",
                         "Number": "None"
                     },
                     {
@@ -2222,12 +2222,12 @@
                         "Number": "None"
                     }
                 ],
-                "Fee": "",
-                "in.GST": ""
+                "Fee": "100.0",
+                "in.GST": "110.0"
             }
         },
-        "Fee": "4200.0",
-        "in.GST": "4620.0",
+        "Fee": "4300.0",
+        "in.GST": "4730.0",
         "Paid Fee": "0",
         "Over Due Fee": "0"
     },
@@ -2909,14 +2909,15 @@
             },
             "Variation": {
                 "Include": true,
-                "Fee": "0",
-                "in.GST": "0"
+                "Fee": "100",
+                "in.GST": "110"
             }
         },
-        "Fee": "12600.0",
-        "in.GST": "13860.0"
+        "Fee": "12700.0",
+        "in.GST": "13970.0"
     },
     "Verbal Acceptance Note": "",
     "Fee_Acceptance_Upload": true,
-    "Verbal_Acceptance_Upload": false
+    "Verbal_Acceptance_Upload": false,
+    "Current_folder_address": "402031-Blue Mountains Hotel School, 74 Gladstone Road, Leura"
 }

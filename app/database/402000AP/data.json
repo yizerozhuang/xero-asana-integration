@@ -4,7 +4,7 @@
     "Asana_url": "https://app.asana.com/0/1203405141297991/1206651352934139",
     "Lock": {
         "Proposal": true,
-        "Invoices": false
+        "Invoices": true
     },
     "State": {
         "Set Up": true,
@@ -2918,5 +2918,6 @@
     },
     "Verbal Acceptance Note": "",
     "Fee_Acceptance_Upload": false,
-    "Verbal_Acceptance_Upload": false
+    "Verbal_Acceptance_Upload": false,
+    "Current_folder_address": "402000AP-17-19 Alan Street, Box Hill"
 }
