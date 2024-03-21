@@ -1,3 +1,4 @@
+
 from tkinter import ttk
 
 from app_log import AppLog
@@ -10,7 +11,7 @@ from asana_function import update_asana, update_asana_invoices
 from xero_function import update_xero, refresh_token, login_xero
 from email_server import email_server
 from app_messagebox import AppMessagebox
-from text_extension import TextExtension
+
 
 from PIL import Image, ImageTk
 import _thread
@@ -56,13 +57,14 @@ class App(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.confirm)
 
         config_state(self)
-        if not self.user in self.conf["engineer_user_list"]:
+        if not self.user in self.conf["engineer_user_list"] and not self.conf["test_mode"]:
             self.auto_check()
 
     def default_set_up(self):
         self.data["Login_user"] = tk.StringVar(value=self.user)
         self.data["Asana_id"] = tk.StringVar()
         self.data["Asana_url"] = tk.StringVar()
+        self.data["Current_folder_address"] = tk.StringVar()
         self.data["Lock"] = {
             "Proposal": tk.BooleanVar(),
             "Invoices": tk.BooleanVar()
@@ -94,13 +96,13 @@ class App(tk.Tk):
         state_frame.grid(row=0, column=1)
 
         tk.Button(state_frame, text="Set Up", command=self._finish_setup, bg="cyan", font=self.conf["font"]).grid(row=0, column=0)
-        self.preview_fee_proposal_button = tk.Button(state_frame, text="Preview Fee Proposal", bg="cyan", command=self._preview_fee_proposal,
+        self.preview_fee_proposal_button = tk.Button(state_frame, text="Gen Fee Proposal", bg="cyan", command=self._preview_fee_proposal,
                                                      font=self.conf["font"])
         self.preview_fee_proposal_button.grid(row=0, column=1)
-        self.email_to_client_button = tk.Button(state_frame, text="Email To Client", command=self._email_fee_proposal, bg="cyan",
+        self.email_to_client_button = tk.Button(state_frame, text="Email Fee Proposal", command=self._email_fee_proposal, bg="cyan",
                                                 font=self.conf["font"])
         self.email_to_client_button.grid(row=0, column=2)
-        self.chase_client_button = tk.Button(state_frame, text="Chase Client", command=lambda: chase(self), bg="cyan",
+        self.chase_client_button = tk.Button(state_frame, text="Chase Fee Acceptance", command=lambda: chase(self), bg="cyan",
                                              font=self.conf["font"])
         self.chase_client_button.grid(row=0, column=3)
         
@@ -111,11 +113,17 @@ class App(tk.Tk):
                   fg="white",
                   font=self.conf["font"]).grid(row=0, column=0)
 
-        self.open_database_button = tk.Button(function_frame, width=10, text="Open Database",
+        self.open_database_button = tk.Button(function_frame, width=12, text="Open Database",
                                               command=self.open_database, bg="brown",
                                               fg="white",
                                               font=self.conf["font"])
         self.open_database_button.grid(row=1, column=0)
+
+
+        # tk.Button(function_frame, width=14, text="Design Certificate", bg="brown", fg="white",
+        #                                     command = lambda: open_design_certificate(self),
+        #                                     font=self.conf["font"]).grid(row=2, column=0)
+
 
         tk.Button(function_frame, text="Rename Project", command=self._rename_project, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
@@ -314,6 +322,18 @@ class App(tk.Tk):
         # self.financial_panel_page.update_bill(variation_var)
         # self.financial_panel_page.update_profit(variation_var)
 
+    def utility_search(self):
+        self.show_frame(self.search_bar_page)
+        self.search_bar_page.entry.delete(0, "end")
+        self.search_bar_page.entry.insert(0, self.utility_search_string_var.get())
+        self.search_bar_page.check(None)
+        self.utility_search_string_var.set("")
+        self.search_bar_page.refresh()
+
+    def utility_reset(self):
+        reset(self)
+        self.utility_search_string_var.set("")
+
     def _project_number_page(self):
         project_number_frame = tk.LabelFrame(self.utility_frame)
         project_number_frame.grid(row=0, column=0, sticky="ns")
@@ -328,7 +348,15 @@ class App(tk.Tk):
         # self.data["Project Info"][]
         # self.current_quotation.trace("w", self._update_quotation_number_label)
         tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=2, column=1)
-
+        # tk.Entry(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], width=30, font=self.conf["font"], state=tk.DISABLED).grid(row=2, column=1)
+        search_frame = tk.Frame(project_number_frame)
+        search_frame.grid(row=3, column=0, columnspan=2)
+        self.utility_search_string_var = tk.StringVar()
+        tk.Entry(search_frame, fg="blue", font=self.conf["font"], textvariable=self.utility_search_string_var).grid(row=0, column=0)
+        tk.Button(search_frame, text="Clear Up", command=self.utility_reset, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=0, column=1)
+        tk.Button(search_frame, text="Search", command=self.utility_search, bg="brown", fg="white",
+                  font=self.conf["font"]).grid(row=0, column=2)
         # self.project_number_label = tk.Label(project_number_frame, font=self.conf["font"])
         # self.project_number_label.grid(row=0, column=1)
         # self.data["Project Info"]["Project"]["Quotation Number"].trace("w",self._update_project_number_label)
@@ -380,7 +408,21 @@ class App(tk.Tk):
             self.messagebox.show_error("Please Create an quotation Number first")
             # messagebox.showerror("Error", "\n Please Create an quotation Number first\n  \n")
             return
-        finish_setup(self)
+        if self._validate_project_name():
+            finish_setup(self)
+
+    def _validate_project_name(self):
+        project_name = self.data["Project Info"]["Project"]["Project Name"].get()
+        if project_name[0] == " " or project_name[-1] == " ":
+            self.messagebox.show_error("You cant have empty space in front or end of the project name")
+            return False
+        special_char_list = ["\\", "/", ":", "*", "?", '"', "<",">","|"]
+        for char in project_name:
+            if char in special_char_list:
+                self.messagebox.show_error("You cant have special character in your project name")
+                return False
+        return True
+
 
     def _preview_fee_proposal(self):
         preview_fee_proposal(self)
@@ -470,6 +512,10 @@ class App(tk.Tk):
             self.destroy()
 
     def _update_asana(self):
+        # update = change_type_of_calculator(self)
+        # if update is None:
+        #     return
+        # if update:
         try:
             update_asana(self)
             update_asana_invoices(self)
@@ -478,6 +524,9 @@ class App(tk.Tk):
             self.messagebox.show_error("Can not find Asana id")
             return
         self.messagebox.show_update("Successful Update Asana")
+        # else:
+        #     self.messagebox.show_error("Please Close the calculation excel sheet before you Update Asana")
+
 
     def _open_asana(self):
         if len(self.data["Asana_id"].get()) == 0:
@@ -488,7 +537,7 @@ class App(tk.Tk):
             return
         edge_address = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
         def open_asana():
-            subprocess.call([edge_address, self.data["Asana_url"].get()])
+            subprocess.call([edge_address, self.data["Asana_url"].get()+"/f"])
 
         _thread.start_new_thread(open_asana, ())
         # webbrowser.open(self.data["Asana_url"].get())
@@ -526,24 +575,39 @@ class App(tk.Tk):
             self.messagebox.show_error("Can not update Xero and Asana")
 
     def _rename_project(self):
+        current_folder_address = os.path.join(self.conf["working_dir"], self.data["Current_folder_address"].get())
+        if len(self.data["Project Info"]["Project"]["Project Number"].get()) != 0:
+            folder_name = self.data["Project Info"]["Project"]["Project Number"].get() + "-" + self.data["Project Info"]["Project"]["Project Name"].get()
+        else:
+            folder_name = self.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + self.data["Project Info"]["Project"]["Project Name"].get()
+        folder_address = os.path.join(self.conf["working_dir"], folder_name)
+
+
         if len(self.data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
             self.messagebox.show_error("Please Create an Quotation Number first")
             return
-        try:
-            old_dir, new_dir = rename_project(self)
-        except PermissionError:
-            self.messagebox.show_error("Bridge wont able to rename the folder, Please close anything related to the folder")
+        elif os.path.exists(folder_address):
+            self.messagebox.show_error(f"{folder_address} exists, you dont neet to rename it")
             return
 
-        if len(self.data["Asana_id"].get()) == 0:
-            self.messagebox.file_info("Rename Folder", old_dir, new_dir)
-        else:
-            update_asana(self)
-            self.messagebox.file_info("Rename Folder and Asana", old_dir, new_dir)
+        if self._validate_project_name():
+            try:
+                os.rename(current_folder_address, folder_address)
+                # old_dir, new_dir = rename_project(self)
+            except Exception as e:
+                print(e)
+                self.messagebox.show_error("Bridge wont able to rename the folder, Please close anything related to the folder")
+                return
 
-        save(self)
-        config_log(self)
-        config_state(self)
+            if len(self.data["Asana_id"].get()) == 0:
+                self.messagebox.file_info("Rename Folder", current_folder_address, folder_address)
+            else:
+                update_asana(self)
+                self.messagebox.file_info("Rename Folder and Asana", current_folder_address, folder_address)
+            self.data["Current_folder_address"].set(folder_name)
+            save(self)
+            config_log(self)
+            config_state(self)
 
     def _email_fee_proposal(self):
         try:
@@ -578,21 +642,21 @@ class App(tk.Tk):
 
     def open_folder(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
-
-        if len(self.data["Project Info"]["Project"]["Project Number"].get()) ==0:
-            folder_name = self.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                          self.data["Project Info"]["Project"]["Project Name"].get()
-        else:
-            folder_name = self.data["Project Info"]["Project"]["Project Number"].get() + "-" + \
-                          self.data["Project Info"]["Project"]["Project Name"].get()
-        folder_path = os.path.join(self.conf["working_dir"], folder_name)
+        current_folder_address = os.path.join(self.conf["working_dir"], self.data["Current_folder_address"].get())
+        # if len(self.data["Project Info"]["Project"]["Project Number"].get()) ==0:
+        #     folder_name = self.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+        #                   self.data["Project Info"]["Project"]["Project Name"].get()
+        # else:
+        #     folder_name = self.data["Project Info"]["Project"]["Project Number"].get() + "-" + \
+        #                   self.data["Project Info"]["Project"]["Project Name"].get()
+        # folder_path = os.path.join(self.conf["working_dir"], folder_name)
 
         if len(quotation_number) == 0:
-            self.messagebox.show_error("Please enter a Quotation Number before you load")
-        elif not os.path.exists(folder_path):
-            self.messagebox.show_error(f"Python cannot find the folder {folder_path}")
+            self.messagebox.show_error("Please login to a project first")
+        elif not os.path.exists(current_folder_address):
+            self.messagebox.show_error(f"Python cannot find the folder {current_folder_address}")
         else:
-            webbrowser.open(folder_path)
+            webbrowser.open(current_folder_address)
 
     def open_database(self):
         quotation_number = self.data["Project Info"]["Project"]["Quotation Number"].get().upper()
@@ -604,3 +668,10 @@ class App(tk.Tk):
             self.messagebox.show_error(f"Python cannot find the folder {accounting_dir}")
         else:
             webbrowser.open(accounting_dir)
+
+    def _config_frame(self, tk_object, state):
+        if type(tk_object)==tk.Frame or type(tk_object)==tk.LabelFrame:
+            for child in tk_object.winfo_children():
+                self._config_frame(child, state)
+        else:
+            tk_object.config(state=state)

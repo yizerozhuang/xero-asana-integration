@@ -13,6 +13,7 @@ asana_api_client = asana.ApiClient(asana_configuration)
 task_api_instance = asana.TasksApi(asana_api_client)
 
 # database_dir = "P:\\app\\database"
+working_dir = conf["working_dir"]
 database_dir = conf["database_dir"]
 # accounting_dir = conf["accounting_dir"]
 scope_dir = os.path.join(database_dir, "scope_of_work.json")
@@ -45,7 +46,11 @@ for dir in os.listdir(database_dir):
         #     "Area": "",
         #     "Custom Area": ""
         # }
-        data_json["Invoices"]["Over Due Fee"] = "0"
+        if len(data_json["Project Info"]["Project"]["Project Number"])!=0:
+            address = os.path.join(data_json["Project Info"]["Project"]["Project Number"]+"-"+data_json["Project Info"]["Project"]["Project Name"])
+        else:
+            address = os.path.join(data_json["Project Info"]["Project"]["Quotation Number"]+"-"+data_json["Project Info"]["Project"]["Project Name"])
+        data_json["Current_folder_address"] = address
         print(count)
         count+=1
 

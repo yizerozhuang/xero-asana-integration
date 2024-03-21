@@ -79,7 +79,6 @@ class SearchBarPage(tk.Frame):
         self.search_bar()
         self.build_tree()
         self.reset()
-        # self.export_data()
 
 
     def reset(self):
@@ -227,9 +226,8 @@ class SearchBarPage(tk.Frame):
         self.update_data(set(data))
 
     def refresh(self):
-        self.entry.delete(0, "end")
         self.generate_data()
-        self.check("None")
+        self.check(None)
         sortby(self.tree, "Quotation Number", True)
 
     def reset_scrollregion(self, event):

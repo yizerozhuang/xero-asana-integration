@@ -5,6 +5,7 @@ import tkinter as tk
 from app_dialog import FileSelectDialog
 
 from win32com import client as win32client
+from openpyxl import load_workbook
 import shutil
 import os
 import json
@@ -197,7 +198,10 @@ def load_invoice_state(app):
     for bill in data["Bills"]["Details"].values():
         for item in bill["Content"]:
             if len(item["Number"].get()) !=0:
-                item["State"].set(bill_json[data["Project Info"]["Project"]["Project Number"].get()+item["Number"].get()])
+                try:
+                    item["State"].set(bill_json[data["Project Info"]["Project"]["Project Number"].get()+item["Number"].get()])
+                except KeyError:
+                    continue
 
 def convert_to_json(obj):
     if isinstance(obj, list):
@@ -226,7 +230,8 @@ def convert_to_data(json, data):
                 except Exception as e:
                     print(e)
         elif len(json) < len(data):
-            data = data[0: len(json)]
+            for j in range(len(json), len(data)):
+                data.pop(-1)
             for i in range(len(data)):
                 convert_to_data(json[i], data[i])
 
@@ -243,55 +248,92 @@ def convert_to_data(json, data):
                 print(e)
 
 
-def generate_all_project(database_dir):
-    res = {}
+def generate_all_projects_and_invoices(database_dir):
+    projects = {}
+    invoices = {}
     for dir in os.listdir(database_dir):
         if os.path.isdir(os.path.join(database_dir, dir)):
             data_json = json.load(open(os.path.join(database_dir, dir, "data.json")))
             if data_json["Asana_id"] != "":
-                res[data_json["Asana_id"]]={
+                projects[data_json["Asana_id"]]={
                     "Asana_url": data_json["Asana_url"],
                     "Quotation Number": data_json["Project Info"]["Project"]["Quotation Number"],
                     "Project Number": data_json["Project Info"]["Project"]["Project Number"],
+                    "Invoices": []
                 }
-    return res
+                for inv in data_json["Invoices Number"]:
+                    if len(inv["Asana_id"])!=0:
+                        invoices[inv["Asana_id"]]={
+                            "Number": inv["Number"],
+                            "Fee": inv["Fee"],
+                            "State": inv["State"]
+                        }
+                        # projects[inv["Asana_id"]]["Invoices"].append(inv["Asana_id"])
+    return projects, invoices
 
 def finish_setup(app):
     data = app.data
-    working_dir = app.conf["working_dir"]
+
     quotation_number = data["Project Info"]["Project"]["Quotation Number"].get()
+    current_folder_address = data["Current_folder_address"].get()
     folder_name = quotation_number + "-" + data["Project Info"]["Project"]["Project Name"].get()
-    # folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get().strip()
-    # working_dir = os.path.join(app.conf["working_dir"], folder_name)
-    found = False
-    current_folder_name = None
-    for dir in os.listdir(working_dir):
-        if os.path.isdir(os.path.join(working_dir, dir)) and dir.split("-")[0]==quotation_number:
-            found = True
-            current_folder_name = dir
-    if not found:
-        create_folder = messagebox.askyesno("Folder not found",
-                                            f"Can not find the folder with quotation number {quotation_number}, do you want to create the folder")
+    working_dir = conf["working_dir"]
+
+    if data["State"]["Set Up"].get():
+        app.messagebox.show_error("You already setup the project")
+        return
+
+    if current_folder_address == "":
+        create_folder = app.messagebox.ask_yes_no(f"Can not find the folder with quotation number {quotation_number}, do you want to create the folder")
         if create_folder:
             create_new_folder(folder_name, app.conf)
         else:
             return
     else:
-        if current_folder_name != folder_name:
+        if current_folder_address != folder_name:
             try:
-                shutil.move(os.path.join(working_dir, current_folder_name), os.path.join(working_dir, folder_name))
+                os.rename(os.path.join(working_dir, current_folder_address), os.path.join(working_dir, folder_name))
             except Exception as e:
                 print(e)
-                tk.messagebox.showerror("Error", "Please Close the file relate to folder before rename")
+                app.messagebox.show_error("Error", "Please Close the file relate to folder before rename")
                 return
+        #
+        # if os.
+    # working_dir = app.conf["working_dir"]
+    # quotation_number = data["Project Info"]["Project"]["Quotation Number"].get()
+    # folder_name = quotation_number + "-" + data["Project Info"]["Project"]["Project Name"].get()
+    # folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get().strip()
+    # working_dir = os.path.join(app.conf["working_dir"], folder_name)
+
+    # found = False
+    # current_folder_name = None
+    # for dir in os.listdir(working_dir):
+    #     if os.path.isdir(os.path.join(working_dir, dir)) and dir.split("-")[0]==quotation_number:
+    #         found = True
+    #         current_folder_name = dir
+    # if not found:
+    #     create_folder = messagebox.askyesno("Folder not found",
+    #                                         f"Can not find the folder with quotation number {quotation_number}, do you want to create the folder")
+    #     if create_folder:
+    #         create_new_folder(folder_name, app.conf)
+    #     else:
+    #         return
+    # else:
+    #     if current_folder_name != folder_name:
+    #         try:
+    #             os.rename(os.path.join(working_dir, current_folder_name), os.path.join(working_dir, folder_name))
+    #         except Exception as e:
+    #             print(e)
+    #             app.messagebox.show_error("Error", "Please Close the file relate to folder before rename")
+    #             return
     data["State"]["Set Up"].set(True)
+    data["Current_folder_address"].set(folder_name)
     app.current_quotation.set(quotation_number)
     save(app)
     app.log.log_finish_set_up(app)
     config_state(app)
     config_log(app)
-    messagebox.showinfo("Set Up",
-                        f"Project {data['Project Info']['Project']['Quotation Number'].get()} set up successful")
+    app.messagebox.show_info(f"Project {data['Project Info']['Project']['Quotation Number'].get()} set up successful")
 
 def config_state(app):
     return
@@ -428,14 +470,16 @@ def rename_project(app):
 
 
 def change_quotation_number(app, new_quotation_number):
+    data = app.data
     working_dir = app.conf["working_dir"]
+    current_folder_address = os.path.join(working_dir, data["Current_folder_address"].get())
     # database_dir = app.conf["database_dir"]
 
-    old_folder_name = app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + app.data["Project Info"]["Project"]["Project Name"].get()
-    old_folder = os.path.join(working_dir, old_folder_name)
+    # old_folder_name = app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + app.data["Project Info"]["Project"]["Project Name"].get()
+    # old_folder = os.path.join(working_dir, old_folder_name)
 
-    if not os.path.exists(old_folder):
-        messagebox.showerror("Error", f"Can not found the folder {old_folder_name}")
+    if not os.path.exists(current_folder_address):
+        messagebox.showerror("Error", f"Can not found the folder {current_folder_address}")
         return "", "", False
 
     new_folder = os.path.join(working_dir, new_quotation_number + "-" + app.data["Project Info"]["Project"]["Project Name"].get())
@@ -444,10 +488,10 @@ def change_quotation_number(app, new_quotation_number):
         # old_database = os.path.join(database_dir, app.data["Project Info"]["Project"]["Quotation Number"].get())
         # new_database = os.path.join(database_dir, new_quotation_number)
         # os.rename(old_database, new_database)
-        os.rename(old_folder, new_folder)
-        return old_folder, new_folder, True
+        os.rename(current_folder_address, new_folder)
+        return current_folder_address, new_folder, True
     except PermissionError:
-        return old_folder, new_folder, False
+        return current_folder_address, new_folder, False
 
 def rename_new_folder(app):
     data = app.data
@@ -516,6 +560,117 @@ def check_accounting_folder(app):
         os.makedirs(accounting_dir)
 
 
+def open_design_certificate(app):
+    data = app.data
+    quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
+
+    if len(data["Project Info"]["Project"]["Project Number"].get()) == 0:
+        folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+                      data["Project Info"]["Project"]["Project Name"].get()
+    else:
+        folder_name = data["Project Info"]["Project"]["Project Number"].get() + "-" + \
+                      data["Project Info"]["Project"]["Project Name"].get()
+    folder_path = os.path.join(conf["working_dir"], folder_name)
+
+    if len(quotation_number) == 0:
+        app.messagebox.show_error("Please enter a Quotation Number before you load")
+        return
+    elif not os.path.exists(folder_path):
+        app.messagebox.show_error(f"Python cannot find the folder {folder_path}")
+        return
+
+    # proposal_type = data["Project Info"]["Project"]["Proposal Type"].get()
+    # if proposal_type == "Minor":
+    calculation_sheet = "Preliminary Calculation"
+    # else:
+    #     calculation_sheet = "Mech System Calculation"
+    excel_path = None
+    for file in os.listdir(folder_path):
+        if file.endswith(".xlsx") and file.startswith(calculation_sheet):
+            excel_path =file
+            break
+    if excel_path is None:
+        app.messagebox.show_error(f"Can not find the {calculation_sheet} file under {folder_path}")
+        return
+    # excel_full_path = os.path.join(folder_path, excel_path)
+
+    excel_full_path = folder_path+"\\"+excel_path
+    # wb = load_workbook(excel_full_path)
+
+
+    excel = win32client.Dispatch("Excel.Application")
+    work_book = excel.Workbooks.Open(excel_full_path)
+    work_book.Worksheets("Mechanical Design Certificate").Activate()
+
+    design_certificate_worksheet = work_book.Worksheets["Mechanical Design Certificate"]
+    design_compliance_cert_work_sheet = work_book.Worksheets["Mech Design Compliance Cert"]
+    design_certificate_worksheet.Cells(2, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
+    design_compliance_cert_work_sheet.Cells(2, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
+
+    design_certificate_first_cell = 45 #if proposal_type=="Minor" else 55
+    design_compliance_first_cell = 26
+
+    for i, drawing in enumerate(data["Project Info"]["Drawing"]):
+        design_certificate_worksheet.Cells(design_certificate_first_cell+i, 2).Value = drawing["Drawing Number"].get()
+        design_certificate_worksheet.Cells(design_certificate_first_cell+i, 4).Value = drawing["Drawing Name"].get()
+        design_certificate_worksheet.Cells(design_certificate_first_cell+i, 8).Value = drawing["Revision"].get()
+
+        design_compliance_cert_work_sheet.Cells(design_compliance_first_cell+i, 2).Value = drawing["Drawing Number"].get()
+        design_compliance_cert_work_sheet.Cells(design_compliance_first_cell+i, 4).Value = drawing["Drawing Name"].get()
+        design_compliance_cert_work_sheet.Cells(design_compliance_first_cell+i, 8).Value = drawing["Revision"].get()
+
+    print_pdf = app.messagebox.ask_yes_no("Do you want to Save the design certificate and design compliance in the Plot Folder?")
+    if print_pdf:
+        design_certificate_worksheet.ExportAsFixedFormat(0, os.path.join(folder_path, "Plot", "Mechanical Design Certificate.pdf"))
+        design_compliance_cert_work_sheet.ExportAsFixedFormat(0, os.path.join(folder_path, "Plot",
+                                                                              "Mechanical Design Compliance Certificate.pdf"))
+
+
+def change_type_of_calculator(app):
+    data = app.data
+    proposal_type = data["Project Info"]["Project"]["Proposal Type"].get()
+    quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
+
+    if len(data["Project Info"]["Project"]["Project Number"].get()) == 0:
+        folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+                      data["Project Info"]["Project"]["Project Name"].get()
+    else:
+        folder_name = data["Project Info"]["Project"]["Project Number"].get() + "-" + \
+                      data["Project Info"]["Project"]["Project Name"].get()
+    folder_path = os.path.join(app.conf["working_dir"], folder_name)
+
+    if len(quotation_number) == 0:
+        app.messagebox.show_error("Please enter a Quotation Number before you update asana")
+        return
+    elif not os.path.exists(folder_path):
+        app.messagebox.show_error(f"Python cannot find the folder {folder_path}")
+        return
+    excel = None
+    for dir in os.listdir(folder_path):
+        if (dir.startswith("Preliminary Calculation") or dir.startswith("Mech System Calculation")) and dir.endswith(".xlsx"):
+            excel = dir
+            break
+    if proposal_type == "Minor" and excel.startswith("Mech System Calculation"):
+        try:
+            os.remove(os.path.join(folder_path, excel))
+            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Preliminary Calculation v2.6.xlsx"),
+                            os.path.join(folder_path, "Preliminary Calculation v2.6.xlsx"))
+        except Exception as e:
+            print(e)
+            return False
+    elif proposal_type == "Major" and excel.startswith("Preliminary Calculation"):
+        try:
+            os.remove(os.path.join(folder_path, excel))
+            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Mech System Calculation v0.4.xlsx"),
+                            os.path.join(folder_path, "Mech System Calculation v0.4.xlsx"))
+        except Exception as e:
+            print(e)
+            return False
+    elif excel is None:
+        file = "Preliminary Calculation v2.6.xlsx" if proposal_type == "Minor" else "Mech System Calculation v0.4.xlsx"
+        shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", file),
+                        os.path.join(folder_path, file))
+    return True
 
 def preview_fee_proposal(app, *args):
     check_accounting_folder(app)
@@ -1097,9 +1252,19 @@ def excel_print_invoice(app, inv):
         try:
             work_sheets = work_book.Worksheets[0]
             address_to = data["Address_to"].get()
-            work_sheets.Cells(5, 1).Value = data["Project Info"][address_to]["Full Name"].get()
-            work_sheets.Cells(6, 1).Value = data["Project Info"][address_to]["Company"].get()
-            work_sheets.Cells(7, 1).Value = data["Project Info"][address_to]["Address"].get()
+
+            cur_row = 5
+            for key in ["Full Name", "Company", "Address", "ABN"]:
+                if len(data["Project Info"][address_to][key].get()) != 0:
+                    if key == "ABN":
+                        work_sheets.Cells(cur_row, 1).Value = "ABN\\ACN: " + data["Project Info"][address_to][key].get()
+                    else:
+                        work_sheets.Cells(cur_row, 1).Value = data["Project Info"][address_to][key].get()
+                    cur_row += 1
+
+            # work_sheets.Cells(5, 1).Value = data["Project Info"][address_to]["Full Name"].get()
+            # work_sheets.Cells(6, 1).Value = data["Project Info"][address_to]["Company"].get()
+            # work_sheets.Cells(7, 1).Value = data["Project Info"][address_to]["Address"].get()
             work_sheets.Cells(4, 10).Value = datetime.today().strftime("%d-%b-%Y")
             work_sheets.Cells(5, 10).Value = data["Invoices Number"][inv]["Number"].get()
             work_sheets.Cells(12, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
@@ -1146,18 +1311,21 @@ def excel_print_invoice(app, inv):
                     cur_row+=2
                 # cur_row+=1
             cur_row+=1
-            for service in data["Invoices"]["Details"]["Variation"]["Content"]:
-                if service["Fee"].get()==0:
-                    continue
-                work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
-                work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
-                if service["Number"].get() == f"INV{str(inv+1)}":
-                    work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
-                    work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
-                    work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
-                    total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
-                    total_inGST += float(service["in.GST"].get()) if len(service["in.GST"].get()) !=0 else 0
-                cur_row += 1
+            if len(data["Invoices"]["Details"]["Variation"]["Fee"].get()) != 0 and data["Invoices"]["Details"]["Variation"]["Fee"].get() != "0":
+                work_sheets.Cells(cur_row, 1).Value = "Variation"
+                cur_row+=1
+                for service in data["Invoices"]["Details"]["Variation"]["Content"]:
+                    if service["Fee"].get()==0:
+                        continue
+                    work_sheets.Cells(cur_row, 1).Value = service["Service"].get()
+                    work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
+                    if service["Number"].get() == f"INV{str(inv+1)}":
+                        work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
+                        work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
+                        work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
+                        total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
+                        total_inGST += float(service["in.GST"].get()) if len(service["in.GST"].get()) !=0 else 0
+                    cur_row += 1
             work_sheets.Cells(44, 9).Value = data["Invoices Number"][0]["Number"].get()
 
             # for service in data["Variation"]:
@@ -1191,6 +1359,7 @@ def excel_print_invoice(app, inv):
             _thread.start_new_thread(open_pdf, ())
             # webbrowser.open(invoice_path)
             # avDoc.open(invoice_path, invoice_path)
+            data["Remittances"][inv]["Preview_Upload"].set(True)
             save(app)
             app.log.log_generate_invoices(app, inv)
             config_state(app)
@@ -1396,7 +1565,6 @@ def email_fee_proposal(app, *args):
     # newmail.From = user_email_dic[app.user]
     newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-{_get_proposal_name(app)}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
@@ -1406,15 +1574,13 @@ def email_fee_proposal(app, *args):
     first_name = get_first_name(full_name)
 
     message = f"""
-    Dear {first_name},<br>
+    Dear {first_name},<br><br>
 
     I hope this email finds you well. Please find the attached fee proposal to this email.<br>
 
-    If you have any questions or need more information regarding the proposal, please don't hesitate to reach out. I am happy to provide you with whatever information you need.<br>
+    If you have any questions or need more information regarding the proposal, please don't hesitate to reach out.<br>
 
     I look forward to hearing from you soon.<br>
-
-    Cheers,<br>
     """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
     newmail.Attachments.Add(os.path.join(accounting_dir, pdf_name))
@@ -1441,7 +1607,6 @@ def chase(app, *args):
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'Re: {data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
@@ -1451,12 +1616,10 @@ def chase(app, *args):
     first_name = get_first_name(full_name)
 
     message = f"""
-    Hi {first_name},<br>
+    Hi {first_name},<br><br>
     I wanted to circle back regarding the fee proposal we sent on {data["Email"]["Fee Proposal"].get()}. Do you have any questions or concerns? We're looking forward to working with you and hearing your feedback. <br>
 
     Thank you for considering our proposal, and we anticipate your response soon.<br>
-
-    Cheers ,<br>
     """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
     newmail.Attachments.Add(os.path.join(accounting_dir, pdf_name))
@@ -1485,7 +1648,6 @@ def email_invoice(app, inv):
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'PCE INV {data["Invoices Number"][inv]["Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
@@ -1495,7 +1657,8 @@ def email_invoice(app, inv):
     first_name = get_first_name(full_name)
 
     message = f"""
-    Hi {first_name},<br>
+    Hi {first_name},<br><br>
+    
     I hope this email finds you well and energized for the week ahead.<br>
 
     Please find the attached invoice for client payment. We appreciate your prompt attention to this matter.<br>
@@ -1503,8 +1666,6 @@ def email_invoice(app, inv):
     If you have any questions or concerns regarding the invoice, please do not hesitate to contact Felix and me. We are happy to discuss further.<br>
 
     Thank you for your time and consideration.<br>
-    
-    Cheers ,<br>
     """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
     newmail.Display()
@@ -1535,7 +1696,6 @@ def email_installation_proposal(app):
     # newmail.From = user_email_dic[app.user]
     newmail.Subject = f'{data["Project Info"]["Project"]["Quotation Number"].get()}-Mechanical Installation Fee Proposal for {data["Project Info"]["Project"]["Project Name"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
-    newmail.CC = "felix@pcen.com.au; admin@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
@@ -1545,15 +1705,13 @@ def email_installation_proposal(app):
     first_name = get_first_name(full_name)
 
     message = f"""
-        Dear {first_name},<br>
+        Dear {first_name},<br><br>
 
         I hope this email finds you well. Please find the attached fee proposal to this email.<br>
 
         If you have any questions or need more information regarding the proposal, please don't hesitate to reach out. I am happy to provide you with whatever information you need.<br>
 
         I look forward to hearing from you soon.<br>
-
-        Cheers,<br>
         """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
     newmail.Attachments.Add(os.path.join(accounting_dir, pdf_name))
@@ -1669,6 +1827,7 @@ def update_app_invoices(app, inv_list):
 
     with open(bills_dir, "w") as f:
         json.dump(bills_json, f, indent=4)
+
 
 
 def send_email_with_attachment(filename):

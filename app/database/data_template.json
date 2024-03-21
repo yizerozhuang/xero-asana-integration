@@ -2,6 +2,7 @@
     "Login_user": "",
     "Asana_id": "",
     "Asana_url": "",
+    "Current_folder_address": "",
     "Lock": {
         "Proposal": false,
         "Invoices": false
@@ -480,7 +481,7 @@
         "Installation Reference":{
             "Date": "",
             "Revision": "1",
-            "Program":null
+            "Program":"Week 1: site induction, site inspection and site measure, coordination.\nWeek 2-3: Order ductwork, VCDs, material and arrange labour.\nWeek 4-5: Installation commissioning and testing to critical area.\nWeek 6-8: Based on site condition, finalize all installation, provide installation certificate."
         },
         "Reference": {
             "Date": "",
@@ -2025,13 +2026,13 @@
                         "Number": "None"
                     },
                     {
-                        "Service": "Installation Final Documentation",
+                        "Service": "Equipment in Position",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"
                     },
                     {
-                        "Service": "",
+                        "Service": "Installation Completion",
                         "Fee": "",
                         "in.GST": "",
                         "Number": "None"

@@ -6,6 +6,7 @@ from text_extension import TextExtension
 from asana_function import update_asana
 
 import os
+import json
 
 class ProjectInfoPage(tk.Frame):
     def __init__(self, parent, app):
@@ -105,9 +106,9 @@ class ProjectInfoPage(tk.Frame):
         save_load_frame.grid(row=1, column=3, rowspan=2)
 
 
-        tk.Button(save_load_frame, width=10, height=2, text="Clear Up", command=lambda: reset(self.app), bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=0)
-        tk.Button(save_load_frame, width=8, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
+        # tk.Button(save_load_frame, width=10, height=2, text="Clear Up", command=lambda: reset(self.app), bg="brown", fg="white",
+        #           font=self.conf["font"]).grid(row=0, column=0)
+        tk.Button(save_load_frame, width=18, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=1)
 
         project["Project Name"].trace("w", self._update_quotation_number)
@@ -479,7 +480,14 @@ The project is a residential develop and consists of:
             return
         delete = self.messagebox.ask_yes_no("Are you sure you want to delete the Project?")
         if delete:
+            delete_quotation = self.data["Project Info"]["Project"]["Quotation Number"].get()
             delete_project(self.app)
+            mp_dir = os.path.join(self.conf["database_dir"], "mp.json")
+            mp_json = json.load(open(mp_dir))
+            mp_json.pop(delete_quotation)
+            with open(mp_dir, "w") as f:
+                json_object = json.dumps(mp_json, indent=4)
+                f.write(json_object)
             self.messagebox.show_info(f"Project {self.data['Project Info']['Project']['Quotation Number'].get()} deleted")
 
     def load_data(self):

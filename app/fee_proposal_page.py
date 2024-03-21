@@ -4,10 +4,14 @@ from datetime import date
 import os
 import json
 from text_extension import TextExtension
+import _thread
 
 from utility import preview_installation_fee_proposal, email_installation_proposal, isfloat
+from asana_function import update_asana
 
+from PIL import Image, ImageTk
 from scope_list import ScopeList
+
 
 class FeeProposalPage(tk.Frame):
     def __init__(self, parent, app):
@@ -118,7 +122,7 @@ class FeeProposalPage(tk.Frame):
         calculate["Custom Apt"].trace("w", lambda a, b, c: self.calculate_apt_price(calculate["Custom Apt"].get(), self.cus_apt_entry, "Apt"))
         self.apt_entry = []
         num=0
-        for i in list(range(80, 130, 5)) + list(range(130, 630, 10)):
+        for i in list(range(80, 1000, 20)) + list(range(1000, 1500, 50)) + [1500, 1600, 1700, 1800]:
             tk.Label(apt_frame, text=f"${i}").grid(row=num%max_row+1, column=(num//max_row)*2)
             self.apt_entry.append(tk.Entry(apt_frame, font=self.conf["font"]))
             self.apt_entry[num].grid(row=num%max_row+1, column=(num//max_row)*2+1)
@@ -129,7 +133,7 @@ class FeeProposalPage(tk.Frame):
         car_park_frame = tk.LabelFrame(calculate_frame)
         car_park_frame.pack(pady=10)
         tk.Label(car_park_frame, text="Project").grid(row=0, column=0)
-        tk.Label(car_park_frame, text="CFD Calc Level").grid(row=0, column=1)
+        tk.Label(car_park_frame, text="Car Park Level").grid(row=0, column=1)
         tk.Label(car_park_frame, text="No of Carports").grid(row=0, column=2)
         tk.Label(car_park_frame, text="Level Factor").grid(row=0, column=3)
         tk.Label(car_park_frame, text="Carport Factor").grid(row=0, column=4)
@@ -154,6 +158,15 @@ class FeeProposalPage(tk.Frame):
             tk.Label(car_park_frame, textvariable=calculate["Car Park"][i]["Complex Factor"], font=self.conf["font"]).grid(row=1 + i, column=5)
             tk.Label(car_park_frame, textvariable=calculate["Car Park"][i]["CFD Cost"], font=self.conf["font"]).grid(row=1 + i, column=6)
 
+        self.image_frame = tk.LabelFrame(calculate_frame)
+        self.image_frame.pack(pady=10)
+        self.image = Image.open(os.path.join(self.conf["resource_dir"], "png", "Car_Park_Calculation.png"))
+        # self.image = self.image.resize((1000, 1000))
+        self.image = ImageTk.PhotoImage(self.image)
+
+        self.image_label = tk.Label(self.image_frame, image=self.image)
+        self.image_label.pack()
+
     def function_part(self):
         reference = {
             "Date": tk.StringVar(value=date.today().strftime("%d-%b-%Y")),
@@ -176,7 +189,7 @@ class FeeProposalPage(tk.Frame):
         self.preview_installation_proposal_button = tk.Button(function_frame, text="Preview Installation Proposal", command=lambda: preview_installation_fee_proposal(self.app),
                                                               bg="Brown", fg="white", font=self.conf["font"])
         self.preview_installation_proposal_button.grid(row=0, column=1)
-        self.email_installation_proposal_buttion = tk.Button(function_frame, text="Email Installation Proposal", command=lambda: email_installation_proposal(self.app),
+        self.email_installation_proposal_buttion = tk.Button(function_frame, text="Email Installation Proposal", command=self._email_installation_fee_proposal,
                                                              bg="Brown", fg="white", font=self.conf["font"])
         self.email_installation_proposal_buttion.grid(row=0, column=2)
         reference["Date"] = tk.StringVar(value=date.today().strftime("%d-%b-%Y"))
@@ -469,9 +482,15 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
                 "Fee": tk.StringVar(),
                 "in.GST": tk.StringVar()
             }
+
             if service != "Variation":
-                invoices["Details"][service]["Content"][0]["Service"].set(service+" Kickoff")
-                invoices["Details"][service]["Content"][1]["Service"].set(service+" Final Documentation")
+                if service != "Installation":
+                    invoices["Details"][service]["Content"][0]["Service"].set(service+" Kickoff")
+                    invoices["Details"][service]["Content"][1]["Service"].set(service+" Final Documentation")
+                else:
+                    invoices["Details"][service]["Content"][0]["Service"].set("Installation Kickoff")
+                    invoices["Details"][service]["Content"][1]["Service"].set("Equipment in Position")
+                    invoices["Details"][service]["Content"][2]["Service"].set("Installation Completion")
             expand_fun = lambda service : lambda a, b, c: self._expand(service)
             invoices["Details"][service]["Expand"].trace("w", expand_fun(service))
             invoices["Details"][service]["Expand"].trace("w", self.update_sum)
@@ -785,15 +804,20 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             else:
                 cfd_cost.set("6000")
 
-    def _config_frame(self,tk_object, state):
-        if type(tk_object)==tk.Frame or type(tk_object)==tk.LabelFrame:
-            for child in tk_object.winfo_children():
-                self._config_frame(child, state)
-        else:
-            try:
-                tk_object.config(state=state)
-            except Exception as e:
-                print()
+
+    def _email_installation_fee_proposal(self):
+        try:
+            def email():
+                email_installation_proposal(self.app)
+            _thread.start_new_thread(email, ())
+            update = self.messagebox.ask_yes_no("Do you want to update Asana?")
+            if update:
+                update_asana(self.app)
+
+        except Exception as e:
+            self.messagebox.show_error("Unable to Create Email")
+            return
+
 
     def _config_entry(self, *args):
         if self.data["Lock"]["Proposal"].get():
@@ -807,7 +831,8 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             self.time_dic["Fee Proposal"].config(state=tk.DISABLED)
             self.time_dic["Pre-design"].config(state=tk.DISABLED)
             self.time_dic["Documentation"].config(state=tk.DISABLED)
-            self._config_frame(self.scope_frame, state=tk.DISABLED)
+            self.app._config_frame(self.scope_frame, state=tk.DISABLED)
+            self.app._config_frame(self.stage_frame, state=tk.DISABLED)
             # for stage in self.stage_dic.keys():
             #     self.stage_dic[stage]["Include"].config(state=tk.DISABLED)
             #     self.stage_dic[stage]["Service"].config(state=tk.DISABLED)
@@ -843,11 +868,8 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             #     for item in self.stage_dic[stage]["Items"]:
             #         item["Include"].config(state=tk.NORMAL)
             #         item["Item"].config(state=tk.NORMAL)
-            for child in self.scope_frame.winfo_children():
-                try:
-                    child.configure(state=tk.NORMAL)
-                except:
-                    continue
+            self.app._config_frame(self.scope_frame, state=tk.NORMAL)
+            self.app._config_frame(self.stage_frame, state=tk.NORMAL)
             for service in self.fee_dic.values():
                 service["Service"].config(state=tk.NORMAL)
                 service["Fee"].config(state=tk.NORMAL)

@@ -79,15 +79,18 @@ class FinancialPanelPage(tk.Frame):
                     "Xero_id": tk.StringVar()
                 }
             )
-            invoice[i]["State"].trace("w", self._update_paid_fee)
-            invoice[i]["Fee"].trace("w", self._update_paid_fee)
+            # invoice[i]["State"].trace("w", self._update_paid_fee)
+            # invoice[i]["Fee"].trace("w", self._update_paid_fee)
             tk.Label(title_frame, width=8, text="INV"+str(i+1), font=self.conf["font"]).grid(row=0, column=i+2, sticky="ew", padx=(2,0))
             self.invoice_label_list.append([])
             self.invoice_label_list[i].append(tk.Entry(invoice_number_frame, state=tk.DISABLED, textvariable=invoice[i]["Number"], width=8, font=self.conf["font"], fg="blue"))
             self.invoice_label_list[i][0].grid(row=0, column=i + 2, padx=(10, 0), sticky="ew")
 
+        self.invoice_radio_frame = tk.Frame(self.invoice_frame)
+        self.invoice_radio_frame.pack(fill=tk.X)
+
         self.data["Lock"]["Invoices"].trace("w", self.config_lock_button)
-        self.data["Lock"]["Invoices"].trace("w", self._config_entry)
+        self.data["Lock"]["Invoices"].trace("w", self.loc_invoice_page)
         self.data["Lock"]["Invoices"].set(False)
 
         total_frame = tk.LabelFrame(self.invoice_frame)
@@ -106,7 +109,6 @@ class FinancialPanelPage(tk.Frame):
             self.invoice_label_list[i].append(tk.Label(total_frame, textvariable=invoice[i]["in.GST"], width=8, font=self.conf["font"]))
             self.invoice_label_list[i][2].grid(row=1, column=2 + i, padx=(2, 0))
             invoice[i]["Fee"].trace("w", ist_fuc(i))
-
         # details = self.data["Invoices"]["Details"]
         # invoice_details = self.data["Invoices Number"]
 
@@ -131,12 +133,13 @@ class FinancialPanelPage(tk.Frame):
         if include:
             if not service in self.invoice_frames:
             # if not service in self.invoice_dic:
-                self.invoice_frames[service] = tk.LabelFrame(self.invoice_frame)
+                self.invoice_frames[service] = tk.LabelFrame(self.invoice_radio_frame)
                 self.invoice_dic[service] = {
                     "Service": tk.Label(self.invoice_frames[service],
                                         text=service + " design and documentation",
                                         width=35,
-                                        font=self.conf["font"]),
+                                        font=self.conf["font"],
+                                        pady=2),
                     # "Fee": tk.Label(self.invoice_frames[service],
                     #                 text="$0/$0.0",
                     #                 width=15,
@@ -146,7 +149,7 @@ class FinancialPanelPage(tk.Frame):
                                                width=6,
                                                variable=self.data["Invoices"]["Details"][service]["Number"],
                                                value="INV" + str(i + 1)) for i in range(6)],
-                    "Expand": [tk.LabelFrame(self.invoice_frame, height=30) for _ in range(self.conf["n_items"])]
+                    "Expand": [tk.LabelFrame(self.invoice_radio_frame, height=30) for _ in range(self.conf["n_items"])]
                 }
                 tk.Label(self.invoice_dic[service]["Fee"], text="$").grid(row=0, column=0)
                 tk.Label(self.invoice_dic[service]["Fee"], textvariable=details[service]["Fee"], width=6).grid(row=0, column=1)
@@ -509,12 +512,13 @@ class FinancialPanelPage(tk.Frame):
                 self.bill_dic[service]["Paid"] = tk.Frame(self.bill_dic[service]["Expand"][-1])
 
 
-
                 tk.Label(self.bill_dic[service]["Paid"], text="$").grid(row=0, column=0)
                 tk.Label(self.bill_dic[service]["Paid"], textvariable=details[service]["Paid"], width=6).grid(row=0, column=1)
                 tk.Label(self.bill_dic[service]["Paid"], text="/").grid(row=0, column=2)
                 tk.Label(self.bill_dic[service]["Paid"], text="$").grid(row=0, column=3)
-                tk.Label(self.bill_dic[service]["Paid"], textvariable=details[service]["Paid.GST"], width=6).grid(row=0, column=4)
+                tk.Label(self.bill_dic[service]["Paid"], textvariable=details[service]["Paid.GST"], width=6).grid(row=0, column=4, pady=(3, 2))
+                # _ = tk.Button(self.bill_dic[service]["Paid"], width=0)
+                # _.grid(row=0, column=5)
 
 
                 self.bill_dic[service]["Service"].grid(row=0, column=0)
@@ -630,7 +634,7 @@ class FinancialPanelPage(tk.Frame):
         title_frame.pack()
 
         _ = tk.LabelFrame(self.profit_frame)
-        tk.Label(_, text="").grid(row=0, column=0, pady=6)
+        tk.Label(_, text="").grid(row=0, column=0, pady=(6, 5))
         _.pack(fill=tk.X)
 
         self.profit_dic = dict()
@@ -666,7 +670,7 @@ class FinancialPanelPage(tk.Frame):
                     "Fee": tk.Label(self.profit_frames[service],
                                     textvariable=profits_details[service]["Fee"],
                                     width=10,
-                                    font=self.conf["font"]),
+                                    font=self.conf["font"],pady=1),
                     "in.GST": tk.Label(self.profit_frames[service],
                                        textvariable=profits_details[service]["in.GST"],
                                        width=10,
@@ -676,7 +680,7 @@ class FinancialPanelPage(tk.Frame):
 
             # self.data["Invoices"]["Fee"].trace("w", lambda a, b, c: )
                 for i in range(self.conf["n_items"]):
-                    tk.Label(self.profit_dic[service]["Expand"][i], text="").pack(pady=2)
+                    tk.Label(self.profit_dic[service]["Expand"][i], text="", font=self.conf["font"]).pack(pady=(1,1))
                 self.profit_dic[service]["Fee"].pack(pady=1)
 
             self.profit_frames[service].pack()
@@ -724,7 +728,7 @@ class FinancialPanelPage(tk.Frame):
     def update_invoice_sum(self, invoice_list):
         invoice_items = get_invoice_item(self.app)
         for i in range(6):
-            invoice_list[i]["Fee"].set(sum([float(inv["Fee"])  for inv in invoice_items[i]]))
+            invoice_list[i]["Fee"].set(sum([float(inv["Fee"]) for inv in invoice_items[i]]))
     # def update_fee_label(self, fee, label):
     #     if len(fee.get().strip())==0:
     #         label.config(text="$0/$0.0")
@@ -773,7 +777,6 @@ class FinancialPanelPage(tk.Frame):
         #     unlock_invoice(self.app)
 
     def _excel_print_invoice(self, i):
-        self.data["Remittances"][i]["Preview_Upload"].set(True)
         excel_print_invoice(self.app, i)
 
     def _email_invoice(self, i):
@@ -783,6 +786,7 @@ class FinancialPanelPage(tk.Frame):
             old_folder, new_folder, update = change_quotation_number(self.app, number)
             if update:
                 self.data["Project Info"]["Project"]["Project Number"].set(number)
+                self.data["Current_folder_address"].set(new_folder)
                 project_quotation_dir = os.path.join(self.conf["database_dir"], "project_quotation_number_map.json")
                 project_quotation_json = json.load(open(project_quotation_dir))
                 project_quotation_json[number] = self.data["Project Info"]["Project"]["Quotation Number"].get()
@@ -974,6 +978,8 @@ class FinancialPanelPage(tk.Frame):
         refresh_token()
         try:
             upload_bill_to_xero(self.app, service, i, file, filename)
+            update_asana(self.app)
+            update_asana_invoices(self.app)
         except Exception as e:
             print(e)
             self.messagebox.show_error("Unable to upload the File to xero")
@@ -988,7 +994,6 @@ class FinancialPanelPage(tk.Frame):
         self.data["Bills"]["Details"][service]["Content"][i]["Upload"].set(True)
 
     def upload_fee_acceptance(self):
-        self.data["Fee_Acceptance_Upload"].set(True)
         # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         if not self.data["State"]["Email to Client"].get():
@@ -1033,13 +1038,13 @@ class FinancialPanelPage(tk.Frame):
                 update_asana(self.app)
                 update_asana_invoices(self.app)
                 self.messagebox.show_info("Success update Asana")
+            self.data["Fee_Acceptance_Upload"].set(True)
             save(self.app)
             config_state(self.app)
             config_log(self.app)
 
 
     def upload_verbal_acceptance(self):
-        self.data["Verbal_Acceptance_Upload"].set(True)
         # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         resource_dir = os.path.join(self.conf["resource_dir"], "txt", "Verbal Fee Acceptance.txt")
@@ -1062,6 +1067,7 @@ class FinancialPanelPage(tk.Frame):
             update_asana(self.app)
             update_asana_invoices(self.app)
             self.app.log.log_fee_accept_file(self.app.user, self.data["Project Info"]["Project"]["Quotation Number"].get())
+            self.data["Verbal_Acceptance_Upload"].set(True)
             save(self.app)
             config_state(self.app)
             config_log(self.app)
@@ -1092,15 +1098,15 @@ class FinancialPanelPage(tk.Frame):
             elif state=="Sent":
                 for label in self.invoice_label_list[i]:
                     label.config(bg="red")
-                self._config_radiobutton(i, tk.DISABLED)
+                # self._config_radiobutton(i, tk.DISABLED)
             elif state=="Paid":
                 for label in self.invoice_label_list[i]:
                     label.config(bg="green")
-                self._config_radiobutton(i, tk.DISABLED)
+                # self._config_radiobutton(i, tk.DISABLED)
             elif state=="Voided":
                 for label in self.invoice_label_list[i]:
                     label.config(bg="purple")
-                self._config_radiobutton(i, tk.DISABLED)
+                # self._config_radiobutton(i, tk.DISABLED)
             else:
                 raise ValueError
 
@@ -1112,24 +1118,21 @@ class FinancialPanelPage(tk.Frame):
         self.data["Lock"]["Invoices"].set(False)
         return
 
-    # def lock_invoice_page(self, *args):
+
+
+    # def _config_radiobutton(self, i, config):
     #     for service, value in self.invoice_dic.items():
-    #
-
-
-    def _config_radiobutton(self, i, config):
-        for service, value in self.invoice_dic.items():
-            value["Invoice"][i].config(state=config)
-            for j, item in enumerate(value["Content"]):
-                item["Invoice"][i].config(state=config)
-        for service, value in self.invoice_dic.items():
-            if self.data["Invoices"]["Details"][service]["Number"].get() == f"INV{str(i+1)}":
-                for inv in value["Invoice"]:
-                    inv.config(state=config)
-            for j, item in enumerate(value["Content"]):
-                if self.data["Invoices"]["Details"][service]["Content"][j]["Number"].get() == f"INV{str(i+1)}":
-                    for inv in value["Content"][j]["Invoice"]:
-                        inv.config(state=config)
+    #         value["Invoice"][i].config(state=config)
+    #         for j, item in enumerate(value["Content"]):
+    #             item["Invoice"][i].config(state=config)
+    #     for service, value in self.invoice_dic.items():
+    #         if self.data["Invoices"]["Details"][service]["Number"].get() == f"INV{str(i+1)}":
+    #             for inv in value["Invoice"]:
+    #                 inv.config(state=config)
+    #         for j, item in enumerate(value["Content"]):
+    #             if self.data["Invoices"]["Details"][service]["Content"][j]["Number"].get() == f"INV{str(i+1)}":
+    #                 for inv in value["Content"][j]["Invoice"]:
+    #                     inv.config(state=config)
 
     def bill_color_code(self, state, label, *args):
         state = state.get()
@@ -1152,16 +1155,23 @@ class FinancialPanelPage(tk.Frame):
         else:
             self.invoice_lock.config(text="Lock")
 
-    def _config_entry(self, *args):
+    def loc_invoice_page(self, *args):
         if self.data["Lock"]["Invoices"].get():
-            self.invoice_color_code()
+            self.app._config_frame(self.invoice_radio_frame, tk.DISABLED)
         else:
-            for service, value in self.invoice_dic.items():
-                for inv in value["Invoice"]:
-                    inv.config(state=tk.NORMAL)
-                for j, item in enumerate(value["Content"]):
-                    for inv in item["Invoice"]:
-                        inv.config(state=tk.NORMAL)
+            self.app._config_frame(self.invoice_radio_frame, tk.NORMAL)
+
+
+    # def _config_entry(self, *args):
+    #     if self.data["Lock"]["Invoices"].get():
+    #         self.invoice_color_code()
+    #     else:
+    #         for service, value in self.invoice_dic.items():
+    #             for inv in value["Invoice"]:
+    #                 inv.config(state=tk.NORMAL)
+    #             for j, item in enumerate(value["Content"]):
+    #                 for inv in item["Invoice"]:
+    #                     inv.config(state=tk.NORMAL)
             # for service, value in self.invoice_dic.items():
             #     for inv in value["Invoice"]:
             #         inv.config(state=tk.DISABLED)

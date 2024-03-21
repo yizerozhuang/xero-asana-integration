@@ -53,11 +53,14 @@ def flatter_custom_fields(asana_task):
 #     return "<body>" + email.replace("<", "").replace(">", "") + "</body>"
 def update_asana(app, *args):
     data = app.data
+    all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
+    projects_id_map = name_id_map(all_projects)
+    current_project_template = clean_response(template_api_instance.get_task_templates(
+        project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
+
+    asana_invoice_status_project = projects_id_map["Invoice status"]
+    asana_bill_status_project = projects_id_map["Bill status"]
     if len(app.data["Asana_id"].get()) == 0:
-        all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
-        projects_id_map = name_id_map(all_projects)
-        current_project_template = clean_response(template_api_instance.get_task_templates(
-            project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
 
         template_id_map = name_id_map(current_project_template)
         api_respond = clean_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
@@ -128,15 +131,15 @@ def update_asana(app, *args):
     contact_field = clean_response(custom_fields_api_instance.get_custom_field(custom_field_id_map["Contact Type"]))
     contact_id_map = name_id_map(contact_field["enum_options"])
 
+    project_task = flatter_custom_fields(project_task)
+
+
     if len(data["Project Info"]["Project"]["Project Number"].get()) != 0:
         name = "P:\\"+data["Project Info"]["Project"]["Project Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
     else:
         name = "P:\\"+data["Project Info"]["Project"]["Quotation Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
 
-    status = None
-    for custom_field in project_task["custom_fields"]:
-        if custom_field["name"] == "Status":
-            status = custom_field["display_value"]
+    status = project_task["Status"]
 
     if not status in ["Pending", "DWG drawings", "Done", "Installation", "Construction Phase"]:
         if data["State"]["Quote Unsuccessful"].get():
@@ -175,17 +178,18 @@ def update_asana(app, *args):
             custom_field_id_map["Client"]: client_name,
             custom_field_id_map["Main Contact"]: main_contact_name,
             custom_field_id_map["Contact Type"]: contact_id_map[data["Project Info"]["Main Contact"]["Contact Type"].get()],
-            custom_field_id_map["Fee ExGST"]:float(data["Invoices"]["Fee"].get()) if isfloat(data["Invoices"]["Fee"].get()) and len(data["Invoices"]["Fee"].get())!=0 else 0,
-            custom_field_id_map["Total Paid ExGST"]: float(data["Invoices"]["Paid Fee"].get())if isfloat(data["Invoices"]["Paid Fee"].get()) and len(data["Invoices"]["Paid Fee"].get())!=0 else 0,
-            custom_field_id_map["Overdue Amount"]: float(data["Invoices"]["Over Due Fee"].get()) if isfloat(
-                data["Invoices"]["Over Due Fee"].get()) and len(data["Invoices"]["Over Due Fee"].get()) != 0 else 0
+            custom_field_id_map["Fee ExGST"]:float(data["Invoices"]["Fee"].get()) if isfloat(data["Invoices"]["Fee"].get()) and len(data["Invoices"]["Fee"].get())!=0 else 0
+            # custom_field_id_map["Total Paid ExGST"]: float(data["Invoices"]["Paid Fee"].get())if isfloat(data["Invoices"]["Paid Fee"].get()) and len(data["Invoices"]["Paid Fee"].get())!=0 else 0,
+            # custom_field_id_map["Overdue Amount"]: float(data["Invoices"]["Over Due Fee"].get()) if isfloat(data["Invoices"]["Over Due Fee"].get()) and len(data["Invoices"]["Over Due Fee"].get()) != 0 else 0
         }
     }
     # messagebox.showinfo("Success", "Update/Create Asana Success")
 
-    sub_tasks = clean_response(task_api_instance.get_subtasks_for_task(task_id))
+    opt_fields = ["name", "assignee", "due_on", "is_rendered_as_separator", "completed", "projects"]
+
+    sub_tasks = clean_response(task_api_instance.get_subtasks_for_task(task_id, opt_fields=opt_fields))
     if not data["State"]["Fee Accepted"].get():
-        asana_update_body["notes"] = data["Email_Content"].get()
+        asana_update_body["notes"] = data["Email_Content"].get() if not data["Email_Content"].get() is None else ""
         body = asana.TasksTaskGidBody(asana_update_body)
         task_api_instance.update_task(task_gid=task_id, body=body)
 
@@ -197,8 +201,10 @@ def update_asana(app, *args):
             body_dict["assignee"] = user_gid_map[app.user]
         if first_task["due_on"] is None:
             body_dict["due_on"] = date.today().strftime("%Y-%m-%d")
-        body = asana.TasksTaskGidBody(body_dict)
-        task_api_instance.update_task(task_gid=first_task_gid, body=body)
+
+        if len(body_dict)!= 0:
+            body = asana.TasksTaskGidBody(body_dict)
+            task_api_instance.update_task(task_gid=first_task_gid, body=body)
     else:
         body = asana.TasksTaskGidBody(asana_update_body)
         task_api_instance.update_task(task_gid=task_id, body=body)
@@ -206,24 +212,29 @@ def update_asana(app, *args):
         data["Email_Content"].set(notes)
         first_task_gid = sub_tasks[0]["gid"]
         # first_task = clearn_response(task_api_instance.get_task(first_task_gid))
-        body = asana.TasksTaskGidBody(
-            {
-                "completed": True
-            }
-        )
-        task_api_instance.update_task(task_gid=first_task_gid, body=body)
+        if not sub_tasks[0]["completed"]:
+            body = asana.TasksTaskGidBody(
+                {
+                    "completed": True
+                }
+            )
+            task_api_instance.update_task(task_gid=first_task_gid, body=body)
         for i in range(1, len(sub_tasks)):
             body_dict = {}
             task_gid = sub_tasks[i]["gid"]
-            task = clean_response(task_api_instance.get_task(task_gid, opt_fields=["name", "assignee", "due_on", "is_rendered_as_separator"]))
-            if task["is_rendered_as_separator"] or task["name"].startswith("INV") or task["name"].startswith("BIL") or task["name"].startswith("---"):
+            # task = clean_response(task_api_instance.get_task(task_gid))
+            task = sub_tasks[i]
+            project_list = [project["gid"] for project in task["projects"]]
+            if task["is_rendered_as_separator"] or task["name"].startswith("---") or asana_invoice_status_project in project_list or asana_bill_status_project in project_list:
                 continue
             if task["assignee"] is None:
                 body_dict["assignee"] = user_gid_map[app.user]
             if task["due_on"] is None:
                 body_dict["due_on"] = date.today().strftime("%Y-%m-%d")
-            body = asana.TasksTaskGidBody(body_dict)
-            task_api_instance.update_task(task_gid=task_gid, body=body)
+
+            if len(body_dict) != 0:
+                body = asana.TasksTaskGidBody(body_dict)
+                task_api_instance.update_task(task_gid=task_gid, body=body)
 
     app.log.log_update_asana(app)
     config_log(app)
@@ -260,7 +271,7 @@ def update_asana_invoices(app, inv_list=None):
         if len(data["Invoices Number"][i]["Asana_id"].get()) == 0:
             body = asana.TasksTaskGidBody(
                 {
-                    "name": f"INV 4xxxxx",
+                    "name": f"INV xxxxxx"
                 }
             )
             response = template_api_instance.instantiate_task(task_template_gid=invoice_template_id,
@@ -303,16 +314,17 @@ def update_asana_invoices(app, inv_list=None):
             #     task_api_instance.set_parent_for_task(body=body, task_gid=new_inv_task_gid)
             #     data["Invoices Number"][i]["Asana_id"].set(new_inv_task_gid)
 
-        name = "INV " + data["Invoices Number"][i]["Number"].get() if len(data["Invoices Number"][i]["Number"].get())!= 0 else f"INV 4xxxxx"
+        task_body = {}
+        if len(data["Invoices Number"][i]["Number"].get()) != 0:
+            task_body["name"] = "INV "+data["Invoices Number"][i]["Number"].get()
+
+        # name = "INV " + data["Invoices Number"][i]["Number"].get() if len(data["Invoices Number"][i]["Number"].get())!= 0 else f"INV 4xxxxx"
 
 
-        task_body = {
-            "name": name,
-            "custom_fields": {
+        task_body["custom_fields"]={
                 custom_field_id_map["Invoice status"]: status_id_map[data["Invoices Number"][i]["State"].get()],
-                custom_field_id_map["Net"]: str(sum([float(item["Fee"]) for item in invoice_item[i]])),
-                custom_field_id_map["Gross"]: str(sum([float(item["in.GST"]) for item in invoice_item[i]]))
-            }
+                custom_field_id_map["Net"]: str(sum([float(item["Fee"]) for item in invoice_item[i]]))
+                # custom_field_id_map["Gross"]: str(sum([float(item["in.GST"]) for item in invoice_item[i]]))
         }
 
         if data["Invoices Number"][i]["State"].get() == "Sent":
@@ -323,8 +335,8 @@ def update_asana_invoices(app, inv_list=None):
                 task_body["assignee"] = user_gid_map[app.user]
         if not inv_list is None:
             inv_number = data["Invoices Number"][i]["Number"].get()
-            if inv_number in inv_list.keys():
-                task_body["custom_fields"][custom_field_id_map["Payment Amount"]] = str(inv_list[inv_number]["payment_amount"])
+            if inv_number in inv_list.keys() and not inv_list[inv_number]["payment_date"] is None:
+                task_body["custom_fields"][custom_field_id_map["Payment InGST"]] = str(inv_list[inv_number]["payment_amount"])
                 task_body["custom_fields"][custom_field_id_map["Payment Date"]] = {"date": str(inv_list[inv_number]["payment_date"])}
         body = asana.TasksTaskGidBody(task_body)
         try:

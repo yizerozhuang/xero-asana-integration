@@ -202,6 +202,7 @@ def _process_invoices(inv_list):
     for inv in inv_list:
         if inv["type"] == "ACCREC":
             res["Invoices"][inv["status"]][inv["invoice_number"]] = {
+                "invoice_id": inv["invoice_id"],
                 "sub_total": inv["sub_total"],
                 "amount_paid": inv["amount_paid"],
                 "line_amount_types": inv["line_amount_types"].value,
@@ -292,11 +293,10 @@ def update_xero(app, contact_name):
     # approve_invoice = remove_none(accounting_api.get_invoices(xero_tenant_id, where=approve_where).to_dict())["invoices"]
     # approve_invoice_id = invoice_number_invoice_id(approve_invoice)
     #
-    paid_where = 'Status=="PAID"'
-
-    paid_invoice = remove_none(accounting_api.get_invoices(xero_tenant_id, where=paid_where).to_dict())["invoices"]
-
-    paid_invoice_id = invoice_number_invoice_id(paid_invoice)
+    all_invoices = _process_invoices(accounting_api.get_invoices(xero_tenant_id).to_dict()["invoices"])
+    # invoices = accounting_api.get_invoices(xero_tenant_id).to_dict()["invoices"]
+    #
+    # invoice_id = invoice_number_invoice_id(invoices)
 
     invoice_item = get_invoice_item(app)
 
@@ -304,8 +304,22 @@ def update_xero(app, contact_name):
 
 
     for i in range(6):
-        if len(data["Invoices Number"][i]["Number"].get()) == 0 or data["Invoices Number"][i]["Number"].get() in paid_invoice_id.keys() or len(invoice_item[i]) == 0:
+        if len(data["Invoices Number"][i]["Number"].get()) == 0:
             continue
+        elif data["Invoices Number"][i]["Number"].get() in all_invoices["Invoices"]["PAID"].keys():
+            continue
+        elif data["Invoices Number"][i]["Number"].get() in all_invoices["Invoices"]["VOIDED"].keys():
+            continue
+        elif len(invoice_item[i]) == 0:
+            continue
+        elif data["Invoices Number"][i]["Number"].get() in all_invoices["Invoices"]["SUBMITTED"].keys():
+            status = "SUBMITTED"
+        elif data["Invoices Number"][i]["Number"].get() in all_invoices["Invoices"]["AUTHORISED"].keys():
+            status = "AUTHORISED"
+        else:
+            status = "DRAFT"
+
+
         line_item_list = []
         for item in invoice_item[i]:
             line_item_list.append(
@@ -326,7 +340,7 @@ def update_xero(app, contact_name):
                 line_items=line_item_list,
                 invoice_number=data["Invoices Number"][i]["Number"].get(),
                 reference=data["Project Info"]["Project"]["Project Name"].get(),
-                status="DRAFT"
+                status=status
             )
         )
     invoices = Invoices(invoices=invoices_list)
@@ -336,11 +350,9 @@ def update_xero(app, contact_name):
         print(e)
         print("No Data Processed")
 
-    if_modified_since = dateutil.parser.parse("2024-01-01")
     # all_inv = accounting_api.get_invoices(xero_tenant_id, if_modified_since=if_modified_since).to_dict()["invoices"]
     # first_inv = accounting_api.get_invoice(xero_tenant_id, all_inv[-1]["invoice_id"])
 
-    all_invoices = _process_invoices(accounting_api.get_invoices(xero_tenant_id, if_modified_since=if_modified_since).to_dict()["invoices"])
 
     update_app_invoices(app, all_invoices)
 

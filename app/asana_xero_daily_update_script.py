@@ -2,7 +2,7 @@ from xero_python.accounting import AccountingApi
 import asana
 import dateutil.parser
 from config import CONFIGURATION as conf
-from utility import generate_all_project, isfloat
+from utility import generate_all_projects_and_invoices, isfloat
 from xero_function import xero_token_required, refresh_token, get_xero_tenant_id, api_client
 from asana_function import clean_response, name_id_map, flatter_custom_fields
 
@@ -14,8 +14,8 @@ from datetime import date
 from win32com import client as win32client
 
 
-# database_dir = conf["database_dir"]
-database_dir = "P:\\app\\database"
+database_dir = conf["database_dir"]
+# database_dir = "P:\\app\\database"
 invoice_dir = os.path.join(database_dir, "invoices.json")
 invoice_json = json.load(open(invoice_dir))
 bill_dir = os.path.join(database_dir, "bills.json")
@@ -35,9 +35,8 @@ bill_status_asana_gid = "1203219273836510"
 mp_asana_gid = "1203405141297991"
 # project_api_instance = asana.ProjectsApi(asana_api_client)
 task_api_instance = asana.TasksApi(asana_api_client)
-net_gross_different_dict = dict()
 
-all_project = generate_all_project(database_dir)
+all_project, all_invoice = generate_all_projects_and_invoices(database_dir)
 def _process_invoice(invoices):
     res = {
         "INV": {
@@ -58,7 +57,7 @@ def _process_invoice(invoices):
         if invoice["type"] == "ACCREC":
             if not invoice["invoice_number"][0] in ["1", "2", "3", "4"]:
                 continue
-            if invoice["status"] == "AUTHORISED":
+            if invoice["status"] in ["DRAFT", "SUBMITTED", "AUTHORISED"]:
                 res["INV"]["Sent"][invoice["invoice_number"]] = {
                         "invoice_number": invoice["invoice_number"],
                         "Payment Date": None if len(invoice["payments"]) == 0 else invoice["payments"][0]["date"],
@@ -69,6 +68,7 @@ def _process_invoice(invoices):
                 }
             elif invoice["status"] == "PAID":
                 res["INV"]["Paid"][invoice["invoice_number"]] = {
+                        "invoice_number": invoice["invoice_number"],
                         "Payment Date": invoice["fully_paid_on_date"],
                         "Payment Amount": None if float(invoice["amount_paid"]) == 0 else str(invoice["amount_paid"]),
                         "Net": str(invoice["sub_total"]),
@@ -143,53 +143,56 @@ def update_xero_and_asana_invoice_script():
             print(f"Processing task {task['name'][4:10]}, the gid is {task['gid']}")
             for invoices_states in invoices["INV"].keys():
                 if task["name"][4:10] in invoices["INV"][invoices_states].keys():
+                    task = flatter_custom_fields(task)
                     inv = invoices["INV"][invoices_states][task["name"][4:10]]
-                    for custom_field in task["custom_fields"]:
-                        custom_field_body = {}
-                        if custom_field["name"] == "Invoice status" and custom_field["display_value"] != invoices_states:
-                            custom_field_body[custom_field_id_map["Invoice status"]] = status_id_map[invoices_states]
-                        elif custom_field["name"] == "Payment Date":
-                            # if custom_field["display_value"] != inv["Payment Date"]:
-                            display_value = None if custom_field["display_value"] is None else custom_field["display_value"][0:10]
-                            payment_date = None if inv["Payment Date"] is None else str(inv["Payment Date"])
-                            if display_value != payment_date:
-                               custom_field_body[custom_field_id_map["Payment Date"]] = {"date":str(inv["Payment Date"])}
-                        elif custom_field["name"] == "Payment Amount" and custom_field["display_value"] != inv["Payment Amount"]:
-                            custom_field_body[custom_field_id_map["Payment Amount"]] = inv["Payment Amount"]
-                        elif custom_field["name"] == "Net" and custom_field["display_value"] != inv["Net"]:
-                            if task["name"][4:10] in net_gross_different_dict.keys():
-                                net_gross_different_dict[task["name"][4:10]]["Net"]={
-                                        "Asana":custom_field["display_value"],
-                                        "Xero":inv["Net"]
-                                    }
-                            else:
-                                net_gross_different_dict[task["name"][4:10]] = {
-                                    "Net":{
-                                        "Asana":custom_field["display_value"],
-                                        "Xero":inv["Net"]
-                                    }
-                                }
-                        elif custom_field["name"] == "Gross" and custom_field["display_value"] != inv["Gross"]:
-                            if task["name"][4:10] in net_gross_different_dict.keys():
-                                net_gross_different_dict[task["name"][4:10]]["Gross"]={
-                                        "Asana":custom_field["display_value"],
-                                        "Xero":inv["Gross"]
-                                    }
-                            else:
-                                net_gross_different_dict[task["name"][4:10]] = {
-                                    "Gross":{
-                                        "Asana":custom_field["display_value"],
-                                        "Xero":inv["Gross"]
-                                    }
-                                }
-                        if len(custom_field_body) !=0:
-                            body = asana.TasksTaskGidBody(
-                                {
-                                    "custom_fields":custom_field_body
-                                }
-                            )
-                            task_api_instance.update_task(task_gid=task["gid"], body=body)
-                            print(f"Process {task['name'][4:10]}")
+                    custom_field_body = {}
+
+                    if task["Invoice status"] != invoices_states:
+                        custom_field_body[custom_field_id_map["Invoice status"]] = status_id_map[invoices_states]
+
+                    display_value = None if task["Payment Date"] is None else task["Payment Date"][0:10]
+                    payment_date = None if inv["Payment Date"] is None else str(inv["Payment Date"])
+                    if display_value != payment_date:
+                        custom_field_body[custom_field_id_map["Payment Date"]] = {"date": str(inv["Payment Date"])}
+
+                    if task["Payment Amount"] != inv["Payment Amount"]:
+                        custom_field_body[custom_field_id_map["Payment Amount"]] = inv["Payment Amount"]
+
+                    if task["Net"] != inv["Net"]:
+                        custom_field_body[custom_field_id_map["Net"]] = inv["Net"]
+
+                    # for custom_field in task["custom_fields"]:
+                    #     if custom_field["name"] == "Invoice status" and custom_field["display_value"] != invoices_states:
+                    #         custom_field_body[custom_field_id_map["Invoice status"]] = status_id_map[invoices_states]
+                    #     elif custom_field["name"] == "Payment Date":
+                    #         # if custom_field["display_value"] != inv["Payment Date"]:
+                    #         display_value = None if custom_field["display_value"] is None else custom_field["display_value"][0:10]
+                    #         payment_date = None if inv["Payment Date"] is None else str(inv["Payment Date"])
+                    #         if display_value != payment_date:
+                    #            custom_field_body[custom_field_id_map["Payment Date"]] = {"date":str(inv["Payment Date"])}
+                    #     elif custom_field["name"] == "Payment Amount" and custom_field["display_value"] != inv["Payment Amount"]:
+                    #         custom_field_body[custom_field_id_map["Payment Amount"]] = inv["Payment Amount"]
+                        # elif custom_field["name"] == "Net" and custom_field["display_value"] != inv["Net"]:
+                        #     if task["name"][4:10] in net_gross_different_dict.keys():
+                        #         net_gross_different_dict[task["name"][4:10]]["Net"]={
+                        #                 "Asana":custom_field["display_value"],
+                        #                 "Xero":inv["Net"]
+                        #             }
+                        #     else:
+                        #         net_gross_different_dict[task["name"][4:10]] = {
+                        #             "Net":{
+                        #                 "Asana":custom_field["display_value"],
+                        #                 "Xero":inv["Net"]
+                        #             }
+                        #         }
+                    if len(custom_field_body) !=0:
+                        body = asana.TasksTaskGidBody(
+                            {
+                                "custom_fields":custom_field_body
+                            }
+                        )
+                        task_api_instance.update_task(task_gid=task["gid"], body=body)
+                        print(f"Processed task with asana id {task['gid']} and invoice number {task['name']}")
                         #     custom_field_body[custom_field_id_map["Invoice status"]]: status_id_map[invoices_states]
                     # if generate_management_report:
                     #     work_sheets.Cells(cur_row, 1).Value = inv["reference"]
@@ -197,6 +200,16 @@ def update_xero_and_asana_invoice_script():
 
                         # work_sheets.Cells(cur_row, 1).Value = inv["reference"]
                         # work_sheets.Cells(cur_row, 1).Value = inv["reference"]
+            # if task["gid"] in all_invoice.keys():
+            #     if task["name"][4:10] != all_invoice[task["gid"]]["Number"] and len(all_invoice[task["gid"]]["Number"])!=0:
+            #         body = asana.TasksTaskGidBody(
+            #             {
+            #                 "name": "INV "+all_invoice[task["gid"]]["Number"]
+            #             }
+            #         )
+            #         task_api_instance.update_task(task_gid=task["gid"], body=body)
+            #         print(f"Processed backlog task with asana id {task['gid']} and invoice number {task['name']}")
+
 
 
 
@@ -214,14 +227,12 @@ def update_xero_and_asana_invoice_script():
             with open(os.path.join(database_dir, "bills.json"), "w") as f:
                 json_object = json.dumps(bill_json, indent=4)
                 f.write(json_object)
-            with open(os.path.join(database_dir, "net_gross_different.json"), "w") as f:
-                json_object = json.dumps(net_gross_different_dict, indent=4)
-                f.write(json_object)
             print(f"The Sync take {time.time() - start}s")
             print("Complete")
             break
         off_set = ori_tasks["next_page"]["offset"]
         # messagebox.showerror("Error", e)
+
 
 def update_asana_project_script():
     start = time.time()
@@ -242,41 +253,44 @@ def update_asana_project_script():
             ori_tasks = task_api_instance.get_tasks_for_project(project_gid=mp_asana_gid, limit=100, opt_fields=task_opt, offset=off_set)
         tasks_list = clean_response(ori_tasks)
         for task in tasks_list:
-            print(f"Processing task: {task['name']} with Asana Gid: {task['gid']}")
-            total_amount = 0
-            paid_amount = 0
-            over_due_amount = 0
-            task = flatter_custom_fields(task)
-            sub_task_list = clean_response(task_api_instance.get_subtasks_for_task(task_gid=task["gid"], opt_fields=sub_task_opt))
-            for sub_task in sub_task_list:
-                if sub_task["projects"] is None:
-                    continue
-                elif invoice_status_asana_gid in [project["gid"] for project in sub_task["projects"]]:
-                    sub_task = flatter_custom_fields(sub_task)
-                    invoice_status = sub_task["Invoice status"]
-                    net = 0 if not isfloat(sub_task["Net"]) else float(sub_task["Net"])
-                    total_amount += net
-                    if invoice_status == "Paid":
-                        paid_amount += net
-                    elif invoice_status == "Sent":
-                        over_due_amount += net
-            if task["gid"] in all_project:
+            if task["gid"] in all_project.keys():
+                print(f"Processing task: {task['name']} with Asana Gid: {task['gid']}")
+                total_amount = 0
+                paid_amount = 0
+                over_due_amount = 0
+                task = flatter_custom_fields(task)
+                sub_task_list = clean_response(task_api_instance.get_subtasks_for_task(task_gid=task["gid"], opt_fields=sub_task_opt))
+                for sub_task in sub_task_list:
+                    if sub_task["projects"] is None:
+                        continue
+                    elif invoice_status_asana_gid in [project["gid"] for project in sub_task["projects"]]:
+                        sub_task = flatter_custom_fields(sub_task)
+                        invoice_status = sub_task["Invoice status"]
+                        net = 0 if not isfloat(sub_task["Net"]) else float(sub_task["Net"])
+                        payment_amount = 0 if not isfloat(sub_task["Payment Amount"]) else float(sub_task["Payment Amount"])
+                        total_amount += net
+                        paid_amount += payment_amount
+                        if invoice_status == "Sent":
+                            over_due_amount += net - payment_amount
                 quotation = all_project[task["gid"]]["Quotation Number"]
                 data_json = json.load(open(os.path.join(database_dir, quotation, "data.json")))
                 data_json["State"]["Asana State"] = task["Status"]
+                data_json["Invoices"]["Paid Fee"] = str(paid_amount)
+                data_json["Invoices"]["Over Due Fee"] = str(over_due_amount)
                 with open(os.path.join(database_dir, quotation, "data.json"), "w") as f:
                     json_object = json.dumps(data_json, indent=4)
                     f.write(json_object)
 
-            if str(total_amount) != task["Fee ExGST"] or str(paid_amount) != task["Total Paid ExGST"] or str(over_due_amount) != task["Overdue Amount"]:
-                asana_update_body = asana.TasksTaskGidBody({
-                    "custom_fields": {
-                        custom_field_id_map["Fee ExGST"]: total_amount,
-                        custom_field_id_map["Overdue Amount"]: over_due_amount,
-                        custom_field_id_map["Total Paid ExGST"]: paid_amount
-                    }
-                })
-                task_api_instance.update_task(task_gid=task["gid"], body=asana_update_body)
+                if str(total_amount) != task["Fee ExGST"] or str(paid_amount) != task["Total Paid ExGST"] or str(over_due_amount) != task["Overdue Amount"]:
+                    asana_update_body = asana.TasksTaskGidBody({
+                        "custom_fields": {
+                            custom_field_id_map["Fee ExGST"]: total_amount,
+                            custom_field_id_map["Overdue Amount"]: over_due_amount,
+                            custom_field_id_map["Total Paid ExGST"]: paid_amount
+                        }
+                    })
+                    task_api_instance.update_task(task_gid=task["gid"], body=asana_update_body)
+                    print(f"Update Asana Task Gid: {task['gid']}")
 
 
 
@@ -295,4 +309,4 @@ def update_asana_project_script():
 if __name__ == '__main__':
     refresh_token()
     update_xero_and_asana_invoice_script()
-    update_asana_project_script()
+    # update_asana_project_script()
