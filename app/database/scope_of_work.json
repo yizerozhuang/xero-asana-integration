@@ -62,7 +62,8 @@
                 "Creation of a three-dimensional model for the car park suitable for the CFD simulations. ",
                 "CFD ventilation simulations to assess the performance of the proposed design. This will provide a basis on which to compare subsequent designs. ",
                 "CFD ventilation simulations for up to three design changes. This includes altering natural ventilation openings, supply/exhaust flow rates, re-locating jet fans, etc. ",
-                "Preparation of a Technical Report detailing the results and recommendations."
+                "Preparation of a Technical Report detailing the results and recommendations.",
+                "1 off site visit/Meeting"
             ],
             "Clarifications": [
                 "We have allowed 3 off model simulation/modification, if additional simulations are required (for example, in the event of still unacceptable CO levels) then these will be discussed with the client and will be subject to a variation.",
@@ -149,7 +150,9 @@
         "Miscellaneous": {
             "Extent": [],
             "Clarifications": [],
-            "Deliverables": []
+            "Deliverables": [
+                "Design certificate"
+            ]
         },
         "Installation": {
             "Extent": [
@@ -158,12 +161,11 @@
                 "Supply and install 1 off Dakin split cassette unit, model FCA100 (10.0 kW cooling capacity).",
                 "Supply and install refrigeration piping, wire and control to the unit.",
                 "Supply and install 2 off kitchen exhaust hoods, kitchen exhaust ductwork from the connection of the hood to connection point under the roof as shown on drawings, including all supports and fittings.",
-                "Supply and install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including ductwork, flexible duct, all supports and fittings.",
+                "Supply and install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including, ductwork, flexible duct, all supports and fittings.",
                 "Supply and install toilet exhaust system from connection point under the roof as shown on drawings to toilet, including toilet exhaust fan, ductwork, flexible duct, all supports and fittings.",
                 "Supply and install 15 off 4-way blow supply air grille to suite the current layout from base building AC supply air duct, including all grilles, thermostats, control panels, dampers as required.",
                 "Balancing, testing and commissioning to all the system installed as per the above.",
                 "12 month defect liability period."
-
             ],
             "Clarifications": [
                 "Provision of all external louvers.",
@@ -294,7 +296,12 @@
                 "Temporary work",
                 "Fire Protection Services"
             ],
-            "Deliverables": []
+            "Deliverables": [
+                "PDF spatial sketch as required",
+                "Equipment specification",
+                "Full set of drawings in PDF and AutoCAD 2D",
+                "D&BP Act class 2 building design declaration"
+            ]
         },
         "Hydraulic Service": {
             "Extent": [
@@ -323,7 +330,12 @@
                 "Diversions, upgrades and/or extension of Authority infrastructure services.",
                 "Shop drawings and work shop drawings"
             ],
-            "Deliverables": []
+            "Deliverables": [
+                "PDF spatial sketch as required",
+                "Equipment specification",
+                "Full set of drawings in PDF and AutoCAD 2D",
+                "D&BP Act class 2 building design declaration"
+            ]
         },
         "Fire Service": {
             "Extent": [
@@ -355,12 +367,11 @@
                 "Supply and install 1 off Dakin split cassette unit, model FCA100 (10.0 kW cooling capacity).",
                 "Supply and install refrigeration piping, wire and control to the unit.",
                 "Supply and install 2 off kitchen exhaust hoods, kitchen exhaust ductwork from the connection of the hood to connection point under the roof as shown on drawings, including all supports and fittings.",
-                "Supply and install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including ductwork, flexible duct, all supports and fittings.",
+                "Supply and install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including, ductwork, flexible duct, all supports and fittings.",
                 "Supply and install toilet exhaust system from connection point under the roof as shown on drawings to toilet, including toilet exhaust fan, ductwork, flexible duct, all supports and fittings.",
                 "Supply and install 15 off 4-way blow supply air grille to suite the current layout from base building AC supply air duct, including all grilles, thermostats, control panels, dampers as required.",
                 "Balancing, testing and commissioning to all the system installed as per the above.",
                 "12 month defect liability period."
-
             ],
             "Clarifications": [
                 "Provision of all external louvers.",
