@@ -2,7 +2,7 @@
     "8091": "Awaiting Payment",
     "401001A": "Awaiting Approval",
     "401001A-Invoice_INV-3794": "Awaiting Approval",
-    "": "Paid",
+    "": "Awaiting Payment",
     "INV-00663": "Paid",
     "1793": "Paid",
     "199801": "Paid",
@@ -24,11 +24,17 @@
     "PCE Nissan car": "Paid",
     "INV-1461": "Paid",
     "Service": "Paid",
-    "402020A": "Draft",
+    "402020A": "Awaiting Payment",
     "6000484": "Paid",
     "INV4566": "Paid",
     "20200746": "Paid",
     "Expense": "Paid",
     "Expense Adjust": "Paid",
-    "INV": "Paid"
+    "INV": "Paid",
+    "402020A-Invoice_1388_from_Intuition_Group_Aust_Pty_Ltd": "Draft",
+    "402020B": "Awaiting Payment",
+    "402020A-Invoice_1386_from_Intuition_Group_Aust_Pty_Ltd": "Paid",
+    "402020B-Invoice_1388_from_Intuition_Group_Aust_Pty_Ltd": "Awaiting Payment",
+    "402021A-Provee_Invoice_240131_K028,_Northland_SC,_2-50_Murray_Road,_Preston_VIC": "Draft",
+    "-00393": "Paid"
 }

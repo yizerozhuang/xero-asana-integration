@@ -138,17 +138,17 @@ class FinancialPanelPage(tk.Frame):
                     "Service": tk.Label(self.invoice_frames[service],
                                         text=service + " design and documentation",
                                         width=35,
-                                        font=self.conf["font"],
-                                        pady=2),
+                                        font=self.conf["font"] + ["bold"],
+                                        pady=2, bg="orange"),
                     # "Fee": tk.Label(self.invoice_frames[service],
                     #                 text="$0/$0.0",
                     #                 width=15,
                     #                 font=self.conf["font"]),
                     "Fee": tk.Frame(self.invoice_frames[service]),
-                    "Invoice": [tk.Radiobutton(self.invoice_frames[service],
-                                               width=6,
-                                               variable=self.data["Invoices"]["Details"][service]["Number"],
-                                               value="INV" + str(i + 1)) for i in range(6)],
+                    # "Invoice": [tk.Radiobutton(self.invoice_frames[service],
+                    #                            width=6,
+                    #                            variable=self.data["Invoices"]["Details"][service]["Number"],
+                    #                            value="INV" + str(i + 1)) for i in range(6)],
                     "Expand": [tk.LabelFrame(self.invoice_radio_frame, height=30) for _ in range(self.conf["n_items"])]
                 }
                 tk.Label(self.invoice_dic[service]["Fee"], text="$").grid(row=0, column=0)
@@ -162,14 +162,17 @@ class FinancialPanelPage(tk.Frame):
                         "Service": tk.Label(self.invoice_dic[service]["Expand"][i],
                                             width=35,
                                             font=self.conf["font"],
-                                            textvariable=details[service]["Content"][i]["Service"]),
-                        "Fee": tk.Frame(self.invoice_dic[service]["Expand"][i],
-                                        width=15),
-                        "Invoice": [tk.Radiobutton(self.invoice_dic[service]["Expand"][i],
+                                            textvariable=details[service]["Content"][i]["Service"],
+                                            bg=self.conf["frame_colors"][i%2]),
+                        "Fee": tk.Frame(self.invoice_dic[service]["Expand"][i], width=15),
+                        # "Invoice": [tk.Radiobutton(self.invoice_dic[service]["Expand"][i],
+                        #                            width=6,
+                        #                            variable=self.app.data["Invoices"]["Details"][service]["Content"][i]["Number"],
+                        #                            value="INV" + str(j + 1)) for j in range(6)]
+                        "Invoice": [tk.Checkbutton(self.invoice_dic[service]["Expand"][i],
                                                    width=6,
-                                                   variable=
-                                                   self.app.data["Invoices"]["Details"][service]["Content"][i]["Number"],
-                                                   value="INV" + str(j + 1)) for j in range(6)]
+                                                   variable=self.app.data["Invoices"]["Details"][service]["Content"][i]["Number"],
+                                                   onvalue="INV" + str(j + 1), offvalue="None") for j in range(6)]
                     } for i in range(self.conf["n_items"])
                 ]
                 self.invoice_dic[service]["Service"].grid(row=0, column=0)
@@ -184,15 +187,20 @@ class FinancialPanelPage(tk.Frame):
                     tk.Label(self.invoice_dic[service]["Content"][i]["Fee"], textvariable=details[service]["Content"][i]["in.GST"], width=6).grid(row=0,
                                                                                                                       column=4)
 
-                for i in range(6):
-                    self.invoice_dic[service]["Invoice"][i].grid(row=0, column=2 + i, padx=(2, 0))
+                # for i in range(6):
+                #     self.invoice_dic[service]["Invoice"][i].grid(row=0, column=2 + i, padx=(2, 0))
+                for i in range(self.conf["n_items"]):
+                    self.invoice_dic[service]["Content"][i]["Service"].grid(row=0, column=0, pady=1)
+                    self.invoice_dic[service]["Content"][i]["Fee"].grid(row=0, column=1)
+                    for j in range(6):
+                        self.invoice_dic[service]["Content"][i]["Invoice"][j].grid(row=0, column=2 + j, padx=(2, 0))
 
-
-                details[service]["Expand"].trace("w", lambda a, b, c: self._expand_invoice(service))
+                # self._expand_invoice(service)
+                # details[service]["Expand"].trace("w", lambda a, b, c: self._expand_invoice(service))
 
                 details[service]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(invoice_details))
                 # details[service]["Fee"].trace("w", lambda a, b, c: self.update_fee_label(details[service]["Fee"], self.invoice_dic[service]["Fee"]))
-                details[service]["Number"].trace("w", lambda a, b, c: self.update_invoice_sum(invoice_details))
+                # details[service]["Number"].trace("w", lambda a, b, c: self.update_invoice_sum(invoice_details))
                 # update_label_fuc = lambda i: lambda a, b, c: self.update_fee_label(details[service]["Content"][i]["Fee"], self.invoice_dic[service]["Content"][i]["Fee"])
                 for i in range(self.conf["n_items"]):
                     details[service]["Content"][i]["Fee"].trace("w", lambda a, b, c: self.update_invoice_sum(invoice_details))
@@ -206,30 +214,30 @@ class FinancialPanelPage(tk.Frame):
             self.invoice_frames[service].pack_forget()
             for i in range(self.conf["n_items"]):
                 self.invoice_dic[service]["Expand"][i].pack_forget()
-    def _expand_invoice(self, service):
-        details = self.data["Invoices"]["Details"]
-        if details[service]["Expand"].get():
-            for i in range(self.conf["n_items"]):
-                self.invoice_dic[service]["Content"][i]["Service"].grid(row=0, column=0, pady=1)
-                self.invoice_dic[service]["Content"][i]["Fee"].grid(row=0, column=1)
-                for j in range(6):
-                    self.invoice_dic[service]["Content"][i]["Invoice"][j].grid(row=0, column=2+j, padx=(2, 0))
-            for i in range(6):
-                self.invoice_dic[service]["Invoice"][i].grid_forget()
+    # def _expand_invoice(self, service):
+    #     # details = self.data["Invoices"]["Details"]
+    #     # if details[service]["Expand"].get():
+    #     for i in range(self.conf["n_items"]):
+    #         self.invoice_dic[service]["Content"][i]["Service"].grid(row=0, column=0, pady=1)
+    #         self.invoice_dic[service]["Content"][i]["Fee"].grid(row=0, column=1)
+    #         for j in range(6):
+    #             self.invoice_dic[service]["Content"][i]["Invoice"][j].grid(row=0, column=2+j, padx=(2, 0))
+        # for i in range(6):
+        #     self.invoice_dic[service]["Invoice"][i].grid_forget()
             # self.invoice_dic[service]["Fee"].config(font=self.conf["font"]+["bold"])
-        else:
-            for i in range(self.conf["n_items"]):
-                self.invoice_dic[service]["Content"][i]["Service"].grid_forget()
-                self.invoice_dic[service]["Content"][i]["Fee"].grid_forget()
-                for j in range(6):
-                    self.invoice_dic[service]["Content"][i]["Invoice"][j].grid_forget()
-
-            # self.invoice_dic[service]["Fee"].config(font=self.conf["font"])
-            for i in range(6):
-                self.invoice_dic[service]["Invoice"][i].grid(row=0, column=2+i)
-        details[service]["Number"].set("None")
-        for i in range(self.conf["n_items"]):
-            details[service]["Content"][i]["Number"].set("None")
+        # else:
+        #     for i in range(self.conf["n_items"]):
+        #         self.invoice_dic[service]["Content"][i]["Service"].grid_forget()
+        #         self.invoice_dic[service]["Content"][i]["Fee"].grid_forget()
+        #         for j in range(6):
+        #             self.invoice_dic[service]["Content"][i]["Invoice"][j].grid_forget()
+        #
+        #     # self.invoice_dic[service]["Fee"].config(font=self.conf["font"])
+        #     for i in range(6):
+        #         self.invoice_dic[service]["Invoice"][i].grid(row=0, column=2+i)
+        # details[service]["Number"].set("None")
+        # for i in range(self.conf["n_items"]):
+        #     details[service]["Content"][i]["Number"].set("None")
     def invoice_function_part(self):
         remittance = [
             {
@@ -272,7 +280,7 @@ class FinancialPanelPage(tk.Frame):
 
             full_button = tk.Button(invoice_function_frame, text="REMIT FULL", font=self.conf["font"], bg="cyan",
                                     command=upload_remittance_func("Full", i))
-            full_button.grid(row=i, column=4)
+            full_button.grid(row=i, column=4, padx=(0, 20))
 
             remittance[i]["Full_Upload"].trace("w", button_config_func(remittance[i]["Full_Upload"], full_button))
 
@@ -853,23 +861,53 @@ class FinancialPanelPage(tk.Frame):
             if self.data['Remittances'][i]["Type"].get() == "Full":
                 self.messagebox.show_error("This invoice already has full amount remittance")
                 return
+            part1_upload = self.data['Remittances'][i]['Part1_Upload'].get()
+            part2_upload = self.data['Remittances'][i]['Part2_Upload'].get()
+            part3_upload = self.data['Remittances'][i]['Part3_Upload'].get()
+
             part1_amount = self.data['Remittances'][i]['Part1'].get()
             part2_amount = self.data['Remittances'][i]['Part2'].get()
             part3_amount = self.data['Remittances'][i]['Part3'].get()
             full_amount = self.data['Invoices Number'][i]['in.GST'].get()
             if part == "Part1":
-                if not isfloat(part1_amount) or float(part1_amount) > float(full_amount):
+                if not isfloat(part1_amount):
+                    self.messagebox.show_error("The first remittance amount is wrong")
+                    return
+                elif float(part1_amount) > float(full_amount):
                     self.messagebox.show_error("The amount exceed the full amount")
                     return
                 amount = part1_amount
             elif part == "Part2":
-                if not isfloat(part1_amount) or not isfloat(part2_amount) or float(part1_amount) + float(part2_amount) > float(full_amount):
+                if not part1_upload:
+                    self.messagebox.show_error("Please upload the first remittance first")
+                    return
+                elif not isfloat(part1_amount):
+                    self.messagebox.show_error("The first remittance amount is wrong")
+                    return
+                elif not isfloat(part2_amount):
+                    self.messagebox.show_error("The second remittance amount is wrong")
+                    return
+                elif float(part1_amount) + float(part2_amount) > float(full_amount):
                     self.messagebox.show_error("The amount exceed the full amount")
                     return
                 amount = str(float(part1_amount)+float(part2_amount))
             else:
-                if not isfloat(part1_amount) or not isfloat(part2_amount) or not isfloat(part3_amount) or float(
-                        part1_amount) + float(part2_amount) + float(part3_amount) > float(full_amount):
+                if not part1_upload:
+                    self.messagebox.show_error("Please upload the first remittance first")
+                    return
+                elif not part2_upload:
+                    self.messagebox.show_error("Please upload the second remittance first")
+                    return
+                elif not isfloat(part1_amount):
+                    self.messagebox.show_error("The first remittance amount is wrong")
+                    return
+                elif not isfloat(part2_amount):
+                    self.messagebox.show_error("The second remittance amount is wrong")
+                    return
+                elif not isfloat(part3_amount):
+                    self.messagebox.show_error("The third remittance amount is wrong")
+                    return
+                elif float(part1_amount) + float(part2_amount) + float(part3_amount) > float(full_amount):
                     self.messagebox.show_error("The amount exceed the full amount")
                     return
                 amount = str(float(part1_amount)+float(part2_amount)+float(part3_amount))
@@ -977,7 +1015,7 @@ class FinancialPanelPage(tk.Frame):
 
         refresh_token()
         try:
-            upload_bill_to_xero(self.app, service, i, file, filename)
+            upload_bill_to_xero(self.app, service, i, folder_path, filename)
             update_asana(self.app)
             update_asana_invoices(self.app)
         except Exception as e:

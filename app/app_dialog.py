@@ -20,6 +20,7 @@ class FileSelectDialog(simpledialog.Dialog):
     def __init__(self, app, dir_list, title=None):
         self.dir_list = dir_list
         self.app = app
+        self.conf = app.conf
         super().__init__(app, title)
 
     def body(self, master):
@@ -27,6 +28,9 @@ class FileSelectDialog(simpledialog.Dialog):
         ttk.Combobox(self, textvariable=self.rename_dir, values=self.dir_list).pack()
 
     def ok(self):
+
+        resource_dir = self.conf["resource_dir"]
+        calculation_sheet = self.conf["calculation_sheet"]
         mode = 0o666
         folder_name = self.app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
                       self.app.data["Project Info"]["Project"]["Project Name"].get()
@@ -37,8 +41,8 @@ class FileSelectDialog(simpledialog.Dialog):
         os.mkdir(os.path.join(folder_path, "Plot"), mode)
         os.mkdir(os.path.join(folder_path, "SS"), mode)
 
-        shutil.copyfile("resource\\xlsx\\Preliminary Calculation v2.6.xlsx",
-                        folder_path+"\\Preliminary Calculation v2.6.xlsx")
+        shutil.copyfile(os.path.join(resource_dir, "xlsx", calculation_sheet),
+                        os.path.join(folder_path, calculation_sheet))
         self.app.data["State"]["Folder Renamed"].set(True)
         self.destroy()
         messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {self.rename_dir.get()} to {folder_path}")

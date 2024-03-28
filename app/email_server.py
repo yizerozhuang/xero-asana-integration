@@ -16,7 +16,7 @@ from datetime import datetime
 from PyPDF2 import PdfReader
 from win32com import client as win32client
 from asana_function import update_asana
-
+import pythoncom
 # username = "yee_test@outlook.com"
 # password = "Zero0929"
 # imap_server = "outlook.office365.com"
@@ -59,7 +59,7 @@ def email_server(app=None):
     imap = imaplib.IMAP4_SSL(imap_server)
     imap.login(username, password)
     imap.select("INBOX")
-
+    pythoncom.CoInitialize()
 
     while True:
         try:
@@ -172,18 +172,14 @@ def email_server(app=None):
                                 current_quotation = get_quotation_number()
                                 folder_name = current_quotation + "-" + project_name
                                 folder_path = os.path.join(conf["working_dir"], folder_name)
-                                create_new_folder(folder_name, conf)
+                                create_new_folder(folder_name, conf, current_quotation)
 
-                                database_dir = os.path.join(conf["database_dir"], current_quotation)
-                                accounting_dir = os.path.join(conf["accounting_dir"], current_quotation)
                                 data_json = json.load(open(os.path.join(conf["database_dir"], "data_template.json")))
                                 data_json["Project Info"]["Project"]["Project Name"] = project_name
                                 data_json["Project Info"]["Project"]["Quotation Number"] = current_quotation
                                 data_json["Current_folder_address"] = folder_name
 
                                 data_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
-                                os.makedirs(database_dir)
-                                os.makedirs(accounting_dir)
                                 # with open(os.path.join(database_dir, "data.json"), "w") as f:
                                 #     json_object = json.dumps(data_json, indent=4)
                                 #     f.write(json_object)
@@ -209,7 +205,7 @@ def email_server(app=None):
                                             print(e)
                                 data_json["Email_Content"] = "\n".join([e for e in email_content if len(e.replace(" ", "").replace("\r", ""))!=0])
 
-                                with open(os.path.join(database_dir, "data.json"), "w") as f:
+                                with open(os.path.join(conf["database_dir"], current_quotation, "data.json"), "w") as f:
                                     json_object = json.dumps(data_json, indent=4)
                                     f.write(json_object)
 
@@ -223,7 +219,7 @@ def email_server(app=None):
                                 print("Create New Project")
                             except Exception as e:
                                 print(e)
-                                sent_email_to_admin(msg_data)
+                                # sent_email_to_admin(msg_data)
                             # if content_type == "text/html":
                             #     # if it's HTML, create a new HTML file and open it in browser
                             #     folder_name = clean(subject)

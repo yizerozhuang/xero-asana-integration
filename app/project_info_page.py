@@ -51,11 +51,10 @@ class ProjectInfoPage(tk.Frame):
 
         # self.app.email_text = tk.Text(self.main_context_frame, font=self.conf["font"], height=68)
         # self.app.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
-        if self.app.user in self.conf["engineer_user_list"]:
-            self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=55)
+        if self.app.user in self.conf["admin_user_list"]:
+            self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=85)
         else:
-            self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"],
-                                            font=self.conf["font"], fg="blue", height=85)
+            self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=55)
         self.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
 
         tk.Label(self.main_context_frame, textvariable=self.app.log_text, font=self.conf["font"], justify=tk.LEFT).grid(row=0, column=2, rowspan=6, sticky="n")
@@ -175,6 +174,11 @@ class ProjectInfoPage(tk.Frame):
         # project["Service Type"]["Hydraulic Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Hydraulic Service"]))
         # project["Service Type"]["Fire Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Fire Service"]))
 
+    # def selected(self):
+    #
+    #     if self.client_contact_type.get() == self.data["Project Info"]["Client"]["Contact Type"].get():
+    #         self.data["Project Info"]["Client"]["Contact Type"].set("None")
+
     def client_part(self):
         client = dict()
         self.data["Project Info"]["Client"] = client
@@ -195,9 +199,12 @@ class ProjectInfoPage(tk.Frame):
         contact_type = ["Architect", "Builder", "Certifier", "Contractor", "Developer", "Engineer", "Government", "RDM",
                         "Strata", "Supplier", "Owner/Tenant", "Others"]
 
-        client["Contact Type"] = tk.StringVar(value="Architect")
+        client["Contact Type"] = tk.StringVar(value="None")
+        # self.client_contact_type = tk.StringVar(value="None")
         for i, types in enumerate(contact_type):
-            button = tk.Radiobutton(self.client_frame, text=types, variable=client["Contact Type"], value=types,
+            # button = tk.Radiobutton(self.client_frame, text=types, variable=self.client_contact_type, command=self.selected, value=types,
+            #                         font=self.conf["font"])
+            button = tk.Checkbutton(self.client_frame, text=types, variable=client["Contact Type"], onvalue=types, offvalue="None",
                                     font=self.conf["font"])
             button.grid(row=i//3 + 1, column=i%3 + 2, sticky="W")
 
@@ -231,10 +238,12 @@ class ProjectInfoPage(tk.Frame):
         contact_type = ["Architect", "Builder", "Certifier", "Contractor", "Developer", "Engineer", "Government", "RDM",
                         "Strata", "Supplier", "Owner/Tenant", "Others"]
 
-        main_contact["Contact Type"] = tk.StringVar(value="Architect")
+        main_contact["Contact Type"] = tk.StringVar(value="None")
         for i, types in enumerate(contact_type):
-            button = tk.Radiobutton(self.contact_frame, text=types, variable=main_contact["Contact Type"],
-                                    value=types, font=self.conf["font"])
+            # button = tk.Radiobutton(self.contact_frame, text=types, variable=main_contact["Contact Type"],
+            #                         value=types, font=self.conf["font"])
+            button = tk.Checkbutton(self.contact_frame, text=types, variable=main_contact["Contact Type"], onvalue=types, offvalue="None",
+                                    font=self.conf["font"])
             button.grid(row=i//3+1, column=i%3+2, sticky="W")
 
         contact_info = ["Company", "Address", "ABN",

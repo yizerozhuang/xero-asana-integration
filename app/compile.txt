@@ -1,1 +1,2 @@
 pyinstaller --onefile --icon=.\app\resource\jpg\logo.jpg .\app\main.py
+pyinstaller --onefile .\app\asana_xero_daily_update_script.py

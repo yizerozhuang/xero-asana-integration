@@ -1,4 +1,3 @@
-
 from tkinter import ttk
 
 from app_log import AppLog
@@ -11,6 +10,7 @@ from asana_function import update_asana, update_asana_invoices
 from xero_function import update_xero, refresh_token, login_xero
 from email_server import email_server
 from app_messagebox import AppMessagebox
+from text_extension import TextExtension
 
 
 from PIL import Image, ImageTk
@@ -57,7 +57,7 @@ class App(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.confirm)
 
         config_state(self)
-        if not self.user in self.conf["engineer_user_list"] and not self.conf["test_mode"]:
+        if self.user in self.conf["admin_user_list"] and not self.conf["test_mode"]:
             self.auto_check()
 
     def default_set_up(self):
@@ -120,9 +120,9 @@ class App(tk.Tk):
         self.open_database_button.grid(row=1, column=0)
 
 
-        # tk.Button(function_frame, width=14, text="Design Certificate", bg="brown", fg="white",
-        #                                     command = lambda: open_design_certificate(self),
-        #                                     font=self.conf["font"]).grid(row=2, column=0)
+        tk.Button(function_frame, width=14, text="Design Certificate", bg="brown", fg="white",
+                                            command = lambda: open_design_certificate(self),
+                                            font=self.conf["font"]).grid(row=2, column=0)
 
 
         tk.Button(function_frame, text="Rename Project", command=self._rename_project, bg="brown", fg="white",
@@ -280,8 +280,7 @@ class App(tk.Tk):
         # }
 
         self.fee_proposal_page.update_fee("Variation", True)
-        self.fee_proposal_page.fee_dic["Variation"]["Expand"].grid_forget()
-        tk.Label(self.fee_proposal_page.fee_frames["Variation"], text="", width=10).grid(row=0, column=0)
+        # self.fee_proposal_page.fee_dic["Variation"]["Expand"].grid_forget()
         self.fee_proposal_page.fee_dic["Variation"]["Service"].config(text="Variation", bg="cyan")
         self.fee_proposal_page.fee_frames["Variation"].pack(side=tk.BOTTOM)
 
@@ -291,7 +290,7 @@ class App(tk.Tk):
         self.financial_panel_page.update_bill("Variation", True)
         self.financial_panel_page.update_profit("Variation", True)
 
-        self.data["Invoices"]["Details"]["Variation"]["Expand"].set(True)
+        # self.data["Invoices"]["Details"]["Variation"]["Expand"].set(True)
 
         for i in range(self.conf["n_bills"], -1, -1):
             self.financial_panel_page.invoice_dic["Variation"]["Expand"][i].pack_forget()
@@ -323,12 +322,19 @@ class App(tk.Tk):
         # self.financial_panel_page.update_profit(variation_var)
 
     def utility_search(self):
-        self.show_frame(self.search_bar_page)
-        self.search_bar_page.entry.delete(0, "end")
-        self.search_bar_page.entry.insert(0, self.utility_search_string_var.get())
-        self.search_bar_page.check(None)
+        data = self.search_bar_page.check(None, self.utility_search_string_var.get().strip())
+        if len(set(data)) == 1:
+            load_data(self, data[0][0])
+            self.show_frame(self.project_info_page)
+        else:
+            self.search_bar_page.entry.delete(0, "end")
+            self.search_bar_page.entry.insert(0, self.utility_search_string_var.get().strip())
+            self.search_bar_page.check(None)
+            self.search_bar_page.refresh()
+            self.show_frame(self.search_bar_page)
         self.utility_search_string_var.set("")
-        self.search_bar_page.refresh()
+
+
 
     def utility_reset(self):
         reset(self)
@@ -367,7 +373,7 @@ class App(tk.Tk):
         # tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=1, column=1)
 
     def role_check(self):
-        if self.user in conf["engineer_user_list"]:
+        if not self.user in conf["admin_user_list"]:
             # self.project_info_page.client_frame.grid_forget()
             # self.project_info_page.contact_frame.grid_forget()
             self.project_info_page.finish_frame.grid_forget()
@@ -565,7 +571,7 @@ class App(tk.Tk):
                 contact = self.data["Project Info"][address_to]["Full Name"].get()
             else:
                 contact = self.data["Project Info"][address_to]["Company"].get() + ", " + self.data["Project Info"][address_to]["Full Name"].get()
-        true = False
+        # true = False
         refresh_token()
         true=update_xero(self, contact)
         # self.messagebox.show_error("You Haven't login xero yet")
@@ -670,7 +676,7 @@ class App(tk.Tk):
             webbrowser.open(accounting_dir)
 
     def _config_frame(self, tk_object, state):
-        if type(tk_object)==tk.Frame or type(tk_object)==tk.LabelFrame:
+        if type(tk_object)==tk.Frame or type(tk_object)==tk.LabelFrame or type(tk_object)==TextExtension:
             for child in tk_object.winfo_children():
                 self._config_frame(child, state)
         else:

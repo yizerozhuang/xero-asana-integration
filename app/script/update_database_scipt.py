@@ -4,6 +4,7 @@ from asana_function import clean_response
 import asana
 import os
 import json
+from win32com import client as win32client
 import time
 import shutil
 
@@ -27,38 +28,43 @@ for dir in os.listdir(database_dir):
         data_dir = os.path.join(database_dir, dir, "data.json")
         data_json = json.load(open(data_dir))
 
-        # data_json["Login_user"] = ""
-        # data_json["Invoices"]["Paid Fee"] = ""
-        # data_json["Fee Proposal"]["Calculation Part"] = {
-        #     "Car Park":[
-        #         {
-        #             "Project": "",
-        #             "Car park Level": "",
-        #             "Number of Carports": "",
-        #             "Level Factor": "0",
-        #             "Carport Factor": "0",
-        #             "Complex Factor": "0",
-        #             "CFD Cost": "0"
-        #         } for _ in range(conf["car_park_row"])
-        #     ],
-        #     "Apt": "",
-        #     "Custom Apt": "",
-        #     "Area": "",
-        #     "Custom Area": ""
-        # }
-        if len(data_json["Project Info"]["Project"]["Project Number"])!=0:
-            address = os.path.join(data_json["Project Info"]["Project"]["Project Number"]+"-"+data_json["Project Info"]["Project"]["Project Name"])
-        else:
-            address = os.path.join(data_json["Project Info"]["Project"]["Quotation Number"]+"-"+data_json["Project Info"]["Project"]["Project Name"])
-        data_json["Current_folder_address"] = address
-        print(count)
-        count+=1
+        # data_json["Invoices"]["Overdue Fee"] = data_json["Invoices"].pop("Over Due Fee")
+        #
+        # for service in conf["invoice_list"]:
+        #     if not data_json["Invoices"]["Details"][service]["Expand"] and len(data_json["Invoices"]["Details"][service]["Fee"])!=0:
+        #         data_json["Invoices"]["Details"][service]["Content"][0]["Service"] = f"{service} Design and Documentation Full Amount"
+        #         data_json["Invoices"]["Details"][service]["Content"][0]["Fee"] = data_json["Invoices"]["Details"][service]["Fee"]
+        #         data_json["Invoices"]["Details"][service]["Content"][0]["in.GST"] = data_json["Invoices"]["Details"][service]["in.GST"]
+        #         data_json["Invoices"]["Details"][service]["Content"][0]["Number"] = data_json["Invoices"]["Details"][service]["Number"]
+        #         for i in range(1, 4):
+        #             data_json["Invoices"]["Details"][service]["Content"][i]["Service"] = ""
+        #             data_json["Invoices"]["Details"][service]["Content"][i]["Fee"] = ""
+        #             data_json["Invoices"]["Details"][service]["Content"][i]["in.GST"] = ""
+        #             data_json["Invoices"]["Details"][service]["Content"][i]["Number"] = "None"
+        #     data_json["Invoices"]["Details"][service].pop("Expand")
+        #     data_json["Invoices"]["Details"][service].pop("Number")
+
+        # folder_dir = data_json["Current_folder_address"]
+        # if not os.path.exists(os.path.join(conf["working_dir"], folder_dir)):
+        #     print()
+        # shortcut_dir = os.path.join(conf["working_dir"], folder_dir, "Database Shortcut.lnk")
+        # shortcut_working_dir = conf["accounting_dir"]
+        # shell = win32client.Dispatch("WScript.Shell")
+        # shortcut = shell.CreateShortcut(shortcut_dir)
+        # accounting_dir = os.path.join(conf["accounting_dir"],  data_json["Project Info"]["Project"]["Quotation Number"])
+        # if not os.path.exists(accounting_dir):
+        #     print()
+        # shortcut.Targetpath = accounting_dir
+        # shortcut.WorkingDirectory = shortcut_working_dir
+        # # shortcut.IconLocation = os.path.join(conf["resource_dir"], "jpg", "logo.jpg")
+        # shortcut.save()
 
 
         with open(data_dir, "w") as f:
             json_object = json.dumps(data_json, indent=4)
             f.write(json_object)
-
+        print(count)
+        count+=1
         # if not os.path.exists(os.path.join(database_dir, dir)):
         #     os.makedirs(os.path.join(database_dir, dir))
         # shutil.move(data_dir, os.path.join(database_dir, dir, "data.json"))

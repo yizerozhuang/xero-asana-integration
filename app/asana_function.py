@@ -19,7 +19,9 @@ workspace_gid = '1198726743417674'
 user_gid_map = {
     "Admin": "1203283895754383",
     "Felix": "1198835648677067",
-    "Engineer1": "1203396624150040"
+    "Engineer1": "1203396624150040",
+    "Engineer2": "1203283895754383",
+    "Engineer3": "1203283895754383"
 }
 #
 
@@ -164,6 +166,12 @@ def update_asana(app, *args):
         main_contact_list.append(data["Project Info"]["Main Contact"]["Full Name"].get())
     main_contact_name = "-".join(main_contact_list)
 
+    main_contact_type = data["Project Info"]["Main Contact"]["Contact Type"].get()
+    if main_contact_type == "None":
+        main_contact_type = None
+    else:
+        main_contact_type = contact_id_map[data["Project Info"]["Main Contact"]["Contact Type"].get()]
+
 
     asana_update_body = {
         "name": name,
@@ -177,8 +185,8 @@ def update_asana(app, *args):
             custom_field_id_map["Feature/Notes"]: data["Project Info"]["Building Features"]["Feature"].get(),
             custom_field_id_map["Client"]: client_name,
             custom_field_id_map["Main Contact"]: main_contact_name,
-            custom_field_id_map["Contact Type"]: contact_id_map[data["Project Info"]["Main Contact"]["Contact Type"].get()],
-            custom_field_id_map["Fee ExGST"]:float(data["Invoices"]["Fee"].get()) if isfloat(data["Invoices"]["Fee"].get()) and len(data["Invoices"]["Fee"].get())!=0 else 0
+            custom_field_id_map["Contact Type"]: main_contact_type,
+            custom_field_id_map["Fee ExGST"]: float(data["Invoices"]["Fee"].get()) if isfloat(data["Invoices"]["Fee"].get()) and len(data["Invoices"]["Fee"].get())!=0 else 0
             # custom_field_id_map["Total Paid ExGST"]: float(data["Invoices"]["Paid Fee"].get())if isfloat(data["Invoices"]["Paid Fee"].get()) and len(data["Invoices"]["Paid Fee"].get())!=0 else 0,
             # custom_field_id_map["Overdue Amount"]: float(data["Invoices"]["Over Due Fee"].get()) if isfloat(data["Invoices"]["Over Due Fee"].get()) and len(data["Invoices"]["Over Due Fee"].get()) != 0 else 0
         }
@@ -382,26 +390,26 @@ def update_asana_invoices(app, inv_list=None):
                 value["Content"][i]["Asana_id"].set(new_bill_task_gid)
                 # asana_bill_list[f"BILL {data['Project Info']['Project']['Quotation Number'].get() + key}"] = response["data"]["gid"]
             else:
-                try:
-                    task_api_instance.get_task(value["Content"][i]["Asana_id"].get())
-                except Exception as e:
-                    print(f'Can not find the Asana Bill Task {value["Content"][i]["Asana_id"].get()}, Creating New Asana Bill Task')
-                    body = asana.TasksTaskGidBody(
-                        {
-                            "name": f"BIL {data['Project Info']['Project']['Project Number'].get() + value['Content'][i]['Number'].get()}"
-                        }
-                    )
-                    response = template_api_instance.instantiate_task(body=body,
-                                                                      task_template_gid=bill_template_id).to_dict()
-                    new_bill_task_gid = response["data"]['new_task']["gid"]
-                    body = asana.TasksTaskGidBody(
-                        {
-                            "parent": task_id,
-                            "insert_before": None
-                        }
-                    )
-                    task_api_instance.set_parent_for_task(body=body, task_gid=new_bill_task_gid)
-                    value["Content"][i]["Asana_id"].set(new_bill_task_gid)
+                # try:
+                task_api_instance.get_task(value["Content"][i]["Asana_id"].get())
+                # except Exception as e:
+                #     print(f'Can not find the Asana Bill Task {value["Content"][i]["Asana_id"].get()}, Creating New Asana Bill Task')
+                #     body = asana.TasksTaskGidBody(
+                #         {
+                #             "name": f"BIL {data['Project Info']['Project']['Project Number'].get() + value['Content'][i]['Number'].get()}"
+                #         }
+                #     )
+                #     response = template_api_instance.instantiate_task(body=body,
+                #                                                       task_template_gid=bill_template_id).to_dict()
+                #     new_bill_task_gid = response["data"]['new_task']["gid"]
+                #     body = asana.TasksTaskGidBody(
+                #         {
+                #             "parent": task_id,
+                #             "insert_before": None
+                #         }
+                #     )
+                #     task_api_instance.set_parent_for_task(body=body, task_gid=new_bill_task_gid)
+                #     value["Content"][i]["Asana_id"].set(new_bill_task_gid)
 
 
             state = value["Content"][i]["State"].get()
@@ -410,8 +418,8 @@ def update_asana_invoices(app, inv_list=None):
                 {
                     "custom_fields": {
                         custom_field_id_map["Bill status"]: status_id_map[state],
-                        custom_field_id_map["Amount Excl GST"]: str(value["Fee"].get()) if len(str(value["Fee"].get()))!=0 else "0",
-                        custom_field_id_map["Amount Incl GST"]: str(value["in.GST"].get()) if len(str(value["in.GST"].get())) != 0 else "0"
+                        custom_field_id_map["Amount Excl GST"]: str(value["Content"][i]["Fee"].get()) if len(str(value["Content"][i]["Fee"].get()))!=0 else "0",
+                        custom_field_id_map["Amount Incl GST"]: str(value["Content"][i]["in.GST"].get()) if len(str(value["Content"][i]["in.GST"].get())) != 0 else "0"
                     }
                 }
             )
