@@ -9,6 +9,45 @@ from utility import load_data, increment_excel_column
 import openpyxl
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
+
+def return_self_mp():
+    return {
+        "Quote. No.": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
+        "Proj. No.": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
+        "Project detailed address": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
+        "Shop Name": lambda data_json: data_json["Project Info"]["Project"]["Shop Name"],
+        "Scale": lambda data_json: data_json["Project Info"]["Project"]["Proposal Type"],
+        "Proj. Type": lambda data_json: data_json["Project Info"]["Project"]["Project Type"],
+        "Project Status": show_status,
+        "Address To": lambda data_json: data_json["Address_to"],
+        "Service Been Engaged": lambda data_json: ", ".join(
+            [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
+             service["Include"]]),
+        "Fee Sent On": lambda data_json: data_json["Email"]["Fee Proposal"],
+        "1st Chase":lambda data_json: data_json["Email"]["First Chase"],
+        "2nd Chase":lambda data_json: data_json["Email"]["Second Chase"],
+        "3rd Chase":lambda data_json: data_json["Email"]["Third Chase"],
+        "Client Name": lambda data_json: data_json["Project Info"]["Client"]["Full Name"],
+        "Client Type": lambda data_json: data_json["Project Info"]["Client"]["Contact Type"],
+        "Client Company": lambda data_json: data_json["Project Info"]["Client"]["Company"],
+        "Main Con Name": lambda data_json: data_json["Project Info"]["Main Contact"]["Full Name"],
+        "Main Con Type": lambda data_json: data_json["Project Info"]["Main Contact"]["Contact Type"],
+        "Main Con Company": lambda data_json: data_json["Project Info"]["Main Contact"]["Company"],
+        "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
+        "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
+        "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
+        "INV--01": lambda data_json: show_invoice(data_json, 0),
+        "INV--02": lambda data_json: show_invoice(data_json, 1),
+        "INV--03": lambda data_json: show_invoice(data_json, 2),
+        "INV--04": lambda data_json: show_invoice(data_json, 3),
+        "INV--05": lambda data_json: show_invoice(data_json, 4),
+        "INV--06": lambda data_json: show_invoice(data_json, 5),
+        "Paid InGST": lambda data_json: data_json["Invoices"]["Paid Fee"],
+        "Overdue InGST": lambda data_json: data_json["Invoices"]["Overdue Fee"],
+        "Total Fee InGST": lambda data_json: data_json["Invoices"]["in.GST"],
+        "Total Bill InGST": lambda data_json: data_json["Bills"]["in.GST"]
+    }
+
 def sortby(tree, col, descending):
     """sort tree contents when a column header is clicked on"""
     # grab values to sort
@@ -78,8 +117,32 @@ class SearchBarPage(tk.Frame):
         self.generate_convert_map()
         self.search_bar()
         self.build_tree()
+        # self.generate_mp()
+
         self.reset()
 
+
+    def generate_mp(self):
+        database_dir = conf["database_dir"]
+        mp_json = {}
+        for dir in os.listdir(database_dir):
+            # print(dir)
+            if os.path.isdir(os.path.join(database_dir, dir)):
+                data_dir = os.path.join(database_dir, dir, "data.json")
+                data_json = json.load(open(data_dir))
+                mp_json[data_json["Project Info"]["Project"]["Quotation Number"]] = {k: v(data_json) for k, v in self.mp_convert_map.items()}
+
+        mp_dir = os.path.join(database_dir, "mp.json")
+
+        mp_json_list = list(mp_json.keys())
+        mp_json_list.sort(reverse=True)
+        new_mp_json_list = {}
+        for quotation in mp_json_list:
+            new_mp_json_list[quotation] = mp_json[quotation]
+        mp_json = new_mp_json_list
+        with open(mp_dir, "w") as f:
+            json_object = json.dumps(mp_json, indent=4)
+            f.write(json_object)
 
     def reset(self):
         self.generate_data()
@@ -87,53 +150,21 @@ class SearchBarPage(tk.Frame):
 
 
     def generate_convert_map(self):
-        self.mp_convert_map = {
-            "Quotation Number": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
-            "Project Number": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
-            "Project Name": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
-            "Shop Name": lambda data_json: data_json["Project Info"]["Project"]["Shop Name"],
-            "Proposal Type": lambda data_json: data_json["Project Info"]["Project"]["Proposal Type"],
-            "Project Type": lambda data_json: data_json["Project Info"]["Project"]["Project Type"],
-            "Project Status": show_status,
-            "Address To": lambda data_json: data_json["Address_to"],
-            "Service": lambda data_json: ", ".join(
-                [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
-                 service["Include"]]),
-            "Proposal Sent Date": lambda data_json: data_json["Email"]["Fee Proposal"],
-            "Client Name": lambda data_json: data_json["Project Info"]["Client"]["Full Name"],
-            "Client Contact Type": lambda data_json: data_json["Project Info"]["Client"]["Contact Type"],
-            "Client Company": lambda data_json: data_json["Project Info"]["Client"]["Company"],
-            "Main Contact Name": lambda data_json: data_json["Project Info"]["Main Contact"]["Full Name"],
-            "Main Contact Contact Type": lambda data_json: data_json["Project Info"]["Main Contact"]["Contact Type"],
-            "Main Contact Company": lambda data_json: data_json["Project Info"]["Main Contact"]["Company"],
-            "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
-            "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
-            "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"],
-            "INV1": lambda data_json: show_invoice(data_json, 0),
-            "INV2": lambda data_json: show_invoice(data_json, 1),
-            "INV3": lambda data_json: show_invoice(data_json, 2),
-            "INV4": lambda data_json: show_invoice(data_json, 3),
-            "INV5": lambda data_json: show_invoice(data_json, 4),
-            "INV6": lambda data_json: show_invoice(data_json, 5),
-            "Paid Amount": lambda data_json: data_json["Invoices"]["Paid Fee"],
-            "Over Due Amount": lambda data_json: data_json["Invoices"]["Over Due Fee"],
-            "Total Fee Amount exGST": lambda data_json: data_json["Invoices"]["Fee"],
-            "Total Bill Amount exGST": lambda data_json: data_json["Bills"]["Fee"]
-        }
-        if self.app.user in self.conf["engineer_user_list"]:
+        self.mp_convert_map = return_self_mp()
+        if not self.app.user in self.conf["admin_user_list"]:
             self.convert_map = {
-                "Quotation Number": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
-                "Project Number": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
-                "Project Name": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
+                "Quote. No.": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
+                "Proj. No.": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
+                "Project detailed address": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
                 "Shop Name": lambda data_json: data_json["Project Info"]["Project"]["Shop Name"],
-                "Proposal Type": lambda data_json: data_json["Project Info"]["Project"]["Proposal Type"],
-                "Project Type": lambda data_json: data_json["Project Info"]["Project"]["Project Type"],
+                "Scale": lambda data_json: data_json["Project Info"]["Project"]["Proposal Type"],
+                "Proj. Type": lambda data_json: data_json["Project Info"]["Project"]["Project Type"],
                 "Project Status": show_status,
                 "Address To": lambda data_json: data_json["Address_to"],
-                "Service": lambda data_json: ", ".join(
+                "Service Been Engaged": lambda data_json: ", ".join(
                     [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
                      service["Include"]]),
-                "Proposal Sent Date": lambda data_json: data_json["Email"]["Fee Proposal"],
+                "Fee Sent On": lambda data_json: data_json["Email"]["Fee Proposal"],
                 "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
                 "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
                 "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"]
@@ -211,24 +242,27 @@ class SearchBarPage(tk.Frame):
         value = self.tree.item(selected, "values")
         # self.app.data["Project Info"]["Project"]["Quotation Number"].set(value[0])
         load_data(self.app, value[0])
-    def check(self, e):
-        typed = self.entry.get()
+    def check(self, e, search_string=None):
+        if search_string is None:
+            typed = self.entry.get().strip()
+        else:
+            typed = search_string
         if typed == "":
             data = self.master_project
         else:
             data = []
             for item in self.master_project:
                 for title in item:
-                    if title is None:
-                        print()
-                    if typed.lower() in title.lower():
+                    if not title is None and typed.lower() in title.lower():
                         data.append(item)
         self.update_data(set(data))
+        return data
+
 
     def refresh(self):
         self.generate_data()
         self.check(None)
-        sortby(self.tree, "Quotation Number", True)
+        sortby(self.tree, "Quote. No.", True)
 
     def reset_scrollregion(self, event):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
@@ -249,7 +283,7 @@ class SearchBarPage(tk.Frame):
                 report_ws[f"{cur_col}{cur_row}"] = value
                 cur_col = increment_excel_column(cur_col)
             cur_row+=1
-
+        report_wb.save(report_dir)
         # tab = Table(displayName="Bridge_MP", ref=f"A1:{cur_col}{cur_row}")
         #
         # # Add a default style with striped rows and banded columns
@@ -257,7 +291,6 @@ class SearchBarPage(tk.Frame):
         #                        showLastColumn=False, showRowStripes=True, showColumnStripes=True)
         # tab.tableStyleInfo = style
         # report_ws.add_table(tab)
-        report_wb.save(report_dir)
 
 
         # for project in self.master_project:

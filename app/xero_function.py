@@ -200,6 +200,10 @@ def _process_invoices(inv_list):
         }
     }
     for inv in inv_list:
+        if not inv["invoice_number"].isdigit():
+            continue
+        elif inv["invoice_number"][0] in ["8", "9"]:
+            continue
         if inv["type"] == "ACCREC":
             res["Invoices"][inv["status"]][inv["invoice_number"]] = {
                 "invoice_id": inv["invoice_id"],
@@ -318,8 +322,6 @@ def update_xero(app, contact_name):
             status = "AUTHORISED"
         else:
             status = "DRAFT"
-
-
         line_item_list = []
         for item in invoice_item[i]:
             line_item_list.append(
@@ -346,6 +348,40 @@ def update_xero(app, contact_name):
     invoices = Invoices(invoices=invoices_list)
     try:
         accounting_api.update_or_create_invoices(xero_tenant_id, invoices)
+    except Exception as e:
+        print(e)
+        print("No Data Processed")
+    bills_list = []
+    for service in conf["invoice_list"]:
+        for content in data["Bills"]["Details"][service]["Content"]:
+            if content["Upload"].get() ==False:
+                continue
+            elif len(content["Number"].get()) ==0:
+                continue
+            elif content["State"].get() == "Paid":
+                continue
+            line_item_list = [
+                LineItem(
+                    description=content["Service"].get(),
+                    quantity=1,
+                    unit_amount=float(content["Fee"].get()) if len(content["Fee"].get()) != 0 else 0,
+                    account_code="51310" if content["no.GST"].get() else "51300",
+                    tax_type="OUTPUT" if content["no.GST"].get() else "INPUT"
+                )
+            ]
+            bills_list.append(
+                Invoice(
+                    type="ACCPAY",
+                    contact=contact,
+                    line_items=line_item_list,
+                    invoice_id=content["Xero_id"].get(),
+                    invoice_number=data["Project Info"]["Project"]["Project Number"].get()+content["Number"].get(),
+                    line_amount_types=LineAmountTypes.NOTAX if content["no.GST"].get() else LineAmountTypes.EXCLUSIVE,
+                )
+            )
+    bills = Invoices(invoices=bills_list)
+    try:
+        accounting_api.update_or_create_invoices(xero_tenant_id, bills)
     except Exception as e:
         print(e)
         print("No Data Processed")
@@ -421,6 +457,7 @@ def upload_bill_to_xero(app, service, i, file, file_name):
     else:
         contact = Contact(create_contact(app, contact_name))
 
+    item = data["Bills"]["Details"][service]["Content"][i]
 
     bill = Invoice(
         type="ACCPAY",
@@ -429,27 +466,29 @@ def upload_bill_to_xero(app, service, i, file, file_name):
         due_date=datetime.today(),
         line_items=[
             LineItem(
-                description=data["Bills"]["Details"][service]["Content"][i]["Service"].get(),
+                description=item["Service"].get(),
                 quantity=1,
-                unit_amount=float(data["Bills"]["Details"][service]["Content"][i]["Fee"].get()) if len(data["Bills"]["Details"][service]["Content"][i]["Fee"].get()) != 0 else 0,
-                tax_type="OUTPUT"
+                unit_amount=float(item["Fee"].get()) if len(item["Fee"].get()) != 0 else 0,
+                account_code="51310" if item["no.GST"].get() else "51300",
+                tax_type="OUTPUT" if item["no.GST"].get() else "INPUT"
             )
         ],
-        line_amount_types=LineAmountTypes.NOTAX if data["Bills"]["Details"][service]["Content"][i]["no.GST"].get() else LineAmountTypes.EXCLUSIVE,
+        line_amount_types=LineAmountTypes.NOTAX if item["no.GST"].get() else LineAmountTypes.EXCLUSIVE,
         invoice_number=file_name.split(".")[0],
         reference=file_name.split(".")[0],
         status="DRAFT"
         )
     invoices = Invoices(invoices=[bill])
-    try:
-        api_response = accounting_api.update_or_create_invoices(xero_tenant_id, invoices)
-        invoice_id = api_response.to_dict()["invoices"][0]["invoice_id"]
-        open_file = open(file, 'rb')
-        body = open_file.read()
-        api_response = accounting_api.create_invoice_attachment_by_file_name(xero_tenant_id, invoice_id, file_name, body)
-    except Exception as e:
-        print(e)
-        print("No Data Processed")
+    # try:
+    api_response = accounting_api.update_or_create_invoices(xero_tenant_id, invoices)
+    invoice_id = api_response.to_dict()["invoices"][0]["invoice_id"]
+    data["Bills"]["Details"][service]["Content"][i]["Xero_id"].set(invoice_id)
+    open_file = open(file, 'rb')
+    body = open_file.read()
+    api_response = accounting_api.create_invoice_attachment_by_file_name(xero_tenant_id, invoice_id, file_name, body)
+    # except Exception as e:
+    #     print(e)
+    #     print("No Data Processed")
 @xero_token_required
 def create_contact(app, name):
     xero_tenant_id = get_xero_tenant_id()

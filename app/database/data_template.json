@@ -72,7 +72,7 @@
         },
         "Client": {
             "Full Name": "",
-            "Contact Type": "Architect",
+            "Contact Type": "None",
             "Company": "",
             "Address": "",
             "ABN": "",
@@ -81,7 +81,7 @@
         },
         "Main Contact": {
             "Full Name": "",
-            "Contact Type": "Architect",
+            "Contact Type": "None",
             "Company": "",
             "Address": "",
             "ABN": "",
@@ -1778,8 +1778,6 @@
             "Mechanical Service": {
                 "Include": false,
                 "Service": "Mechanical Service",
-                "Expand": false,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "Mechanical Service Kickoff",
@@ -1812,8 +1810,6 @@
             "CFD Service": {
                 "Include": false,
                 "Service": "CFD Service",
-                "Expand": false,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "CFD Service Kickoff",
@@ -1846,8 +1842,6 @@
             "Electrical Service": {
                 "Include": false,
                 "Service": "Electrical Service",
-                "Expand": false,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "Electrical Service Kickoff",
@@ -1880,8 +1874,6 @@
             "Hydraulic Service": {
                 "Include": false,
                 "Service": "Hydraulic Service",
-                "Expand": false,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "Hydraulic Service Kickoff",
@@ -1914,8 +1906,6 @@
             "Fire Service": {
                 "Include": false,
                 "Service": "Fire Service",
-                "Expand": false,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "Fire Service Kickoff",
@@ -1948,8 +1938,6 @@
             "Mechanical Review": {
                 "Include": false,
                 "Service": "Mechanical Review",
-                "Expand": false,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "Mechanical Review Kickoff",
@@ -1982,8 +1970,6 @@
             "Miscellaneous": {
                 "Include": false,
                 "Service": "Miscellaneous",
-                "Expand": false,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "Miscellaneous Kickoff",
@@ -2016,8 +2002,6 @@
             "Installation": {
                 "Include": false,
                 "Service": "Installation",
-                "Expand": false,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "Installation Kickoff",
@@ -2050,8 +2034,6 @@
             "Variation": {
                 "Include": true,
                 "Service": "Variation",
-                "Expand": true,
-                "Number": "None",
                 "Content": [
                     {
                         "Service": "",
@@ -2083,7 +2065,7 @@
             }
         },
         "Paid Fee": "0",
-        "Over Due Fee": "0",
+        "Overdue Fee": "0",
         "Fee": "0",
         "in.GST": "0"
     },

@@ -84,6 +84,13 @@ def save_to_mp(app, data_json):
 
     mp_json[quotation] = {k:v(data_json) for k, v in mp_convert_map.items()}
 
+    mp_json_list = list(mp_json.keys())
+    mp_json_list.sort(reverse=True)
+    new_mp_json_list = {}
+    for quotation in mp_json_list:
+        new_mp_json_list[quotation] = mp_json[quotation]
+    mp_json = new_mp_json_list
+
     with open(mp_dir, "w") as f:
         json_object = json.dumps(mp_json, indent=4)
         f.write(json_object)
@@ -156,8 +163,8 @@ def load(app, quotation_number):
 
 def unlock_invoice(app):
     for service, value in app.financial_panel_page.invoice_dic.items():
-        for inv in value["Invoice"]:
-            inv.config(state=tk.NORMAL)
+        # for inv in value["Invoice"]:
+        #     inv.config(state=tk.NORMAL)
         for j, item in enumerate(value["Content"]):
             for inv in item["Invoice"]:
                 inv.config(state=tk.NORMAL)
@@ -262,11 +269,11 @@ def generate_all_projects_and_invoices(database_dir):
                     "Invoices": []
                 }
                 for inv in data_json["Invoices Number"]:
-                    if len(inv["Asana_id"])!=0:
-                        invoices[inv["Asana_id"]]={
+                    if len(inv["Asana_id"])!=0 and inv["State"]=="Backlog":
+                        invoices[inv["Asana_id"]] = {
                             "Number": inv["Number"],
                             "Fee": inv["Fee"],
-                            "State": inv["State"]
+                            # "State": inv["State"]
                         }
                         # projects[inv["Asana_id"]]["Invoices"].append(inv["Asana_id"])
     return projects, invoices
@@ -286,7 +293,7 @@ def finish_setup(app):
     if current_folder_address == "":
         create_folder = app.messagebox.ask_yes_no(f"Can not find the folder with quotation number {quotation_number}, do you want to create the folder")
         if create_folder:
-            create_new_folder(folder_name, app.conf)
+            create_new_folder(folder_name, app.conf, quotation_number)
         else:
             return
     else:
@@ -519,8 +526,8 @@ def rename_new_folder(app):
             os.mkdir(os.path.join(folder_path, "Photos"), mode)
             os.mkdir(os.path.join(folder_path, "Plot"), mode)
             os.mkdir(os.path.join(folder_path, "SS"), mode)
-            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Preliminary Calculation v2.6.xlsx"),
-                            os.path.join(folder_path, "Preliminary Calculation v2.6.xlsx"))
+            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", app.conf["calculation_sheet"]),
+                            os.path.join(folder_path, app.conf["calculation_sheet"]))
             messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {rename_list[0]} to {folder_name}")
         else:
             FileSelectDialog(app, rename_list, "Multiple new folders found, please select one")
@@ -532,15 +539,31 @@ def rename_new_folder(app):
     app.log.log_rename_folder(app)
     config_log(app)
 
-def create_new_folder(folder_name, conf):
+def create_new_folder(folder_name, conf, quotation):
+    database_dir = os.path.join(conf["database_dir"], quotation)
+    accounting_dir = os.path.join(conf["accounting_dir"], quotation)
     folder_path = os.path.join(conf["working_dir"], folder_name)
+    calculation_sheet = conf["calculation_sheet"]
+
+    os.makedirs(database_dir)
+    os.makedirs(accounting_dir)
     os.mkdir(folder_path)
     os.mkdir(os.path.join(folder_path, "External"))
     os.mkdir(os.path.join(folder_path, "Photos"))
     os.mkdir(os.path.join(folder_path, "Plot"))
     os.mkdir(os.path.join(folder_path, "SS"))
-    shutil.copyfile(os.path.join(conf["resource_dir"], "xlsx", "Preliminary Calculation v2.6.xlsx"),
-                    os.path.join(folder_path, "Preliminary Calculation v2.6.xlsx"))
+    shutil.copyfile(os.path.join(conf["resource_dir"], "xlsx", calculation_sheet),
+                    os.path.join(folder_path, calculation_sheet))
+
+    shortcut_dir = os.path.join(folder_path, "Database Shortcut.lnk")
+    shortcut_working_dir = conf["accounting_dir"]
+    shell = win32client.Dispatch("WScript.Shell")
+    shortcut = shell.CreateShortcut(shortcut_dir)
+    shortcut.Targetpath = accounting_dir
+    shortcut.WorkingDirectory = shortcut_working_dir
+    # shortcut.IconLocation = os.path.join(conf["resource_dir"], "jpg", "logo.jpg")
+    shortcut.save()
+
 
 def _check_fee(app):
     data = app.data
@@ -570,7 +593,7 @@ def open_design_certificate(app):
     else:
         folder_name = data["Project Info"]["Project"]["Project Number"].get() + "-" + \
                       data["Project Info"]["Project"]["Project Name"].get()
-    folder_path = os.path.join(conf["working_dir"], folder_name)
+    folder_path = conf["working_dir"]+"\\"+folder_name
 
     if len(quotation_number) == 0:
         app.messagebox.show_error("Please enter a Quotation Number before you load")
@@ -594,11 +617,14 @@ def open_design_certificate(app):
         return
     # excel_full_path = os.path.join(folder_path, excel_path)
 
-    excel_full_path = folder_path+"\\"+excel_path
+    excel_full_path = os.path.join(folder_path, excel_path)
     # wb = load_workbook(excel_full_path)
 
 
     excel = win32client.Dispatch("Excel.Application")
+    excel.ScreenUpdating = True
+    excel.DisplayAlerts = True
+    excel.EnableEvents = True
     work_book = excel.Workbooks.Open(excel_full_path)
     work_book.Worksheets("Mechanical Design Certificate").Activate()
 
@@ -626,51 +652,52 @@ def open_design_certificate(app):
                                                                               "Mechanical Design Compliance Certificate.pdf"))
 
 
-def change_type_of_calculator(app):
-    data = app.data
-    proposal_type = data["Project Info"]["Project"]["Proposal Type"].get()
-    quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
-
-    if len(data["Project Info"]["Project"]["Project Number"].get()) == 0:
-        folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                      data["Project Info"]["Project"]["Project Name"].get()
-    else:
-        folder_name = data["Project Info"]["Project"]["Project Number"].get() + "-" + \
-                      data["Project Info"]["Project"]["Project Name"].get()
-    folder_path = os.path.join(app.conf["working_dir"], folder_name)
-
-    if len(quotation_number) == 0:
-        app.messagebox.show_error("Please enter a Quotation Number before you update asana")
-        return
-    elif not os.path.exists(folder_path):
-        app.messagebox.show_error(f"Python cannot find the folder {folder_path}")
-        return
-    excel = None
-    for dir in os.listdir(folder_path):
-        if (dir.startswith("Preliminary Calculation") or dir.startswith("Mech System Calculation")) and dir.endswith(".xlsx"):
-            excel = dir
-            break
-    if proposal_type == "Minor" and excel.startswith("Mech System Calculation"):
-        try:
-            os.remove(os.path.join(folder_path, excel))
-            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Preliminary Calculation v2.6.xlsx"),
-                            os.path.join(folder_path, "Preliminary Calculation v2.6.xlsx"))
-        except Exception as e:
-            print(e)
-            return False
-    elif proposal_type == "Major" and excel.startswith("Preliminary Calculation"):
-        try:
-            os.remove(os.path.join(folder_path, excel))
-            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Mech System Calculation v0.4.xlsx"),
-                            os.path.join(folder_path, "Mech System Calculation v0.4.xlsx"))
-        except Exception as e:
-            print(e)
-            return False
-    elif excel is None:
-        file = "Preliminary Calculation v2.6.xlsx" if proposal_type == "Minor" else "Mech System Calculation v0.4.xlsx"
-        shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", file),
-                        os.path.join(folder_path, file))
-    return True
+# def change_type_of_calculator(app):
+#     data = app.data
+#     proposal_type = data["Project Info"]["Project"]["Proposal Type"].get()
+#     quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
+#
+#
+#     if len(data["Project Info"]["Project"]["Project Number"].get()) == 0:
+#         folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+#                       data["Project Info"]["Project"]["Project Name"].get()
+#     else:
+#         folder_name = data["Project Info"]["Project"]["Project Number"].get() + "-" + \
+#                       data["Project Info"]["Project"]["Project Name"].get()
+#     folder_path = os.path.join(app.conf["working_dir"], folder_name)
+#
+#     if len(quotation_number) == 0:
+#         app.messagebox.show_error("Please enter a Quotation Number before you update asana")
+#         return
+#     elif not os.path.exists(folder_path):
+#         app.messagebox.show_error(f"Python cannot find the folder {folder_path}")
+#         return
+#     excel = None
+#     for dir in os.listdir(folder_path):
+#         if (dir.startswith("Preliminary Calculation") or dir.startswith("Mech System Calculation")) and dir.endswith(".xlsx"):
+#             excel = dir
+#             break
+#     if proposal_type == "Minor" and excel.startswith("Mech System Calculation"):
+#         try:
+#             os.remove(os.path.join(folder_path, excel))
+#             shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Preliminary Calculation v2.6.xlsx"),
+#                             os.path.join(folder_path, "Preliminary Calculation v2.6.xlsx"))
+#         except Exception as e:
+#             print(e)
+#             return False
+#     elif proposal_type == "Major" and excel.startswith("Preliminary Calculation"):
+#         try:
+#             os.remove(os.path.join(folder_path, excel))
+#             shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", "Mech System Calculation v0.4.xlsx"),
+#                             os.path.join(folder_path, "Mech System Calculation v0.4.xlsx"))
+#         except Exception as e:
+#             print(e)
+#             return False
+#     elif excel is None:
+#         file = "Preliminary Calculation v2.6.xlsx" if proposal_type == "Minor" else "Mech System Calculation v0.4.xlsx"
+#         shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", file),
+#                         os.path.join(folder_path, file))
+#     return True
 
 def preview_fee_proposal(app, *args):
     check_accounting_folder(app)
@@ -1120,39 +1147,39 @@ def _major_project_fee_section(data, work_sheets, n_stage, page, row_per_page):
         work_sheets.Cells(cur_row, 2).Value = service
 
         if n_stage == 1:
-            if data["Invoices"]["Details"][service]["Expand"].get():
-                for j in range(n_stage):
-                    item = data["Invoices"]["Details"][service]["Content"][j]
-                    item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
-                    work_sheets.Cells(cur_row, 4 + j).Value = item_fee
-                    stage_total[j] += item_fee
+            # if data["Invoices"]["Details"][service]["Expand"].get():
+            for j in range(n_stage):
+                item = data["Invoices"]["Details"][service]["Content"][j]
+                item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
+                work_sheets.Cells(cur_row, 4 + j).Value = item_fee
+                stage_total[j] += item_fee
             work_sheets.Cells(cur_row, 8).Value = float(data["Invoices"]["Details"][service]["Fee"].get())
             cur_row +=1
         elif n_stage == 2:
-            if data["Invoices"]["Details"][service]["Expand"].get():
-                for j in range(n_stage):
-                    item = data["Invoices"]["Details"][service]["Content"][j]
-                    item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
-                    work_sheets.Cells(cur_row, 4 + 2*j).Value = item_fee
-                    stage_total[j] += item_fee
+            # if data["Invoices"]["Details"][service]["Expand"].get():
+            for j in range(n_stage):
+                item = data["Invoices"]["Details"][service]["Content"][j]
+                item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
+                work_sheets.Cells(cur_row, 4 + 2*j).Value = item_fee
+                stage_total[j] += item_fee
             work_sheets.Cells(cur_row, 8).Value = float(data["Invoices"]["Details"][service]["Fee"].get())
             cur_row +=1
         elif n_stage == 3:
-            if data["Invoices"]["Details"][service]["Expand"].get():
-                for j in range(n_stage):
-                    item = data["Invoices"]["Details"][service]["Content"][j]
-                    item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
-                    work_sheets.Cells(cur_row, 4 + j).Value = item_fee
-                    stage_total[j] += item_fee
+            # if data["Invoices"]["Details"][service]["Expand"].get():
+            for j in range(n_stage):
+                item = data["Invoices"]["Details"][service]["Content"][j]
+                item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
+                work_sheets.Cells(cur_row, 4 + j).Value = item_fee
+                stage_total[j] += item_fee
             work_sheets.Cells(cur_row, 7).Value = float(data["Invoices"]["Details"][service]["Fee"].get())
             cur_row +=1
         elif n_stage == 4:
-            if data["Invoices"]["Details"][service]["Expand"].get():
-                for j in range(n_stage):
-                    item = data["Invoices"]["Details"][service]["Content"][j]
-                    item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
-                    work_sheets.Cells(cur_row, 4 + j).Value = item_fee
-                    stage_total[j] += item_fee
+            # if data["Invoices"]["Details"][service]["Expand"].get():
+            for j in range(n_stage):
+                item = data["Invoices"]["Details"][service]["Content"][j]
+                item_fee = float(item["Fee"].get()) if len(item["Fee"].get()) !=0 else 0
+                work_sheets.Cells(cur_row, 4 + j).Value = item_fee
+                stage_total[j] += item_fee
             work_sheets.Cells(cur_row, 8).Value = float(data["Invoices"]["Details"][service]["Fee"].get())
             cur_row +=1
 
@@ -1274,41 +1301,41 @@ def excel_print_invoice(app, inv):
             for service in data["Invoices"]["Details"].values():
                 if not service["Include"].get() or service["Service"].get()=="Variation":
                     continue
-                if service["Expand"].get():
-                    work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
-                    # work_sheets.Cells(cur_row, 7).Value = "Amount"
-                    # work_sheets.Cells(cur_row, 8).Value = "This pay"
-                    cur_row += 1
-                    for item in service["Content"]:
-                        if len(item["Fee"].get()) != 0:
-                            work_sheets.Cells(cur_row, 1).Value = item["Service"].get()
-                            work_sheets.Cells(cur_row, 7).Value = item["Fee"].get()
-                            if item["Number"].get() == f"INV{str(inv+1)}":
-                                work_sheets.Cells(cur_row, 8).Value = item["Fee"].get()
-                                work_sheets.Cells(cur_row, 9).Value = item["Fee"].get()
-                                work_sheets.Cells(cur_row, 10).Value = item["in.GST"].get()
-                                total_fee += float(item["Fee"].get())
-                                total_inGST += float(item["in.GST"].get()) if len(item["in.GST"].get()) != 0 else 0
-                            cur_row += 1
-                    work_sheets.Cells(cur_row, 6).Value = "Total: "
-                    work_sheets.Cells(cur_row, 6).Font.Bold = True
-                    work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
-                    work_sheets.Cells(cur_row, 7).Font.Bold = True
-                    cur_row += 2
-                else:
-                    work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
-                    # work_sheets.Cells(cur_row+1, 2).Value = "Payment Instalments"
-                    # work_sheets.Cells(cur_row+1, 7).Value = "Amount"
-                    # work_sheets.Cells(cur_row+1, 8).Value = "This pay"
-                    # work_sheets.Cells(cur_row+2, 1).Value = "The Full amount for design and documentation"
-                    work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
-                    if service["Number"].get() == f"INV{str(inv+1)}":
-                        work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
-                        work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
-                        work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
-                        total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
-                        total_inGST += float(service["in.GST"].get()) if len(service["Fee"].get()) !=0 else 0
-                    cur_row+=2
+                # if service["Expand"].get():
+                work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
+                # work_sheets.Cells(cur_row, 7).Value = "Amount"
+                # work_sheets.Cells(cur_row, 8).Value = "This pay"
+                cur_row += 1
+                for item in service["Content"]:
+                    if len(item["Fee"].get()) != 0:
+                        work_sheets.Cells(cur_row, 1).Value = item["Service"].get()
+                        work_sheets.Cells(cur_row, 7).Value = item["Fee"].get()
+                        if item["Number"].get() == f"INV{str(inv+1)}":
+                            work_sheets.Cells(cur_row, 8).Value = item["Fee"].get()
+                            work_sheets.Cells(cur_row, 9).Value = item["Fee"].get()
+                            work_sheets.Cells(cur_row, 10).Value = item["in.GST"].get()
+                            total_fee += float(item["Fee"].get())
+                            total_inGST += float(item["in.GST"].get()) if len(item["in.GST"].get()) != 0 else 0
+                        cur_row += 1
+                work_sheets.Cells(cur_row, 6).Value = "Total: "
+                work_sheets.Cells(cur_row, 6).Font.Bold = True
+                work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
+                work_sheets.Cells(cur_row, 7).Font.Bold = True
+                cur_row += 2
+                # else:
+                #     work_sheets.Cells(cur_row, 1).Value = service["Service"].get() + " design and documentation"
+                #     # work_sheets.Cells(cur_row+1, 2).Value = "Payment Instalments"
+                #     # work_sheets.Cells(cur_row+1, 7).Value = "Amount"
+                #     # work_sheets.Cells(cur_row+1, 8).Value = "This pay"
+                #     # work_sheets.Cells(cur_row+2, 1).Value = "The Full amount for design and documentation"
+                #     work_sheets.Cells(cur_row, 7).Value = service["Fee"].get()
+                #     if service["Number"].get() == f"INV{str(inv+1)}":
+                #         work_sheets.Cells(cur_row, 8).Value = service["Fee"].get()
+                #         work_sheets.Cells(cur_row, 9).Value = service["Fee"].get()
+                #         work_sheets.Cells(cur_row, 10).Value = service["in.GST"].get()
+                #         total_fee += float(service["Fee"].get()) if len(service["Fee"].get()) !=0 else 0
+                #         total_inGST += float(service["in.GST"].get()) if len(service["Fee"].get()) !=0 else 0
+                #     cur_row+=2
                 # cur_row+=1
             cur_row+=1
             if len(data["Invoices"]["Details"]["Variation"]["Fee"].get()) != 0 and data["Invoices"]["Details"]["Variation"]["Fee"].get() != "0":
@@ -1728,28 +1755,28 @@ def get_invoice_item(app):
         for key, service in data["Invoices"]["Details"].items():
             if not service["Include"].get():
                 continue
-            if service["Expand"].get():
-                for j in range(app.conf["n_items"]):
-                    if len(service["Content"][j]["Service"].get()) == 0 or len(service["Content"][j]["Fee"].get()) == 0:
-                        continue
-                    if service["Content"][j]["Number"].get() == f"INV{i+1}":
-                        res[i].append(
-                            {
-                                "Item": service["Content"][j]["Service"].get(),
-                                "Fee": service["Content"][j]["Fee"].get(),
-                                "in.GST": service["Content"][j]["in.GST"].get()
-                            }
-                        )
-            else:
-                if service["Number"].get() == f"INV{i+1}":
-                    if len(service["Fee"].get()) != 0:
-                        res[i].append(
-                            {
-                                "Item": service["Service"].get(),
-                                "Fee": service["Fee"].get(),
-                                "in.GST": service["in.GST"].get()
-                            }
-                        )
+            # if service["Expand"].get():
+            for j in range(app.conf["n_items"]):
+                if len(service["Content"][j]["Service"].get()) == 0 or len(service["Content"][j]["Fee"].get()) == 0:
+                    continue
+                if service["Content"][j]["Number"].get() == f"INV{i+1}":
+                    res[i].append(
+                        {
+                            "Item": service["Content"][j]["Service"].get(),
+                            "Fee": service["Content"][j]["Fee"].get(),
+                            "in.GST": service["Content"][j]["in.GST"].get()
+                        }
+                    )
+            # else:
+            #     if service["Number"].get() == f"INV{i+1}":
+            #         if len(service["Fee"].get()) != 0:
+            #             res[i].append(
+            #                 {
+            #                     "Item": service["Service"].get(),
+            #                     "Fee": service["Fee"].get(),
+            #                     "in.GST": service["in.GST"].get()
+            #                 }
+            #             )
     return res
 
 def update_app_invoices(app, inv_list):
