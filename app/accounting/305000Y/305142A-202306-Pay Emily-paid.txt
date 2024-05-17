@@ -1,0 +1,19 @@
+Date	Project No.	Project Name	Details	Design Cost
+29-May-23	305000U	Sunny Bamboo House, Central Park Mall, 28 Broadway, Chippendale	Hydraulic drawings	300
+01-Jun-23	305142	Shop 2, 49-51 Burwood Road, Burwood	Hydraulic drawings	300
+07-Jun-23	305151	Sunny Seafood Restaurant, Central Park Mall, 28 Broadway, Chippendale	Hydraulic drawings	600
+25-May-23		Proposed boarding house development @ 1 Hill Street Wentworthville	Hydraulic spatial design & Calc	200
+05-Jun-23	304093	Childcare, 1 Jordon Street, Cambridge Park	Hydraulic drawings	700
+16-Jun-23	304112	Berowra Village, 1C Turner Road, Berowra Heights	Hydraulic drawings	500
+22-Jun-23	305182	T502, Eastpoint Plaza, 233 Adelaide Terrace, Perth, WA	Hydraulic drawings	300
+22-Jun-23	306182	T503, Eastpoint Plaza, 233 Adelaide Terrace, Perth, WA	Hydraulic drawings	300
+19-Jun-23	304093	Childcare, 1 Jordon Street, Cambridge Park	Sydney Water Pressure and Flow enquiry	150.41
+19-Jun-23	304093	Childcare, 1 Jordon Street, Cambridge Park	Sydney Water sewer services diagram	26.68
+28-Jun-23	306175	22 Ramsay Street, Collaroy	Hydraulic spatial design & Calc	200
+
+total: $3577.09
+
+Bank Name: ANZ
+Account Name: Park B M
+BSB: 012263
+Account Number: 472137742

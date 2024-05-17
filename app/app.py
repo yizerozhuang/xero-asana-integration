@@ -6,6 +6,7 @@ from fee_proposal_page import FeeProposalPage
 from financial_panel import FinancialPanelPage
 from search_bar_page import SearchBarPage
 from utility import *
+import tkinter as tk
 from asana_function import update_asana, update_asana_invoices
 from xero_function import update_xero, refresh_token, login_xero
 from email_server import email_server
@@ -17,6 +18,7 @@ from PIL import Image, ImageTk
 import _thread
 import os
 import webbrowser
+import time
 
 class App(tk.Tk):
     def __init__(self, conf, user, *args, **kwargs):
@@ -60,6 +62,8 @@ class App(tk.Tk):
         if self.user in self.conf["admin_user_list"] and not self.conf["test_mode"]:
             self.auto_check()
 
+        self.timer_thread()
+
     def default_set_up(self):
         self.data["Login_user"] = tk.StringVar(value=self.user)
         self.data["Asana_id"] = tk.StringVar()
@@ -75,13 +79,15 @@ class App(tk.Tk):
             "Email to Client": tk.BooleanVar(),
             "Fee Accepted": tk.BooleanVar(),
             "Quote Unsuccessful": tk.BooleanVar(),
-            "Asana State": tk.StringVar()
+            "Asana State": tk.StringVar(value="Fee Proposal")
         }
         self.data["Email"] = {
+            "Fee Coming": tk.StringVar(),
             "Fee Proposal": tk.StringVar(),
             "First Chase": tk.StringVar(),
             "Second Chase": tk.StringVar(),
-            "Third Chase": tk.StringVar()
+            "Third Chase": tk.StringVar(),
+            "Fee Accepted": tk.StringVar()
         }
         self.data["Email_Content"] = tk.StringVar()
         self.data["Address_to"] = tk.StringVar(value="Client")
@@ -120,9 +126,10 @@ class App(tk.Tk):
         self.open_database_button.grid(row=1, column=0)
 
 
-        tk.Button(function_frame, width=14, text="Design Certificate", bg="brown", fg="white",
-                                            command = lambda: open_design_certificate(self),
-                                            font=self.conf["font"]).grid(row=2, column=0)
+        self.design_certificate = tk.Button(function_frame, width=14, text="Design Certificate", bg="brown", fg="white",
+                                            command=lambda: open_design_certificate(self),
+                                            font=self.conf["font"])
+        self.design_certificate.grid(row=2, column=0)
 
 
         tk.Button(function_frame, text="Rename Project", command=self._rename_project, bg="brown", fg="white",
@@ -220,8 +227,8 @@ class App(tk.Tk):
 
     def main_context_part(self):
         # main frame page
-        self.search_bar_page = SearchBarPage(self.main_frame, self)
         self.project_info_page = ProjectInfoPage(self.main_frame, self)
+        self.search_bar_page = SearchBarPage(self.main_frame, self)
         self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
         self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
         self._update_variation()
@@ -321,7 +328,7 @@ class App(tk.Tk):
         # self.financial_panel_page.update_bill(variation_var)
         # self.financial_panel_page.update_profit(variation_var)
 
-    def utility_search(self):
+    def utility_search(self, *args):
         data = self.search_bar_page.check(None, self.utility_search_string_var.get().strip())
         if len(set(data)) == 1:
             load_data(self, data[0][0])
@@ -363,6 +370,7 @@ class App(tk.Tk):
                   font=self.conf["font"]).grid(row=0, column=1)
         tk.Button(search_frame, text="Search", command=self.utility_search, bg="brown", fg="white",
                   font=self.conf["font"]).grid(row=0, column=2)
+        self.bind("<Control-Key-space>", self.utility_search)
         # self.project_number_label = tk.Label(project_number_frame, font=self.conf["font"])
         # self.project_number_label.grid(row=0, column=1)
         # self.data["Project Info"]["Project"]["Quotation Number"].trace("w",self._update_project_number_label)
@@ -385,6 +393,7 @@ class App(tk.Tk):
             self.email_to_client_button.grid_forget()
             self.chase_client_button.grid_forget()
             self.open_database_button.grid_forget()
+            self.design_certificate.grid_forget()
             self.update_xero_button.grid_forget()
             self.refresh_xero_button.grid_forget()
             self.login_xero_button.grid_forget()
@@ -415,7 +424,11 @@ class App(tk.Tk):
             # messagebox.showerror("Error", "\n Please Create an quotation Number first\n  \n")
             return
         if self._validate_project_name():
-            finish_setup(self)
+            try:
+                finish_setup(self)
+            except PermissionError as e:
+                print(e)
+                self.messagebox.show_error("Permission Denied, Please Close the file before you finish set up")
 
     def _validate_project_name(self):
         project_name = self.data["Project Info"]["Project"]["Project Name"].get()
@@ -489,6 +502,23 @@ class App(tk.Tk):
             email_server(self)
 
         _thread.start_new_thread(running_email_server, ())
+
+    def timer_thread(self):
+        self.timer = self.conf["timer"]
+        def project_timer():
+            while True:
+                time.sleep(1)
+                if len(self.current_quotation.get())!=0:
+                    self.timer -=1
+                    if self.timer == 0:
+                        reset(self)
+                        self.messagebox.show_error(f"The Session is exceeding {str(int(self.conf['timer']/60))} mins, please login this project again")
+                else:
+                    self.timer = self.conf["timer"]
+
+        _thread.start_new_thread(project_timer, ())
+
+
         # def check_log_and_save():
         #     while True:
         #         print("auto confined")
@@ -514,7 +544,6 @@ class App(tk.Tk):
                 save(self)
             except Exception as e:
                 print(e)
-                pass
             self.destroy()
 
     def _update_asana(self):
@@ -553,27 +582,16 @@ class App(tk.Tk):
     #         return
 
     def _update_xero(self):
-        address_to = self.data["Address_to"].get()
         if not self.data["State"]["Fee Accepted"].get():
             self.messagebox.show_error("Please upload a fee acceptance before you update xero")
             return
         elif len(self.data["Project Info"]["Project"]["Project Number"].get())==0:
             self.messagebox.show_error("Cant Find the Project Number, Please sent first invoice to the client.")
             return
-        if len(self.data["Project Info"][address_to]["Full Name"].get()) == 0:
-            if len(self.data["Project Info"][address_to]["Company"].get()) == 0:
-                self.messagebox.show_error(f"You should at least provide {address_to} name or {address_to} company")
-                return
-            else:
-                contact = self.data["Project Info"][address_to]["Company"].get()
-        else:
-            if len(self.data["Project Info"][address_to]["Company"].get()) == 0:
-                contact = self.data["Project Info"][address_to]["Full Name"].get()
-            else:
-                contact = self.data["Project Info"][address_to]["Company"].get() + ", " + self.data["Project Info"][address_to]["Full Name"].get()
+
         # true = False
         refresh_token()
-        true=update_xero(self, contact)
+        true=update_xero(self)
         # self.messagebox.show_error("You Haven't login xero yet")
         if true:
             self.messagebox.show_update("Update Xero and Asana Successful")
@@ -611,6 +629,7 @@ class App(tk.Tk):
                 update_asana(self)
                 self.messagebox.file_info("Rename Folder and Asana", current_folder_address, folder_address)
             self.data["Current_folder_address"].set(folder_name)
+            webbrowser.open(folder_address)
             save(self)
             config_log(self)
             config_state(self)

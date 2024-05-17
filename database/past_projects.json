@@ -1,0 +1,87 @@
+{
+    "Restaurant": [
+      "KFC (International fast food chain), Baulkham Hills, Rhodes, Gregory Hills, North Sydney, St Ives",
+      "Hai Di Lao, Darlin Harbour and Chatswood (international Premium Hot-Pot chain )",
+      "Hanok Korean (Charcoal Korean charcoal BBQ), Dickson ACT, Miranda, Wollongong, Phillip, Kotara, Campbell Town, Tuggerah, Wagga Wagga",
+      "The Grounds of Alexandria (stylish café, bar, restaurant, garden and event hub)",
+      "Leaf Café (award winning coffee, coffee franchises), Emerton, Rhodes, Marsden Park, Westmead, The Ponds, Pennant Hills, Success WA",
+      "Meet Fresh (contemporary exquisite desserts), Chatswood, Eastwood, Burwood, Haymarket, Waterloo",
+      "Stacked (Fast food chain) North Sydney, Mascot, Sydney, Westfield Sydney, Penrith",
+      "WE Kitchens (modern central commercial kitchen hire services)",
+      "Kagoshima Master, Ultimo and Crowns Nest (authentic Wagyu Yakiniku restaurant)",
+      "Mamaks Village, Darling Harbour and Martin Place (authentic Malaysian cuisine)"
+    ],
+    "Office": [
+      "Level 11, 59 Goulburn Street, Haymarket (Premier Corporate Office)",
+      "Saint Andrews House, 464-480 Kent Street, Sydney (1500m2)",
+      "Nepean Health Hub, Kingswood (STH Architects, 1600m2)",
+      "100 Murray Street, Pyrmont (Validus, 1400m2)",
+      "59 Goulburn Street, Haymarket (Sunshine Contracting Group, 760m2)",
+      "North Wing, 2 Minna Close, Belrose (Studio Hiyaku, 1500m2)",
+      "60 Station Street, Parramatta (Bupa Parramatta, 400m2)",
+      "120 Sussex Street, Sydney (Acitve Super, 173m2)",
+      "106 Princes Highway, Arncliffe (Lati Studio, Arncliffe-Ray White Office, 74m2)",
+      "Nepean Health Hub, Kingswood (STH Architects, 1600m2)"
+    ],
+    "Commercial": [
+      "The Rocks Discovery Museum, 2-8 Kendall Lane, The Rocks",
+      "China Construction Bank Sydney (Corporate head office), Sydney CBD",
+      "Red Bottle, Central Park Mall, 28 Broadway, Chippendale, 1 Castlereagh Street, Sydney",
+      "Meshki, 730 Botany Road, Mascot",
+      "Stone Real-estate, Engadine (Real estate)",
+      "Vitaland Kids Cafe, Castle Hill and Alexandra (Kids play centre chain store), Miranda, Alexandria, St Leonards",
+      "Body Fit Gym, Emerton Village, 32 & 40 Jersey Road, Emerton",
+      "Lindfield Radiology, 12-18 Tryon Road, Lindfield",
+      "Tumble Laundry Lounges Pty Ltd, Waterloo, Surry Hills",
+      "Medical Centre, Mall 88, 88 Christie Street, St Leonards"
+    ],
+    "Group House": [
+      "18 Fisher Ave, Vaucluse (PSEC Project Services)",
+      "10 Cecil Street, Paddington (25 rooms, Cracknell & Lonergan Architects Pty Ltd)",
+      "10 Belinda Place, Mays Hill (27 units, Harrison Group Pty Ltd)",
+      "8-10 Gollan Avenue, Oatlands (Jonathan Crutcher)",
+      "30 Kerr Parade, Auburn (140 rooms, Zhinar Architects)",
+      "11 Yarranabbe Road, Darling Point (Tros Architecture Interior)",
+      "1 Hill Street, Wentworthville (Phoenix Building Approvals Pty Ltd)",
+      "22 Ramsay Street, Collaroy (Sandy Kong)"
+    ],
+    "Apartment": [
+      "38 Cudgegong Road, Rouse Hill (Zhinar Architects, 295 Apartments, $200m)",
+      "‘Crownview’, 373 Crown Street, Wollongong (mixed-used twin tower, 149 apartments)",
+      "‘Regent’, 58-68 Regent Street, Kogarah (PBD Architects,12-storey, 96 high-end apartments, $80m)",
+      "‘Grand Auburn’, 5-7 Northumberland Road, Auburn (Zhinar Architects, mixed-used, 116 apartment, $110m)",
+      "23-27 Schofields Road, Schofields (Binah Construction, 137 Apartments, $100m)",
+      "27-33 Ascot Street, Canley Heights (Zhinar Architects, 74 Apartments, $60m)",
+      "31 Warriewood Road, Warriewood (DKO Architects, 5-storey 104 apartments, $90m)",
+      "35-39 Jenkins Road, Carlingford (Blue Sox Developments, 60 Apartments, $45m)",
+      "‘The Pearson’, 2-6 Pearson Ave, Gordon (Wolski Coppin Architecture, boutique apartment)",
+      "‘The Mitchell’, 11-15 Mitchell Avenue, Jannali (PBD Architects, 31 featured apartments)"
+    ],
+    "Mixed-use Complex": [
+      "8 Dumaresq Street, Campbelltown (tqm Construcion, Mixed-Use with Apartments, $450m)",
+      "93 Forest Road, Hurstville (DKO Architects, 4 towers, 550 apartments and commercial/retail)",
+      "26 Elizabeth Street, Liverpool (Rothe Lowman Architect, $300m)",
+      "Grosvenor Place, 225 George Street, Sydney (Sydney Sky Scraper Chiller replacement, $100m)",
+      "2-4 Cambridge Street, Epping (Zhinar Architects, 83 Mixed-Use Apartments, $90m)"
+    ],
+    "School": [
+      "Little Zak’s Acadamy - Childcare Centre, Northmead, Thornleigh, Bomaderry, Kiama Heights",
+      "Childcare Centre, Baulkham Hills, Kurri Kurri, Ryde",
+      "Childcare Centre, 1 Jordon Street, Cambridge Park (Design Corp Architects)",
+      "Childcare Centre, 90 Woodlands Road, Liverpool (CBS Engineers)",
+      "Childcare Centre, 17 Hawkesbury Road, Westmead (Design Corp Architects)",
+      "Childcare Centre, 106 South Terrace, Bankstown (UR Refrigeration & Airconditioning)"
+    ],
+    "Others": [
+      "Fuel Station, Hillvue, Acacia Ridge, QLD (Neilly Davies & Partners Pty Ltd - Susheel Kumar Thota)",
+      "Panda Warehouse, 119-133 McEvoy Street, Alexandria (443 m2)",
+      "Marble Stone Process Factory, 2A-92 Milperra Road, Revesby (BYL Design, 360 m2)",
+      "Spray Paint, 137-139 Silverwater Road, Silverwater (Archizone, 69 m2)",
+      "47 Buffalo Road, Gladesville, (Brooks Projects Architects, 483 m2)",
+      "MaHPharma, 256E New Line Road, Dural (APM HVAC & Refrigeration Pty Ltd)",
+      "Samsung QC, Murray Jones Drive, Bankstown Aerodome (Kreativ Design)",
+      "Aussia Pharmaceuticals Pty Ltd, 35A-35C Sefton Road, Thornleigh, (Zhinar Architects)",
+      "Vehicle Body Repair Workshop, 41 The Promenade, Yennora (CBS Engineers)",
+      "1891 Botany Road, Matraville (Neilly Davies & Partners Pty Ltd)"
+    ]
+}

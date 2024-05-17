@@ -5,28 +5,42 @@ import json
 import os
 
 from config import CONFIGURATION as conf
-from utility import load_data, increment_excel_column
+from utility import load_data, increment_excel_column, save, convert_float
 import openpyxl
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
+SERVICE_NAME_CONVERT_MAP = {
+    "Mechanical Service": "Mech",
+    "CFD Service": "CFD",
+    "Electrical Service": "Elec",
+    "Hydraulic Service": "Hyd",
+    "Fire Service": "Fire",
+    "Mechanical Review": "Me",
+    "Miscellaneous": "Misc",
+    "Installation": "Instal",
+    "Variation": "Vari"
+}
+
 
 def return_self_mp():
-    return {
-        "Quote. No.": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
+    mp_map = {
+        "Quote No.": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
         "Proj. No.": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
         "Project detailed address": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
         "Shop Name": lambda data_json: data_json["Project Info"]["Project"]["Shop Name"],
         "Scale": lambda data_json: data_json["Project Info"]["Project"]["Proposal Type"],
         "Proj. Type": lambda data_json: data_json["Project Info"]["Project"]["Project Type"],
         "Project Status": show_status,
-        "Address To": lambda data_json: data_json["Address_to"],
         "Service Been Engaged": lambda data_json: ", ".join(
             [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
              service["Include"]]),
-        "Fee Sent On": lambda data_json: data_json["Email"]["Fee Proposal"],
-        "1st Chase":lambda data_json: data_json["Email"]["First Chase"],
-        "2nd Chase":lambda data_json: data_json["Email"]["Second Chase"],
-        "3rd Chase":lambda data_json: data_json["Email"]["Third Chase"],
+        "Fee Coming": lambda data_json: data_json["Email"]["Fee Coming"],
+        "Fee Sent.": lambda data_json: data_json["Email"]["Fee Proposal"],
+        "Fee Accept": lambda data_json: data_json["Email"]["Fee Accepted"],
+        "1st": lambda data_json: data_json["Email"]["First Chase"],
+        "2nd": lambda data_json: data_json["Email"]["Second Chase"],
+        "3rd": lambda data_json: data_json["Email"]["Third Chase"],
+        "Address To": lambda data_json: data_json["Address_to"],
         "Client Name": lambda data_json: data_json["Project Info"]["Client"]["Full Name"],
         "Client Type": lambda data_json: data_json["Project Info"]["Client"]["Contact Type"],
         "Client Company": lambda data_json: data_json["Project Info"]["Client"]["Company"],
@@ -42,16 +56,34 @@ def return_self_mp():
         "INV--04": lambda data_json: show_invoice(data_json, 3),
         "INV--05": lambda data_json: show_invoice(data_json, 4),
         "INV--06": lambda data_json: show_invoice(data_json, 5),
-        "Paid InGST": lambda data_json: data_json["Invoices"]["Paid Fee"],
-        "Overdue InGST": lambda data_json: data_json["Invoices"]["Overdue Fee"],
-        "Total Fee InGST": lambda data_json: data_json["Invoices"]["in.GST"],
-        "Total Bill InGST": lambda data_json: data_json["Bills"]["in.GST"]
+        "Paid Fee": lambda data_json: data_json["Invoices"]["Paid Fee"],
+        "Overdue Fee": lambda data_json: data_json["Invoices"]["Overdue Fee"]
     }
+    invoice_lambda_function = lambda service: lambda data_json: data_json["Invoices"]["Details"][service]["in.GST"] if data_json["Invoices"]["Details"][service]["Include"] else ""
 
-def sortby(tree, col, descending):
+
+
+
+    mp_map["Total Fee"] = lambda data_json: data_json["Invoices"]["in.GST"]
+    for service in conf["invoice_list"]:
+        mp_map[f"{SERVICE_NAME_CONVERT_MAP[service]} Fee"] = invoice_lambda_function(service)
+
+    bill_lambda_function = lambda service: lambda data_json: data_json["Bills"]["Details"][service]["in.GST"] if data_json["Bills"]["Details"][service]["Include"] else ""
+
+    mp_map["Total Bill"] = lambda data_json: data_json["Bills"]["in.GST"]
+    for service in conf["invoice_list"]:
+        mp_map[f"{SERVICE_NAME_CONVERT_MAP[service]} Bill"] = bill_lambda_function(service)
+
+    return mp_map
+
+def sortby(tree, col, descending, numeric_list):
     """sort tree contents when a column header is clicked on"""
     # grab values to sort
-    data = [(tree.set(child, col), child) for child in tree.get_children('')]
+
+    if col in numeric_list:
+        data = [(convert_float(tree.set(child, col)), child) for child in tree.get_children('')]
+    else:
+        data = [(tree.set(child, col), child) for child in tree.get_children('')]
     # if the data to be sorted is numeric change to float
     # data =  change_numeric(data)
     # now sort the data in place
@@ -59,7 +91,7 @@ def sortby(tree, col, descending):
     for ix, item in enumerate(data):
         tree.move(item[1], '', ix)
     # switch the heading so it will sort in the opposite direction
-    tree.heading(col, command=lambda col=col: sortby(tree, col, int(not descending)))
+    tree.heading(col, command=lambda col=col: sortby(tree, col, int(not descending), numeric_list))
 
 def show_status(data_json):
     state = data_json["State"]
@@ -70,7 +102,7 @@ def show_status(data_json):
                         "Construction Phase":"10.Construction"}
     if state["Asana State"] in ["Pending", "DWG drawings", "Done", "Installation", "Construction Phase"]:
         return asana_status_map[state["Asana State"]]
-    if state["Quote Unsuccessful"]:
+    elif state["Quote Unsuccessful"]:
         return "11.Quote Unsuccessful"
     elif state["Fee Accepted"]:
         return "05.Design"
@@ -113,7 +145,6 @@ class SearchBarPage(tk.Frame):
         self.main_context_frame.bind("<Configure>", self.reset_scrollregion)
         self.conf = self.app.conf
 
-
         self.generate_convert_map()
         self.search_bar()
         self.build_tree()
@@ -145,6 +176,8 @@ class SearchBarPage(tk.Frame):
             f.write(json_object)
 
     def reset(self):
+        if len(self.app.current_quotation.get())!=0:
+            save(self.app)
         self.generate_data()
         self.update_data(self.master_project)
 
@@ -153,7 +186,7 @@ class SearchBarPage(tk.Frame):
         self.mp_convert_map = return_self_mp()
         if not self.app.user in self.conf["admin_user_list"]:
             self.convert_map = {
-                "Quote. No.": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
+                "Quote No.": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
                 "Proj. No.": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
                 "Project detailed address": lambda data_json: data_json["Project Info"]["Project"]["Project Name"],
                 "Shop Name": lambda data_json: data_json["Project Info"]["Project"]["Shop Name"],
@@ -164,13 +197,19 @@ class SearchBarPage(tk.Frame):
                 "Service Been Engaged": lambda data_json: ", ".join(
                     [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
                      service["Include"]]),
-                "Fee Sent On": lambda data_json: data_json["Email"]["Fee Proposal"],
+                "Fee Sent.": lambda data_json: data_json["Email"]["Fee Proposal"],
                 "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
                 "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
                 "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"]
             }
         else:
             self.convert_map = self.mp_convert_map
+        self.numeric_titles = [
+            "Paid Fee",
+            "Overdue Fee",
+            "Total Fee ",
+            "Total Bill "
+        ] + [f"{SERVICE_NAME_CONVERT_MAP[service]} Fee" for service in self.conf["invoice_list"]] + [f"{SERVICE_NAME_CONVERT_MAP[service]} Bill" for service in self.conf["invoice_list"]]
         self.mp_header = list(self.convert_map.keys())
 
 
@@ -206,7 +245,7 @@ class SearchBarPage(tk.Frame):
         self.entry.grid(row=0, column=0, sticky="ew")
         tk.Button(search_frame, text="Refresh", bg="Brown", fg="white", command=self.refresh, font=self.conf["font"]).grid(row=0, column=1)
         # tk.Button(search_frame, text="Export MP Excel", bg="Brown", fg="white", command=self.export_data, font=self.conf["font"]).grid(row=0, column=2)
-
+        tk.Label(search_frame, text="All Fee Include GST", font=self.conf["font"]+["bold"]).grid(row=0, column=2)
         self.tree = ttk.Treeview(container, height=35, columns=self.mp_header, show="headings", selectmode="browse")
         treeXScroll = ttk.Scrollbar(container, orient=tk.HORIZONTAL)
         treeXScroll.configure(command=self.main_canvas.xview)
@@ -225,7 +264,7 @@ class SearchBarPage(tk.Frame):
 
     def build_tree(self):
         for col in self.mp_header:
-            self.tree.heading(col, text=col.title(), command=lambda c=col: sortby(self.tree, c, 0))
+            self.tree.heading(col, text=col.title(), command=lambda c=col: sortby(self.tree, c, 0, self.numeric_titles))
             # adjust the column's width to the header string
             self.tree.column(col, width=tkFont.Font().measure(col.title()))
     def update_data(self, data):
@@ -262,7 +301,7 @@ class SearchBarPage(tk.Frame):
     def refresh(self):
         self.generate_data()
         self.check(None)
-        sortby(self.tree, "Quote. No.", True)
+        sortby(self.tree, "Quote No.", True, self.numeric_titles)
 
     def reset_scrollregion(self, event):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
