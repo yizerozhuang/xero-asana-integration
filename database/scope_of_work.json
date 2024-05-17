@@ -1,0 +1,398 @@
+{
+    "Minor": {
+        "Mechanical Service": {
+            "Extent": [
+                "Map out existing mechanical components",
+                "Commercial kitchen exhaust and makeup air system design;",
+                "Charcoal exhaust design with spark arrestor",
+                "Performance based horizontal kitchen exhaust discharge",
+                "Table top BBQ/Hot pot exhaust system",
+                "Air conditioning design to the tenancy area as required;",
+                "Grilles coordination with RCP",
+                "Natural ventilation design",
+                "Other ventilation as required to AS 1668.2",
+                "Coordination with stakeholder and other services",
+                "D&BP Act class 2 building design declaration",
+                "1 off site visit"
+            ],
+            "Clarifications": [
+                "Assessment of compliance with environmental noise regulations",
+                "Preparation of Performance Solutions",
+                "Odour management report, please liaise with us cost of the report from us"
+            ],
+            "Deliverables": [
+                "Full set of mechanical drawings in PDF format",
+                "Mechanical design certificate",
+                "Equipment selection"
+            ]
+        },
+        "Mechanical Review": {
+            "Extent": [
+                "Car park ventilation system.",
+                "Garbage exhaust.",
+                "Fire pump room ventilation.",
+                "Stair pressurization and relief systems.",
+                "Air conditioning system design to ensuites.",
+                "Air conditioning system design to other communal area as required.",
+                "Air conditioning system design to commercial tenancy, cold shell.",
+                "Air conditioning system design to commercial tenancy, warm shell.",
+                "Air conditioning system design to apartments.",
+                "Toilet and laundry ventilation to apartments.",
+                "Rangehood exhaust system to apartments.",
+                "Outside air system design for noise affected apartments.",
+                "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc.",
+                "Other ventilation to AS 1668.2.",
+                "Electrical services associated with mechanical plant and equipment.",
+                "Coordinate with architect, electrical, hydraulic fire service and other relevant parties.",
+                "D&BP Act class 2 building design declaration",
+                "D&BP Act class 3 building design declaration"
+            ],
+            "Clarifications": [
+                "Fire engineering;",
+                "Assessment of compliance with environmental noise regulations;",
+                "Preparation of Performance Solutions where Deemed to satisfy requirements of the BCA do not suit the project requirements;",
+                "Refrigeration systems to cool rooms and freezers;",
+                "Revit modelling and documentation."
+            ],
+            "Deliverables": []
+        },
+        "CFD Service": {
+            "Extent": [
+                "Review of all drawings relevant to the car park design. ",
+                "Creation of a three-dimensional model for the car park suitable for the CFD simulations. ",
+                "CFD ventilation simulations to assess the performance of the proposed design. This will provide a basis on which to compare subsequent designs. ",
+                "CFD ventilation simulations for up to three design changes. This includes altering natural ventilation openings, supply/exhaust flow rates, re-locating jet fans, etc. ",
+                "Preparation of a Technical Report detailing the results and recommendations.",
+                "1 off site visit/Meeting"
+            ],
+            "Clarifications": [
+                "We have allowed 3 off model simulation/modification, if additional simulations are required (for example, in the event of still unacceptable CO levels) then these will be discussed with the client and will be subject to a variation.",
+                "We have not allowed fire engineering solution for jet fan which might affect sprinkler performance, this will need to be addressed by fire engineer on the job."
+            ],
+            "Deliverables": [
+                "PDF spatial sketch as required",
+                "Car park CFD ventilation report ",
+                "NSW regulated design and submission",
+                "1 meeting"
+            ]
+        },
+        "Electrical Service": {
+            "Extent": [
+                "Maximum demand calculation as per AS3000",
+                "Electrical single line diagram",
+                "Main switchboard and mains",
+                "Distribution boards and submains(if required)",
+                "General power distribution and Comms",
+                "Electrical and lighting systems",
+                "Power supply to mechanical, fire and hydraulic services including full services coordination",
+                "Internal lighting",
+                "General indoor/external lighting and lighting control",
+                "Exit signages and Emergency egress lighting as per AS2293-2005",
+                "1 off site visit"
+            ],
+            "Clarifications": [
+                "ASP Level 3 design",
+                "Liaison with Supply Authority/Level 3 ASP for power supply to site",
+                "NBN pathway design and submission",
+                "UPS, Stand-by and emergency generator systems",
+                "Landscape and council metered public lighting",
+                "Solar PV system",
+                "Home Automation Systems"
+            ],
+            "Deliverables": [
+                "Full set of Electrical drawings in PDF format",
+                "Electrical design certificate",
+                "Coordination with related services"
+            ]
+        },
+        "Hydraulic Service": {
+            "Extent": [
+                "Sanitary waste and drainage services",
+                "Trade waste service",
+                "Hot and cold water supply and distribution services",
+                "Natural gas supply and distribution services",
+                "Fire Hydrant and Hose Reel supply and distribution services",
+                "Mechanical plant condensate waste",
+                "1 off site visit"
+            ],
+            "Clarifications": [
+                "Authority fees and charges such as Section 73, Section 188 etc",
+                "Site underground service survey service",
+                "Fire protection services (including fire sprinkler system, fire alarm system or any dry fire systems)",
+                "Civil and stormwater services",
+                "Landscape irrigation o water features associated plant and distribution systems"
+            ],
+            "Deliverables": [
+                "Full set of hydraulic drawings in PDF format",
+                "Hydraulic design certificate",
+                "Coordination with related services"
+            ]
+        },
+        "Fire Service": {
+            "Extent": [
+                "The emergency lights, exit and directional signage",
+                "Automatic Detection and warning Systems",
+                "Portable Fire Extinguisher System",
+                "Sprinkler system",
+                "Liaise with relevant authorities and consultants",
+                "Section 74B certificate based on base building fire safety measures",
+                "1 off site visit"
+            ],
+            "Clarifications": [
+                "BCA DTS requirements compliance only, not allow for any performance solution",
+                "Any applicable fire engineering report by C10 Fire Engineer"
+            ],
+            "Deliverables": [
+                "Full set of Fire Protection Service drawings in PDF format",
+                "Fire Protection Service design certificate",
+                "Coordination with related services"
+            ]
+        },
+        "Miscellaneous": {
+            "Extent": [],
+            "Clarifications": [],
+            "Deliverables": [
+                "Design certificate"
+            ]
+        },
+        "Installation": {
+            "Extent": [
+                "Supply and install 2 off general exhaust system from the ventilation of cool room condenser and ice maker, including ductwork, roof goose neck, supports and fittings.",
+                "Supply and install kitchen makeup air system from facade louvre to the kitchen as shown on drawings, including kitchen makeup air fan, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install 1 off Dakin split cassette unit, model FCA100 (10.0 kW cooling capacity).",
+                "Supply and install refrigeration piping, wire and control to the unit.",
+                "Supply and install 2 off kitchen exhaust hoods, kitchen exhaust ductwork from the connection of the hood to connection point under the roof as shown on drawings, including all supports and fittings.",
+                "Supply and install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install toilet exhaust system from connection point under the roof as shown on drawings to toilet, including toilet exhaust fan, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install 15 off 4-way blow supply air grille to suite the current layout from base building AC supply air duct, including all grilles, thermostats, control panels, dampers as required.",
+                "Balancing, testing and commissioning to all the system installed as per the above.",
+                "12 month defect liability period."
+            ],
+            "Clarifications": [
+                "Provision of all external louvers.",
+                "Provision of access panels to roof and ceilings where required for mechanical equipment.",
+                "Mechanical plant platforms, walkways, restraint, and the like for safe access to services mechanical plant and equipment.",
+                "Painting of any exposed mechanical services with exception of standard paint finishes on equipment.",
+                "Three phase power supply, we have assumed tails are to be provided adjacent to MSSB by the electrical contractor.",
+                "Provision of tundishes for condensate from air conditioning units(we have assumed tundishes are within 3 metres of the units).",
+                "Fire trip wiring, FFCP and associated works.",
+                "Under flashing of penetrations through roof and external walls by others."
+            ],
+            "Deliverables": [
+                "Kitchen exhaust hood 1, 2000Wx1200D",
+                "Kitchen exhaust hood 2, 2100Wx1000D",
+                "Kitchen exhaust air fan 3300L/s@350Pa, Fantech Model PUD564DD or equivalent",
+                "Outside air fan 360L/s@240Pa, Fantech or equivalent",
+                "Daikin ducted split, 14.0kW cooling",
+                "Daikin VRV 4S system, CU 22.4kW cooling, 2 off FCUs are 11.2kW cooling each",
+                "Misting Box for kitchen exhaust hood 1, 2000L/S, AOM Misting Box 800 or equivalent"
+            ]
+        }
+    },
+    "Major": {
+        "Mechanical Service": {
+            "Extent": [
+                "Car park ventilation system.",
+                "Garbage exhaust.",
+                "Fire pump room ventilation.",
+                "Stair pressurization and relief systems.",
+                "Air conditioning system design to ensuites.",
+                "Air conditioning system design to other communal area as required.",
+                "Air conditioning system design to commercial tenancy, cold shell.",
+                "Air conditioning system design to commercial tenancy, warm shell.",
+                "Air conditioning system design to apartments.",
+                "Toilet and laundry ventilation to apartments.",
+                "Rangehood exhaust system to apartments.",
+                "Outside air system design for noise affected apartments.",
+                "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc.",
+                "Other ventilation to AS 1668.2.",
+                "Electrical services associated with mechanical plant and equipment.",
+                "Coordinate with architect, electrical, hydraulic fire service and other relevant parties.",
+                "D&BP Act class 2 building design declaration",
+                "D&BP Act class 3 building design declaration"
+            ],
+            "Clarifications": [
+                "Fire engineering;",
+                "Assessment of compliance with environmental noise regulations;",
+                "Preparation of Performance Solutions where Deemed to satisfy requirements of the BCA do not suit the project requirements;",
+                "Refrigeration systems to cool rooms and freezers;",
+                "Revit modelling and documentation."
+            ],
+            "Deliverables": []
+        },
+        "Mechanical Review": {
+            "Extent": [
+                "Car park ventilation system.",
+                "Garbage exhaust.",
+                "Fire pump room ventilation.",
+                "Stair pressurization and relief systems.",
+                "Air conditioning system design to ensuites.",
+                "Air conditioning system design to other communal area as required.",
+                "Air conditioning system design to commercial tenancy, cold shell.",
+                "Air conditioning system design to commercial tenancy, warm shell.",
+                "Air conditioning system design to apartments.",
+                "Toilet and laundry ventilation to apartments.",
+                "Rangehood exhaust system to apartments.",
+                "Outside air system design for noise affected apartments.",
+                "Plant room ventilations, including storage rooms, main switch room, grease arrest room, garbage rooms, etc.",
+                "Other ventilation to AS 1668.2.",
+                "Electrical services associated with mechanical plant and equipment.",
+                "Coordinate with architect, electrical, hydraulic fire service and other relevant parties.",
+                "D&BP Act class 2 building design declaration",
+                "D&BP Act class 3 building design declaration"
+            ],
+            "Clarifications": [
+                "Fire engineering;",
+                "Assessment of compliance with environmental noise regulations;",
+                "Preparation of Performance Solutions where Deemed to satisfy requirements of the BCA do not suit the project requirements;",
+                "Refrigeration systems to cool rooms and freezers;",
+                "Revit modelling and documentation."
+            ],
+            "Deliverables": []
+        },
+        "CFD Service": {
+            "Extent": [
+                "Review of all drawings relevant to the car park design. ",
+                "Creation of a three-dimensional model for the car park suitable for the CFD simulations. ",
+                "CFD ventilation simulations to assess the performance of the proposed design. This will provide a basis on which to compare subsequent designs. ",
+                "CFD ventilation simulations for up to three design changes. This includes altering natural ventilation openings, supply/exhaust flow rates, re-locating jet fans, etc. ",
+                "Preparation of a Technical Report detailing the results and recommendations."
+            ],
+            "Clarifications": [
+                "We have allowed 3 off model simulation/modification, if additional simulations are required (for example, in the event of still unacceptable CO levels) then these will be discussed with the client and will be subject to a variation.",
+                "We have not allowed fire engineering solution for jet fan which might affect sprinkler performance, this will need to be addressed by fire engineer on the job."
+            ],
+            "Deliverables": [
+                "PDF spatial sketch as required",
+                "Car park CFD ventilation report ",
+                "NSW regulated design and submission",
+                "1 meeting"
+            ]
+        },
+        "Electrical Service": {
+            "Extent": [
+                "Electrical Maximum Demand calculation;",
+                "Existing Tenancy Distribution Board modification and electricity metering rearrangement;",
+                "General lighting including lighting lux level calculation;",
+                "Lighting control system",
+                "Exit signages and Emergency spit fire as per AS2293-2005",
+                "General power distribution and outlets as per AS3000-2017",
+                "Communications and outlets",
+                "Communication and Power cable reticulation containment",
+                "Coordinate with all other services",
+                "Security services, access control, CCTV cameras and associated power and data provisions",
+                "Lead-in NBN design and application",
+                "Liaise with relevant authorities and consultants",
+                "D&BP Act class 3 building design declaration"
+            ],
+            "Clarifications": [
+                "Audio Visual services",
+                "ASP Level 3 design",
+                "Public address and background music",
+                "WAP heat map",
+                "Inter cabinet communications design",
+                "IT hardware and software",
+                "WAP heat map",
+                "Building automation systems",
+                "Temporary work",
+                "Fire Protection Services"
+            ],
+            "Deliverables": [
+                "PDF spatial sketch as required",
+                "Equipment specification",
+                "Full set of drawings in PDF and AutoCAD 2D",
+                "D&BP Act class 2 building design declaration"
+            ]
+        },
+        "Hydraulic Service": {
+            "Extent": [
+                "Connection to authority services including sewer, water and gas.",
+                "Sanitary waste and drainage services incorporating: Gravity flow system connecting to authorities sewer main.",
+                "Trade waste incorporating Grease arrestor",
+                "Stormwater drainage incorporating: Buildings only with connection to Civil drainage systems.",
+                "Cold water supply and distribution services.",
+                "Hot water supply and distribution services.",
+                "Backflow prevention.",
+                "Natural gas supply and distribution services.",
+                "Metering of water supplies.",
+                "Metering of gas supplies.",
+                "Fire Hydrant and Hose Reel supply and distribution services.",
+                "Mechanical plant condensate waste.",
+                "Liaise with relevant authorities and consultants",
+                "D&BP Act class 3 building design declaration"
+            ],
+            "Clarifications": [
+                "Nomination and scheduling of sanitary fixtures and tapware.",
+                "Nomination of fire extinguishers.",
+                "Landscape irrigation.",
+                "Tenancy fitout services beyond the base building provisions.",
+                "Nomination of sanitary ancillaries such as roll holders, soap dispensers, hand dryers etc.",
+                "Water features including associated plant and distribution systems.",
+                "Diversions, upgrades and/or extension of Authority infrastructure services.",
+                "Shop drawings and work shop drawings"
+            ],
+            "Deliverables": [
+                "PDF spatial sketch as required",
+                "Equipment specification",
+                "Full set of drawings in PDF and AutoCAD 2D",
+                "D&BP Act class 2 building design declaration"
+            ]
+        },
+        "Fire Service": {
+            "Extent": [
+                "Fire Hydrant System",
+                "Fire Detection system",
+                "Emergency Warning and Intercommunication System (EWIS).",
+                "Fire Extinguishers.",
+                "Allocation of Sprinkler pump equipment.",
+                "Allocation of combined fire service storage Liaise with relevant authorities and consultants"
+            ],
+            "Clarifications": [
+                "BCA DTS requirement compliance",
+                "Any applicable fire engineering report by C10 Fire Engineer",
+                "Drencher design",
+                "Fire brigade consultant",
+                "Temporary work"
+            ],
+            "Deliverables": []
+        },
+        "Miscellaneous": {
+            "Extent": [],
+            "Clarifications": [],
+            "Deliverables": []
+        },
+        "Installation": {
+            "Extent": [
+                "Supply and install 2 off general exhaust system from the ventilation of cool room condenser and ice maker, including ductwork, roof goose neck, supports and fittings.",
+                "Supply and install kitchen makeup air system from facade louvre to the kitchen as shown on drawings, including kitchen makeup air fan, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install 1 off Dakin split cassette unit, model FCA100 (10.0 kW cooling capacity).",
+                "Supply and install refrigeration piping, wire and control to the unit.",
+                "Supply and install 2 off kitchen exhaust hoods, kitchen exhaust ductwork from the connection of the hood to connection point under the roof as shown on drawings, including all supports and fittings.",
+                "Supply and install kitchen makeup air system from connection point under the roof as shown on drawings to kitchen, including, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install toilet exhaust system from connection point under the roof as shown on drawings to toilet, including toilet exhaust fan, ductwork, flexible duct, all supports and fittings.",
+                "Supply and install 15 off 4-way blow supply air grille to suite the current layout from base building AC supply air duct, including all grilles, thermostats, control panels, dampers as required.",
+                "Balancing, testing and commissioning to all the system installed as per the above.",
+                "12 month defect liability period."
+            ],
+            "Clarifications": [
+                "Provision of all external louvers.",
+                "Provision of access panels to roof and ceilings where required for mechanical equipment.",
+                "Mechanical plant platforms, walkways, restraint, and the like for safe access to services mechanical plant and equipment.",
+                "Painting of any exposed mechanical services with exception of standard paint finishes on equipment.",
+                "Three phase power supply, we have assumed tails are to be provided adjacent to MSSB by the electrical contractor.",
+                "Provision of tundishes for condensate from air conditioning units(we have assumed tundishes are within 3 metres of the units).",
+                "Fire trip wiring, FFCP and associated works.",
+                "Under flashing of penetrations through roof and external walls by others."
+            ],
+            "Deliverables": [
+                "Kitchen exhaust hood 1, 2000Wx1200D",
+                "Kitchen exhaust hood 2, 2100Wx1000D",
+                "Kitchen exhaust air fan 3300L/s@350Pa, Fantech Model PUD564DD or equivalent",
+                "Outside air fan 360L/s@240Pa, Fantech or equivalent",
+                "Daikin ducted split, 14.0kW cooling",
+                "Daikin VRV 4S system, CU 22.4kW cooling, 2 off FCUs are 11.2kW cooling each",
+                "Misting Box for kitchen exhaust hood 1, 2000L/S, AOM Misting Box 800 or equivalent"
+            ]
+        }
+    }
+}

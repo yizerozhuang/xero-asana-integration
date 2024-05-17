@@ -16,37 +16,79 @@ class AppDialog:
     def show(self):
         pass
 
-class FileSelectDialog(simpledialog.Dialog):
-    def __init__(self, app, dir_list, title=None):
-        self.dir_list = dir_list
+class RadioButtonSelectDialog(simpledialog.Dialog):
+    def __init__(self, app, selection_list, select_var, text,project_name, title=None):
         self.app = app
         self.conf = app.conf
+        self.selection_list = selection_list
+        self.select_var = select_var
+        self.text = text
+        self.project_name = project_name
         super().__init__(app, title)
 
     def body(self, master):
-        self.rename_dir = tk.StringVar()
-        ttk.Combobox(self, textvariable=self.rename_dir, values=self.dir_list).pack()
+        tk.Label(self, text=self.text).pack()
+        for selection in self.selection_list:
+            tk.Radiobutton(self, text=selection, variable=self.select_var, value=selection).pack()
+        tk.Label(self, text=f"For {self.project_name}", font=self.conf["font"] + ["bold"]).pack()
 
     def ok(self):
-
-        resource_dir = self.conf["resource_dir"]
-        calculation_sheet = self.conf["calculation_sheet"]
-        mode = 0o666
-        folder_name = self.app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                      self.app.data["Project Info"]["Project"]["Project Name"].get()
-        folder_path = os.path.join(self.app.conf["working_dir"], folder_name)
-        os.mkdir(folder_path, mode)
-        shutil.move(self.rename_dir.get(), os.path.join(folder_path, "External"))
-        os.mkdir(os.path.join(folder_path, "Photos"), mode)
-        os.mkdir(os.path.join(folder_path, "Plot"), mode)
-        os.mkdir(os.path.join(folder_path, "SS"), mode)
-
-        shutil.copyfile(os.path.join(resource_dir, "xlsx", calculation_sheet),
-                        os.path.join(folder_path, calculation_sheet))
-        self.app.data["State"]["Folder Renamed"].set(True)
         self.destroy()
-        messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {self.rename_dir.get()} to {folder_path}")
+        # resource_dir = self.conf["resource_dir"]
+        # calculation_sheet = self.conf["calculation_sheet"]
+        # mode = 0o666
+        # folder_name = self.app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+        #               self.app.data["Project Info"]["Project"]["Project Name"].get()
+        # folder_path = os.path.join(self.app.conf["working_dir"], folder_name)
+        # os.mkdir(folder_path, mode)
+        # shutil.move(self.rename_dir.get(), os.path.join(folder_path, "External"))
+        # os.mkdir(os.path.join(folder_path, "Photos"), mode)
+        # os.mkdir(os.path.join(folder_path, "Plot"), mode)
+        # os.mkdir(os.path.join(folder_path, "SS"), mode)
+        #
+        # shutil.copyfile(os.path.join(resource_dir, "xlsx", calculation_sheet),
+        #                 os.path.join(folder_path, calculation_sheet))
+        # self.app.data["State"]["Folder Renamed"].set(True)
+        # self.destroy()
+        # messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {self.rename_dir.get()} to {folder_path}")
     def cancel(self):
+        self.select_var.set("")
+        self.destroy()
+
+class FileSelectDialog(simpledialog.Dialog):
+    def __init__(self, app, dir_list, file_selection, text, title=None):
+        self.dir_list = dir_list
+        self.app = app
+        self.conf = app.conf
+        self.file_selection = file_selection
+        self.text = text
+        super().__init__(app, title)
+
+    def body(self, master):
+        tk.Label(self, text=self.text).pack()
+        ttk.Combobox(self, textvariable=self.file_selection, values=self.dir_list).pack()
+
+    def ok(self):
+        self.destroy()
+        # resource_dir = self.conf["resource_dir"]
+        # calculation_sheet = self.conf["calculation_sheet"]
+        # mode = 0o666
+        # folder_name = self.app.data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+        #               self.app.data["Project Info"]["Project"]["Project Name"].get()
+        # folder_path = os.path.join(self.app.conf["working_dir"], folder_name)
+        # os.mkdir(folder_path, mode)
+        # shutil.move(self.rename_dir.get(), os.path.join(folder_path, "External"))
+        # os.mkdir(os.path.join(folder_path, "Photos"), mode)
+        # os.mkdir(os.path.join(folder_path, "Plot"), mode)
+        # os.mkdir(os.path.join(folder_path, "SS"), mode)
+        #
+        # shutil.copyfile(os.path.join(resource_dir, "xlsx", calculation_sheet),
+        #                 os.path.join(folder_path, calculation_sheet))
+        # self.app.data["State"]["Folder Renamed"].set(True)
+        # self.destroy()
+        # messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {self.rename_dir.get()} to {folder_path}")
+    def cancel(self):
+        self.file_selection.set("")
         self.destroy()
 #
 # class message_box(tk.messagebox)

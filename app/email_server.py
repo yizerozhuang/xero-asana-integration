@@ -180,6 +180,7 @@ def email_server(app=None):
                                 data_json["Current_folder_address"] = folder_name
 
                                 data_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
+                                data_json["Email"]["Fee Coming"] = datetime.today().strftime("%Y-%m-%d")
                                 # with open(os.path.join(database_dir, "data.json"), "w") as f:
                                 #     json_object = json.dumps(data_json, indent=4)
                                 #     f.write(json_object)
@@ -258,10 +259,10 @@ def email_server(app=None):
                             except Exception as e:
                                 print(e)
                                 sent_email_to_admin(msg_data)
-                        elif subject.startswith("Re: "):
+                        elif subject.startswith("Re: ") or subject.startswith("RE: "):
                             try:
-                                if not app is None and app.data["Project Info"]["Project"]["Quotation Number"].get() == subject[4:12]:
-                                    quotation_number = subject[4:12]
+                                quotation_number = subject.split(":", 1)[-1].split("-")[0].strip()
+                                if not app is None and app.data["Project Info"]["Project"]["Quotation Number"].get() == quotation_number:
                                     if len(app.data["Email"]["First Chase"].get())==0:
                                         app.data["Email"]["First Chase"].set(datetime.strptime(Date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%d"))
                                     elif len(app.data["Email"]["Second Chase"].get())==0:
@@ -273,7 +274,6 @@ def email_server(app=None):
                                     config_state(app)
                                     config_log(app)
                                 else:
-                                    quotation_number = subject[4:12]
                                     database_dir = os.path.join(conf["database_dir"], quotation_number, "data.json")
                                     data_json = json.load(open(database_dir))
                                     if len(data_json["Email"]["First Chase"])==0:

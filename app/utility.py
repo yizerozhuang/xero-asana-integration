@@ -1,8 +1,9 @@
 import textwrap
+import time
 from tkinter import messagebox
 import tkinter as tk
 
-from app_dialog import FileSelectDialog
+from app_dialog import FileSelectDialog, RadioButtonSelectDialog
 
 from win32com import client as win32client
 from openpyxl import load_workbook
@@ -23,6 +24,12 @@ from email import encoders
 import pythoncom
 # pythoncom.CoInitialize()
 
+
+def convert_float(string):
+    if string == "":
+        return 0
+    else:
+        return float(string)
 def isfloat(string):
     try:
         float(string)
@@ -57,6 +64,16 @@ def reset(app):
     database_dir = os.path.join(app.conf["database_dir"], "data_template.json")
     template_json = json.load(open(database_dir))
     template_json["Fee Proposal"]["Reference"]["Date"] = datetime.today().strftime("%d-%b-%Y")
+
+    test_data = data.copy()
+    try:
+        convert_to_data(template_json, test_data)
+    except Exception as e:
+        print(e)
+        app.messagebox.show_error("The template Json file is corrupt, please contact Admin to fix it")
+        return
+
+
     convert_to_data(template_json, app.data)
 
     app.fee_proposal_page._reset_scope()
@@ -143,8 +160,18 @@ def load(app, quotation_number):
     # quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
     database_dir = os.path.join(app.conf["database_dir"], quotation_number)
     data_json = json.load(open(os.path.join(database_dir, "data.json")))
+
+    test_data = data.copy()
+    try:
+        convert_to_data(data_json, test_data)
+    except Exception as e:
+        print(e)
+        app.messagebox.show_error("The Json file is corrupt, please contact Admin to fix it")
+        return
+
     convert_to_data(data_json, data)
 
+    app.timer = app.conf["timer"]
     app.data["Login_user"].set(app.user)
     save(app)
 
@@ -204,11 +231,8 @@ def load_invoice_state(app):
     bill_json = json.load(open(bill_dir))
     for bill in data["Bills"]["Details"].values():
         for item in bill["Content"]:
-            if len(item["Number"].get()) !=0:
-                try:
-                    item["State"].set(bill_json[data["Project Info"]["Project"]["Project Number"].get()+item["Number"].get()])
-                except KeyError:
-                    continue
+            if len(item["Xero_id"].get()) !=0:
+                item["State"].set(bill_json[item["Xero_id"].get()])
 
 def convert_to_json(obj):
     if isinstance(obj, list):
@@ -223,19 +247,15 @@ def convert_to_data(json, data):
         if len(json) == len(data):
             [convert_to_data(json[i], data[i]) for i in range(len(json))]
         elif len(json) > len(data):
+            for j in range(len(data), len(json)):
+                data.append(
+                    {
+                        "Include": tk.BooleanVar(value=True),
+                        "Item": tk.StringVar()
+                    }
+                )
             for i in range(len(json)):
-                try:
-                    convert_to_data(json[i], data[i])
-                except IndexError:
-                    data.append(
-                        {
-                            "Include": tk.BooleanVar(value=True),
-                            "Item": tk.StringVar()
-                        }
-                    )
-                    convert_to_data(json[i], data[i])
-                except Exception as e:
-                    print(e)
+                convert_to_data(json[i], data[i])
         elif len(json) < len(data):
             for j in range(len(json), len(data)):
                 data.pop(-1)
@@ -258,6 +278,7 @@ def convert_to_data(json, data):
 def generate_all_projects_and_invoices(database_dir):
     projects = {}
     invoices = {}
+    bills = {}
     for dir in os.listdir(database_dir):
         if os.path.isdir(os.path.join(database_dir, dir)):
             data_json = json.load(open(os.path.join(database_dir, dir, "data.json")))
@@ -276,8 +297,17 @@ def generate_all_projects_and_invoices(database_dir):
                             # "State": inv["State"]
                         }
                         # projects[inv["Asana_id"]]["Invoices"].append(inv["Asana_id"])
-    return projects, invoices
+                for service in data_json["Bills"]["Details"].values():
+                    for content in service["Content"]:
+                        if len(content["Xero_id"])!=0:
+                            assert len(content["Asana_id"])!=0
+                            bills[content["Xero_id"]] = content["Asana_id"]
+    return projects, invoices, bills
 
+def move_new_folder_to_external(app, working_dir, new_folder_dir, folder_name, quotation_number):
+    os.rename(os.path.join(working_dir, new_folder_dir), os.path.join(working_dir, "External"))
+    create_new_folder(folder_name, app.conf, quotation_number, False)
+    os.rename(os.path.join(working_dir, "External"), os.path.join(working_dir, folder_name,"External"))
 def finish_setup(app):
     data = app.data
 
@@ -291,18 +321,39 @@ def finish_setup(app):
         return
 
     if current_folder_address == "":
-        create_folder = app.messagebox.ask_yes_no(f"Can not find the folder with quotation number {quotation_number}, do you want to create the folder")
-        if create_folder:
-            create_new_folder(folder_name, app.conf, quotation_number)
+        new_folder_list = []
+        for directory in os.listdir(working_dir):
+            if directory.startswith("New folder"):
+                new_folder_list.append(directory)
+
+        if len(new_folder_list) > 1:
+            file_selection = tk.StringVar()
+            FileSelectDialog(app, new_folder_list, file_selection, "Multiple New Folder Found, please select the folder you want to rename")
+            if len(file_selection.get())!=0:
+                new_folder = file_selection.get()
+                move_new_folder_to_external(app, working_dir, new_folder, folder_name, quotation_number)
+            else:
+                return
+        elif len(new_folder_list)==1:
+            create_folder = app.messagebox.ask_yes_no(f"Bridge found new folder {new_folder_list[0]}, do you want to create the folder")
+            if create_folder:
+                new_folder = new_folder_list[0]
+                move_new_folder_to_external(app, working_dir, new_folder, folder_name, quotation_number)
+            else:
+                return
         else:
-            return
+            create_folder = app.messagebox.ask_yes_no(f"Can not find the folder with quotation number {quotation_number} or New Folder, do you want to create the folder")
+            if create_folder:
+                create_new_folder(folder_name, app.conf, quotation_number)
+            else:
+                return
     else:
         if current_folder_address != folder_name:
             try:
                 os.rename(os.path.join(working_dir, current_folder_address), os.path.join(working_dir, folder_name))
             except Exception as e:
                 print(e)
-                app.messagebox.show_error("Error", "Please Close the file relate to folder before rename")
+                app.messagebox.show_error("Please Close the file relate to folder before rename")
                 return
         #
         # if os.
@@ -446,13 +497,13 @@ def get_quotation_number():
         current_quotation = current_quotation[:6] + quotation_letter
     return current_quotation
 
-def remove_none(obj):
-    if isinstance(obj, list):
-        return [remove_none(x) for x in obj if x is not None]
-    elif isinstance(obj, dict):
-        return {k: remove_none(v) for k, v in obj.items() if v is not None}
-    else:
-        return obj
+# def remove_none(obj):
+#     if isinstance(obj, list):
+#         return [remove_none(x) for x in obj if x is not None]
+#     elif isinstance(obj, dict):
+#         return {k: remove_none(v) for k, v in obj.items() if v is not None}
+#     else:
+#         return obj
 
 def rename_project(app):
     #determine whether to change the quotation  number or the project name
@@ -500,46 +551,46 @@ def change_quotation_number(app, new_quotation_number):
     except PermissionError:
         return current_folder_address, new_folder, False
 
-def rename_new_folder(app):
-    data = app.data
-    folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                  data["Project Info"]["Project"]["Project Name"].get()
-    folder_path = os.path.join(app.conf["working_dir"], folder_name)
-    dir_list = os.listdir(app.conf["working_dir"])
-    rename_list = [dir for dir in dir_list if dir.startswith("New folder")]
+# def rename_new_folder(app):
+#     data = app.data
+#     folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+#                   data["Project Info"]["Project"]["Project Name"].get()
+#     folder_path = os.path.join(app.conf["working_dir"], folder_name)
+#     dir_list = os.listdir(app.conf["working_dir"])
+#     rename_list = [dir for dir in dir_list if dir.startswith("New folder")]
+#
+#     if len(data["Project Info"]["Project"]["Project Name"].get()) == 0:
+#         messagebox.showerror(title="Error", message="Please Input a project name")
+#         return
+#     elif len(data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
+#         messagebox.showerror(title="Error", message="Please Input a quotation number")
+#         return
+#     elif len(rename_list) == 0:
+#         messagebox.showerror(title="Error", message="Please create a new folder first")
+#         return
+#
+#     try:
+#         if len(rename_list) == 1:
+#             mode = 0o666
+#             os.mkdir(folder_path, mode)
+#             shutil.move(os.path.join(app.conf["working_dir"], rename_list[0]), os.path.join(folder_path, "External"))
+#             os.mkdir(os.path.join(folder_path, "Photos"), mode)
+#             os.mkdir(os.path.join(folder_path, "Plot"), mode)
+#             os.mkdir(os.path.join(folder_path, "SS"), mode)
+#             shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", app.conf["calculation_sheet"]),
+#                             os.path.join(folder_path, app.conf["calculation_sheet"]))
+#             messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {rename_list[0]} to {folder_name}")
+#         else:
+#             FileSelectDialog(app, rename_list, "Multiple new folders found, please select one")
+#     except FileExistsError:
+#         messagebox.showerror("Error", f"Cannot create a file when that file already exists:{folder_name}")
+#         return
+#     save(app)
+#     config_state(app)
+#     app.log.log_rename_folder(app)
+#     config_log(app)
 
-    if len(data["Project Info"]["Project"]["Project Name"].get()) == 0:
-        messagebox.showerror(title="Error", message="Please Input a project name")
-        return
-    elif len(data["Project Info"]["Project"]["Quotation Number"].get()) == 0:
-        messagebox.showerror(title="Error", message="Please Input a quotation number")
-        return
-    elif len(rename_list) == 0:
-        messagebox.showerror(title="Error", message="Please create a new folder first")
-        return
-
-    try:
-        if len(rename_list) == 1:
-            mode = 0o666
-            os.mkdir(folder_path, mode)
-            shutil.move(os.path.join(app.conf["working_dir"], rename_list[0]), os.path.join(folder_path, "External"))
-            os.mkdir(os.path.join(folder_path, "Photos"), mode)
-            os.mkdir(os.path.join(folder_path, "Plot"), mode)
-            os.mkdir(os.path.join(folder_path, "SS"), mode)
-            shutil.copyfile(os.path.join(app.conf["resource_dir"], "xlsx", app.conf["calculation_sheet"]),
-                            os.path.join(folder_path, app.conf["calculation_sheet"]))
-            messagebox.showinfo(title="Folder renamed", message=f"Rename Folder {rename_list[0]} to {folder_name}")
-        else:
-            FileSelectDialog(app, rename_list, "Multiple new folders found, please select one")
-    except FileExistsError:
-        messagebox.showerror("Error", f"Cannot create a file when that file already exists:{folder_name}")
-        return
-    save(app)
-    config_state(app)
-    app.log.log_rename_folder(app)
-    config_log(app)
-
-def create_new_folder(folder_name, conf, quotation):
+def create_new_folder(folder_name, conf, quotation, creating_external=True):
     database_dir = os.path.join(conf["database_dir"], quotation)
     accounting_dir = os.path.join(conf["accounting_dir"], quotation)
     folder_path = os.path.join(conf["working_dir"], folder_name)
@@ -548,7 +599,8 @@ def create_new_folder(folder_name, conf, quotation):
     os.makedirs(database_dir)
     os.makedirs(accounting_dir)
     os.mkdir(folder_path)
-    os.mkdir(os.path.join(folder_path, "External"))
+    if creating_external:
+        os.mkdir(os.path.join(folder_path, "External"))
     os.mkdir(os.path.join(folder_path, "Photos"))
     os.mkdir(os.path.join(folder_path, "Plot"))
     os.mkdir(os.path.join(folder_path, "SS"))
@@ -586,13 +638,15 @@ def check_accounting_folder(app):
 def open_design_certificate(app):
     data = app.data
     quotation_number = data["Project Info"]["Project"]["Quotation Number"].get().upper()
+    adobe_address = r"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
 
-    if len(data["Project Info"]["Project"]["Project Number"].get()) == 0:
-        folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
-                      data["Project Info"]["Project"]["Project Name"].get()
-    else:
-        folder_name = data["Project Info"]["Project"]["Project Number"].get() + "-" + \
-                      data["Project Info"]["Project"]["Project Name"].get()
+    # if len(data["Project Info"]["Project"]["Project Number"].get()) == 0:
+    #     folder_name = data["Project Info"]["Project"]["Quotation Number"].get() + "-" + \
+    #                   data["Project Info"]["Project"]["Project Name"].get()
+    # else:
+    #     folder_name = data["Project Info"]["Project"]["Project Number"].get() + "-" + \
+    #                   data["Project Info"]["Project"]["Project Name"].get()
+    folder_name = data["Current_folder_address"].get()
     folder_path = conf["working_dir"]+"\\"+folder_name
 
     if len(quotation_number) == 0:
@@ -619,22 +673,57 @@ def open_design_certificate(app):
 
     excel_full_path = os.path.join(folder_path, excel_path)
     # wb = load_workbook(excel_full_path)
-
+    # calculation_sheet = load_workbook(excel_full_path)
+    # sheet_names = calculation_sheet.sheetnames
+    # if not ("Mechanical Design Certificate" in sheet_names and "Mech Design Compliance Cert" in sheet_names):
+    #     app.messagebox.show_error("Mechanical Design Certificate and Compliance Cert are not in the excel sheet")
+    #     return
+    # design_certificate_worksheet = calculation_sheet["Mechanical Design Certificate"]
+    # design_compliance_cert_work_sheet = calculation_sheet["Mech Design Compliance Cert"]
+    # design_certificate_worksheet["A2"] = data["Project Info"]["Project"]["Project Name"].get()
+    # design_compliance_cert_work_sheet["A2"] = data["Project Info"]["Project"]["Project Name"].get()
+    # print(calculation_sheet)
 
     excel = win32client.Dispatch("Excel.Application")
-    excel.ScreenUpdating = True
-    excel.DisplayAlerts = True
-    excel.EnableEvents = True
+    try:
+        excel.Visible = True
+    except Exception as e:
+        print(e)
+    # excel.ScreenUpdating = False
+    # excel.DisplayAlerts = False
+    # excel.EnableEvents = False
     work_book = excel.Workbooks.Open(excel_full_path)
-    work_book.Worksheets("Mechanical Design Certificate").Activate()
+    work_book.Worksheets[0].Activate()
 
     design_certificate_worksheet = work_book.Worksheets["Mechanical Design Certificate"]
     design_compliance_cert_work_sheet = work_book.Worksheets["Mech Design Compliance Cert"]
     design_certificate_worksheet.Cells(2, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
     design_compliance_cert_work_sheet.Cells(2, 1).Value = data["Project Info"]["Project"]["Project Name"].get()
 
-    design_certificate_first_cell = 45 #if proposal_type=="Minor" else 55
-    design_compliance_first_cell = 26
+    # design_certificate_first_cell = 48 #if proposal_type=="Minor" else 55
+    # design_compliance_first_cell = 26
+
+    i = 1
+    design_certificate_first_cell = None
+    while i < 100:
+        if design_certificate_worksheet.Cells(i, 2).Value == "Drawing Number":
+            design_certificate_first_cell = i+1
+            break
+        i+=1
+    if design_certificate_first_cell is None:
+        app.messagebox.show_error("Can not found the drawing row of the design certificate")
+        return
+    i = 1
+    design_compliance_first_cell = None
+    while i < 100:
+        if design_compliance_cert_work_sheet.Cells(i, 2).Value == "Drawing Number":
+            design_compliance_first_cell = i + 1
+            break
+        i += 1
+    if design_compliance_cert_work_sheet is None:
+        app.messagebox.show_error("Can not found the drawing row of the design compliance certificate")
+        return
+
 
     for i, drawing in enumerate(data["Project Info"]["Drawing"]):
         design_certificate_worksheet.Cells(design_certificate_first_cell+i, 2).Value = drawing["Drawing Number"].get()
@@ -645,11 +734,30 @@ def open_design_certificate(app):
         design_compliance_cert_work_sheet.Cells(design_compliance_first_cell+i, 4).Value = drawing["Drawing Name"].get()
         design_compliance_cert_work_sheet.Cells(design_compliance_first_cell+i, 8).Value = drawing["Revision"].get()
 
-    print_pdf = app.messagebox.ask_yes_no("Do you want to Save the design certificate and design compliance in the Plot Folder?")
-    if print_pdf:
-        design_certificate_worksheet.ExportAsFixedFormat(0, os.path.join(folder_path, "Plot", "Mechanical Design Certificate.pdf"))
-        design_compliance_cert_work_sheet.ExportAsFixedFormat(0, os.path.join(folder_path, "Plot",
-                                                                              "Mechanical Design Compliance Certificate.pdf"))
+
+
+    print_pdf = tk.StringVar(value="None")
+    RadioButtonSelectDialog(app,
+                            ["Design Certificate", "Design Compliance Certificate"],
+                            print_pdf,
+                            "Do you want to generate",
+                            data["Project Info"]["Project"]["Project Name"].get())
+    # print_pdf = app.messagebox.ask_yes_no("Do you want to Save the design certificate and design compliance in the Plot Folder?")
+    print_pdf = print_pdf.get()
+    if print_pdf == "Design Certificate":
+        pdf_path = os.path.join(folder_path, "Plot", "Mechanical Design Certificate.pdf")
+        design_certificate_worksheet.ExportAsFixedFormat(0, pdf_path)
+        def open_pdf():
+            subprocess.call([adobe_address, pdf_path])
+
+        _thread.start_new_thread(open_pdf, ())
+    elif print_pdf == "Design Compliance Certificate":
+        pdf_path = os.path.join(folder_path, "Plot", "Mechanical Design Compliance Certificate.pdf")
+        design_compliance_cert_work_sheet.ExportAsFixedFormat(0, pdf_path)
+        def open_pdf():
+            subprocess.call([adobe_address, pdf_path])
+
+        _thread.start_new_thread(open_pdf, ())
 
 
 # def change_type_of_calculator(app):
@@ -787,9 +895,10 @@ def minor_project_fee_proposal(app, *args):
                 os.path.join(accounting_dir, excel_name))
     excel = win32client.Dispatch("Excel.Application")
     try:
-        excel.ScreenUpdating = False
-        excel.DisplayAlerts = False
-        excel.EnableEvents = False
+        excel.Visible = False
+        # excel.ScreenUpdating = False
+        # excel.DisplayAlerts = False
+        # excel.EnableEvents = False
     except Exception as e:
         print(e)
         pass
@@ -882,14 +991,14 @@ def minor_project_fee_proposal(app, *args):
         app.log.log_fee_proposal(app)
         config_log(app)
     try:
-        excel.ScreenUpdating = True
-        excel.DisplayAlerts = True
-        excel.EnableEvents = True
+        excel.Visible = True
+        # excel.ScreenUpdating = True
+        # excel.DisplayAlerts = True
+        # excel.EnableEvents = True
         work_book.Close(True)
         # adobe.close(0)
     except Exception as e:
         print(e)
-        pass
 
 def major_project_fee_proposal(app, *args):
     data = app.data
@@ -973,9 +1082,10 @@ def major_project_fee_proposal(app, *args):
                 os.path.join(accounting_dir, excel_name))
     excel = win32client.Dispatch("Excel.Application")
     try:
-        excel.ScreenUpdating = False
-        excel.DisplayAlerts = False
-        excel.EnableEvents = False
+        excel.Visible = False
+        # excel.ScreenUpdating = False
+        # excel.DisplayAlerts = False
+        # excel.EnableEvents = False
     except Exception as e:
         print(e)
         pass
@@ -1102,14 +1212,14 @@ def major_project_fee_proposal(app, *args):
         app.log.log_fee_proposal(app)
         config_log(app)
     try:
-        excel.ScreenUpdating = True
-        excel.DisplayAlerts = True
-        excel.EnableEvents = True
+        excel.Visible = True
+        # excel.ScreenUpdating = True
+        # excel.DisplayAlerts = True
+        # excel.EnableEvents = True
         work_book.Close(True)
         # adobe.close(0)
     except Exception as e:
         print(e)
-        pass
 
 def _major_project_fee_section(data, work_sheets, n_stage, page, row_per_page):
 
@@ -1253,7 +1363,10 @@ def excel_print_invoice(app, inv):
     if len(data["Invoices Number"][inv]["Number"].get()) == 0:
         messagebox.showerror("Error", "You need to generate a invoice number before you generate the Invoice")
         return
-
+    elif data["Invoices Number"][inv]["Fee"].get() == "0" or len(data["Invoices Number"][inv]["Fee"].get())==0:
+        process = app.messagebox.ask_yes_no("The Invoice amount is 0, Do you want to process?")
+        if not process:
+            return
     rewrite = True
     if os.path.exists(os.path.join(accounting_dir, invoice_name)):
         old_pdf_path=os.path.join(accounting_dir, invoice_name)
@@ -1272,9 +1385,10 @@ def excel_print_invoice(app, inv):
         shutil.copy(os.path.join(resource_dir, "xlsx", f"invoice_template.xlsx"),
                     os.path.join(accounting_dir, excel_name))
         excel = win32client.Dispatch("Excel.Application")
-        excel.ScreenUpdating = False
-        excel.DisplayAlerts = False
-        excel.EnableEvents = False
+        excel.Visible = False
+        # excel.ScreenUpdating = False
+        # excel.DisplayAlerts = False
+        # excel.EnableEvents = False
         work_book = excel.Workbooks.Open(os.path.join(accounting_dir, excel_name))
         try:
             work_sheets = work_book.Worksheets[0]
@@ -1392,12 +1506,13 @@ def excel_print_invoice(app, inv):
             config_state(app)
             config_log(app)
         try:
-            excel.ScreenUpdating = True
-            excel.DisplayAlerts = True
-            excel.EnableEvents = True
+            excel.Visible = True
+            # excel.ScreenUpdating = True
+            # excel.DisplayAlerts = True
+            # excel.EnableEvents = True
             work_book.Close(True)
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
 def preview_installation_fee_proposal(app):
     data = app.data
@@ -1453,12 +1568,12 @@ def preview_installation_fee_proposal(app):
                 os.path.join(accounting_dir, excel_name))
     excel = win32client.Dispatch("Excel.Application")
     try:
-        excel.ScreenUpdating = False
-        excel.DisplayAlerts = False
-        excel.EnableEvents = False
+        excel.Visible = False
+        # excel.ScreenUpdating = False
+        # excel.DisplayAlerts = False
+        # excel.EnableEvents = False
     except Exception as e:
         print(e)
-        pass
     work_book = excel.Workbooks.Open(os.path.join(accounting_dir, excel_name))
         # messagebox.showerror("Error", e)
     try:
@@ -1552,14 +1667,14 @@ def preview_installation_fee_proposal(app):
         app.log.log_fee_proposal(app)
         config_log(app)
     try:
-        excel.ScreenUpdating = True
-        excel.DisplayAlerts = True
-        excel.EnableEvents = True
+        excel.Visible = True
+        # excel.ScreenUpdating = True
+        # excel.DisplayAlerts = True
+        # excel.EnableEvents = True
         work_book.Close(True)
         # adobe.close(0)
     except Exception as e:
         print(e)
-        pass
 
 
 def email_fee_proposal(app, *args):
@@ -1615,6 +1730,14 @@ def email_fee_proposal(app, *args):
     save(app)
     config_state(app)
     return True
+def convert_time_format(time_string):
+    year, month, day = time_string.split("-")
+    if day == "01":
+        return datetime(int(year), int(month), int(day)).strftime("%d<sup>st</sup> %B %Y")
+    elif day == "02":
+        return datetime(int(year), int(month), int(day)).strftime("%d<sup>nd</sup> %B %Y")
+    else:
+        return datetime(int(year), int(month), int(day)).strftime("%d<sup>th</sup> %B %Y")
 def chase(app, *args):
     data = app.data
     # database_dir = os.path.join(app.conf["database_dir"], data["Project Info"]["Project"]["Quotation Number"].get())
@@ -1634,6 +1757,7 @@ def chase(app, *args):
     newmail = ol.CreateItem(olmailitem)
     newmail.Subject = f'Re: {data["Project Info"]["Project"]["Quotation Number"].get()}-{data["Project Info"]["Project"]["Project Name"].get()}'
     newmail.To = f'{data["Project Info"]["Client"]["Contact Email"].get()}; {data["Project Info"]["Main Contact"]["Contact Email"].get()}'
+    newmail.CC = "felix@pcen.com.au"
     newmail.BCC = "bridge@pcen.com.au"
     newmail.GetInspector()
     index = newmail.HTMLbody.find(">", newmail.HTMLbody.find("<body"))
@@ -1643,10 +1767,16 @@ def chase(app, *args):
     first_name = get_first_name(full_name)
 
     message = f"""
-    Hi {first_name},<br><br>
-    I wanted to circle back regarding the fee proposal we sent on {data["Email"]["Fee Proposal"].get()}. Do you have any questions or concerns? We're looking forward to working with you and hearing your feedback. <br>
+    Dear {first_name},<br><br>
+    
+    
+    I hope this email finds you well.<br><br>
+    
+    I am writing to follow up on the fee proposal we sent on <b>{convert_time_format(data["Email"]["Fee Proposal"].get())}, attached</b>. I wanted to check if there is any update. <br><br>
 
-    Thank you for considering our proposal, and we anticipate your response soon.<br>
+    If you need any further clarification, please do not hesitate to contact us.<br><br>
+    
+    Looking forward to hearing from you and contribute to the project.<br><br>
     """
     newmail.HTMLbody = newmail.HTMLbody[:index + 1] + message + newmail.HTMLbody[index + 1:]
     newmail.Attachments.Add(os.path.join(accounting_dir, pdf_name))

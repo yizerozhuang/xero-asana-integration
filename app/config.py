@@ -7,7 +7,7 @@ CONFIGURATION = {
     "proposal_list": ["Mechanical Service", "Mechanical Review", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Miscellaneous"],
     "service_list":["Mechanical Service", "Mechanical Review", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Miscellaneous", "Installation"],
     "all_service_list":["Mechanical Service", "Mechanical Review","Kitchen Ventilation" ,"CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Miscellaneous", "Installation"],
-    "invoice_list": ["Mechanical Service", "Mechanical Review", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Miscellaneous", "Installation", "Variation"],
+    "invoice_list": ["Mechanical Service", "CFD Service", "Electrical Service", "Hydraulic Service", "Fire Service", "Mechanical Review", "Miscellaneous", "Installation", "Variation"],
     "extra_list":["Extent", "Clarifications", "Deliverables"],
     "major_stage": ["Design Application", "Design Development", "Construction Documentation", "Construction Phase Service"],
     "tax rates": 1.1,
@@ -21,6 +21,7 @@ CONFIGURATION = {
     "n_variation": 4,
     "len_per_line": 100,
     "car_park_row": 6,
+    "timer": 1800,
     "bridge_email": "bridge@pcen.com.au",
     "email_username": "bridge@pcen.com.au",
     "email_password": "PcE$yD2023",
@@ -30,10 +31,12 @@ CONFIGURATION = {
     "xero_client_id": "92582E6BA77A41F0B5076D3E5B442A24",
     "xero_client_secret": "YmhTPLEHqGhjYFOK0uPowcpVsgdLJ2ZKYD_PKq-rjGJVQIml",
     "xero_bill_email": "bills.vwkv1.b68g90zti0h38qcd@xerofiles.com",
-    "admin_user_list":["Admin", "Felix"],
+    "admin_user_list":["Admin", "Felix", "Joe"],
     # "engineer_user_list": ["Engineer1", "Engineer2", "Engineer3"],
     "frame_colors": ["white", "azure"],
     "calculation_sheet": "Preliminary Calculation v2.6.xlsx",
+    "bill_type": ["Mechanical", "Electrical", "Hydraulic", "Fire", "Drafting", "CFD", "Installation", "Others"],
+    "asana_states":["Fee Proposal", "Design","Pending", "DWG drawings", "Done", "Installation", "Construction Phase", "Quote Unsuccessful"],
     "test_mode": False
     # "xero_bill_email":"bills.of4xmk.wt2xjjy1w2n5vceb@xerofiles.com"
 }

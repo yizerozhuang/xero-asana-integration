@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
-
 from utility import *
 from asana_function import update_asana, update_asana_invoices
 from xero_function import upload_bill_to_xero, refresh_token
@@ -75,6 +74,8 @@ class FinancialPanelPage(tk.Frame):
                     "Fee": tk.StringVar(),
                     "in.GST": tk.StringVar(),
                     "State": tk.StringVar(value="Backlog"),
+                    # "Payment Amount": tk.StringVar(),
+                    # "Payment Date": tk.StringVar(),
                     "Asana_id": tk.StringVar(),
                     "Xero_id": tk.StringVar()
                 }
@@ -335,12 +336,14 @@ class FinancialPanelPage(tk.Frame):
                     "Paid.GST": tk.StringVar(),
                     "Content": [
                         {
+                            "Contact": tk.StringVar(),
                             "Service": tk.StringVar(),
                             "Fee": tk.StringVar(),
                             "in.GST": tk.StringVar(),
                             "no.GST": tk.BooleanVar(),
                             "Description": tk.StringVar(),
                             "State": tk.StringVar(value="Draft"),
+                            "Type": tk.StringVar(),
                             "Upload": tk.BooleanVar(),
                             "Number": tk.StringVar(),
                             "Asana_id": tk.StringVar(),
@@ -348,6 +351,32 @@ class FinancialPanelPage(tk.Frame):
                         } for _ in range(self.conf["n_bills"])
                     ]
                 }
+
+            if service in ["Mechanical Service", "Mechanical Review"]:
+                for i in range(self.conf["n_bills"]):
+                    bills["Details"][service]["Content"][i]["Type"].set("Mechanical")
+            elif service == "CFD Service":
+                for i in range(self.conf["n_bills"]):
+                    bills["Details"][service]["Content"][i]["Type"].set("CFD")
+            elif service == "Electrical Service":
+                for i in range(self.conf["n_bills"]):
+                    bills["Details"][service]["Content"][i]["Type"].set("Electrical")
+            elif service == "Hydraulic Service":
+                for i in range(self.conf["n_bills"]):
+                    bills["Details"][service]["Content"][i]["Type"].set("Hydraulic")
+            elif service == "Fire Service":
+                for i in range(self.conf["n_bills"]):
+                    bills["Details"][service]["Content"][i]["Type"].set("Fire")
+            elif service == "Installation":
+                for i in range(self.conf["n_bills"]):
+                    bills["Details"][service]["Content"][i]["Type"].set("Installation")
+            elif service in ["Variation", "Miscellaneous"]:
+                for i in range(self.conf["n_bills"]):
+                    bills["Details"][service]["Content"][i]["Type"].set("Others")
+
+
+
+
             ist_update_fun = lambda service : lambda a, b, c: self.app._ist_update(bills["Details"][service]["Fee"],
                                                                                    bills["Details"][service]["in.GST"],
                                                                                    bills["Details"][service]["no.GST"])
@@ -483,10 +512,15 @@ class FinancialPanelPage(tk.Frame):
                                            font=self.conf["font"],
                                            fg="blue"
                                            ),
+                        "Contact": tk.Entry(self.bill_dic[service]["Expand"][i],
+                                            textvariable=details[service]["Content"][i]["Contact"],
+                                            font=self.conf["font"],
+                                            width=17,
+                                            fg="blue"),
                         "Service": tk.Entry(self.bill_dic[service]["Expand"][i],
                                             textvariable=details[service]["Content"][i]["Service"],
                                             font=self.conf["font"],
-                                            width=49,
+                                            width=53,
                                             fg="blue"),
                         "Fee": tk.Entry(self.bill_dic[service]["Expand"][i],
                                         width=10,
@@ -501,6 +535,12 @@ class FinancialPanelPage(tk.Frame):
                                                  variable=details[service]["Content"][i]["no.GST"],
                                                  width=6,
                                                  text="No GST"),
+                        "Type": ttk.Combobox(self.bill_dic[service]["Expand"][i],
+                                             textvariable=details[service]["Content"][i]["Type"],
+                                             values=self.conf["bill_type"],
+                                             width=12,
+                                             state="readonly",
+                                             font=self.conf["font"]),
                         # "Description": tk.Entry(self.bill_dic[service]["Expand"][i],
                         #                         width=30,
                         #                         textvariable=details[service]["Content"][i]["Description"],
@@ -562,12 +602,14 @@ class FinancialPanelPage(tk.Frame):
                 config_button_func = lambda i : lambda a, b, c: self.config_button(self.data["Bills"]["Details"][service]["Content"][i]["Upload"], self.bill_dic[service]["Content"][i]["Upload"])
                 for i in range(self.conf["n_bills"]):
                     self.bill_dic[service]["Content"][i]["Number"].grid(row=0, column=0, padx=(0, 3))
-                    self.bill_dic[service]["Content"][i]["Service"].grid(row=0, column=1)
-                    self.bill_dic[service]["Content"][i]["Fee"].grid(row=0, column=2)
-                    self.bill_dic[service]["Content"][i]["in.GST"].grid(row=0, column=3)
-                    self.bill_dic[service]["Content"][i]["no.GST"].grid(row=0, column=4)
+                    self.bill_dic[service]["Content"][i]["Contact"].grid(row=0, column=1)
+                    self.bill_dic[service]["Content"][i]["Service"].grid(row=0, column=2)
+                    self.bill_dic[service]["Content"][i]["Fee"].grid(row=0, column=3)
+                    self.bill_dic[service]["Content"][i]["in.GST"].grid(row=0, column=4)
+                    self.bill_dic[service]["Content"][i]["no.GST"].grid(row=0, column=5)
+                    self.bill_dic[service]["Content"][i]["Type"].grid(row=0, column=6)
                     # self.bill_dic[service]["Content"][i]["Description"].grid(row=0, column=5)
-                    self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=6, padx=(160, 0))
+                    self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=7)
                     self.data["Bills"]["Details"][service]["Content"][i]["Upload"].trace("w", config_button_func(i))
                     # self.bill_dic[service]["Content"][i]["Upload"].grid(row=0, column=6, sticky="w")
             self.bill_frames[service].pack(fill=tk.X)
@@ -788,13 +830,14 @@ class FinancialPanelPage(tk.Frame):
         excel_print_invoice(self.app, i)
 
     def _email_invoice(self, i):
-        email_invoice(self.app, i)
+        project_name = self.data["Project Info"]["Project"]["Project Name"].get()
         if i == 0 and len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
             number = self.data["Invoices Number"][0]["Number"].get()
             old_folder, new_folder, update = change_quotation_number(self.app, number)
             if update:
+                email_invoice(self.app, i)
                 self.data["Project Info"]["Project"]["Project Number"].set(number)
-                self.data["Current_folder_address"].set(new_folder)
+                self.data["Current_folder_address"].set(number+"-"+project_name)
                 project_quotation_dir = os.path.join(self.conf["database_dir"], "project_quotation_number_map.json")
                 project_quotation_json = json.load(open(project_quotation_dir))
                 project_quotation_json[number] = self.data["Project Info"]["Project"]["Quotation Number"].get()
@@ -814,6 +857,7 @@ class FinancialPanelPage(tk.Frame):
                     f"Fail to rename the folder from {old_folder} to {new_folder}, Please close all the file relate in the folder")
                 return
         else:
+            email_invoice(self.app, i)
             update_asana(self.app)
             update_asana_invoices(self.app)
             update_xero = self.messagebox.ask_yes_no("The Invoices has upload to Asana, do you want to update Xero")
@@ -976,37 +1020,64 @@ class FinancialPanelPage(tk.Frame):
         self.data["Bills"]["Details"][service][origin + "_Upload"].set(True)
         self.messagebox.file_info("Upload", file, folder_dir)
 
-    def upload_sub_fee(self, service, bill_number, i):
+    def upload_sub_fee(self, service, bill_letter, i):
         # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         bills_dir = os.path.join(self.conf["bills_dir"], date.today().strftime("%Y%m"))
-        bill_number = bill_number.get()
-        if len(bill_number) == 0:
+        bill_letter = bill_letter.get()
+        bill_number = self.data["Project Info"]["Project"]["Project Number"].get()+bill_letter
+        if len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
+            self.messagebox.show_error("This Project dont have a Project Number yet")
+            return
+        elif len(bill_letter) == 0:
             self.messagebox.show_error("You need to enter a bill number")
             return
-        elif len(self.data["Project Info"]["Project"]["Project Number"].get()) == 0:
-            self.messagebox.show_error("Please generate first invoice number before you upload bill file")
+        elif len(self.data["Bills"]["Details"][service]["Content"][i]["Contact"].get()) == 0:
+            self.messagebox.show_error("Please enter the contact before you upload bill")
+            return
+        elif len(self.data["Bills"]["Details"][service]["Content"][i]["Type"].get())==0:
+            self.messagebox.show_error("Please select the type of the bill before you upload the bill")
             return
         elif float(self.data["Bills"]["Details"][service]["Paid"].get()) > float(self.data["Bills"]["Details"][service]["Fee"].get()):
             self.messagebox.show_error("Bill Amount, exceed subbie quote amount")
             return
+
         if self.data["Bills"]["Details"][service]["Content"][i]["Upload"].get():
-            rewrite = self.messagebox.ask_yes_no(f"Existing file found, Do you want to rewrite")
+            rewrite = self.messagebox.ask_yes_no(f"You uploaded this bill before, Do you want to rewrite")
             if not rewrite:
                 return
         file = filedialog.askopenfilename(initialdir=accounting_dir)
-        filename = self.data["Project Info"]["Project"]["Project Number"].get() + bill_number + "-" + os.path.basename(file).replace(" ", "_")
         if file == "":
+            return
+
+        filename = bill_number + "-" + os.path.basename(file).replace(" ", "_")
+        if not os.path.exists(bills_dir):
+            os.makedirs(bills_dir)
+        try:
+            for old_file in os.listdir(accounting_dir):
+                if old_file.startswith(bill_number+"-"):
+                    os.remove(os.path.join(accounting_dir, old_file))
+            for old_file in os.listdir(bills_dir):
+                if old_file.startswith(bill_number + "-"):
+                    os.remove(os.path.join(bills_dir, old_file))
+        except PermissionError:
+            self.messagebox.show_error("Please Close the old file before you upload the bill, Bridge need to remove the old fild")
+            return
+        except Exception as e:
+            print(e)
+            self.messagebox.show_error("Some error occurs, please contact Administrator")
             return
         try:
             folder_path = os.path.join(accounting_dir, filename)
-            bill_path = os.path.join(bills_dir, filename)
             shutil.move(file, folder_path)
-            if not os.path.exists(bills_dir):
-                os.makedirs(bills_dir)
+
+            bill_path = os.path.join(bills_dir, filename)
             shutil.copy(folder_path, bill_path)
         except PermissionError:
             self.messagebox.show_error("Please Close the file before you upload it")
+            return
+        except AssertionError:
+            self.messagebox.show_error("You Can not delete a bill in Awaiting payment or Paid Stage")
             return
         except Exception as e:
             print(e)
@@ -1072,11 +1143,13 @@ class FinancialPanelPage(tk.Frame):
             self.data["State"]["Fee Accepted"].set(True)
             self.app.log.log_fee_accept_file(self.app.user, self.data["Project Info"]["Project"]["Quotation Number"].get())
             update = self.messagebox.file_ask_yes_no("Upload", file, folder_dir, "Asana")
+            self.data["State"]["Asana State"].set("Design")
             if update:
                 update_asana(self.app)
                 update_asana_invoices(self.app)
                 self.messagebox.show_info("Success update Asana")
             self.data["Fee_Acceptance_Upload"].set(True)
+            self.data["Email"]["Fee Accepted"].set(date.today().strftime("%Y-%m-%d"))
             save(self.app)
             config_state(self.app)
             config_log(self.app)
@@ -1102,10 +1175,12 @@ class FinancialPanelPage(tk.Frame):
             with open(os.path.join(accounting_dir, "Verbal Fee Acceptance.txt"), "w") as f:
                 f.write(self.data["Verbal Acceptance Note"].get())
             f.close()
+            self.data["State"]["Asana State"].set("Design")
             update_asana(self.app)
             update_asana_invoices(self.app)
             self.app.log.log_fee_accept_file(self.app.user, self.data["Project Info"]["Project"]["Quotation Number"].get())
             self.data["Verbal_Acceptance_Upload"].set(True)
+            self.data["Email"]["Fee Accepted"].set(date.today().strftime("%Y-%m-%d"))
             save(self.app)
             config_state(self.app)
             config_log(self.app)

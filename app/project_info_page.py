@@ -89,7 +89,7 @@ class ProjectInfoPage(tk.Frame):
                                                                                                 padx=(10, 0))
         project["Quotation Number"] = tk.StringVar()
         tk.Entry(project_frame, width=45, font=self.conf["font"], fg="blue",
-                 textvariable=project["Quotation Number"]).grid(row=1,
+                 textvariable=project["Quotation Number"], state=tk.DISABLED).grid(row=1,
                                                                 column=1,
                                                                 columnspan=2,
                                                                 padx=(0, 10))
@@ -98,7 +98,7 @@ class ProjectInfoPage(tk.Frame):
                                                                                               padx=(10, 0))
         project["Project Number"] = tk.StringVar()
         tk.Entry(project_frame, width=45, font=self.conf["font"], fg="blue",
-                 textvariable=project["Project Number"]).grid(row=2, column=1, columnspan=2, padx=(0, 10))
+                 textvariable=project["Project Number"], state=tk.DISABLED).grid(row=2, column=1, columnspan=2, padx=(0, 10))
 
 
         save_load_frame = tk.Frame(project_frame)
@@ -107,8 +107,33 @@ class ProjectInfoPage(tk.Frame):
 
         # tk.Button(save_load_frame, width=10, height=2, text="Clear Up", command=lambda: reset(self.app), bg="brown", fg="white",
         #           font=self.conf["font"]).grid(row=0, column=0)
-        tk.Button(save_load_frame, width=18, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
-                  font=self.conf["font"]).grid(row=0, column=1)
+        # tk.Button(save_load_frame, width=18, height=2, text="Load", command=self.load_data, bg="brown", fg="white",
+        #           font=self.conf["font"]).grid(row=0, column=1)
+        project_state_frame = tk.LabelFrame(save_load_frame)
+        project_state_frame.grid(row=0, column=1, sticky="nsew")
+
+        tk.Label(project_state_frame, text="Project State:", font=self.conf["font"], width=18).pack(fill=tk.BOTH, expand=1)
+        self.project_state_dropdown_menu = ttk.Combobox(project_state_frame,
+                                                font=self.conf["font"],
+                                                textvariable=self.data["State"]["Asana State"],
+                                                values=self.conf["asana_states"],
+                                                state="readonly")
+        # self.project_state_label = tk.Label(project_state_frame, font=self.conf["font"], text="01.Set Up")
+        self.project_state_dropdown_menu.pack(fill=tk.BOTH, expand=1)
+        # self.previous_state_stringvar = tk.StringVar()
+        # def callback(eventobject, previous_state):
+        #     print(eventobject)
+        #
+        # self.project_state_dropdown_menu.bind("<<ComboboxSelected>>", lambda event: callback(event, self.previous_state_stringvar))
+        #
+        #
+        # self.data["State"]["Asana State"].trace("w", lambda a,b,c: self.previous_state_stringvar.set(self.data["State"]["Asana State"].get()))
+
+
+
+        # for state in self.data["State"].values():
+        #     state.trace("w", self._update_project_state)
+
 
         project["Project Name"].trace("w", self._update_quotation_number)
 
@@ -174,6 +199,27 @@ class ProjectInfoPage(tk.Frame):
         # project["Service Type"]["Hydraulic Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Hydraulic Service"]))
         # project["Service Type"]["Fire Service"]["Include"].trace("w", lambda a, b, c: self._update_service(project["Service Type"]["Fire Service"]))
 
+    def _update_project_state(self, *args):
+        state = self.data["State"]
+        asana_status_map = {"Pending": "06.Pending",
+                            "DWG drawings": "07.DWG drawings",
+                            "Done": "08.Done",
+                            "Installation": "09.Installation",
+                            "Construction Phase": "10.Construction"}
+        if state["Asana State"].get() in ["Pending", "DWG drawings", "Done", "Installation", "Construction Phase"]:
+            self.project_state_label.config(text=asana_status_map[state["Asana State"].get()])
+        elif state["Quote Unsuccessful"].get():
+            self.project_state_label.config(text="11.Quote Unsuccessful")
+        elif state["Fee Accepted"].get():
+            self.project_state_label.config(text="05.Design")
+        elif state["Email to Client"].get():
+            self.project_state_label.config(text="04.Chase Client")
+        elif state["Generate Proposal"].get():
+            self.project_state_label.config(text="03.Email To Client")
+        elif state["Set Up"].get():
+            self.project_state_label.config(text="02.Preview Fee Proposal")
+        else:
+            self.project_state_label.config(text="01.Set Up")
     # def selected(self):
     #
     #     if self.client_contact_type.get() == self.data["Project Info"]["Client"]["Contact Type"].get():
@@ -468,11 +514,11 @@ The project is a residential develop and consists of:
         tk.Button(self.finish_frame, text="Delete Project", command=self._delete_project,
                   bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
 
-        self.quote_text = tk.StringVar(value="Quote Unsuccessful")
-        tk.Button(self.finish_frame, textvariable=self.quote_text, command=self.quote_unsuccessful,
-                  bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
-
-        self.data["State"]["Quote Unsuccessful"].trace("w", self._update_quote_button_text)
+        # self.quote_text = tk.StringVar(value="Quote Unsuccessful")
+        # tk.Button(self.finish_frame, textvariable=self.quote_text, command=self.quote_unsuccessful,
+        #           bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)
+        #
+        # self.data["State"]["Quote Unsuccessful"].trace("w", self._update_quote_button_text)
 
         # tk.Button(finish_frame, text="Finish Set Up", command=self._finish_setup,
         #           bg="brown", fg="white", font=self.conf["font"]).pack(side=tk.RIGHT)

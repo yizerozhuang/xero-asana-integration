@@ -16,12 +16,25 @@ from datetime import date, timedelta
 from win32com import client as win32client
 
 
-database_dir = conf["database_dir"]
-# database_dir = "P:\\app\\database"
+# database_dir = conf["database_dir"]
+database_dir = "P:\\app\\database"
+backup_dir = "C:\\Users\\Admin\\Desktop\\test_back_up"
+working_dir = "P:"
+accounting_dir = "A:\\00-Bridge Database"
+
 invoice_dir = os.path.join(database_dir, "invoices.json")
 invoice_json = json.load(open(invoice_dir))
 bill_dir = os.path.join(database_dir, "bills.json")
-bill_json = json.load(open(bill_dir))
+bill_json = {}
+
+xero_asana_status_map = {
+    "DRAFT": "Draft",
+    "SUBMITTED": "Awaiting Approval",
+    "AUTHORISED": "Awaiting Payment",
+    "PAID": "Paid",
+    "VOIDED": "Voided"
+}
+
 
 # generate_management_report = False
 
@@ -38,21 +51,15 @@ mp_asana_gid = "1203405141297991"
 # project_api_instance = asana.ProjectsApi(asana_api_client)
 task_api_instance = asana.TasksApi(asana_api_client)
 
-all_project, backlog_invoice = generate_all_projects_and_invoices(database_dir)
-def _process_invoice(invoices):
+all_project, backlog_invoice, all_bills = generate_all_projects_and_invoices(database_dir)
+def _process_invoice(invoices, accounting_api, xero_tenant_id):
     res = {
         "INV": {
             "Sent": {},
             "Paid": {},
             "Voided": {}
         },
-        "BIL": {
-            "Draft": [],
-            "Awaiting Approval": [],
-            "Awaiting Payment": [],
-            "Paid": [],
-            "Voided": []
-        }
+        "BIL": {}
     }
     invoices = invoices.to_dict()["invoices"]
     for invoice in invoices:
@@ -89,16 +96,24 @@ def _process_invoice(invoices):
                         "reference": invoice["reference"]
                 }
         elif invoice["type"] == "ACCPAY":
-            if invoice["status"] == "DRAFT":
-                res["BIL"]["Draft"].append(invoice["invoice_number"])
-            elif invoice["status"] == "SUBMITTED":
-                res["BIL"]["Awaiting Approval"].append(invoice["invoice_number"])
-            elif invoice["status"] == "AUTHORISED":
-                res["BIL"]["Awaiting Payment"].append(invoice["invoice_number"])
-            elif invoice["status"] == "PAID":
-                res["BIL"]["Paid"].append(invoice["invoice_number"])
-            elif invoice["status"] == "VOIDED":
-                res["BIL"]["Voided"].append(invoice["invoice_number"])
+            if invoice["status"] in ["DRAFT", "SUBMITTED", "AUTHORISED", "PAID", "VOIDED"]:
+                res["BIL"][invoice["invoice_id"]]={
+                    "name": invoice["invoice_number"].split("-")[0],
+                    "Bill status": xero_asana_status_map[invoice["status"]],
+                    "From": invoice["contact"]["name"],
+                    "Issue Date": str(invoice["date"]),
+                    "Amount Excl GST": str(invoice["sub_total"]),
+                    "Amount Incl GST": str(invoice["total"]),
+                    "HeadsUp": str(accounting_api.get_invoice(xero_tenant_id, invoice["invoice_id"]).to_dict()["invoices"][0]["line_items"][0]["description"])
+                }
+            # elif invoice["status"] == "SUBMITTED":
+            #     res["BIL"]["Awaiting Approval"].append(invoice["invoice_number"])
+            # elif invoice["status"] == "AUTHORISED":
+            #     res["BIL"]["Awaiting Payment"].append(invoice["invoice_number"])
+            # elif invoice["status"] == "PAID":
+            #     res["BIL"]["Paid"].append(invoice["invoice_number"])
+            # elif invoice["status"] == "VOIDED":
+            #     res["BIL"]["Voided"].append(invoice["invoice_number"])
         else:
             raise TypeError
             # print("Error, Unsupported Invoice Type")
@@ -110,14 +125,14 @@ def update_xero_and_asana_invoice_script():
     xero_tenant_id = get_xero_tenant_id()
     accounting_api = AccountingApi(api_client)
 
-    invoices = _process_invoice(accounting_api.get_invoices(xero_tenant_id, if_modified_since=if_modified_since))
+    invoices = _process_invoice(accounting_api.get_invoices(xero_tenant_id, if_modified_since=if_modified_since), accounting_api, xero_tenant_id)
     for invoices_states in invoices["INV"].keys():
         for invoice_number in invoices["INV"][invoices_states].keys():
             invoice_json[invoice_number] = invoices_states
 
     for key, value in invoices["BIL"].items():
-        for inv_number in value:
-            bill_json[inv_number] = key
+        bill_json[key] = value["Bill status"]
+
     off_set = None
     opt_field = ["name", "custom_fields.name", "custom_fields.display_value"]
 
@@ -130,6 +145,13 @@ def update_xero_and_asana_invoice_script():
     status_id_map = name_id_map(status_field["enum_options"])
 
 
+    bill_custom_fields_setting = clean_response(custom_fields_setting_api_instance.get_custom_field_settings_for_project(bill_status_asana_gid))
+    bill_all_custom_fields = [custom_field["custom_field"] for custom_field in bill_custom_fields_setting]
+    bill_custom_field_id_map = name_id_map(bill_all_custom_fields)
+
+    bill_status_field = clean_response(
+        custom_fields_api_instance.get_custom_field(bill_custom_field_id_map["Bill status"]))
+    bill_status_id_map = name_id_map(bill_status_field["enum_options"])
     # if generate_management_report:
     #     resource_dir = conf["resource_dir"]
     #     management_report_template = os.path.join(resource_dir, "xlsx", "management_report_template.xlsx")
@@ -139,6 +161,8 @@ def update_xero_and_asana_invoice_script():
     #     work_book = excel.Workbooks.Open(management_report)
     #     work_sheets = work_book.Worksheets[1]
     #     cur_row = 8
+
+    #update_invoice
     while True:
         if off_set is None:
             ori_tasks = task_api_instance.get_tasks_for_project(project_gid=invoice_status_asana_gid, opt_fields=opt_field, limit=100).to_dict()
@@ -229,29 +253,74 @@ def update_xero_and_asana_invoice_script():
                     print(f"Processed backlog task with asana id {task['gid']} and invoice number {task['name']}")
 
         if ori_tasks["next_page"] is None:
-
-            inv_json_list = list(invoice_json.keys())
-            inv_json_list.sort()
-            new_inv_list = {}
-            for inv_number in inv_json_list:
-                new_inv_list[inv_number] = invoice_json[inv_number]
-
-            with open(os.path.join(database_dir, "invoices.json"), "w") as f:
-                json_object = json.dumps(new_inv_list, indent=4)
-                f.write(json_object)
-            with open(os.path.join(database_dir, "bills.json"), "w") as f:
-                json_object = json.dumps(bill_json, indent=4)
-                f.write(json_object)
-            print(f"The Sync take {time.time() - start}s")
-            print("Complete")
             break
         off_set = ori_tasks["next_page"]["offset"]
         # messagebox.showerror("Error", e)
 
 
+
+    # update_bills
+    # for bill in all_bills.keys():
+    #     asana_id = all_bills[bill]
+    #     asana_task = flatter_custom_fields(clean_response(task_api_instance.get_task(asana_id)))
+    #     print(bill)
+    #     assert bill in invoices["BIL"].keys()
+    #     xero_bill = invoices["BIL"][bill]
+    #
+    #     asana_update_body = {"custom_fields":{}}
+    #     update = False
+    #     print(f"Processed Bill with asana id {asana_id} with asana task name {asana_task['name']}")
+    #     if asana_task["name"] != "BIL "+xero_bill["name"]:
+    #         asana_update_body["name"] = "BIL "+xero_bill["name"]
+    #         update = True
+    #     if asana_task["Bill status"] != xero_bill["Bill status"]:
+    #         asana_update_body["custom_fields"][bill_custom_field_id_map["Bill status"]] = bill_status_id_map[xero_bill["Bill status"]]
+    #         update = True
+    #
+    #     if asana_task["From"] != xero_bill["From"]:
+    #         asana_update_body["custom_fields"][bill_custom_field_id_map["From"]] = xero_bill["From"]
+    #         update = True
+    #
+    #     display_value = None if asana_task["Bill In Date"] is None else asana_task["Bill In Date"][0:10]
+    #     issue_date = None if xero_bill["Issue Date"] is None else xero_bill["Issue Date"]
+    #     if display_value != issue_date:
+    #         if issue_date is None:
+    #             asana_update_body["custom_fields"][bill_custom_field_id_map["Bill In Date"]] = None
+    #         else:
+    #             asana_update_body["custom_fields"][bill_custom_field_id_map["Bill In Date"]] = {"date": issue_date}
+    #         update=True
+    #
+    #     if float(asana_task["Amount Excl GST"]) != float(xero_bill["Amount Excl GST"]):
+    #         asana_update_body["custom_fields"][bill_custom_field_id_map["Amount Excl GST"]] = float(xero_bill["Amount Excl GST"])
+    #         update = True
+    #
+    #     if float(asana_task["Amount Incl GST"]) != float(xero_bill["Amount Incl GST"]):
+    #         asana_update_body["custom_fields"][bill_custom_field_id_map["Amount Incl GST"]] = float(xero_bill["Amount Incl GST"])
+    #         update = True
+    #
+    #     if update:
+    #         body = asana.TasksTaskGidBody(asana_update_body)
+    #         task_api_instance.update_task(task_gid=asana_id, body=body)
+    #         print(f"Update Bill with asana id {asana_id} with asana task name {asana_task['name']}")
+
+    inv_json_list = list(invoice_json.keys())
+    inv_json_list.sort()
+    new_inv_list = {}
+    for inv_number in inv_json_list:
+        new_inv_list[inv_number] = invoice_json[inv_number]
+
+    with open(os.path.join(database_dir, "invoices.json"), "w") as f:
+        json_object = json.dumps(new_inv_list, indent=4)
+        f.write(json_object)
+    with open(os.path.join(database_dir, "bills.json"), "w") as f:
+        json_object = json.dumps(bill_json, indent=4)
+        f.write(json_object)
+    print(f"The Sync take {time.time() - start}s")
+    print("Complete")
+
 def update_asana_project_script():
     start = time.time()
-    off_set = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJib3JkZXJfcmFuayI6IltcIlYwMDNUWVpDVkFSRVwiLDEyMDM0NzA3NzA0MDQ3ODcsXCI5WllJU1RBV1pQNlwiLDEyMDQwOTM4NTA1MzMyMjldIiwiaWF0IjoxNzExNjEyMjE1LCJleHAiOjE3MTE2MTMxMTV9.56txrs-TfsiVwT7m6dwyF2n5HwHgJTiCPHFB15X2Dfs"
+    off_set = None
     # opt_field = ["name", "custom_fields.name", "custom_fields.display_value"]
 
     mp_dir = os.path.join(database_dir, "mp.json")
@@ -263,6 +332,9 @@ def update_asana_project_script():
         custom_fields_setting_api_instance.get_custom_field_settings_for_project(mp_asana_gid))
     all_custom_fields = [custom_field["custom_field"] for custom_field in custom_fields_setting]
     custom_field_id_map = name_id_map(all_custom_fields)
+
+    status_field = clean_response(custom_fields_api_instance.get_custom_field(custom_field_id_map["Status"]))
+    status_id_map = name_id_map(status_field["enum_options"])
 
     contact_field = clean_response(custom_fields_api_instance.get_custom_field(custom_field_id_map["Contact Type"]))
     contact_id_map = name_id_map(contact_field["enum_options"])
@@ -316,6 +388,10 @@ def update_asana_project_script():
                     update_body["name"] = project_name
                     update = True
 
+
+
+
+
                 service_list = sorted([service for service in conf["all_service_list"] if data_json["Project Info"]["Project"]["Service Type"][service]["Include"]])
                 asana_service_list = [] if task["Services"] is None else sorted(task["Services"].split(", "))
                 # asana_service_list = task["Services"].split(", ")
@@ -324,6 +400,12 @@ def update_asana_project_script():
                         update_body["custom_fields"]["Services"] = None
                     else:
                         update_body["custom_fields"][custom_field_id_map["Services"]] = [service_id_map[service] for service in service_list]
+                    update = True
+
+                status = data_json["State"]["Asana State"]
+
+                if task["Status"] != status and not (task["Status"] is None and status == ""):
+                    update_body["custom_fields"][custom_field_id_map["Status"]] = status_id_map[status]
                     update = True
 
 
@@ -401,7 +483,7 @@ def update_asana_project_script():
                     update_body["custom_fields"][custom_field_id_map["Total Paid InGST"]] = float(paid_amount)
                     update = True
 
-                data_json["State"]["Asana State"] = task["Status"]
+                # data_json["State"]["Asana State"] = task["Status"]
                 data_json["Invoices"]["Paid Fee"] = str(paid_amount)
                 data_json["Invoices"]["Overdue Fee"] = str(over_due_amount)
                 mp_json[quotation] = {k: v(data_json) for k, v in mp_convert_map.items()}
@@ -458,10 +540,6 @@ def convert_to_mp_excel(report_dir):
     report_wb.save(report_dir)
 def backup_database():
     start = time.time()
-    backup_dir = conf["backup_dir"]
-    working_dir = conf["working_dir"]
-    accounting_dir = conf["accounting_dir"]
-    database_dir = conf["database_dir"]
     bridge_dir = os.path.join(working_dir, "Bridge.exe")
 
 
@@ -491,7 +569,7 @@ def backup_database():
 
 
 if __name__ == '__main__':
-    # refresh_token()
-    # update_xero_and_asana_invoice_script()
+    refresh_token()
+    update_xero_and_asana_invoice_script()
     update_asana_project_script()
     backup_database()
