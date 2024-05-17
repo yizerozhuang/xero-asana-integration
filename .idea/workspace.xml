@@ -4,57 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8ef28d62-7810-41ce-8c7f-93ca3161891e" name="Changes" comment="V3">
-      <change afterPath="$PROJECT_DIR$/app/script/bill_loading_script.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/script/check_database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/script/json_diff_script.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/script/moving_file_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/xero-asana-integration.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/xero-asana-integration.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/309000AG/PCE INV 402026.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/309000AG/PCE INV 402026.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/309000AG/PCE INV 402026.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/309000AG/PCE INV 402026.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/309000AJ/PCE INV 402025.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/309000AJ/PCE INV 402025.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/309000AJ/PCE INV 402025.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/309000AJ/PCE INV 402025.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/310000ZM/23 Waller Avenue, Armidale Back Up.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/310000ZM/23 Waller Avenue, Armidale Back Up.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/311000ZR/Mechanical Fee Proposal for T10, Capital Food Market, 10 Lathlain Street, Belconnen, ACT Rev 1.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/311000ZR/Mechanical Fee Proposal for T10, Capital Food Market, 10 Lathlain Street, Belconnen, ACT Rev 1.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/311000ZR/T10, Capital Food Market, 10 Lathlain Street, Belconnen, ACT Back Up.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/311000ZR/T10, Capital Food Market, 10 Lathlain Street, Belconnen, ACT Back Up.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/401000AY/Mechanical and CFD Fee Proposal for 7-9 Castlereagh Street &amp; 6-12 Copeland Street, Liverpool Rev 1.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/401000AY/Mechanical and CFD Fee Proposal for 7-9 Castlereagh Street &amp; 6-12 Copeland Street, Liverpool Rev 1.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000AA/8-12 Patrica Street, Mays Hill Back Up.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000AA/8-12 Patrica Street, Mays Hill Back Up.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000AD/PCE INV 402031.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000AD/PCE INV 402031.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000AD/PCE INV 402031.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000AD/PCE INV 402031.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000AL/9 Grand Avenue, Camellia Back Up.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000AL/9 Grand Avenue, Camellia Back Up.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000AL/Mechanical Fee Proposal for 9 Grand Avenue, Camellia Rev 1.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000AL/Mechanical Fee Proposal for 9 Grand Avenue, Camellia Rev 1.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000AP/17-19 Alan Street, Box Hill Back Up.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000AP/17-19 Alan Street, Box Hill Back Up.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000AW/61-63 Lawrence Street, Peakhurst Back Up.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000AW/61-63 Lawrence Street, Peakhurst Back Up.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000AW/Mechanical Fee Proposal for 61-63 Lawrence Street, Peakhurst Rev 1.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000AW/Mechanical Fee Proposal for 61-63 Lawrence Street, Peakhurst Rev 1.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000BE/Electrical Fee Proposal for Shop 2, 965 Bourke Street, Waterloo Rev 1.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000BE/Electrical Fee Proposal for Shop 2, 965 Bourke Street, Waterloo Rev 1.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/402000BE/Shop 2, 965 Bourke Street, Waterloo Back Up.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/402000BE/Shop 2, 965 Bourke Street, Waterloo Back Up.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/403000AC/PCE INV 403066.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/403000AC/PCE INV 403066.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/accounting/403000AC/PCE INV 403066.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/accounting/403000AC/PCE INV 403066.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app_dialog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/asana_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/asana_function.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/asana_xero_daily_update_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/asana_xero_daily_update_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/bills.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/bills.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/data_template.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/data_template.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/invoices.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/invoices.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/login.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/login.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/mp.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/mp.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/project_quotation_number_map.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/project_quotation_number_map.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/scope_of_work.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/scope_of_work.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/unprocessed_tasks.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/email_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/email_server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/financial_panel.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/financial_panel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/project_info_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/project_info_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/recycle_bin/403000AB-240311181412/403000AB/data.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/recycle_bin/403000AB-240311181412/403000AB/data.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/script/update_database_scipt.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/script/update_database_scipt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/search_bar_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/search_bar_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/utility.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utility.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/xero_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/xero_function.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-    </list>
+    <list default="true" id="8ef28d62-7810-41ce-8c7f-93ca3161891e" name="Changes" comment="V3" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -390,7 +340,7 @@
       <workItem from="1715572355540" duration="55000" />
       <workItem from="1715585764165" duration="3005000" />
       <workItem from="1715824152879" duration="1703000" />
-      <workItem from="1715915768707" duration="606000" />
+      <workItem from="1715915768707" duration="943000" />
     </task>
     <task id="LOCAL-00001" summary="v2">
       <option name="closed" value="true" />
