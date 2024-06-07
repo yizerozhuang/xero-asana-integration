@@ -5,13 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb80cfbb-99a1-429f-98f2-8a37cf76712a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/xero-asana-integration.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/xero-asana-integration.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/utility.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utility.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/xero_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/xero_function.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -171,12 +165,23 @@
       <workItem from="1717128005844" duration="1353000" />
       <workItem from="1717135082532" duration="216000" />
       <workItem from="1717739290958" duration="4524000" />
-      <workItem from="1717744092716" duration="620000" />
+      <workItem from="1717744092716" duration="945000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="XDebuggerManager">
     <watches-manager>
