@@ -12,13 +12,15 @@ import json
 import time
 import shutil
 import openpyxl
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 from win32com import client as win32client
 
 
 # database_dir = conf["database_dir"]
 database_dir = "P:\\app\\database"
-backup_dir = "C:\\Users\\Admin\\Desktop\\test_back_up"
+# backup_dir = "P:\\app\\backup"
+backup_dir = "A:\\00-Bridge Database Backup"
+result_output_dir = "P:\\app\\backup"
 working_dir = "P:"
 accounting_dir = "A:\\00-Bridge Database"
 
@@ -51,7 +53,6 @@ mp_asana_gid = "1203405141297991"
 # project_api_instance = asana.ProjectsApi(asana_api_client)
 task_api_instance = asana.TasksApi(asana_api_client)
 
-all_project, backlog_invoice, all_bills = generate_all_projects_and_invoices(database_dir)
 def _process_invoice(invoices, accounting_api, xero_tenant_id):
     res = {
         "INV": {
@@ -120,7 +121,7 @@ def _process_invoice(invoices, accounting_api, xero_tenant_id):
             # return
     return res
 @xero_token_required
-def update_xero_and_asana_invoice_script():
+def update_xero_and_asana_invoice_script(all_project, backlog_invoice, all_bills):
     start = time.time()
     xero_tenant_id = get_xero_tenant_id()
     accounting_api = AccountingApi(api_client)
@@ -240,7 +241,7 @@ def update_xero_and_asana_invoice_script():
                     task_body["name"] = "INV xxxxxx"
                     update = True
                 elif len(backlog_invoice[task["gid"]]["Number"])!=0 and task["name"]!=f"INV {backlog_invoice[task['gid']]['Number']}":
-                    task_body["name"] = f"INV {task['Number']}"
+                    task_body["name"] = f"INV {backlog_invoice[task['gid']]['Number']}"
                     update = True
 
                 if float(backlog_invoice[task["gid"]]["Fee"]) != float(task["Net"]):
@@ -260,48 +261,48 @@ def update_xero_and_asana_invoice_script():
 
 
     # update_bills
-    # for bill in all_bills.keys():
-    #     asana_id = all_bills[bill]
-    #     asana_task = flatter_custom_fields(clean_response(task_api_instance.get_task(asana_id)))
-    #     print(bill)
-    #     assert bill in invoices["BIL"].keys()
-    #     xero_bill = invoices["BIL"][bill]
-    #
-    #     asana_update_body = {"custom_fields":{}}
-    #     update = False
-    #     print(f"Processed Bill with asana id {asana_id} with asana task name {asana_task['name']}")
-    #     if asana_task["name"] != "BIL "+xero_bill["name"]:
-    #         asana_update_body["name"] = "BIL "+xero_bill["name"]
-    #         update = True
-    #     if asana_task["Bill status"] != xero_bill["Bill status"]:
-    #         asana_update_body["custom_fields"][bill_custom_field_id_map["Bill status"]] = bill_status_id_map[xero_bill["Bill status"]]
-    #         update = True
-    #
-    #     if asana_task["From"] != xero_bill["From"]:
-    #         asana_update_body["custom_fields"][bill_custom_field_id_map["From"]] = xero_bill["From"]
-    #         update = True
-    #
-    #     display_value = None if asana_task["Bill In Date"] is None else asana_task["Bill In Date"][0:10]
-    #     issue_date = None if xero_bill["Issue Date"] is None else xero_bill["Issue Date"]
-    #     if display_value != issue_date:
-    #         if issue_date is None:
-    #             asana_update_body["custom_fields"][bill_custom_field_id_map["Bill In Date"]] = None
-    #         else:
-    #             asana_update_body["custom_fields"][bill_custom_field_id_map["Bill In Date"]] = {"date": issue_date}
-    #         update=True
-    #
-    #     if float(asana_task["Amount Excl GST"]) != float(xero_bill["Amount Excl GST"]):
-    #         asana_update_body["custom_fields"][bill_custom_field_id_map["Amount Excl GST"]] = float(xero_bill["Amount Excl GST"])
-    #         update = True
-    #
-    #     if float(asana_task["Amount Incl GST"]) != float(xero_bill["Amount Incl GST"]):
-    #         asana_update_body["custom_fields"][bill_custom_field_id_map["Amount Incl GST"]] = float(xero_bill["Amount Incl GST"])
-    #         update = True
-    #
-    #     if update:
-    #         body = asana.TasksTaskGidBody(asana_update_body)
-    #         task_api_instance.update_task(task_gid=asana_id, body=body)
-    #         print(f"Update Bill with asana id {asana_id} with asana task name {asana_task['name']}")
+    for bill in all_bills.keys():
+        asana_id = all_bills[bill]
+        asana_task = flatter_custom_fields(clean_response(task_api_instance.get_task(asana_id)))
+        print(bill)
+        assert bill in invoices["BIL"].keys()
+        xero_bill = invoices["BIL"][bill]
+
+        asana_update_body = {"custom_fields":{}}
+        update = False
+        print(f"Processed Bill with asana id {asana_id} with asana task name {asana_task['name']}")
+        if asana_task["name"] != "BIL "+xero_bill["name"]:
+            asana_update_body["name"] = "BIL "+xero_bill["name"]
+            update = True
+        if asana_task["Bill status"] != xero_bill["Bill status"]:
+            asana_update_body["custom_fields"][bill_custom_field_id_map["Bill status"]] = bill_status_id_map[xero_bill["Bill status"]]
+            update = True
+
+        if asana_task["From"] != xero_bill["From"]:
+            asana_update_body["custom_fields"][bill_custom_field_id_map["From"]] = xero_bill["From"]
+            update = True
+
+        display_value = None if asana_task["Bill In Date"] is None else asana_task["Bill In Date"][0:10]
+        issue_date = None if xero_bill["Issue Date"] is None else xero_bill["Issue Date"]
+        if display_value != issue_date:
+            if issue_date is None:
+                asana_update_body["custom_fields"][bill_custom_field_id_map["Bill In Date"]] = None
+            else:
+                asana_update_body["custom_fields"][bill_custom_field_id_map["Bill In Date"]] = {"date": issue_date}
+            update=True
+
+        if float(asana_task["Amount Excl GST"]) != float(xero_bill["Amount Excl GST"]):
+            asana_update_body["custom_fields"][bill_custom_field_id_map["Amount Excl GST"]] = float(xero_bill["Amount Excl GST"])
+            update = True
+
+        if float(asana_task["Amount Incl GST"]) != float(xero_bill["Amount Incl GST"]):
+            asana_update_body["custom_fields"][bill_custom_field_id_map["Amount Incl GST"]] = float(xero_bill["Amount Incl GST"])
+            update = True
+
+        if update:
+            body = asana.TasksTaskGidBody(asana_update_body)
+            task_api_instance.update_task(task_gid=asana_id, body=body)
+            print(f"Update Bill with asana id {asana_id} with asana task name {asana_task['name']}")
 
     inv_json_list = list(invoice_json.keys())
     inv_json_list.sort()
@@ -318,7 +319,7 @@ def update_xero_and_asana_invoice_script():
     print(f"The Sync take {time.time() - start}s")
     print("Complete")
 
-def update_asana_project_script():
+def update_asana_project_script(all_project, backlog_invoice, all_bills):
     start = time.time()
     off_set = None
     # opt_field = ["name", "custom_fields.name", "custom_fields.display_value"]
@@ -387,9 +388,6 @@ def update_asana_project_script():
                 if task["name"] != project_name:
                     update_body["name"] = project_name
                     update = True
-
-
-
 
 
                 service_list = sorted([service for service in conf["all_service_list"] if data_json["Project Info"]["Project"]["Service Type"][service]["Include"]])
@@ -538,7 +536,7 @@ def convert_to_mp_excel(report_dir):
             cur_col = increment_excel_column(cur_col)
         cur_row += 1
     report_wb.save(report_dir)
-def backup_database():
+def backup_database(all_project, backlog_invoice, all_bills):
     start = time.time()
     bridge_dir = os.path.join(working_dir, "Bridge.exe")
 
@@ -559,9 +557,15 @@ def backup_database():
         shutil.copy(bridge_dir, bridge_backup_dir)
         convert_to_mp_excel(mp_excel_dir)
 
-    past_backup_name = os.path.join(backup_dir, (date.today()-timedelta(30)).strftime("%Y%m%d"))
-    if os.path.exists(past_backup_name):
-        shutil.rmtree(past_backup_name)
+
+
+
+    for folder in os.listdir(backup_dir):
+        folder_date = datetime.strptime(folder, "%Y%m%d").date()
+        if (date.today() - folder_date)>timedelta(30):
+            old_folder = os.path.join(backup_dir, folder)
+            print(f"Deleting folder {old_folder}")
+            shutil.rmtree(old_folder)
     print(f"The Backup take {time.time() - start}s")
     print("Backup Complete!!!")
 
@@ -569,7 +573,20 @@ def backup_database():
 
 
 if __name__ == '__main__':
-    refresh_token()
-    update_xero_and_asana_invoice_script()
-    update_asana_project_script()
-    backup_database()
+    result_output_dir_name = os.path.join(result_output_dir, date.today().strftime("%Y%m%d"))
+    os.makedirs(result_output_dir_name, exist_ok=True)
+    log_dir = os.path.join(result_output_dir_name, "output.log")
+
+    try:
+        all_project, backlog_invoice, all_bills = generate_all_projects_and_invoices(database_dir)
+        refresh_token()
+        update_xero_and_asana_invoice_script(all_project, backlog_invoice, all_bills)
+        update_asana_project_script(all_project, backlog_invoice, all_bills)
+        backup_database(all_project, backlog_invoice, all_bills)
+    except Exception as e:
+        with open(log_dir, "w") as f:
+            f.write("The Daily Script Fail, please rerun the script")
+            f.write(e)
+    else:
+        with open(log_dir, "w") as f:
+            f.write("The Daily Script Success")

@@ -71,6 +71,7 @@ def email_server(app=None):
             if "socket" in str(e):
                 if not app is None:
                     app.messagebox.show_error("Internet Error, Please close and restart python")
+                    app.status_label.config(bg="Red")
                     return
             continue
         if status == "OK":
@@ -169,6 +170,10 @@ def email_server(app=None):
                                 # iterate over email parts
                             try:
                                 project_name = abstract_project_name(subject)
+                                all_project_name = get_all_project_name(conf["working_dir"])
+                                if project_name in all_project_name:
+                                    print("project exist, skip ")
+                                    continue
                                 current_quotation = get_quotation_number()
                                 folder_name = current_quotation + "-" + project_name
                                 folder_path = os.path.join(conf["working_dir"], folder_name)
@@ -337,6 +342,14 @@ def abstract_project_name(subject):
     for chr in special_character_list:
         project_name = project_name.replace(chr, "_")
     return project_name
+
+def get_all_project_name(directory):
+    res = []
+    for folder in os.listdir(directory):
+        if "-" in folder:
+            project_name = folder.split("-", 1)[-1]
+            res.append(project_name)
+    return res
 
 if __name__ == '__main__':
     email_server()

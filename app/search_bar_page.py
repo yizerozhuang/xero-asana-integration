@@ -99,11 +99,10 @@ def show_status(data_json):
                         "DWG drawings":"07.DWG drawings",
                         "Done":"08.Done",
                         "Installation":"09.Installation",
-                        "Construction Phase":"10.Construction"}
-    if state["Asana State"] in ["Pending", "DWG drawings", "Done", "Installation", "Construction Phase"]:
+                        "Construction Phase":"10.Construction",
+                        "Quote Unsuccessful":"11.Quote Unsuccessful"}
+    if state["Asana State"] in ["Pending", "DWG drawings", "Done", "Installation", "Construction Phase", "Quote Unsuccessful"]:
         return asana_status_map[state["Asana State"]]
-    elif state["Quote Unsuccessful"]:
-        return "11.Quote Unsuccessful"
     elif state["Fee Accepted"]:
         return "05.Design"
     elif state["Email to Client"]:
@@ -197,7 +196,6 @@ class SearchBarPage(tk.Frame):
                 "Service Been Engaged": lambda data_json: ", ".join(
                     [service["Service"] for service in data_json["Project Info"]["Project"]["Service Type"].values() if
                      service["Include"]]),
-                "Fee Sent.": lambda data_json: data_json["Email"]["Fee Proposal"],
                 "Apt/Room/Area": lambda data_json: data_json["Project Info"]["Building Features"]["Apt"],
                 "Basement/Car Spots": lambda data_json: data_json["Project Info"]["Building Features"]["Basement"],
                 "Feature/Notes": lambda data_json: data_json["Project Info"]["Building Features"]["Feature"]
@@ -226,8 +224,8 @@ class SearchBarPage(tk.Frame):
         #         )
         mp_dir = os.path.join(database_dir, "mp.json")
         mp_json = json.load(open(mp_dir))
-        for value in mp_json.values():
-            res.append(tuple(value.values()))
+        for project in mp_json.values():
+            res.append(tuple([ project[key] for key in self.mp_header]))
         # res.sort(key=lambda e: e[0])
         self.master_project = res
 

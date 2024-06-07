@@ -201,6 +201,7 @@ class App(tk.Tk):
         self.state_dict["Fee Accepted"].grid(row=3, column=3)
 
 
+
         self.legend_frame = tk.LabelFrame(self.utility_frame)
         self.legend_frame.grid(row=0, column=3)
 
@@ -224,6 +225,10 @@ class App(tk.Tk):
         tk.Label(self.legend_frame, text="Awaiting Payment", bg="orange").grid(row=1, column=3, sticky="ew")
         tk.Label(self.legend_frame, text="Paid", bg="green").grid(row=1, column=4, sticky="ew")
         tk.Label(self.legend_frame, text="Voided", bg="purple", fg="white").grid(row=1, column=5, sticky="ew")
+
+        tk.Label(self.legend_frame, text="Online Status").grid(row=2, column=0)
+        self.status_label = tk.Label(self.legend_frame, width=10, bg="Green")
+        self.status_label.grid(row=2, column=1)
 
     def main_context_part(self):
         # main frame page
