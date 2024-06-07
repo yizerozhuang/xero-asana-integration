@@ -579,6 +579,14 @@ def return_contact_id(accounting_api, xero_tenant_id, app, contact_name):
         contact_name = contact_full_name.strip() + "-" + contact_company.strip()
 
     contacts_name_map = contact_name_contact_id(contacts_list)
+    # for key in contacts_name_map.keys():
+    #     if "," in key:
+    #         new_key = " , ".join(key.split(","))
+    #         contacts_name_map[new_key] = contacts_name_map.pop(key)
+
+    if "," in contact_name:
+        contact_name = " , ".join([ part.strip() for part in contact_name.split(",")])
+
     if contact_name.lower() in contacts_name_map.keys():
         contact_id = contacts_name_map[contact_name.lower()]
     else:

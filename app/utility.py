@@ -1,12 +1,10 @@
 import textwrap
-import time
 from tkinter import messagebox
 import tkinter as tk
 
 from app_dialog import FileSelectDialog, RadioButtonSelectDialog
 
 from win32com import client as win32client
-from openpyxl import load_workbook
 import shutil
 import os
 import json

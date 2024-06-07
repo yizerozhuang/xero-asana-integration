@@ -5,15 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb80cfbb-99a1-429f-98f2-8a37cf76712a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/asana_xero_daily_update_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/asana_xero_daily_update_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/xero-asana-integration.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/xero-asana-integration.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/email_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/email_server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/search_bar_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/search_bar_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utility.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utility.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/xero_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/xero_function.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,13 +56,15 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;MATLAB_INTERPRETER&quot;: &quot;C:\\Program Files\\MATLAB\\R2023a\\bin\\matlab.exe&quot;,
     &quot;Python.app.executor&quot;: &quot;Run&quot;,
     &quot;Python.daily_update.executor&quot;: &quot;Debug&quot;,
     &quot;Python.main.executor&quot;: &quot;Debug&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Admin/Documents/GitHub/xero-asana-integration&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Zero/Documents/GitHub/xero-asana-integration&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -73,18 +73,26 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.daily_update">
+  <component name="RunManager" selected="Python.app">
+    <configuration default="true" type="MatlabApplication">
+      <option name="FILE_PATH" value="" />
+      <option name="INTERPRETER_PATH" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="PARAMETERS" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="app" type="PythonConfigurationType" factoryName="Python">
       <module name="xero-asana-integration" />
-      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="xero-asana-integration" />
-      <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration" />
+      <option name="SDK_HOME" value="C:\Users\Zero\anaconda3\envs\xero-asana-intergration\python.exe" />
+      <option name="SDK_NAME" value="xero-asana-intergration" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -100,14 +108,12 @@
     </configuration>
     <configuration name="daily_update" type="PythonConfigurationType" factoryName="Python">
       <module name="xero-asana-integration" />
-      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="xero-asana-integration" />
       <option name="WORKING_DIRECTORY" value="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -164,6 +170,8 @@
       <workItem from="1717117258634" duration="3981000" />
       <workItem from="1717128005844" duration="1353000" />
       <workItem from="1717135082532" duration="216000" />
+      <workItem from="1717739290958" duration="4524000" />
+      <workItem from="1717744092716" duration="620000" />
     </task>
     <servers />
   </component>
@@ -180,8 +188,8 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/xero_asana_integration$main.coverage" NAME="main Coverage Results" MODIFIED="1716787193497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pdf_codepilot$main.coverage" NAME="main Coverage Results" MODIFIED="1716166129870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/xero_asana_integration$app.coverage" NAME="app Coverage Results" MODIFIED="1717117748187" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration" />
     <SUITE FILE_PATH="coverage/xero_asana_integration$daily_update.coverage" NAME="daily_update Coverage Results" MODIFIED="1717135157334" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\Admin\Documents\GitHub\xero-asana-integration\app" />
+    <SUITE FILE_PATH="coverage/xero_asana_integration$app.coverage" NAME="app Coverage Results" MODIFIED="1717744619648" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pdf_codepilot$main.coverage" NAME="main Coverage Results" MODIFIED="1716166129870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
