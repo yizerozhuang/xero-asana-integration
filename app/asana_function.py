@@ -421,6 +421,7 @@ def update_asana_invoices(app, inv_list=None):
             contact = value["Content"][i]["Contact"].get()
             type = value["Content"][i]["Type"].get()
             update_body = {
+                    "name": f"BIL {data['Project Info']['Project']['Project Number'].get() + value['Content'][i]['Number'].get()}",
                     "custom_fields": {
                         custom_field_id_map["Bill status"]: status_id_map[state],
                         custom_field_id_map["From"]: contact,

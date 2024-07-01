@@ -1050,7 +1050,7 @@ class FinancialPanelPage(tk.Frame):
         if file == "":
             return
 
-        filename = bill_number + "-" + os.path.basename(file).replace(" ", "_")
+        filename = "BIL " + bill_number + "-" + os.path.basename(file).replace(" ", "_")
         if not os.path.exists(bills_dir):
             os.makedirs(bills_dir)
         try:
