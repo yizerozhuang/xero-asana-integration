@@ -44,6 +44,16 @@ def sent_email_to_admin(msg_data):
     smtp.quit()
 
 
+def check_valid_project_name(project_name):
+    working_dir = conf["working_dir"]
+    for folder in os.listdir(working_dir):
+        if "-" in folder:
+            quotation, folder_project_name = folder.split("-", 1)
+            current_quotation = datetime.today().strftime("%Y%m")[3:]+"000"
+            if project_name == folder_project_name and quotation.startswith(current_quotation):
+                return False
+    return True
+
 def email_server(app=None):
 
     log = AppLog()
@@ -170,10 +180,13 @@ def email_server(app=None):
                                 # iterate over email parts
                             try:
                                 project_name = abstract_project_name(subject)
-                                all_project_name = get_all_project_name(conf["working_dir"])
-                                if project_name in all_project_name:
-                                    print("project exist, skip ")
+
+                                if not check_valid_project_name(project_name):
                                     continue
+                                # all_project_name = get_all_project_name(conf["working_dir"])
+                                # if project_name in all_project_name:
+                                #     print("project exist, skip ")
+                                #     continue
                                 current_quotation = get_quotation_number()
                                 folder_name = current_quotation + "-" + project_name
                                 folder_path = os.path.join(conf["working_dir"], folder_name)
@@ -343,13 +356,6 @@ def abstract_project_name(subject):
         project_name = project_name.replace(chr, "_")
     return project_name
 
-def get_all_project_name(directory):
-    res = []
-    for folder in os.listdir(directory):
-        if "-" in folder:
-            project_name = folder.split("-", 1)[-1]
-            res.append(project_name)
-    return res
 
 if __name__ == '__main__':
     email_server()

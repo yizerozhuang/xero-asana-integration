@@ -838,12 +838,12 @@ class FinancialPanelPage(tk.Frame):
                 email_invoice(self.app, i)
                 self.data["Project Info"]["Project"]["Project Number"].set(number)
                 self.data["Current_folder_address"].set(number+"-"+project_name)
-                project_quotation_dir = os.path.join(self.conf["database_dir"], "project_quotation_number_map.json")
-                project_quotation_json = json.load(open(project_quotation_dir))
-                project_quotation_json[number] = self.data["Project Info"]["Project"]["Quotation Number"].get()
-                with open(project_quotation_dir, "w") as f:
-                    json_object = json.dumps(project_quotation_json, indent=4)
-                    f.write(json_object)
+                # project_quotation_dir = os.path.join(self.conf["database_dir"], "project_quotation_number_map.json")
+                # project_quotation_json = json.load(open(project_quotation_dir))
+                # project_quotation_json[number] = self.data["Project Info"]["Project"]["Quotation Number"].get()
+                # with open(project_quotation_dir, "w") as f:
+                #     json_object = json.dumps(project_quotation_json, indent=4)
+                #     f.write(json_object)
                 # if len(self.data["Asana_id"].get()) != 0:
                 update_asana(self.app)
                 update_asana_invoices(self.app)
@@ -852,6 +852,11 @@ class FinancialPanelPage(tk.Frame):
                 update_xero = self.messagebox.file_ask_yes_no("Folder and Asana Renamed", old_folder, new_folder, "Xero")
                 if update_xero:
                     self.app._update_xero()
+
+                unpaid_bill_list = self._get_no_upload_bills()
+                if len(unpaid_bill_list) > 0:
+                    self.messagebox.show_info(f"Please Upload bill {','.join(unpaid_bill_list)} to Xero")
+
             else:
                 self.messagebox.show_error(
                     f"Fail to rename the folder from {old_folder} to {new_folder}, Please close all the file relate in the folder")
@@ -866,6 +871,16 @@ class FinancialPanelPage(tk.Frame):
         self.data["Remittances"][i]["Email_Upload"].set(True)
         save(self.app)
         config_state(self.app)
+
+    def _get_no_upload_bills(self):
+        result = []
+        for service, value in self.data["Bills"]["Details"].items():
+            if value["Include"].get():
+                for bill in value["Content"]:
+                    if len(bill["Number"].get()) != 0:
+                        result.append(bill["Number"].get())
+        return result
+
 
     def _get_current_invoice_number(self):
         invoice_dir = os.path.join(self.conf["database_dir"], "invoices.json")
@@ -1041,6 +1056,13 @@ class FinancialPanelPage(tk.Frame):
         elif float(self.data["Bills"]["Details"][service]["Paid"].get()) > float(self.data["Bills"]["Details"][service]["Fee"].get()):
             self.messagebox.show_error("Bill Amount, exceed subbie quote amount")
             return
+        elif not self._validate_supplier_name(self.data["Bills"]["Details"][service]["Content"][i]["Contact"].get()):
+            self.messagebox.show_error("The Supplier name does is not valid")
+            return
+        elif not self._validate_bill_number():
+            self.messagebox.show_error("The Bill number should starts with A and no duplicate with consecutive order")
+            return
+
 
         if self.data["Bills"]["Details"][service]["Content"][i]["Upload"].get():
             rewrite = self.messagebox.ask_yes_no(f"You uploaded this bill before, Do you want to rewrite")
@@ -1102,6 +1124,45 @@ class FinancialPanelPage(tk.Frame):
         self.messagebox.file_info("Upload", file, folder_path, "And the bill has been sent to Xero")
         self.data["Bills"]["Details"][service]["Content"][i]["Upload"].set(True)
 
+    def _validate_bill_number(self):
+        all_bill_numbers = []
+        for service, value in self.data["Bills"]["Details"].items():
+            if value["Include"].get():
+                for bill in value["Content"]:
+                    if bill["Number"].get() in all_bill_numbers:
+                        return False
+                    if len(bill["Number"].get())!=0:
+                        all_bill_numbers.append(bill["Number"].get())
+
+        if not self._validate_consecutive(all_bill_numbers):
+            return False
+        return True
+
+    def _validate_consecutive(self, bill_number_list):
+        bill_number_list = [ord(number) for number in bill_number_list]
+        bill_number_list.sort()
+        if bill_number_list[0] != 65:
+            return False
+        cur = 65
+        for number in bill_number_list[1:]:
+            if number != cur+1:
+                return False
+            cur = number
+        return True
+
+    def _validate_supplier_name(self, supplier_name):
+        # validate the supplier_name
+        if supplier_name.strip() != supplier_name:
+            return False
+
+        if "-" in supplier_name:
+            company_contact_name = supplier_name.split("-")
+            if len(company_contact_name) != 2:
+                return False
+            company, contact_name = company_contact_name
+            if company.strip() != company or contact_name.strip() != contact_name:
+                return False
+        return True
     def upload_fee_acceptance(self):
         # database_dir = os.path.join(self.conf["database_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())
         accounting_dir = os.path.join(self.conf["accounting_dir"], self.data["Project Info"]["Project"]["Quotation Number"].get())

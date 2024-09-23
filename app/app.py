@@ -1,3 +1,4 @@
+import subprocess
 from tkinter import ttk
 
 from app_log import AppLog
@@ -5,6 +6,7 @@ from project_info_page import ProjectInfoPage
 from fee_proposal_page import FeeProposalPage
 from financial_panel import FinancialPanelPage
 from search_bar_page import SearchBarPage
+# from timesheet_page import TimeSheetPage
 from utility import *
 import tkinter as tk
 from asana_function import update_asana, update_asana_invoices
@@ -21,12 +23,14 @@ import webbrowser
 import time
 
 class App(tk.Tk):
-    def __init__(self, conf, user, *args, **kwargs):
+    def __init__(self, conf, user, user_email, admin, *args, **kwargs):
         # TkinterDnD.Tk.__init__(self, *args, **kwargs)
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Premium Consulting Engineers")
         self.conf = conf
         self.user = user
+        self.user_email = user_email
+        self.admin = admin
         self.log = AppLog()
 
         self.current_quotation = tk.StringVar()
@@ -59,7 +63,7 @@ class App(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.confirm)
 
         config_state(self)
-        if self.user in self.conf["admin_user_list"] and not self.conf["test_mode"]:
+        if self.admin and not self.conf["test_mode"]:
             self.auto_check()
 
         self.timer_thread()
@@ -229,6 +233,29 @@ class App(tk.Tk):
         tk.Label(self.legend_frame, text="Online Status").grid(row=2, column=0)
         self.status_label = tk.Label(self.legend_frame, width=10, bg="Green")
         self.status_label.grid(row=2, column=1)
+        tk.Button(self.legend_frame, text="Manuel Update", bg="brown", fg="white", font=self.conf["font"],
+                  command=self._manuel_update).grid(row=2, column=2)
+        tk.Label(self.legend_frame, text="Last Update:", font=self.conf["font"]).grid(row=2, column=3)
+        self.last_update_time = tk.StringVar()
+        tk.Label(self.legend_frame, textvariable=self.last_update_time, font=self.conf["font"]).grid(row=2, column=4, columnspan=2)
+        # tk.Button(self.legend_frame, text="Manuel Update", bg="brown", fg="white", font=self.conf["font"]).grid(row=2,
+        #                                                                                                         column=2)
+
+    def _get_last_update_time(self):
+        backup_dir = self.conf["backup_dir"]
+        current_folder_list = []
+        for folder in os.listdir(backup_dir):
+            current_folder_list.append(datetime.strptime(folder, "%Y%m%d"))
+        self.last_update_time.set(max(current_folder_list).strftime("%Y-%m-%d"))
+
+    def _manuel_update(self):
+        def thread():
+            script_dir = self.conf["daily_script_dir"]
+            subprocess.check_output([script_dir])
+            self._get_last_update_time()
+        update = self.messagebox.ask_yes_no("Do you want to manuel update?")
+        if update:
+            _thread.start_new_thread(thread, ())
 
     def main_context_part(self):
         # main frame page
@@ -236,6 +263,8 @@ class App(tk.Tk):
         self.search_bar_page = SearchBarPage(self.main_frame, self)
         self.fee_proposal_page = FeeProposalPage(self.main_frame, self)
         self.financial_panel_page = FinancialPanelPage(self.main_frame, self)
+        # self.timesheet_page = TimeSheetPage(self.main_frame, self)
+
         self._update_variation()
         self._project_number_page()
 
@@ -259,7 +288,10 @@ class App(tk.Tk):
                                                fg="white",
                                                font=self.conf["font"])
         self.finacial_panel_button.grid(row=0, column=3)
-
+        # self.timesheet_button = tk.Button(change_page_frame, text="Timesheet",
+        #                                   command=lambda: self.show_frame(self.timesheet_page), bg="DarkOrange1", fg="white",
+        #                                   font=self.conf["font"])
+        # self.timesheet_button.grid(row=0, column=4)
     def _update_variation(self):
         # variation = [
         #     {
@@ -386,7 +418,7 @@ class App(tk.Tk):
         # tk.Label(project_number_frame, textvariable=self.data["Project Info"]["Project"]["Project Name"], font=self.conf["font"]).grid(row=1, column=1)
 
     def role_check(self):
-        if not self.user in conf["admin_user_list"]:
+        if not self.admin:
             # self.project_info_page.client_frame.grid_forget()
             # self.project_info_page.contact_frame.grid_forget()
             self.project_info_page.finish_frame.grid_forget()
@@ -394,15 +426,18 @@ class App(tk.Tk):
             self.fee_proposal_page.email_installation_proposal_buttion.grid_forget()
             self.fee_proposal_page.fee_frame.grid_forget()
             self.finacial_panel_button.grid_forget()
+            # self.timesheet_page.grid(row=0, column=3)
             self.preview_fee_proposal_button.grid_forget()
             self.email_to_client_button.grid_forget()
             self.chase_client_button.grid_forget()
             self.open_database_button.grid_forget()
-            self.design_certificate.grid_forget()
+            self.design_certificate.grid(row=1, column=0)
             self.update_xero_button.grid_forget()
             self.refresh_xero_button.grid_forget()
             self.login_xero_button.grid_forget()
             self.legend_frame.grid_forget()
+        else:
+            self._get_last_update_time()
 
 
     # def _update_quotation_number_label(self, *args):
@@ -417,6 +452,7 @@ class App(tk.Tk):
         self.fee_proposal_page.pack_forget()
         # self.fee_accepted_page.pack_forget()
         self.financial_panel_page.pack_forget()
+        # self.timesheet_page.pack_forget()
 
         if type(page) == SearchBarPage:
             self.search_bar_page.refresh()
@@ -516,8 +552,14 @@ class App(tk.Tk):
                 if len(self.current_quotation.get())!=0:
                     self.timer -=1
                     if self.timer == 0:
+                        quotation = self.current_quotation.get()
+                        project_number = self.data["Project Info"]["Project"]["Project Number"].get()
+                        project_name = self.data["Project Info"]["Project"]["Project Name"].get()
                         reset(self)
-                        self.messagebox.show_error(f"The Session is exceeding {str(int(self.conf['timer']/60))} mins, please login this project again")
+                        self.show_frame(self.search_bar_page)
+                        resume = self.messagebox.ask_yes_no(f"The Session is exceeding {str(int(self.conf['timer']/60))} mins \n Do you want to back to \n {quotation} {project_number} {project_name}")
+                        if resume == True:
+                            load_data(self, quotation)
                 else:
                     self.timer = self.conf["timer"]
 
@@ -616,7 +658,7 @@ class App(tk.Tk):
             self.messagebox.show_error("Please Create an Quotation Number first")
             return
         elif os.path.exists(folder_address):
-            self.messagebox.show_error(f"{folder_address} exists, you dont neet to rename it")
+            self.messagebox.show_error(f"{folder_address} exists, you dont need to rename it")
             return
 
         if self._validate_project_name():

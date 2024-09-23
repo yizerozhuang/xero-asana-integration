@@ -183,7 +183,7 @@ class SearchBarPage(tk.Frame):
 
     def generate_convert_map(self):
         self.mp_convert_map = return_self_mp()
-        if not self.app.user in self.conf["admin_user_list"]:
+        if not self.app.admin:
             self.convert_map = {
                 "Quote No.": lambda data_json: data_json["Project Info"]["Project"]["Quotation Number"],
                 "Proj. No.": lambda data_json: data_json["Project Info"]["Project"]["Project Number"],
@@ -279,6 +279,7 @@ class SearchBarPage(tk.Frame):
         value = self.tree.item(selected, "values")
         # self.app.data["Project Info"]["Project"]["Quotation Number"].set(value[0])
         load_data(self.app, value[0])
+
     def check(self, e, search_string=None):
         if search_string is None:
             typed = self.entry.get().strip()

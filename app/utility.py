@@ -279,6 +279,8 @@ def generate_all_projects_and_invoices(database_dir):
     bills = {}
     for dir in os.listdir(database_dir):
         if os.path.isdir(os.path.join(database_dir, dir)):
+            if not os.path.exists(os.path.join(database_dir, dir, "data.json")):
+                continue
             data_json = json.load(open(os.path.join(database_dir, dir, "data.json")))
             if data_json["Asana_id"] != "":
                 projects[data_json["Asana_id"]]={
@@ -299,7 +301,12 @@ def generate_all_projects_and_invoices(database_dir):
                     for content in service["Content"]:
                         if len(content["Xero_id"])!=0:
                             assert len(content["Asana_id"])!=0
-                            bills[content["Xero_id"]] = content["Asana_id"]
+                            bills[content["Xero_id"]] = {
+                                "Asana id": content["Asana_id"],
+                                "Number": data_json["Project Info"]["Project"]["Project Number"]+content["Number"],
+                                "State": content["State"],
+                                "Quotation Number": data_json["Project Info"]["Project"]["Quotation Number"]
+                            }
     return projects, invoices, bills
 
 def move_new_folder_to_external(app, working_dir, new_folder_dir, folder_name, quotation_number):
@@ -654,11 +661,12 @@ def open_design_certificate(app):
         app.messagebox.show_error(f"Python cannot find the folder {folder_path}")
         return
 
-    # proposal_type = data["Project Info"]["Project"]["Proposal Type"].get()
-    # if proposal_type == "Minor":
-    calculation_sheet = "Preliminary Calculation"
-    # else:
-    #     calculation_sheet = "Mech System Calculation"
+    proposal_type = data["Project Info"]["Project"]["Proposal Type"].get()
+    if proposal_type == "Minor":
+        calculation_sheet = "Preliminary Calculation"
+    else:
+        calculation_sheet = "Mech System Calculation"
+
     excel_path = None
     for file in os.listdir(folder_path):
         if file.endswith(".xlsx") and file.startswith(calculation_sheet):
@@ -742,20 +750,41 @@ def open_design_certificate(app):
                             data["Project Info"]["Project"]["Project Name"].get())
     # print_pdf = app.messagebox.ask_yes_no("Do you want to Save the design certificate and design compliance in the Plot Folder?")
     print_pdf = print_pdf.get()
+
+    def open_pdf():
+        subprocess.call([adobe_address, pdf_path])
+
+
     if print_pdf == "Design Certificate":
         pdf_path = os.path.join(folder_path, "Plot", "Mechanical Design Certificate.pdf")
-        design_certificate_worksheet.ExportAsFixedFormat(0, pdf_path)
-        def open_pdf():
-            subprocess.call([adobe_address, pdf_path])
+        if os.path.exists(pdf_path):
+            _thread.start_new_thread(open_pdf, ())
+            generate = app.messagebox.ask_yes_no("Existing Mechanical Design Certificate Found, do you want to over write?")
+            if generate:
+                for proc in psutil.process_iter():
+                    if proc.name() == "Acrobat.exe":
+                        proc.kill()
+                design_certificate_worksheet.ExportAsFixedFormat(0, pdf_path)
+                _thread.start_new_thread(open_pdf, ())
+        else:
+            design_certificate_worksheet.ExportAsFixedFormat(0, pdf_path)
+            _thread.start_new_thread(open_pdf, ())
 
-        _thread.start_new_thread(open_pdf, ())
+
     elif print_pdf == "Design Compliance Certificate":
         pdf_path = os.path.join(folder_path, "Plot", "Mechanical Design Compliance Certificate.pdf")
-        design_compliance_cert_work_sheet.ExportAsFixedFormat(0, pdf_path)
-        def open_pdf():
-            subprocess.call([adobe_address, pdf_path])
-
-        _thread.start_new_thread(open_pdf, ())
+        if os.path.exists(pdf_path):
+            _thread.start_new_thread(open_pdf, ())
+            generate = app.messagebox.ask_yes_no("Existing Design Compliance Certificate Found, do you want to over write?")
+            if generate:
+                for proc in psutil.process_iter():
+                    if proc.name() == "Acrobat.exe":
+                        proc.kill()
+                design_compliance_cert_work_sheet.ExportAsFixedFormat(0, pdf_path)
+                _thread.start_new_thread(open_pdf, ())
+        else:
+            design_compliance_cert_work_sheet.ExportAsFixedFormat(0, pdf_path)
+            _thread.start_new_thread(open_pdf, ())
 
 
 # def change_type_of_calculator(app):
@@ -807,12 +836,15 @@ def open_design_certificate(app):
 
 def preview_fee_proposal(app, *args):
     check_accounting_folder(app)
-    if app.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
-        minor_project_fee_proposal(app)
-    elif app.data["Project Info"]["Project"]["Proposal Type"].get() == "Major":
-        major_project_fee_proposal(app)
-    else:
-        print("Unsupported Project Type")
+    try:
+        if app.data["Project Info"]["Project"]["Proposal Type"].get() == "Minor":
+            minor_project_fee_proposal(app)
+        else:
+            major_project_fee_proposal(app)
+    except ValueError as e:
+        app.messagebox.show_error("Unexpected files in the database, Please put the external files in a SS folder")
+
+
 
 def get_first_name(name):
     return name.split(" ")[0]
@@ -1103,9 +1135,14 @@ def major_project_fee_proposal(app, *args):
         work_sheets.Cells(46, 2).Value = data["Project Info"][address_to]["Company"].get()
         work_sheets.Cells(47, 2).Value = data["Project Info"][address_to]["Address"].get()
 
-        work_sheets.Cells(45, 8).Value = data["Project Info"]["Project"]["Quotation Number"].get()
-        work_sheets.Cells(46, 8).Value = data["Fee Proposal"]["Reference"]["Date"].get()
-        work_sheets.Cells(47, 8).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
+        if stage == 3:
+            work_sheets.Cells(45, 7).Value = data["Project Info"]["Project"]["Quotation Number"].get()
+            work_sheets.Cells(46, 7).Value = data["Fee Proposal"]["Reference"]["Date"].get()
+            work_sheets.Cells(47, 7).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
+        else:
+            work_sheets.Cells(45, 8).Value = data["Project Info"]["Project"]["Quotation Number"].get()
+            work_sheets.Cells(46, 8).Value = data["Fee Proposal"]["Reference"]["Date"].get()
+            work_sheets.Cells(47, 8).Value = data["Fee Proposal"]["Reference"]["Revision"].get()
 
         first_name = get_first_name(data["Project Info"][address_to]["Full Name"].get())
 
@@ -1561,9 +1598,12 @@ def preview_installation_fee_proposal(app):
             messagebox.showerror("Error", "There is no other existing fee proposal found, can only have revision 1")
             return
 
-
-    shutil.copy(os.path.join(resource_dir, "xlsx", f"installation_fee_proposal_template.xlsx"),
-                os.path.join(accounting_dir, excel_name))
+    try:
+        shutil.copy(os.path.join(resource_dir, "xlsx", f"installation_fee_proposal_template.xlsx"),
+                    os.path.join(accounting_dir, excel_name))
+    except PermissionError:
+        app.messagebox.show_error("Please close the excel before you generate")
+        return
     excel = win32client.Dispatch("Excel.Application")
     try:
         excel.Visible = False
@@ -1683,22 +1723,19 @@ def email_fee_proposal(app, *args):
     pdf_list = [file for file in os.listdir(os.path.join(accounting_dir)) if
                 "Fee Proposal" in str(file) and str(file).endswith(".pdf") and not "Mechanical Installation Fee Proposal" in str(file)]
 
-    pdf_name = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
-
     if not data["State"]["Generate Proposal"].get():
         messagebox.showerror("Error", "Please Generate a pdf first")
         return
-    elif not os.path.exists(os.path.join(accounting_dir, pdf_name)):
-        messagebox.showerror("Error",
-                             f'Python cant found fee proposal for {data["Project Info"]["Project"]["Quotation Number"].get()} revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
-        return
-
+    # elif not os.path.exists(os.path.join(accounting_dir, pdf_name)):
+    #     messagebox.showerror("Error",
+    #                          f'Python cant found fee proposal for {data["Project Info"]["Project"]["Quotation Number"].get()} revision {data["Fee Proposal"]["Reference"]["Revision"].get()}')
+    #     return
+    pdf_name = sorted(pdf_list, key=lambda pdf: str(pdf).split(" ")[-1].split(".")[0])[-1]
     if not "OUTLOOK.EXE" in (p.name() for p in psutil.process_iter()):
         os.startfile("outlook")
 
     # user_email_dic = json.load(open(os.path.join(app.conf["database_dir"], "user_email.json")))
     # pythoncom.pythoncom.CoInitialize()
-
     ol = win32client.Dispatch("Outlook.Application", pythoncom.CoInitialize())
     olmailitem = 0x0
     newmail = ol.CreateItem(olmailitem)

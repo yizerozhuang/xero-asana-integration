@@ -65,7 +65,7 @@ class FeeProposalPage(tk.Frame):
         calculate = {
             "Car Park":[
                 {
-                    "Project": tk.StringVar(),
+                    # "Project": tk.StringVar(),
                     "Car park Level": tk.StringVar(),
                     "Number of Carports": tk.StringVar(),
                     "Level Factor": tk.StringVar(value="0"),
@@ -80,6 +80,9 @@ class FeeProposalPage(tk.Frame):
             "Custom Area": tk.StringVar()
         }
         self.data["Fee Proposal"]["Calculation Part"] = calculate
+
+        for i in range(self.conf["n_car_park"]):
+            self.data["Project Info"]["Building Features"]["Major"]["Car Park"][i][0].trace("w", self._update_total_level)
 
         self.data["Project Info"]["Building Features"]["Minor"]["Total Area"].trace("w", lambda a, b, c: self.set_variable(calculate["Area"], self.data["Project Info"]["Building Features"]["Minor"]["Total Area"]))
         self.data["Project Info"]["Building Features"]["Major"]["Total Apt"].trace("w", lambda a, b, c: self.set_variable(calculate["Apt"], self.data["Project Info"]["Building Features"]["Major"]["Total Apt"]))
@@ -135,7 +138,7 @@ class FeeProposalPage(tk.Frame):
 
         car_park_frame = tk.LabelFrame(calculate_frame)
         car_park_frame.pack(pady=10)
-        tk.Label(car_park_frame, text="Project").grid(row=0, column=0)
+        # tk.Label(car_park_frame, text="Project").grid(row=0, column=0)
         tk.Label(car_park_frame, text="Car Park Level").grid(row=0, column=1)
         tk.Label(car_park_frame, text="No of Carports").grid(row=0, column=2)
         tk.Label(car_park_frame, text="Level Factor").grid(row=0, column=3)
@@ -147,13 +150,16 @@ class FeeProposalPage(tk.Frame):
         carport_factor_function = lambda i: lambda a,b,c: self.carport_factor_calculation(calculate["Car Park"][i]["Number of Carports"], calculate["Car Park"][i]["Carport Factor"])
         complex_factor_function = lambda i:lambda a,b,c: self.complex_factor_calculation(calculate["Car Park"][i]["Level Factor"], calculate["Car Park"][i]["Carport Factor"], calculate["Car Park"][i]["Complex Factor"])
         cfd_cost_function = lambda i:lambda a,b,c: self.cfd_cost_calculation(calculate["Car Park"][i]["Complex Factor"], calculate["Car Park"][i]["CFD Cost"])
+
+        self.data["Project Info"]["Building Features"]["Major"]["Total Car spot"].trace("w", self._update_total_car_park)
+
         for i in range(self.conf["car_park_row"]):
             calculate["Car Park"][i]["Car park Level"].trace("w", level_factor_function(i))
             calculate["Car Park"][i]["Number of Carports"].trace("w", carport_factor_function(i))
             calculate["Car Park"][i]["Level Factor"].trace("w", complex_factor_function(i))
             calculate["Car Park"][i]["Carport Factor"].trace("w", complex_factor_function(i))
             calculate["Car Park"][i]["Complex Factor"].trace("w", cfd_cost_function(i))
-            tk.Entry(car_park_frame, textvariable=calculate["Car Park"][i]["Project"], font=self.conf["font"], fg="blue").grid(row=1+i, column=0)
+            # tk.Entry(car_park_frame, textvariable=calculate["Car Park"][i]["Project"], font=self.conf["font"], fg="blue").grid(row=1+i, column=0)
             tk.Entry(car_park_frame, textvariable=calculate["Car Park"][i]["Car park Level"], font=self.conf["font"], fg="blue").grid(row=1+i, column=1)
             tk.Entry(car_park_frame, textvariable=calculate["Car Park"][i]["Number of Carports"], font=self.conf["font"], fg="blue").grid(row=1+i, column=2)
             tk.Label(car_park_frame, textvariable=calculate["Car Park"][i]["Level Factor"], font=self.conf["font"]).grid(row=1 + i, column=3)
@@ -170,6 +176,16 @@ class FeeProposalPage(tk.Frame):
         self.image_label = tk.Label(self.image_frame, image=self.image)
         self.image_label.pack()
 
+    def _update_total_level(self, *args):
+        total = 0
+        for row in self.data["Project Info"]["Building Features"]["Major"]["Car Park"]:
+            if len(row[0].get().strip()) !=0:
+                total+=1
+
+
+        self.data["Fee Proposal"]["Calculation Part"]["Car Park"][0]["Car park Level"].set(str(total))
+    def _update_total_car_park(self, *args):
+        self.data["Fee Proposal"]["Calculation Part"]["Car Park"][0]["Number of Carports"].set(self.data["Project Info"]["Building Features"]["Major"]["Total Car spot"].get())
     def function_part(self):
 
         reference = {
@@ -270,15 +286,16 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
 
         stage_dir = os.path.join(self.conf["database_dir"], "general_scope_of_staging.json")
         stage_data = json.load(open(stage_dir))
+        tick_function = lambda index: lambda a, b, c: self._tick_on_off_all_sub_item(index)
         for i, stage in enumerate(self.conf["major_stage"]):
             stage_dict[f"Stage{i+1}"]={
                 "Service": tk.StringVar(value=stage),
                 "Include": tk.BooleanVar(value=True),
                 "Items": []
             }
-
             include_frame = tk.Frame(self.stage_frame)
             include_frame.pack(anchor="w")
+            stage_dict[f"Stage{i + 1}"]["Include"].trace("w", tick_function(i))
 
             self.stage_dic[f"Stage{i+1}"]={
                 "Service": tk.Entry(include_frame, textvariable=stage_dict[f"Stage{i+1}"]["Service"], font=self.conf["font"], fg="blue", width=30),
@@ -322,6 +339,10 @@ Week 6-8: Based on site condition, finalize all installation, provide installati
             tk.Checkbutton(append_frame, variable=self.append_stage[f"Stage{i+1}"]["Add"], text="Add to Database").grid(row=0, column=1)
             func = lambda i: lambda: self._append_stage(i)
             tk.Button(append_frame, text="Submit", command=func(i)).grid(row=0, column=2)
+
+    def _tick_on_off_all_sub_item(self, i, *args):
+        for item in self.data["Fee Proposal"]["Stage"][f"Stage{i+1}"]["Items"]:
+            item["Include"].set(self.data["Fee Proposal"]["Stage"][f"Stage{i+1}"]["Include"].get())
 
     def reset_stage(self):
         stage_data = self.data["Fee Proposal"]["Stage"]

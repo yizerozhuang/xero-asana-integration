@@ -51,7 +51,7 @@ class ProjectInfoPage(tk.Frame):
 
         # self.app.email_text = tk.Text(self.main_context_frame, font=self.conf["font"], height=68)
         # self.app.email_text.grid(row=0, column=1, rowspan=6, sticky="n")
-        if self.app.user in self.conf["admin_user_list"]:
+        if self.app.admin:
             self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=85)
         else:
             self.email_text = TextExtension(self.main_context_frame, textvariable=self.data["Email_Content"], font=self.conf["font"], fg="blue", height=55)
@@ -155,8 +155,7 @@ class ProjectInfoPage(tk.Frame):
         project["Proposal Type"].trace("w", self._update_proposal)
 
         tk.Label(project_frame, text="Project Type", font=self.conf["font"]).grid(row=5, column=0)
-        project_types = ["Restaurant", "Office", "Commercial", "Group House", "Apartment", "Mixed-use Complex",
-                         "School", "Others"]
+        project_types = self.conf["project_types"]
 
         project["Project Type"] = tk.StringVar(value="Restaurant")
 

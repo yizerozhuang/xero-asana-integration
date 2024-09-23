@@ -350,7 +350,7 @@ def update_xero(app):
                 LineItem(
                     description=item["Item"],
                     quantity=1,
-                    unit_amount=int(float(item["Fee"])),
+                    unit_amount=float(item["Fee"]),
                     tax_type="OUTPUT",
                     account_code=project_type_account_code_map[data["Project Info"]["Project"]["Project Type"].get()]
                 )

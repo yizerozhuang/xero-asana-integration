@@ -13,16 +13,19 @@ import time
 import shutil
 import openpyxl
 from datetime import datetime, date, timedelta
+from pathlib import Path
 from win32com import client as win32client
 
 
 # database_dir = conf["database_dir"]
-database_dir = "P:\\app\\database"
+database_dir = "B:\\01.Bridge\\app\\database"
 # backup_dir = "P:\\app\\backup"
 backup_dir = "A:\\00-Bridge Database Backup"
-result_output_dir = "P:\\app\\backup"
+result_output_dir = "B:\\01.Bridge\\app\\backup"
 working_dir = "P:"
 accounting_dir = "A:\\00-Bridge Database"
+scan_dir = "S:\\01.Expense invoice"
+
 
 invoice_dir = os.path.join(database_dir, "invoices.json")
 invoice_json = json.load(open(invoice_dir))
@@ -262,18 +265,19 @@ def update_xero_and_asana_invoice_script(all_project, backlog_invoice, all_bills
 
     # update_bills
     for bill in all_bills.keys():
-        asana_id = all_bills[bill]
+        asana_id = all_bills[bill]["Asana id"]
         asana_task = flatter_custom_fields(clean_response(task_api_instance.get_task(asana_id)))
-        print(bill)
         assert bill in invoices["BIL"].keys()
         xero_bill = invoices["BIL"][bill]
 
         asana_update_body = {"custom_fields":{}}
         update = False
-        print(f"Processed Bill with asana id {asana_id} with asana task name {asana_task['name']}")
-        if asana_task["name"] != "BIL "+xero_bill["name"]:
-            asana_update_body["name"] = "BIL "+xero_bill["name"]
+
+        print(f"Processing Bill with asana id {asana_id} with asana task name {asana_task['name']}")
+        if asana_task["name"] != xero_bill["name"]:
+            asana_update_body["name"] = xero_bill["name"]
             update = True
+
         if asana_task["Bill status"] != xero_bill["Bill status"]:
             asana_update_body["custom_fields"][bill_custom_field_id_map["Bill status"]] = bill_status_id_map[xero_bill["Bill status"]]
             update = True
@@ -303,6 +307,23 @@ def update_xero_and_asana_invoice_script(all_project, backlog_invoice, all_bills
             body = asana.TasksTaskGidBody(asana_update_body)
             task_api_instance.update_task(task_gid=asana_id, body=body)
             print(f"Update Bill with asana id {asana_id} with asana task name {asana_task['name']}")
+
+        bill_number = all_bills[bill]["Number"][6]
+        quotation_number = all_bills[bill]["Quotation Number"]
+        data_dir = os.path.join(database_dir, quotation_number, "data.json")
+        data_json = json.load(open(data_dir))
+
+        for service, value in data_json["Bills"]["Details"].items():
+            if value["Include"]:
+                for content in value["Content"]:
+                    if content["Number"] == bill_number:
+                        content["Contact"] = xero_bill["From"]
+                        break
+
+        with open(data_dir, "w") as f:
+            json_object = json.dumps(data_json, indent=4)
+            f.write(json_object)
+
 
     inv_json_list = list(invoice_json.keys())
     inv_json_list.sort()
@@ -536,6 +557,53 @@ def convert_to_mp_excel(report_dir):
             cur_col = increment_excel_column(cur_col)
         cur_row += 1
     report_wb.save(report_dir)
+
+def update_scan_folder(all_bills):
+
+    paid_bills = []
+    for bill in all_bills.values():
+        if bill["State"] == "Paid":
+            paid_bills.append(bill["Number"])
+
+    all_bills = {}
+
+    for dirpath, _, filenames in os.walk(scan_dir):
+        for filename in filenames:
+            if filename.startswith("BIL "):
+                bill_number = filename.split("-")[0].split(" ")[-1]
+                file, extension = filename.rsplit(".", 1)
+
+
+                new_bill_address = os.path.join(dirpath, filename)
+                if bill_number in paid_bills:
+                    if not file.endswith("-Paid"):
+                        new_bill_address = os.path.join(dirpath, file + "-Paid." + extension)
+                        shutil.move(os.path.join(dirpath, filename), new_bill_address)
+                        print(f"Adding -Paid at the end of the file for bill {filename}")
+                else:
+                    if not os.path.exists(os.path.join(scan_dir, date.today().strftime("%Y%m"))):
+                        os.makedirs(os.path.join(scan_dir, date.today().strftime("%Y%m")))
+                    if not dirpath.startswith(os.path.join(scan_dir, date.today().strftime("%Y%m"))):
+                        new_bill_address = os.path.join(scan_dir, date.today().strftime("%Y%m"), filename)
+                        shutil.move(os.path.join(dirpath, filename), new_bill_address)
+                        print(f"Moving filename {filename} to folder {date.today().strftime('%Y%m')}")
+
+
+                if bill_number in all_bills.keys():
+                    if os.path.getctime(new_bill_address) > all_bills[bill_number]["Time"]:
+                        os.remove(all_bills[bill_number]["Address"])
+                        all_bills[bill_number] = {
+                            "Time": os.path.getctime(new_bill_address),
+                            "Address": new_bill_address
+                        }
+                    else:
+                        os.remove(new_bill_address)
+                else:
+                    all_bills[bill_number] = {
+                        "Time": os.path.getctime(new_bill_address),
+                        "Address": new_bill_address
+                    }
+
 def backup_database(all_project, backlog_invoice, all_bills):
     start = time.time()
     bridge_dir = os.path.join(working_dir, "Bridge.exe")
@@ -570,23 +638,22 @@ def backup_database(all_project, backlog_invoice, all_bills):
     print("Backup Complete!!!")
 
 
-
-
 if __name__ == '__main__':
     result_output_dir_name = os.path.join(result_output_dir, date.today().strftime("%Y%m%d"))
     os.makedirs(result_output_dir_name, exist_ok=True)
     log_dir = os.path.join(result_output_dir_name, "output.log")
 
-    try:
-        all_project, backlog_invoice, all_bills = generate_all_projects_and_invoices(database_dir)
-        refresh_token()
-        update_xero_and_asana_invoice_script(all_project, backlog_invoice, all_bills)
-        update_asana_project_script(all_project, backlog_invoice, all_bills)
-        backup_database(all_project, backlog_invoice, all_bills)
-    except Exception as e:
-        with open(log_dir, "w") as f:
-            f.write("The Daily Script Fail, please rerun the script")
-            f.write(e)
-    else:
-        with open(log_dir, "w") as f:
-            f.write("The Daily Script Success")
+    # try:
+    all_project, backlog_invoice, all_bills = generate_all_projects_and_invoices(database_dir)
+    refresh_token()
+    update_xero_and_asana_invoice_script(all_project, backlog_invoice, all_bills)
+    update_asana_project_script(all_project, backlog_invoice, all_bills)
+    update_scan_folder(all_bills)
+    backup_database(all_project, backlog_invoice, all_bills)
+    # except Exception as e:
+    #     with open(log_dir, "w") as f:
+    #         f.write("The Daily Script Fail, please rerun the script")
+    #         f.write(str(e))
+    # else:
+    #     with open(log_dir, "w") as f:
+    #         f.write("The Daily Script Success")

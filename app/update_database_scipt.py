@@ -25,12 +25,12 @@ accounting_dir = conf["accounting_dir"]
 mp_dir = os.path.join(database_dir, "mp.json")
 mp_json = json.load(open(mp_dir))
 
-scope_dir = os.path.join(database_dir, "scope_of_work.json")
-scope_json = json.load(open(scope_dir))
-
-stage_dir = os.path.join(database_dir, "general_scope_of_staging.json")
-stage_json = json.load(open(stage_dir))
-count=0
+# scope_dir = os.path.join(database_dir, "scope_of_work.json")
+# scope_json = json.load(open(scope_dir))
+#
+# stage_dir = os.path.join(database_dir, "general_scope_of_staging.json")
+# stage_json = json.load(open(stage_dir))
+# count=0
 for dir in os.listdir(database_dir):
     if os.path.isdir(os.path.join(database_dir, dir)):
         print(dir)
@@ -128,24 +128,27 @@ for dir in os.listdir(database_dir):
         # data_json["Profits"]["Fee"] = str(total_fee)
         # data_json["Profits"]["in.GST"] = str(total_ingst)
 
+        for car in data_json["Fee Proposal"]["Calculation Part"]["Car Park"]:
+            if "Project" in car.keys():
+                car.pop("Project")
 
-        if len(data_json["Asana_id"]) !=0:
-            asana_task = flatter_custom_fields(task_api_instance.get_task(data_json["Asana_id"]).to_dict()["data"])
-            data_json["State"]["Asana State"] = asana_task["Status"]
-        else:
-            data_json["State"]["Asana State"] = "Fee Proposal"
-
-
-        data_log = open(data_log_dir, "r")
-        lines = data_log.readlines()
-
-        data_json["Email"]["Fee Coming"] = ""
-        data_json["Email"]["Fee Accepted"] = ""
-        for line in lines:
-            if "log fee accept file" in line:
-                data_json["Email"]["Fee Accepted"] = line[:10]
-            elif "Create project from email" in line:
-                data_json["Email"]["Fee Coming"] = line[:10]
+        # if len(data_json["Asana_id"]) !=0:
+        #     asana_task = flatter_custom_fields(task_api_instance.get_task(data_json["Asana_id"]).to_dict()["data"])
+        #     data_json["State"]["Asana State"] = asana_task["Status"]
+        # else:
+        #     data_json["State"]["Asana State"] = "Fee Proposal"
+        #
+        #
+        # data_log = open(data_log_dir, "r")
+        # lines = data_log.readlines()
+        #
+        # data_json["Email"]["Fee Coming"] = ""
+        # data_json["Email"]["Fee Accepted"] = ""
+        # for line in lines:
+        #     if "log fee accept file" in line:
+        #         data_json["Email"]["Fee Accepted"] = line[:10]
+        #     elif "Create project from email" in line:
+        #         data_json["Email"]["Fee Coming"] = line[:10]
         mp_convert_map = return_self_mp()
         mp_json[dir] = {k: v(data_json) for k, v in mp_convert_map.items()}
 
@@ -154,13 +157,13 @@ for dir in os.listdir(database_dir):
         with open(data_dir, "w") as f:
             json_object = json.dumps(data_json, indent=4)
             f.write(json_object)
-        print(count)
-        count+=1
+        # print(count)
+        # count+=1
         # if not os.path.exists(os.path.join(database_dir, dir)):
         #     os.makedirs(os.path.join(database_dir, dir))
         # shutil.move(data_dir, os.path.join(database_dir, dir, "data.json"))
         # shutil.move(os.path.join(database_dir, dir, "data.log"), os.path.join(database_dir, dir, "data.log"))
 
-with open(mp_dir, "w") as f:
-    json_object = json.dumps(mp_json, indent=4)
-    f.write(json_object)
+# with open(mp_dir, "w") as f:
+#     json_object = json.dumps(mp_json, indent=4)
+#     f.write(json_object)

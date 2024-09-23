@@ -1,10 +1,12 @@
 import asana
 from utility import config_log, get_invoice_item, isfloat
-
+from config import CONFIGURATION as conf
 from tkinter import messagebox
 
 import datetime
 from datetime import date
+import os
+import json
 
 asana_configuration = asana.Configuration()
 asana_configuration.access_token = '2/1203283895754383/1206354773081941:c116d68430be7b2832bf5d7ea2a0a415'
@@ -16,15 +18,12 @@ custom_fields_api_instance = asana.CustomFieldsApi(asana_api_client)
 custom_fields_setting_api_instance = asana.CustomFieldSettingsApi(asana_api_client)
 template_api_instance = asana.TaskTemplatesApi(asana_api_client)
 workspace_gid = '1198726743417674'
-user_gid_map = {
-    "Admin": "1203283895754383",
-    "Felix": "1198835648677067",
-    "Engineer1": "1198835648677067",
-    "Engineer2": "1203283895754383",
-    "Engineer3": "1203283895754383",
-    "Daniel": "1198835648677067"
-}
-#
+
+
+database_dir = conf["database_dir"]
+user_json_dir = os.path.join(database_dir, "login.json")
+user_json = json.load(open(user_json_dir, "r"))
+
 
 def clean_response(response):
     response = response.to_dict()["data"]
@@ -48,6 +47,7 @@ def flatter_custom_fields(asana_task):
         assert not field["name"] in asana_task.keys()
         asana_task[field["name"]] = field["display_value"]
     return asana_task
+
 
 
 # def convert_email_content(email):
@@ -136,6 +136,27 @@ def update_asana(app, *args):
 
     project_task = flatter_custom_fields(project_task)
 
+    current_projects_id = [project["gid"] for project in project_task["projects"]]
+    project_type_id_list = [projects_id_map[project] for project in conf["project_types"]]
+    for project_type in project_type_id_list:
+        if project_type == projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]:
+            continue
+
+        if project_type in current_projects_id:
+            body = asana.TaskGidAddProjectBody(
+                {
+                    "project": project_type
+                }
+            )
+            task_api_instance.remove_project_for_task(task_gid=task_id, body=body)
+    if not projects_id_map[data["Project Info"]["Project"]["Project Type"].get()] in current_projects_id:
+        body = asana.TaskGidAddProjectBody(
+            {
+                "project": projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]
+            }
+        )
+        task_api_instance.add_project_for_task(task_gid=task_id, body=body)
+
 
     if len(data["Project Info"]["Project"]["Project Number"].get()) != 0:
         name = "P:\\"+data["Project Info"]["Project"]["Project Number"].get() + "-" + data["Project Info"]["Project"]["Project Name"].get()
@@ -207,7 +228,7 @@ def update_asana(app, *args):
         first_task = clean_response(task_api_instance.get_task(first_task_gid))
 
         if first_task["assignee"] is None:
-            body_dict["assignee"] = user_gid_map[app.user]
+            body_dict["assignee"] = user_json[app.user_email]["supervisor_asana_id"]
         if first_task["due_on"] is None:
             body_dict["due_on"] = date.today().strftime("%Y-%m-%d")
 
@@ -218,8 +239,6 @@ def update_asana(app, *args):
         if not (data["State"]["Quote Unsuccessful"].get() or data["State"]["Asana State"].get() in ["Pending"]):
             body = asana.TasksTaskGidBody(asana_update_body)
             task_api_instance.update_task(task_gid=task_id, body=body)
-            notes = clean_response(task_api_instance.get_task(task_gid=task_id))["notes"]
-            data["Email_Content"].set(notes)
             first_task_gid = sub_tasks[0]["gid"]
             # first_task = clearn_response(task_api_instance.get_task(first_task_gid))
             if not sub_tasks[0]["completed"]:
@@ -238,13 +257,15 @@ def update_asana(app, *args):
                 if task["is_rendered_as_separator"] or task["name"].startswith("---") or asana_invoice_status_project in project_list or asana_bill_status_project in project_list:
                     continue
                 if task["assignee"] is None:
-                    body_dict["assignee"] = user_gid_map[app.user]
+                    body_dict["assignee"] = user_json[app.user_email]["supervisor_asana_id"]
                 if task["due_on"] is None:
                     body_dict["due_on"] = date.today().strftime("%Y-%m-%d")
 
                 if len(body_dict) != 0:
                     body = asana.TasksTaskGidBody(body_dict)
                     task_api_instance.update_task(task_gid=task_gid, body=body)
+        notes = clean_response(task_api_instance.get_task(task_gid=task_id))["notes"]
+        data["Email_Content"].set(notes)
 
     app.log.log_update_asana(app)
     config_log(app)
@@ -301,7 +322,7 @@ def update_asana_invoices(app, inv_list=None):
                 task_api_instance.get_task(data["Invoices Number"][i]["Asana_id"].get())
             except Exception as e:
                 print(e)
-                messagebox.showerror("Error", f'Can not find the invoice with id{data["Invoices Number"][i]["Asana_id"].get()}')
+                messagebox.showerror("Error", f'Can not find the invoice number {data["Invoices Number"][i]["Number"].get()} with id{data["Invoices Number"][i]["Asana_id"].get()}')
                 return
             #     print(f'Can not found Asana Invoice Task {data["Invoices Number"][i]["Asana_id"].get()} Creating New Invoice Task')
             #
@@ -341,7 +362,7 @@ def update_asana_invoices(app, inv_list=None):
             if invoice_task["due_on"] is None:
                 task_body["due_on"] = (date.today() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
             if invoice_task["assignee"] is None:
-                task_body["assignee"] = user_gid_map[app.user]
+                task_body["assignee"] = user_json[app.user_email]["supervisor_asana_id"]
         if not inv_list is None:
             inv_number = data["Invoices Number"][i]["Number"].get()
             if inv_number in inv_list.keys() and not inv_list[inv_number]["payment_date"] is None:
@@ -432,7 +453,7 @@ def update_asana_invoices(app, inv_list=None):
                     }
                 }
             if bill_task["assignee"] is None:
-                update_body["assignee"] = user_gid_map[app.user]
+                update_body["assignee"] = user_json[app.user_email]["supervisor_asana_id"]
             if bill_task["due_on"] is None:
                 update_body["due_on"] = date.today().strftime("%Y-%m-%d")
             asana_update_body = asana.TasksTaskGidBody(update_body)
