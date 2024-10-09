@@ -156,7 +156,7 @@ class SearchBarPage(tk.Frame):
         database_dir = conf["database_dir"]
         mp_json = {}
         for dir in os.listdir(database_dir):
-            # print(dir)
+            print(dir)
             if os.path.isdir(os.path.join(database_dir, dir)):
                 data_dir = os.path.join(database_dir, dir, "data.json")
                 data_json = json.load(open(data_dir))
@@ -215,7 +215,7 @@ class SearchBarPage(tk.Frame):
         database_dir = conf["database_dir"]
         res = []
         # for dir in os.listdir(database_dir):
-        #     # print(dir)
+        #     print(dir)
         #     if os.path.isdir(os.path.join(database_dir, dir)):
         #         data_dir = os.path.join(database_dir, dir, "data.json")
         #         data_json = json.load(open(data_dir))

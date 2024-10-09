@@ -474,7 +474,7 @@ def update_asana_project_script(all_project, backlog_invoice, all_bills):
                     data_json["Project Info"]["Main Contact"]["Contact Type"] = "None"
                 contact_type = data_json["Project Info"]["Main Contact"]["Contact Type"]
                 if task["Contact Type"] != contact_type and not (task["Contact Type"] is None and contact_type=="None"):
-                    if contact_type=="None":
+                    if contact_type=="None" or contact_type=="":
                         update_body["custom_fields"][custom_field_id_map["Contact Type"]] = None
                     else:
                         update_body["custom_fields"][custom_field_id_map["Contact Type"]] = contact_id_map[contact_type]

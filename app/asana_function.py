@@ -80,45 +80,7 @@ def update_asana(app, *args):
         data["Asana_url"].set(asana_task["permalink_url"])
         project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
     else:
-    #     try:
         project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
-    #     except Exception as e:
-    #         print(f"Unable to Found Project Asana id {data['Asana_id'].get()}, Creating New Asana Project")
-    #         all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
-    #         projects_id_map = name_id_map(all_projects)
-    #         current_project_template = clean_response(template_api_instance.get_task_templates(
-    #             project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
-    #
-    #         template_id_map = name_id_map(current_project_template)
-    #         api_respond = clean_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
-    #         new_task_gid = api_respond["new_task"]["gid"]
-    #         body = asana.TaskGidAddProjectBody(
-    #             {
-    #                 "project": projects_id_map["MP"]
-    #             }
-    #         )
-    #         task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
-    #         data["Asana_id"].set(new_task_gid)
-    #         asana_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
-    #         data["Asana_url"].set(asana_task["permalink_url"])
-    #     project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
-        # all_projects = clean_response(project_api_instance.get_projects_for_workspace(workspace_gid))
-        # projects_id_map = name_id_map(all_projects)
-        # current_project_template = clean_response(template_api_instance.get_task_templates(
-        #     project=projects_id_map[data["Project Info"]["Project"]["Project Type"].get()]))
-        #
-        # template_id_map = name_id_map(current_project_template)
-        # api_respond = clean_response(template_api_instance.instantiate_task(template_id_map["P:\\300000-XXXX"]))
-        # new_task_gid = api_respond["new_task"]["gid"]
-        # body = asana.TaskGidAddProjectBody(
-        #     {
-        #         "project": projects_id_map["MP"]
-        #     }
-        # )
-        # task_api_instance.add_project_for_task(task_gid=new_task_gid, body=body)
-        # data["Asana_id"].set(new_task_gid)
-        # project_task = clean_response(task_api_instance.get_task(data["Asana_id"].get()))
-        # data["Asana_url"].set(project_task["permalink_url"])
 
     task_id = data["Asana_id"].get()
 

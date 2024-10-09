@@ -43,6 +43,7 @@ CONFIGURATION = {
 
 CONFIGURATION["working_dir"] = "P:"
 CONFIGURATION["database_dir"] = "B:\\01.Bridge\\app\\database"
+# CONFIGURATION["database_dir"] = r"B:\03. Bridge Testing Environment\app\database"
 CONFIGURATION["accounting_dir"] = "A:\\00-Bridge Database"
 CONFIGURATION["report_dir"] = "A:\\01-Bridge Management Report"
 CONFIGURATION["backup_dir"] = "A:\\00-Bridge Database Backup"
@@ -67,6 +68,6 @@ CONFIGURATION["resource_dir"] = "T:\\00-Template-Do Not Modify\\00-Bridge templa
 # CONFIGURATION["backup_dir"] = "A:\\00-Bridge Database Backup"
 CONFIGURATION["xero_access_token_dir"] = os.path.join(CONFIGURATION["resource_dir"], "txt", "xero_access_token.txt")
 CONFIGURATION["xero_refresh_token_dir"] = os.path.join(CONFIGURATION["resource_dir"], "txt", "xero_refresh_token.txt")
-CONFIGURATION["recycle_bin_dir"] = os.path.join(os.path.join(Path(CONFIGURATION['working_dir']), "app"), "recycle_bin")
+CONFIGURATION["recycle_bin_dir"] = "B:\\01.Bridge\\app\\recycle_bin"
 
 CONFIGURATION["daily_script_dir"] = r"B:\01.Bridge\asana_xero_daily_update_script.exe"
